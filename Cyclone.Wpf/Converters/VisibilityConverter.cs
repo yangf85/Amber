@@ -84,6 +84,12 @@ public class VisibilityConverter
         new(d => d == 0 ? Visibility.Visible : Visibility.Collapsed);
 
     /// <summary>
+    /// 数值不等于 0 时可见
+    /// </summary>
+    public static FuncValueConverter<double, Visibility> VisibleWhenNotZero { get; } =
+        new(d => d != 0 ? Visibility.Visible : Visibility.Collapsed);
+
+    /// <summary>
     /// 值等于参数时可见（用于枚举比较）
     /// </summary>
     public static FuncValueConverter<object, object, Visibility> VisibleWhenEquals { get; } =
