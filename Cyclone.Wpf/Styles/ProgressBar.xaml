@@ -130,44 +130,22 @@
                                         <ColumnDefinition x:Name="Width2" Width="0" />
                                     </Grid.ColumnDefinitions>
                                     <Grid x:Name="Animation" RenderTransformOrigin="0.5,0.5">
-                                        <Grid.RenderTransform>
-                                            <TransformGroup>
-                                                <ScaleTransform ScaleX="1" ScaleY="-1" />
-                                                <SkewTransform AngleX="0" AngleY="0" />
-                                                <RotateTransform Angle="180" />
-                                                <TranslateTransform />
-                                            </TransformGroup>
-                                        </Grid.RenderTransform>
-                                        <Border Background="{TemplateBinding Background}">
-                                            <Viewbox
-                                                Margin="{TemplateBinding Padding}"
-                                                HorizontalAlignment="Left"
-                                                SnapsToDevicePixels="True"
-                                                StretchDirection="DownOnly">
-                                                <TextBlock
-                                                    VerticalAlignment="Center"
-                                                    FontSize="{TemplateBinding FontSize}"
-                                                    Foreground="{DynamicResource Foreground.Invert}"
-                                                    RenderTransformOrigin="0.5,0.5"
-                                                    SnapsToDevicePixels="True"
-                                                    Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, StringFormat={}{0}%}">
-                                                    <TextBlock.RenderTransform>
-                                                        <TransformGroup>
-                                                            <ScaleTransform ScaleX="-1" ScaleY="1" />
-                                                            <SkewTransform AngleX="0" AngleY="0" />
-                                                            <RotateTransform Angle="0" />
-                                                            <TranslateTransform />
-                                                        </TransformGroup>
-                                                    </TextBlock.RenderTransform>
-                                                </TextBlock>
-                                            </Viewbox>
-                                        </Border>
+                                        <Border Background="{TemplateBinding Background}" />
                                         <Border
                                             BorderBrush="#000000"
                                             BorderThickness="1"
                                             Opacity="0.1" />
                                     </Grid>
                                 </Grid>
+                                <!--  文本固定居中显示，不随进度移动  -->
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="{TemplateBinding FontSize}"
+                                    Foreground="{DynamicResource Foreground.Invert}"
+                                    IsHitTestVisible="False"
+                                    SnapsToDevicePixels="True"
+                                    Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, StringFormat={}{0:F0}%}" />
                             </Grid>
                         </Grid>
                         <VisualStateManager.VisualStateGroups>

@@ -195,28 +195,28 @@ namespace Cyclone.Wpf.Demo.Views
         }
 
         [RelayCommand]
-        void RefreshTemperature()
+        private void RefreshTemperature()
         {
             Temperature = _random.Next(-20, 51) + (_random.NextDouble() * 2 - 1);
             NotificationService.Instance.Information($"当前温度: {Temperature:0.1}°C");
         }
 
         [RelayCommand]
-        void ShowVolumeSettings()
+        private void ShowVolumeSettings()
         {
             var message = $"音量设置:\n主音量: {VolumeLevel:0}%\n低音: {BassLevel:0}dB";
             NotificationService.Instance.Information(message);
         }
 
         [RelayCommand]
-        void ShowImageSettings()
+        private void ShowImageSettings()
         {
             var message = $"图像设置:\n亮度: {Brightness:0}\n对比度: {Contrast:0}\n饱和度: {Saturation:0}";
             NotificationService.Instance.Information(message);
         }
 
         [RelayCommand]
-        void ShowPriceRange()
+        private void ShowPriceRange()
         {
             var message = $"价格区间: ¥{MinPrice:0} - ¥{MaxPrice:0}";
             NotificationService.Instance.Information(message);
@@ -230,7 +230,7 @@ namespace Cyclone.Wpf.Demo.Views
         }
 
         [RelayCommand]
-        void ShowSystemStatus()
+        private void ShowSystemStatus()
         {
             var message = $"系统状态:\nCPU: {CpuUsage:0}%\n内存: {MemoryUsage:0}%\n磁盘: {DiskUsage:0}%";
             NotificationService.Instance.Information(message);
