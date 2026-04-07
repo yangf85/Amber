@@ -200,19 +200,6 @@ public static class ColorHelper
     }
 
     /// <summary>
-    /// 色调转RGB分量辅助方法
-    /// </summary>
-    private static double HueToRgb(double p, double q, double t)
-    {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
-        if (t < 1.0 / 2.0) return q;
-        if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
-        return p;
-    }
-
-    /// <summary>
     /// RGB转CMYK
     /// </summary>
     public static void RgbToCmyk(byte r, byte g, byte b, out double c, out double m, out double y, out double k)
@@ -243,6 +230,19 @@ public static class ColorHelper
         r = (byte)((1 - c) * (1 - k) * 255);
         g = (byte)((1 - m) * (1 - k) * 255);
         b = (byte)((1 - y) * (1 - k) * 255);
+    }
+
+    /// <summary>
+    /// 色调转RGB分量辅助方法
+    /// </summary>
+    private static double HueToRgb(double p, double q, double t)
+    {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
+        if (t < 1.0 / 2.0) return q;
+        if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
+        return p;
     }
 
     #endregion 颜色空间转换
@@ -533,6 +533,37 @@ public static class ColorHelper
         }
     }
 
+    /// <summary>
+    /// 将指定格式的颜色文本转换为颜色对象，转换失败返回 null
+    /// </summary>
+    /// <param name="text">颜色文本</param>
+    /// <param name="mode">颜色文本格式</param>
+    /// <returns>成功返回颜色，失败返回 null</returns>
+    public static Color? ParseColorText(string text, ColorTextMode mode)
+    {
+        return TryParseColorText(text, mode, out Color color) ? color : null;
+    }
+
+    /// <summary>
+    /// 将HEX格式字符串解析为颜色，解析失败返回 null
+    /// </summary>
+    /// <param name="text">要解析的字符串</param>
+    /// <returns>成功返回颜色，失败返回 null</returns>
+    public static Color? ParseHexColor(string text)
+    {
+        return TryParseHexColor(text, out Color color) ? color : null;
+    }
+
+    /// <summary>
+    /// 将RGB格式字符串解析为颜色，解析失败返回 null
+    /// </summary>
+    /// <param name="text">要解析的字符串</param>
+    /// <returns>成功返回颜色，失败返回 null</returns>
+    public static Color? ParseRgbColor(string text)
+    {
+        return TryParseRgbColor(text, out Color color) ? color : null;
+    }
+
     #endregion 颜色文本转换
 
     #region 颜色文本验证
@@ -577,7 +608,7 @@ public static class ColorHelper
     /// <summary>
     /// 将数值限制在指定范围内
     /// </summary>
-    public static byte Clamp(int value, int min, int max)
+    private static byte Clamp(int value, int min, int max)
     {
         return (byte)Math.Max(min, Math.Min(value, max));
     }
@@ -585,7 +616,7 @@ public static class ColorHelper
     /// <summary>
     /// 将浮点数值限制在指定范围内
     /// </summary>
-    public static double Clamp(double value, double min, double max)
+    private static double Clamp(double value, double min, double max)
     {
         return Math.Max(min, Math.Min(value, max));
     }
