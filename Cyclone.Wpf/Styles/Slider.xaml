@@ -20,7 +20,7 @@
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
                         <Trigger Property="IsDragging" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource DraggingBackgroundBrush}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Dragging}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -177,6 +177,7 @@
         x:Key="Slider.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="Slider">
+
         <Setter Property="AutoToolTipPlacement" Value="TopLeft" />
         <Setter Property="AutoToolTipPrecision" Value="2" />
         <Style.Triggers>

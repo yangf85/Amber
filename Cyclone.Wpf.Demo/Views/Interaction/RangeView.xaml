@@ -320,6 +320,48 @@
                 </cy:SpacingStackPanel>
             </HeaderedContentControl>
 
+            <HeaderedContentControl Header="RotationEditor 控件示例">
+                <cy:SpacingStackPanel Spacing="15">
+                    <GroupBox Header="物件旋转控制">
+                        <cy:SpacingStackPanel Spacing="10">
+                            <cy:RotationEditor
+                                AngleX="{Binding RotationX, Mode=TwoWay}"
+                                AngleY="{Binding RotationY, Mode=TwoWay}"
+                                AngleZ="{Binding RotationZ, Mode=TwoWay}"
+                                Step="1" />
+                            <TextBlock FontSize="12" Foreground="Gray">
+                                <Run Text="X: " />
+                                <Run FontWeight="Bold" Foreground="#D44040" Text="{Binding RotationX, StringFormat={}{0:0.0}°}" />
+                                <Run Text="  Y: " />
+                                <Run FontWeight="Bold" Foreground="#3AAA5C" Text="{Binding RotationY, StringFormat={}{0:0.0}°}" />
+                                <Run Text="  Z: " />
+                                <Run FontWeight="Bold" Foreground="#3A7AD4" Text="{Binding RotationZ, StringFormat={}{0:0.0}°}" />
+                            </TextBlock>
+                            <cy:SpacingUniformGrid HorizontalSpacing="10" Rows="1">
+                                <Button
+                                    Padding="10,5"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding RandomRotationCommand}"
+                                    Content="随机旋转" />
+                                <Button
+                                    Padding="10,5"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ShowRotationCommand}"
+                                    Content="显示当前角度" />
+                            </cy:SpacingUniformGrid>
+                        </cy:SpacingStackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="精细步长控制（Step=0.5）">
+                        <cy:RotationEditor
+                            AngleX="{Binding RotationX, Mode=TwoWay}"
+                            AngleY="{Binding RotationY, Mode=TwoWay}"
+                            AngleZ="{Binding RotationZ, Mode=TwoWay}"
+                            Step="0.5" />
+                    </GroupBox>
+                </cy:SpacingStackPanel>
+            </HeaderedContentControl>
+
             <HeaderedContentControl Header="CircularGauge 控件示例">
                 <Grid>
                     <Grid.ColumnDefinitions>

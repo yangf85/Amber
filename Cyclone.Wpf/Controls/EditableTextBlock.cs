@@ -19,62 +19,6 @@ namespace Cyclone.Wpf.Controls
         private TextBlock _textBlock;
         private TextBox _textBox;
 
-        static EditableTextBlock()
-        {
-        }
-
-        #region Text
-
-        public string Text
-        {
-            get => (string)GetValue(TextProperty);
-            set => SetValue(TextProperty, value);
-        }
-
-        public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register(nameof(Text), typeof(string), typeof(EditableTextBlock), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        #endregion Text
-
-        #region IsEditing
-
-        public bool IsEditing
-        {
-            get => (bool)GetValue(IsEditingProperty);
-            set => SetValue(IsEditingProperty, value);
-        }
-
-        public static readonly DependencyProperty IsEditingProperty =
-            DependencyProperty.Register(nameof(IsEditing), typeof(bool), typeof(EditableTextBlock), new FrameworkPropertyMetadata(false));
-
-        #endregion IsEditing
-
-        #region TextWrapping
-
-        public TextWrapping TextWrapping
-        {
-            get => (TextWrapping)GetValue(TextWrappingProperty);
-            set => SetValue(TextWrappingProperty, value);
-        }
-
-        public static readonly DependencyProperty TextWrappingProperty =
-            DependencyProperty.Register(nameof(TextWrapping), typeof(TextWrapping), typeof(EditableTextBlock), new PropertyMetadata(default(TextWrapping)));
-
-        #endregion TextWrapping
-
-        #region IsReadOnly
-
-        public bool IsReadOnly
-        {
-            get => (bool)GetValue(IsReadOnlyProperty);
-            set => SetValue(IsReadOnlyProperty, value);
-        }
-
-        public static readonly DependencyProperty IsReadOnlyProperty =
-            DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(EditableTextBlock), new PropertyMetadata(default(bool)));
-
-        #endregion IsReadOnly
-
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -159,5 +103,62 @@ namespace Cyclone.Wpf.Controls
                 }
             }
         }
+
+        static EditableTextBlock()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(EditableTextBlock), new FrameworkPropertyMetadata(typeof(EditableTextBlock)));
+        }
+
+        #region Text
+
+        public static readonly DependencyProperty TextProperty =
+            DependencyProperty.Register(nameof(Text), typeof(string), typeof(EditableTextBlock), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public string Text
+        {
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
+        }
+
+        #endregion Text
+
+        #region IsEditing
+
+        public static readonly DependencyProperty IsEditingProperty =
+            DependencyProperty.Register(nameof(IsEditing), typeof(bool), typeof(EditableTextBlock), new FrameworkPropertyMetadata(false));
+
+        public bool IsEditing
+        {
+            get => (bool)GetValue(IsEditingProperty);
+            set => SetValue(IsEditingProperty, value);
+        }
+
+        #endregion IsEditing
+
+        #region TextWrapping
+
+        public static readonly DependencyProperty TextWrappingProperty =
+            DependencyProperty.Register(nameof(TextWrapping), typeof(TextWrapping), typeof(EditableTextBlock), new PropertyMetadata(default(TextWrapping)));
+
+        public TextWrapping TextWrapping
+        {
+            get => (TextWrapping)GetValue(TextWrappingProperty);
+            set => SetValue(TextWrappingProperty, value);
+        }
+
+        #endregion TextWrapping
+
+        #region IsReadOnly
+
+        public static readonly DependencyProperty IsReadOnlyProperty =
+            DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(EditableTextBlock), new PropertyMetadata(default(bool)));
+
+        public bool IsReadOnly
+        {
+            get => (bool)GetValue(IsReadOnlyProperty);
+            set => SetValue(IsReadOnlyProperty, value);
+        }
+
+        #endregion IsReadOnly
     }
 }

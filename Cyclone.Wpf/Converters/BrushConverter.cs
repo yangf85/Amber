@@ -9,13 +9,13 @@ public class BrushConverter
     /// <summary>
     /// 布尔值转画刷转换器：true时返回绿色画刷，false时返回红色画刷
     /// </summary>
-    public static FuncValueConverter<bool, Brush> BooleanToBrushConverter { get; } =
+    public static FuncValueConverter<bool, Brush> BooleanToBrush { get; } =
         new(b => b ? Brushes.Green : Brushes.Red);
 
     /// <summary>
     /// 整数值转画刷转换器：-1时返回黄色画刷，小于1时返回红色画刷，其他情况返回绿色画刷
     /// </summary>
-    public static FuncValueConverter<int, Brush> IntToBrushConverter { get; } =
+    public static FuncValueConverter<int, Brush> IntToBrush { get; } =
         new(i => i switch
         {
             -1 => Brushes.Yellow,

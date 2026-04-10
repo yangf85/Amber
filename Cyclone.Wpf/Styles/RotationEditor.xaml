@@ -1,0 +1,247 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--  ============================================================  -->
+    <!--  RepeatButton：滑块轨道两侧的可点击区域，无视觉  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RotationEditor.SliderRepeatButtonStyle" TargetType="RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border
+                        Height="4"
+                        VerticalAlignment="Center"
+                        Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  Thumb：滑块拖拽手柄，方形无圆角，边框使用所属 Slider 的 Foreground  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RotationEditor.SliderThumbStyle" TargetType="Thumb">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Width" Value="12" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border
+                        x:Name="ThumbBorder"
+                        Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
+                        BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
+                        BorderThickness="1"
+                        SnapsToDevicePixels="True" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.75" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  Slider 自定义模板：4px 扁平轨道，左侧填充使用 Foreground 着色  -->
+    <!--  ============================================================  -->
+    <ControlTemplate x:Key="RotationEditor.SliderTemplate" TargetType="Slider">
+        <Grid
+            Height="22"
+            VerticalAlignment="Center"
+            Background="Transparent">
+            <!--  轨道底色  -->
+            <Border
+                Height="4"
+                VerticalAlignment="Center"
+                Background="{DynamicResource Background.Inactive}"
+                SnapsToDevicePixels="True" />
+            <!--  真正的 Track，左侧 RepeatButton 用 Foreground 染色作为已选区段  -->
+            <Track x:Name="PART_Track">
+                <Track.DecreaseRepeatButton>
+                    <RepeatButton
+                        Background="{TemplateBinding Foreground}"
+                        Command="Slider.DecreaseLarge"
+                        Style="{StaticResource RotationEditor.SliderRepeatButtonStyle}" />
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                    <RepeatButton
+                        Background="Transparent"
+                        Command="Slider.IncreaseLarge"
+                        Style="{StaticResource RotationEditor.SliderRepeatButtonStyle}" />
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                    <Thumb Style="{StaticResource RotationEditor.SliderThumbStyle}" />
+                </Track.Thumb>
+            </Track>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!--  ============================================================  -->
+    <!--  三轴 Slider 样式：共享自定义模板，仅区分 Foreground 颜色  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RotationEditor.SliderStyle.Base" TargetType="Slider">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Minimum" Value="0" />
+        <Setter Property="Maximum" Value="359.99" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template" Value="{StaticResource RotationEditor.SliderTemplate}" />
+    </Style>
+
+    <Style
+        x:Key="RotationEditor.XSliderStyle"
+        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        TargetType="Slider">
+        <Setter Property="Foreground" Value="#D44040" />
+    </Style>
+
+    <Style
+        x:Key="RotationEditor.YSliderStyle"
+        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        TargetType="Slider">
+        <Setter Property="Foreground" Value="#3AAA5C" />
+    </Style>
+
+    <Style
+        x:Key="RotationEditor.ZSliderStyle"
+        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        TargetType="Slider">
+        <Setter Property="Foreground" Value="#3A7AD4" />
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  轴标签容器样式（彩色方块外框）  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RotationEditor.AxisLabelContainerStyle" TargetType="ContentPresenter">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextElement.FontSize" Value="12" />
+        <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+        <Setter Property="TextElement.Foreground" Value="White" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  默认控件模板  -->
+    <!--  ============================================================  -->
+    <ControlTemplate x:Key="RotationEditor.Template.Basic" TargetType="ctl:RotationEditor">
+        <Border
+            Padding="{TemplateBinding Padding}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            CornerRadius="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  X 轴  -->
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Width="22"
+                    Height="22"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Background="#D44040"
+                    CornerRadius="0">
+                    <ContentPresenter Content="{TemplateBinding LabelX}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                </Border>
+                <Slider
+                    x:Name="PART_XSlider"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    Style="{StaticResource RotationEditor.XSliderStyle}"
+                    Value="{Binding AngleX, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+
+                <!--  Y 轴  -->
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Width="22"
+                    Height="22"
+                    Margin="0,4,10,0"
+                    VerticalAlignment="Center"
+                    Background="#3AAA5C"
+                    CornerRadius="0">
+                    <ContentPresenter Content="{TemplateBinding LabelY}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                </Border>
+                <Slider
+                    x:Name="PART_YSlider"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,4,0,0"
+                    LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    Style="{StaticResource RotationEditor.YSliderStyle}"
+                    Value="{Binding AngleY, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+
+                <!--  Z 轴  -->
+                <Border
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Width="22"
+                    Height="22"
+                    Margin="0,4,10,0"
+                    VerticalAlignment="Center"
+                    Background="#3A7AD4"
+                    CornerRadius="0">
+                    <ContentPresenter Content="{TemplateBinding LabelZ}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                </Border>
+                <Slider
+                    x:Name="PART_ZSlider"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,4,0,0"
+                    LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
+                    Style="{StaticResource RotationEditor.ZSliderStyle}"
+                    Value="{Binding AngleZ, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <!--  ============================================================  -->
+    <!--  默认样式  -->
+    <!--  ============================================================  -->
+    <Style TargetType="ctl:RotationEditor">
+        <Setter Property="Background" Value="{DynamicResource Background.Control}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.Thin}" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="Template" Value="{StaticResource RotationEditor.Template.Basic}" />
+        <Setter Property="Focusable" Value="False" />
+    </Style>
+</ResourceDictionary>

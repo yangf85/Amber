@@ -43,6 +43,7 @@
 
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Slider.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RangeSlider.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RotationEditor.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ProgressBar.xaml" />
 
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TreeView.xaml" />

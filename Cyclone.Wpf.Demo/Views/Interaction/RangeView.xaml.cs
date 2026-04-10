@@ -63,6 +63,11 @@ namespace Cyclone.Wpf.Demo.Views
             // CircularGauge 相关属性初始值
             CurrentSpeed = 60;
             Temperature = 25.5;
+
+            // RotationEditor 相关属性初始值
+            RotationX = 0;
+            RotationY = 0;
+            RotationZ = 0;
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -185,6 +190,19 @@ namespace Cyclone.Wpf.Demo.Views
 
         #endregion CircularGauge 相关属性
 
+        #region RotationEditor 相关属性
+
+        [ObservableProperty]
+        public partial double RotationX { get; set; }
+
+        [ObservableProperty]
+        public partial double RotationY { get; set; }
+
+        [ObservableProperty]
+        public partial double RotationZ { get; set; }
+
+        #endregion RotationEditor 相关属性
+
         #region 命令
 
         [RelayCommand]
@@ -233,6 +251,22 @@ namespace Cyclone.Wpf.Demo.Views
         private void ShowSystemStatus()
         {
             var message = $"系统状态:\nCPU: {CpuUsage:0}%\n内存: {MemoryUsage:0}%\n磁盘: {DiskUsage:0}%";
+            NotificationService.Instance.Information(message);
+        }
+
+        [RelayCommand]
+        private void RandomRotation()
+        {
+            RotationX = _random.Next(0, 360);
+            RotationY = _random.Next(0, 360);
+            RotationZ = _random.Next(0, 360);
+            NotificationService.Instance.Information($"旋转已随机设置: X={RotationX:0}° Y={RotationY:0}° Z={RotationZ:0}°");
+        }
+
+        [RelayCommand]
+        private void ShowRotation()
+        {
+            var message = $"当前旋转角度:\nX: {RotationX:0.0}°\nY: {RotationY:0.0}°\nZ: {RotationZ:0.0}°";
             NotificationService.Instance.Information(message);
         }
 
