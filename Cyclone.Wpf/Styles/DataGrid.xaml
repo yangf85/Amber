@@ -6,7 +6,6 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ScorllViewer.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ValidationTemplate.xaml" />
         <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
     </ResourceDictionary.MergedDictionaries>
 
@@ -51,7 +50,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}" />
+        <Setter Property="Validation.ErrorTemplate" Value="{DynamicResource ValidationError.ControlTemplate}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -63,15 +62,6 @@
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         SnapsToDevicePixels="True">
-                        <ToolTipService.ToolTip>
-                            <ToolTip
-                                x:Name="ValidationTooltip"
-                                DataContext="{Binding (Validation.Errors), RelativeSource={RelativeSource TemplatedParent}}"
-                                Placement="Bottom"
-                                PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                                Template="{DynamicResource ToolTip.ControlTemplate.Validation}"
-                                VerticalOffset="2" />
-                        </ToolTipService.ToolTip>
                         <ScrollViewer
                             x:Name="PART_ContentHost"
                             Background="{TemplateBinding Background}"
@@ -79,19 +69,6 @@
                             HorizontalScrollBarVisibility="Hidden"
                             VerticalScrollBarVisibility="Hidden" />
                     </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="Validation.HasError" Value="True">
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Background.Error}" />
-                            <Setter TargetName="RootBorder" Property="BorderThickness" Value="1" />
-                        </Trigger>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="Validation.HasError" Value="True" />
-                                <Condition Property="IsKeyboardFocusWithin" Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="ValidationTooltip" Property="IsOpen" Value="True" />
-                        </MultiTrigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

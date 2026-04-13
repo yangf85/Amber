@@ -22,15 +22,13 @@
                         ItemsSource="{Binding Pagination.Data}"
                         SelectionMode="Extended">
                         <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" />
                             <DataGridTextColumn
-                                Binding="{Binding FirstName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                                Header="First Name" />
-                            <DataGridTextColumn
-                                Binding="{Binding LastName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                Binding="{Binding LastName}"
                                 EditingElementStyle="{StaticResource DataGrid.EditingTextBox.Style}"
                                 Header="Last Name" />
                             <DataGridTextColumn
-                                Binding="{Binding Age, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                Binding="{Binding Age}"
                                 EditingElementStyle="{StaticResource DataGrid.EditingTextBox.Style}"
                                 Header="Age" />
                             <DataGridTextColumn Binding="{Binding Email}" Header="Email" />
@@ -63,20 +61,14 @@
                 <DataGrid
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"
-                    cy:DataGridHelper.IsEnableCellValidation="True"
                     ItemsSource="{Binding MockData}">
                     <DataGrid.Columns>
                         <DataGridTextColumn
-                            Binding="{Binding Name}"
+                            Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                             EditingElementStyle="{StaticResource DataGrid.EditingTextBox.Style}"
                             Header="名称" />
-                        <DataGridCheckBoxColumn
-                            Binding="{Binding Gender}"
-                            Header="性别" />
-                        <DataGridTextColumn
-                            Binding="{Binding Age}"
-                            EditingElementStyle="{StaticResource DataGrid.EditingTextBox.Style}"
-                            Header="年龄" />
+                        <DataGridCheckBoxColumn Binding="{Binding Gender}" Header="性别" />
+                        <DataGridTextColumn Binding="{Binding Age, UpdateSourceTrigger=PropertyChanged}" Header="年龄" />
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding Status}"

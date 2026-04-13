@@ -131,87 +131,54 @@ public class DataGridHelper
 
     #endregion IsAutoGenerate
 
-    #region IsEnableCellValidation
+    #region TextColumnEditingStyle
 
-    public static readonly DependencyProperty IsEnableCellValidationProperty =
+    public static readonly DependencyProperty TextColumnEditingStyleProperty =
         DependencyProperty.RegisterAttached(
-            "IsEnableCellValidation",
-            typeof(bool),
+            "TextColumnEditingStyle",
+            typeof(Style),
             typeof(DataGridHelper),
-            new PropertyMetadata(false, OnIsEnableCellValidationChanged));
+            new PropertyMetadata(null, OnTextColumnEditingStyleChanged));
 
-    public static bool GetIsEnableCellValidation(DependencyObject obj)
-            => (bool)obj.GetValue(IsEnableCellValidationProperty);
+    public static Style GetTextColumnEditingStyle(DependencyObject obj)
+            => (Style)obj.GetValue(TextColumnEditingStyleProperty);
 
-    public static void SetIsEnableCellValidation(DependencyObject obj, bool value)
-        => obj.SetValue(IsEnableCellValidationProperty, value);
+    public static void SetTextColumnEditingStyle(DependencyObject obj, Style value)
+        => obj.SetValue(TextColumnEditingStyleProperty, value);
 
-    private static void OnIsEnableCellValidationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static void OnTextColumnEditingStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not DataGrid dataGrid) return;
 
-        if (e.NewValue is true)
+        if (e.NewValue is Style)
         {
-            dataGrid.Loaded += OnDataGridLoadedForValidation;
+            // 对已有的列立即应用
+            ApplyEditingStyle(dataGrid);
+
+            // 监听后续添加的列
             ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged
-                += (_, _) => { if (dataGrid.IsLoaded) PatchColumnBindings(dataGrid); };
+                += (_, _) => ApplyEditingStyle(dataGrid);
         }
-        else
+    }
+
+    private static void ApplyEditingStyle(DataGrid dataGrid)
+    {
+        var style = GetTextColumnEditingStyle(dataGrid);
+        if (style == null)
         {
-            dataGrid.Loaded -= OnDataGridLoadedForValidation;
+            return;
         }
-    }
 
-    private static void OnDataGridLoadedForValidation(object sender, RoutedEventArgs e)
-    {
-        if (sender is DataGrid dataGrid)
-            PatchColumnBindings(dataGrid);
-    }
-
-    private static void PatchColumnBindings(DataGrid dataGrid)
-    {
         foreach (var column in dataGrid.Columns)
         {
-            if (column.IsReadOnly) continue;
-
-            if (column is DataGridBoundColumn boundColumn
-                && boundColumn.Binding is Binding binding
-                && string.IsNullOrEmpty(binding.BindingGroupName))
+            if (column is DataGridTextColumn textColumn)
             {
-                boundColumn.Binding = CloneBindingWithValidation(binding);
+                textColumn.EditingElementStyle = style;
             }
         }
     }
 
-    private static Binding CloneBindingWithValidation(Binding source)
-    {
-        var clone = new Binding
-        {
-            Path = source.Path,
-            BindingGroupName = "CellValidation",
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-            ValidatesOnNotifyDataErrors = true,
-            ValidatesOnExceptions = true,
-        };
-
-        if (source.Mode != BindingMode.Default) clone.Mode = source.Mode;
-        if (source.Converter != null) clone.Converter = source.Converter;
-        if (source.ConverterParameter != null) clone.ConverterParameter = source.ConverterParameter;
-        if (source.ConverterCulture != null) clone.ConverterCulture = source.ConverterCulture;
-        if (source.StringFormat != null) clone.StringFormat = source.StringFormat;
-        if (source.FallbackValue != null) clone.FallbackValue = source.FallbackValue;
-        if (source.TargetNullValue != null) clone.TargetNullValue = source.TargetNullValue;
-        if (!string.IsNullOrEmpty(source.ElementName)) clone.ElementName = source.ElementName;
-        if (source.RelativeSource != null) clone.RelativeSource = source.RelativeSource;
-        if (source.Source != null) clone.Source = source.Source;
-
-        foreach (var rule in source.ValidationRules)
-            clone.ValidationRules.Add(rule);
-
-        return clone;
-    }
-
-    #endregion IsEnableCellValidation
+    #endregion TextColumnEditingStyle
 
     #region 内部列管理类
 
