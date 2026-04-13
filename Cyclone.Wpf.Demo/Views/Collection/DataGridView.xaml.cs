@@ -40,15 +40,15 @@ public partial class PaginationViewModel<T> : ObservableValidator, IPagination
 {
     private IEnumerable<T> _source;
 
+    [ObservableProperty]
+    public partial ObservableCollection<T> Data { get; set; } = [];
+
     public PaginationViewModel(IEnumerable<T> source)
     {
         _source = source;
         Update();
         Total = source.Count();
     }
-
-    [ObservableProperty]
-    public partial ObservableCollection<T> Data { get; set; } = [];
 
     #region Implementation Pagination
 
@@ -113,12 +113,6 @@ public partial class DataGridViewModel : ObservableObject
     [ObservableProperty]
     public partial ObservableCollection<DataGridItem> MockData { get; set; } = [];
 
-    public DataGridViewModel()
-    {
-        InitMockData();
-        Pagination = new PaginationViewModel<FakerData>(FakerDataHelper.GenerateFakerDataCollection(75));
-    }
-
     [RelayCommand]
     private void ShowSelectedItems()
     {
@@ -160,6 +154,12 @@ public partial class DataGridViewModel : ObservableObject
 
         ];
     }
+
+    public DataGridViewModel()
+    {
+        InitMockData();
+        Pagination = new PaginationViewModel<FakerData>(FakerDataHelper.GenerateFakerDataCollection(75));
+    }
 }
 
 public enum Status
@@ -184,7 +184,7 @@ public partial class DataGridItem : ObservableValidator
     public partial bool Gender { get; set; }
 
     [ObservableProperty]
-    [DataGridProperty("年龄", Index = 3, IsReadOnly = true)]
+    [DataGridProperty("年龄", Index = 3)]
     [NotifyDataErrorInfo]
     [Range(1, 100, ErrorMessage = "Age must be between 1 and 100")]
     public partial int Age { get; set; }

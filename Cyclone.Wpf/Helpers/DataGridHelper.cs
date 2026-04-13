@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -51,6 +52,10 @@ public class DataGridHelper
         DependencyProperty.RegisterAttached("SelectedItems", typeof(IList), typeof(DataGridHelper),
                     new FrameworkPropertyMetadata(default(IList), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedItemChanged));
 
+    public static IList GetSelectedItems(DataGrid obj) => (IList)obj.GetValue(SelectedItemsProperty);
+
+    public static void SetSelectedItems(DataGrid obj, IList value) => obj.SetValue(SelectedItemsProperty, value);
+
     private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is DataGrid dataGrid)
@@ -74,21 +79,17 @@ public class DataGridHelper
         }
     }
 
-    public static IList GetSelectedItems(DataGrid obj) => (IList)obj.GetValue(SelectedItemsProperty);
-
-    public static void SetSelectedItems(DataGrid obj, IList value) => obj.SetValue(SelectedItemsProperty, value);
-
     #endregion SelectedItems
 
     #region IsAutoGenerate
 
-    public static bool GetIsAutoGenerate(DependencyObject obj) => (bool)obj.GetValue(IsAutoGenerateProperty);
-
-    public static void SetIsAutoGenerate(DependencyObject obj, bool value) => obj.SetValue(IsAutoGenerateProperty, value);
-
     public static readonly DependencyProperty IsAutoGenerateProperty =
                 DependencyProperty.RegisterAttached("IsAutoGenerate", typeof(bool), typeof(DataGridHelper),
                     new PropertyMetadata(false, OnIsAutoGenerateChanged));
+
+    public static bool GetIsAutoGenerate(DependencyObject obj) => (bool)obj.GetValue(IsAutoGenerateProperty);
+
+    public static void SetIsAutoGenerate(DependencyObject obj, bool value) => obj.SetValue(IsAutoGenerateProperty, value);
 
     private static void OnIsAutoGenerateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -129,6 +130,88 @@ public class DataGridHelper
     }
 
     #endregion IsAutoGenerate
+
+    #region IsEnableCellValidation
+
+    public static readonly DependencyProperty IsEnableCellValidationProperty =
+        DependencyProperty.RegisterAttached(
+            "IsEnableCellValidation",
+            typeof(bool),
+            typeof(DataGridHelper),
+            new PropertyMetadata(false, OnIsEnableCellValidationChanged));
+
+    public static bool GetIsEnableCellValidation(DependencyObject obj)
+            => (bool)obj.GetValue(IsEnableCellValidationProperty);
+
+    public static void SetIsEnableCellValidation(DependencyObject obj, bool value)
+        => obj.SetValue(IsEnableCellValidationProperty, value);
+
+    private static void OnIsEnableCellValidationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not DataGrid dataGrid) return;
+
+        if (e.NewValue is true)
+        {
+            dataGrid.Loaded += OnDataGridLoadedForValidation;
+            ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged
+                += (_, _) => { if (dataGrid.IsLoaded) PatchColumnBindings(dataGrid); };
+        }
+        else
+        {
+            dataGrid.Loaded -= OnDataGridLoadedForValidation;
+        }
+    }
+
+    private static void OnDataGridLoadedForValidation(object sender, RoutedEventArgs e)
+    {
+        if (sender is DataGrid dataGrid)
+            PatchColumnBindings(dataGrid);
+    }
+
+    private static void PatchColumnBindings(DataGrid dataGrid)
+    {
+        foreach (var column in dataGrid.Columns)
+        {
+            if (column.IsReadOnly) continue;
+
+            if (column is DataGridBoundColumn boundColumn
+                && boundColumn.Binding is Binding binding
+                && string.IsNullOrEmpty(binding.BindingGroupName))
+            {
+                boundColumn.Binding = CloneBindingWithValidation(binding);
+            }
+        }
+    }
+
+    private static Binding CloneBindingWithValidation(Binding source)
+    {
+        var clone = new Binding
+        {
+            Path = source.Path,
+            BindingGroupName = "CellValidation",
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            ValidatesOnNotifyDataErrors = true,
+            ValidatesOnExceptions = true,
+        };
+
+        if (source.Mode != BindingMode.Default) clone.Mode = source.Mode;
+        if (source.Converter != null) clone.Converter = source.Converter;
+        if (source.ConverterParameter != null) clone.ConverterParameter = source.ConverterParameter;
+        if (source.ConverterCulture != null) clone.ConverterCulture = source.ConverterCulture;
+        if (source.StringFormat != null) clone.StringFormat = source.StringFormat;
+        if (source.FallbackValue != null) clone.FallbackValue = source.FallbackValue;
+        if (source.TargetNullValue != null) clone.TargetNullValue = source.TargetNullValue;
+        if (!string.IsNullOrEmpty(source.ElementName)) clone.ElementName = source.ElementName;
+        if (source.RelativeSource != null) clone.RelativeSource = source.RelativeSource;
+        if (source.Source != null) clone.Source = source.Source;
+
+        foreach (var rule in source.ValidationRules)
+            clone.ValidationRules.Add(rule);
+
+        return clone;
+    }
+
+    #endregion IsEnableCellValidation
 
     #region 内部列管理类
 
