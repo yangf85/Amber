@@ -12,10 +12,10 @@
     <ControlTemplate x:Key="SettingItem.ControlTemplate.Basic" TargetType="{x:Type ctl:SettingItem}">
         <Border
             x:Name="PART_RootBorder"
+            Padding="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
-            Padding="{TemplateBinding Padding}"
             SnapsToDevicePixels="True">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -85,12 +85,14 @@
                 <Setter TargetName="IconPresenter" Property="Visibility" Value="Collapsed" />
             </Trigger>
 
-            <!--  Description 为空:收起描述行  -->
+            <!--  Description 为空:收起描述行,同时让 Label 跨两行整体居中  -->
             <Trigger Property="Description" Value="{x:Null}">
                 <Setter TargetName="DescriptionTextBlock" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="LabelPresenter" Property="Grid.RowSpan" Value="2" />
             </Trigger>
             <Trigger Property="Description" Value="">
                 <Setter TargetName="DescriptionTextBlock" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="LabelPresenter" Property="Grid.RowSpan" Value="2" />
             </Trigger>
 
             <!--  整行可点击 + 鼠标悬停:高亮背景  -->
@@ -111,7 +113,6 @@
 
     <!--  SettingItem 默认样式  -->
     <Style x:Key="SettingItem.Style.Basic" TargetType="{x:Type ctl:SettingItem}">
-        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.None}" />
         <Setter Property="Padding" Value="{DynamicResource Padding.All}" />
@@ -135,19 +136,19 @@
     <!--  SettingGroup 模板  -->
     <ControlTemplate x:Key="SettingGroup.ControlTemplate.Basic" TargetType="{x:Type ctl:SettingGroup}">
         <Border
+            Padding="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
-            Padding="{TemplateBinding Padding}"
             SnapsToDevicePixels="True">
             <DockPanel LastChildFill="True">
                 <!--  组标题(SettingGroup.Header,继承自 HeaderedItemsControl)  -->
                 <ContentPresenter
                     x:Name="HeaderPresenter"
                     Margin="0,0,0,4"
-                    DockPanel.Dock="Top"
                     Content="{TemplateBinding Header}"
                     ContentTemplate="{TemplateBinding HeaderTemplate}"
+                    DockPanel.Dock="Top"
                     TextBlock.FontSize="{DynamicResource Font.Header}"
                     TextBlock.Foreground="{DynamicResource Text.Header}" />
 
@@ -181,7 +182,6 @@
 
     <!--  SettingGroup 默认样式  -->
     <Style x:Key="SettingGroup.Style.Basic" TargetType="{x:Type ctl:SettingGroup}">
-        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.Thin}" />
         <Setter Property="Padding" Value="{DynamicResource Padding.All}" />
@@ -199,5 +199,4 @@
     </Style>
 
     <Style BasedOn="{StaticResource SettingGroup.Style.Basic}" TargetType="{x:Type ctl:SettingGroup}" />
-
 </ResourceDictionary>
