@@ -7,71 +7,90 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="EnumSelector.ListBoxItem.Style.Basic" TargetType="ListBoxItem">
-        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+    <!--
+        ListBoxItem 容器样式：去掉 ListBox 的视觉，由内部 RadioButton/CheckBox 自带。
+        保留 padding 与 focus 反馈，避免无障碍信息丢失。
+    -->
+    <Style x:Key="EnumSelector.ItemContainer.Style.Basic" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="{DynamicResource Padding.Small}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ListBoxItem">
-                    <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="EnumSelector.ListBox.Style.Basic" TargetType="ListBox">
-        <Setter Property="ItemContainerStyle" Value="{StaticResource EnumSelector.ListBoxItem.Style.Basic}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListBox">
-                    <UniformGrid
-                        x:Name="ItemsContainer"
-                        Columns="{Binding Path=Columns, RelativeSource={RelativeSource AncestorType=ctl:EnumSelector}}"
-                        IsItemsHost="True"
-                        Rows="{Binding Path=Rows, RelativeSource={RelativeSource AncestorType=ctl:EnumSelector}}" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <!--  根据 EffectiveDisplayMode 提供不同的模板  -->
-        <Style.Triggers>
-            <!--  CheckBox 模式  -->
-            <DataTrigger Binding="{Binding Path=EffectiveDisplayMode, RelativeSource={RelativeSource AncestorType=ctl:EnumSelector}}" Value="CheckBox">
-                <Setter Property="ItemTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <CheckBox Content="{Binding}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
-            </DataTrigger>
-            <!--  RadioButton 模式  -->
-            <DataTrigger Binding="{Binding Path=EffectiveDisplayMode, RelativeSource={RelativeSource AncestorType=ctl:EnumSelector}}" Value="RadioButton">
-                <Setter Property="ItemTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <RadioButton
-                                Content="{Binding}"
-                                GroupName="{Binding Path=RadioButtonGroupName, RelativeSource={RelativeSource AncestorType=ctl:EnumSelector}}"
-                                IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style
-        x:Key="EnumSelector.Style.Basic"
-        BasedOn="{StaticResource Control.Style.Basic}"
-        TargetType="ctl:EnumSelector">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ctl:EnumSelector">
-                    <Border x:Name="RootBorder">
-                        <ListBox x:Name="PART_ItemsContainer" Style="{StaticResource EnumSelector.ListBox.Style.Basic}" />
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    <Style BasedOn="{StaticResource EnumSelector.Style.Basic}" TargetType="ctl:EnumSelector" />
+
+    <!--  RadioButton 模式的默认 ItemTemplate  -->
+    <DataTemplate x:Key="EnumSelector.ItemTemplate.RadioButton">
+        <RadioButton
+            Content="{Binding DisplayText}"
+            GroupName="{Binding RadioButtonGroupName, RelativeSource={RelativeSource AncestorType={x:Type ctl:EnumSelector}}}"
+            IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <!--  CheckBox 模式的默认 ItemTemplate  -->
+    <DataTemplate x:Key="EnumSelector.ItemTemplate.CheckBox">
+        <CheckBox Content="{Binding DisplayText}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <!--  EnumSelector 控件模板  -->
+    <ControlTemplate x:Key="EnumSelector.ControlTemplate.Basic" TargetType="{x:Type ctl:EnumSelector}">
+        <Border
+            x:Name="PART_RootBorder"
+            Padding="{TemplateBinding Padding}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
+            <ItemsPresenter />
+        </Border>
+    </ControlTemplate>
+
+    <!--  EnumSelector 默认样式  -->
+    <Style x:Key="EnumSelector.Style.Basic" TargetType="{x:Type ctl:EnumSelector}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.None}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource EnumSelector.ItemContainer.Style.Basic}" />
+        <Setter Property="ItemTemplate" Value="{StaticResource EnumSelector.ItemTemplate.RadioButton}" />
+        <Setter Property="Template" Value="{StaticResource EnumSelector.ControlTemplate.Basic}" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <UniformGrid
+                        x:Name="PART_ItemsHost"
+                        Columns="{Binding Columns, RelativeSource={RelativeSource AncestorType={x:Type ctl:EnumSelector}}}"
+                        Rows="{Binding Rows, RelativeSource={RelativeSource AncestorType={x:Type ctl:EnumSelector}}}" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <!--
+                EffectiveDisplayMode=CheckBox 时切换到 CheckBox 模板。
+                注意：用户在 XAML 上显式赋值 ItemTemplate 时，DataTrigger 仍会覆盖；
+                如果用户想要"完全自定义"，应同时不依赖 DisplayMode（或在自定义模板里自己处理两种模式）。
+            -->
+            <Trigger Property="EffectiveDisplayMode" Value="CheckBox">
+                <Setter Property="ItemTemplate" Value="{StaticResource EnumSelector.ItemTemplate.CheckBox}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style BasedOn="{StaticResource EnumSelector.Style.Basic}" TargetType="{x:Type ctl:EnumSelector}" />
+
 </ResourceDictionary>

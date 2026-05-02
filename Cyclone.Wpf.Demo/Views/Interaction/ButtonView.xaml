@@ -65,40 +65,6 @@
                     TrackWidth="60" />
             </cy:SpacingUniformGrid>
         </HeaderedContentControl>
-        <HeaderedContentControl Background="Gray" Header="SplitButton">
-            <cy:SpacingUniformGrid HorizontalSpacing="5" Rows="1">
-                <cy:SplitButton
-                    ItemClickCommand="{Binding SplitButton.TestCommand}"
-                    ItemClickCommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=Self}}"
-                    Label="One"
-                    SelectedIndex="{Binding SplitButton.Index}">
-                    <cy:SplitButtonItem Content="S1" />
-                    <cy:SplitButtonItem Content="S2" />
-                    <cy:SplitButtonItem Content="S3" />
-                    <cy:SplitButtonItem Content="S4" />
-                </cy:SplitButton>
-
-                <cy:SplitButton
-                    DisplayMemberPath="FirstName"
-                    ItemClickCommand="{Binding SplitButton.ShowDataCommand}"
-                    ItemClickCommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=Self}}"
-                    ItemsSource="{Binding SplitButton.FakerData}"
-                    Label="Two" />
-                <cy:SplitButton ItemsSource="{Binding SplitButton.FakerData}" Label="Three">
-                    <cy:SplitButton.ItemTemplate>
-                        <DataTemplate>
-                            <Button
-                                Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=cy:SplitButtonItem}}"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
-                                BorderThickness="0"
-                                Command="{Binding ShowSelfCommand}"
-                                Content="{Binding FirstName}" />
-                        </DataTemplate>
-                    </cy:SplitButton.ItemTemplate>
-                </cy:SplitButton>
-            </cy:SpacingUniformGrid>
-        </HeaderedContentControl>
         <HeaderedContentControl Header="HyperlinkButton">
             <cy:SpacingUniformGrid HorizontalSpacing="5" Rows="1">
                 <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />

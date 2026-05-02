@@ -8,11 +8,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Cyclone.Wpf.Demo.ViewModels"
     Title="MainWindow"
-    Width="1080"
-    Height="720"
+    Width="1280"
+    Height="960"
     cy:WindowHelper.IsClosing="{Binding IsClosing, Mode=OneWayToSource}"
     cy:WindowHelper.IsClosingMonitorEnabled="True"
     d:DataContext="{d:DesignInstance Type=vm:ShellWindowViewModel}"
+    FontFamily="Segoe UI"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <cy:AdvancedWindow.Icon>

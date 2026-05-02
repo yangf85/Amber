@@ -1,73 +1,31 @@
-﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 定义内容过渡效果的接口
+/// 内容切换时播放过渡动画的容器控件。
+/// <para>
+/// 模板里维护两个 ContentPresenter（旧 / 新）：每次 Content 变化时，
+/// 把上一份内容搬到旧 presenter，新内容放到新 presenter，然后由 <see cref="Transition"/> 创建动画驱动两者过渡。
+/// </para>
+/// <para>
+/// 控件统一负责动画的启动、取消、清理；<see cref="ITransition"/> 实现只负责生产 Storyboard。
+/// 这样快速连续切换 Content 时也能可靠地取消上一次动画、避免视觉残留。
+/// </para>
 /// </summary>
-public interface ITransition
-{
-    /// <summary>
-    /// 开始执行过渡动画
-    /// </summary>
-    /// <param name="transitionBox">过渡控件</param>
-    /// <param name="oldContent">旧内容的呈现器</param>
-    /// <param name="newContent">新内容的呈现器</param>
-    /// <param name="duration">动画持续时间</param>
-    void StartTransition(TransitionBox transitionBox, ContentPresenter oldContent, ContentPresenter newContent, Duration duration);
-}
-
-/// <summary>
-/// 内容变化时播放动画效果的控件
-/// </summary>
-[TemplatePart(Name = "PART_OldContentPresenter", Type = typeof(ContentPresenter))]
-[TemplatePart(Name = "PART_NewContentPresenter", Type = typeof(ContentPresenter))]
+[TemplatePart(Name = PART_OldPresenter, Type = typeof(ContentPresenter))]
+[TemplatePart(Name = PART_NewPresenter, Type = typeof(ContentPresenter))]
 public class TransitionBox : ContentControl
 {
-    private ContentPresenter _oldContentPresenter;
-    private ContentPresenter _newContentPresenter;
-    private object _oldContent;
-    private bool _isTemplateApplied = false;
+    private const string PART_OldPresenter = nameof(PART_OldPresenter);
+    private const string PART_NewPresenter = nameof(PART_NewPresenter);
 
-    #region 依赖属性
-
-    public static readonly DependencyProperty TransitionProperty =
-        DependencyProperty.Register(
-            nameof(Transition),
-            typeof(ITransition),
-            typeof(TransitionBox),
-            new PropertyMetadata(null));
-
-    /// <summary>
-    /// 获取或设置内容切换时使用的过渡效果
-    /// </summary>
-    public ITransition Transition
-    {
-        get => (ITransition)GetValue(TransitionProperty);
-        set => SetValue(TransitionProperty, value);
-    }
-
-    public static readonly DependencyProperty TransitionDurationProperty =
-        DependencyProperty.Register(
-            nameof(TransitionDuration),
-            typeof(Duration),
-            typeof(TransitionBox),
-            new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(300))));
-
-    /// <summary>
-    /// 获取或设置过渡动画的持续时间
-    /// </summary>
-    public Duration TransitionDuration
-    {
-        get => (Duration)GetValue(TransitionDurationProperty);
-        set => SetValue(TransitionDurationProperty, value);
-    }
-
-    #endregion 依赖属性
+    private ContentPresenter _oldPresenter;
+    private ContentPresenter _newPresenter;
+    private Storyboard _currentStoryboard;
+    private bool _isTemplateApplied;
 
     static TransitionBox()
     {
@@ -76,38 +34,83 @@ public class TransitionBox : ContentControl
             new FrameworkPropertyMetadata(typeof(TransitionBox)));
     }
 
-    public TransitionBox()
+    #region Transition
+
+    public static readonly DependencyProperty TransitionProperty =
+        DependencyProperty.Register(
+            nameof(Transition),
+            typeof(ITransition),
+            typeof(TransitionBox),
+            new FrameworkPropertyMetadata(default(ITransition)));
+
+    /// <summary>
+    /// 内容切换时使用的过渡动画。为 null 时切换无动画。
+    /// </summary>
+    public ITransition Transition
     {
-        this.Loaded += OnLoaded;
+        get => (ITransition)GetValue(TransitionProperty);
+        set => SetValue(TransitionProperty, value);
     }
+
+    #endregion Transition
+
+    #region TransitionDuration
+
+    public static readonly DependencyProperty TransitionDurationProperty =
+        DependencyProperty.Register(
+            nameof(TransitionDuration),
+            typeof(Duration),
+            typeof(TransitionBox),
+            new FrameworkPropertyMetadata(new Duration(System.TimeSpan.FromMilliseconds(300))));
+
+    /// <summary>过渡动画时长。默认 300ms。</summary>
+    public Duration TransitionDuration
+    {
+        get => (Duration)GetValue(TransitionDurationProperty);
+        set => SetValue(TransitionDurationProperty, value);
+    }
+
+    #endregion TransitionDuration
+
+    #region IsAnimating (只读)
+
+    private static readonly DependencyPropertyKey IsAnimatingPropertyKey =
+        DependencyProperty.RegisterReadOnly(
+            nameof(IsAnimating),
+            typeof(bool),
+            typeof(TransitionBox),
+            new FrameworkPropertyMetadata(false));
+
+    public static readonly DependencyProperty IsAnimatingProperty = IsAnimatingPropertyKey.DependencyProperty;
+
+    /// <summary>
+    /// 只读。当前是否处于过渡动画中。可绑定到 UI 状态（例如禁用切换按钮）。
+    /// </summary>
+    public bool IsAnimating
+    {
+        get => (bool)GetValue(IsAnimatingProperty);
+        private set => SetValue(IsAnimatingPropertyKey, value);
+    }
+
+    #endregion IsAnimating
 
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
 
-        // 初始化控件时获取内容呈现器
-        _oldContentPresenter = GetTemplateChild("PART_OldContentPresenter") as ContentPresenter;
-        _newContentPresenter = GetTemplateChild("PART_NewContentPresenter") as ContentPresenter;
+        _oldPresenter = GetTemplateChild(PART_OldPresenter) as ContentPresenter;
+        _newPresenter = GetTemplateChild(PART_NewPresenter) as ContentPresenter;
 
-        if (_oldContentPresenter != null && _newContentPresenter != null)
+        if (_oldPresenter is not null && _newPresenter is not null)
         {
-            // 初始设置
-            _oldContentPresenter.Visibility = Visibility.Collapsed;
-            _newContentPresenter.Visibility = Visibility.Visible;
-            _newContentPresenter.Opacity = 1.0;
+            // 初始：旧 presenter 透明、新 presenter 显示当前 Content
+            _oldPresenter.Opacity = 0;
+            _oldPresenter.Content = null;
 
-            // 初始显示内容
-            _newContentPresenter.Content = Content;
+            _newPresenter.Opacity = 1;
+            _newPresenter.Content = Content;
+
             _isTemplateApplied = true;
-        }
-    }
-
-    private void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        // 确保内容正确显示
-        if (_isTemplateApplied && _newContentPresenter != null)
-        {
-            _newContentPresenter.Content = Content;
         }
     }
 
@@ -115,40 +118,100 @@ public class TransitionBox : ContentControl
     {
         base.OnContentChanged(oldContent, newContent);
 
-        // 保存旧内容引用
-        _oldContent = oldContent;
-
-        // 如果控件尚未加载模板，则直接返回
-        if (!_isTemplateApplied || _oldContentPresenter == null || _newContentPresenter == null)
+        // 模板还未应用：内容会在 OnApplyTemplate 里被同步到 newPresenter，这里不动
+        if (!_isTemplateApplied)
         {
             return;
         }
 
-        // 如果没有设置过渡效果，或者是初始内容设置，直接更新内容
-        if (Transition == null || oldContent == null)
+        // 没有 transition 或没有旧内容：直接切换，不播动画
+        if (Transition is null || oldContent is null)
         {
-            _newContentPresenter.Content = newContent;
+            _newPresenter.Content = newContent;
             return;
         }
 
-        // 准备新旧内容 - 这里是关键修改点
-        _oldContentPresenter.Content = oldContent;
-        _oldContentPresenter.Visibility = Visibility.Visible;
-        _oldContentPresenter.Opacity = 1.0;
+        // 1. 取消正在进行的动画
+        StopCurrentAnimation();
 
-        // 预先准备新内容，但保持不可见状态
-        _newContentPresenter.Content = newContent;
-        // 先将新内容设为不可见，避免布局时出现闪烁
-        _newContentPresenter.Visibility = Visibility.Hidden;
+        // 2. 把"目前 newPresenter 显示的内容"挪到 oldPresenter（不一定等于 oldContent ——
+        //    如果上一次动画被中途打断，newPresenter 此时显示的可能是更早的某一帧）
+        _oldPresenter.Content = _newPresenter.Content;
+        _newPresenter.Content = newContent;
 
-        // 强制一次布局更新
-        this.UpdateLayout();
+        // 3. 重置两个 presenter 的视觉状态——清掉上一次动画可能留下的 RenderTransform / Opacity 异常
+        ResetPresenterVisuals(_oldPresenter);
+        ResetPresenterVisuals(_newPresenter);
 
-        // 设置新内容的起始状态，但仍保持在视觉树中
-        _newContentPresenter.Visibility = Visibility.Visible;
-        _newContentPresenter.Opacity = 0;
+        // 4. 强制布局更新一次，保证 ActualWidth/Height 在 Slide 等需要尺寸的动画里可用
+        UpdateLayout();
 
-        // 立即开始动画，不使用 Dispatcher 延迟
-        Transition.StartTransition(this, _oldContentPresenter, _newContentPresenter, TransitionDuration);
+        // 5. 由 Transition 创建动画，控件负责启动/订阅完成
+        var storyboard = Transition.CreateAnimation(
+            _oldPresenter,
+            _newPresenter,
+            new Size(ActualWidth, ActualHeight),
+            TransitionDuration);
+
+        if (storyboard is null)
+        {
+            // Transition 实现返回 null：当作"不动画"处理
+            return;
+        }
+
+        storyboard.Completed += OnStoryboardCompleted;
+        _currentStoryboard = storyboard;
+        IsAnimating = true;
+
+        // isControllable=true：允许之后用 Stop 取消
+        storyboard.Begin(this, isControllable: true);
+    }
+
+    private void OnStoryboardCompleted(object sender, System.EventArgs e)
+    {
+        // 动画自然完成；如果是被 StopCurrentAnimation 取消的，订阅已被解除，不会走到这里
+        FinishAnimation();
+    }
+
+    private void StopCurrentAnimation()
+    {
+        if (_currentStoryboard is null)
+        {
+            return;
+        }
+        _currentStoryboard.Completed -= OnStoryboardCompleted;
+        _currentStoryboard.Stop(this);
+        _currentStoryboard = null;
+    }
+
+    private void FinishAnimation()
+    {
+        // 动画完成后把 oldPresenter 清空，并把视觉状态恢复
+        if (_oldPresenter is not null)
+        {
+            _oldPresenter.Content = null;
+            ResetPresenterVisuals(_oldPresenter);
+            _oldPresenter.Opacity = 0;
+        }
+        if (_newPresenter is not null)
+        {
+            ResetPresenterVisuals(_newPresenter);
+            _newPresenter.Opacity = 1;
+        }
+
+        _currentStoryboard = null;
+        IsAnimating = false;
+    }
+
+    /// <summary>
+    /// 清掉 presenter 上一次动画留下的痕迹：RenderTransform 残留、RenderTransformOrigin、Opacity 中间值。
+    /// 不动 Content（由调用方决定）。
+    /// </summary>
+    private static void ResetPresenterVisuals(ContentPresenter presenter)
+    {
+        // ClearValue 而不是赋 null：让 DP 回到默认值，避免覆盖 Style / Template 里的 setter
+        presenter.ClearValue(UIElement.RenderTransformProperty);
+        presenter.ClearValue(UIElement.RenderTransformOriginProperty);
+        presenter.ClearValue(UIElement.OpacityProperty);
     }
 }

@@ -166,11 +166,8 @@
                     Grid.Column="2"
                     DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource Mode=TemplatedParent}}"
                     IsEnabled="{Binding Path=IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                    IsVisibleSpinButton="False"
                     Maximum="{TemplateBinding Maximum}"
                     Minimum="{TemplateBinding Minimum}"
-                    NumberStyle="{TemplateBinding NumberStyle}"
-                    Step="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     Value="{Binding Path=Value, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                 <ContentPresenter
                     x:Name="DescriptionContainer"

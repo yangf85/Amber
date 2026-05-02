@@ -140,61 +140,6 @@
                 </cy:SpacingStackPanel>
             </Border>
 
-            <!--  NumberBox 展示  -->
-            <Border Style="{StaticResource CardStyle}">
-                <cy:SpacingStackPanel Spacing="15">
-                    <TextBlock Style="{StaticResource TitleStyle}" Text="🔢 NumberBox 数字输入框" />
-
-                    <cy:SpacingUniformGrid
-                        Columns="2"
-                        HorizontalSpacing="15"
-                        VerticalSpacing="10">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource LabelStyle}" Text="小数输入 (-50~20):" />
-                            <cy:NumberBox
-                                DecimalPlaces="2"
-                                Maximum="20"
-                                Minimum="-50"
-                                Step="0.1"
-                                Value="{Binding NumberDouble}" />
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource LabelStyle}" Text="整数输入 (0~999):" />
-                            <cy:NumberBox
-                                NumberStyle="Integer"
-                                Step="1"
-                                Value="{Binding NumberInt}" />
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource LabelStyle}" Text="价格输入:" />
-                            <cy:NumberBox
-                                DecimalPlaces="2"
-                                Maximum="9999"
-                                Minimum="0"
-                                Value="{Binding Price}">
-                                <cy:NumberBox.Prefix>
-                                    <TextBlock
-                                        FontWeight="Bold"
-                                        Foreground="Green"
-                                        Text="¥" />
-                                </cy:NumberBox.Prefix>
-                            </cy:NumberBox>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource LabelStyle}" Text="百分比:" />
-                            <cy:NumberBox
-                                DecimalPlaces="1"
-                                Maximum="100"
-                                Minimum="0"
-                                Value="{Binding Percentage}" />
-                        </StackPanel>
-                    </cy:SpacingUniformGrid>
-                </cy:SpacingStackPanel>
-            </Border>
-
             <!--  高级控件展示  -->
             <Border Style="{StaticResource CardStyle}">
                 <cy:SpacingStackPanel Spacing="15">

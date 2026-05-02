@@ -2,25 +2,34 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
-    <ResourceDictionary.MergedDictionaries>
-        <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
-    </ResourceDictionary.MergedDictionaries>
 
-    <Style TargetType="{x:Type ctl:TransitionBox}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ctl:TransitionBox}">
-                    <Grid ClipToBounds="True">
-                        <!--  旧内容呈现器  -->
-                        <ContentPresenter
-                            x:Name="PART_OldContentPresenter"
-                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                            Visibility="Collapsed" />
-                        <!--  新内容呈现器  -->
-                        <ContentPresenter x:Name="PART_NewContentPresenter" ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+    <ControlTemplate x:Key="TransitionBox.ControlTemplate.Basic" TargetType="{x:Type ctl:TransitionBox}">
+        <Grid ClipToBounds="True">
+            <!--  旧内容：Z 在下；初始 Opacity=0 等动画驱动  -->
+            <ContentPresenter
+                x:Name="PART_OldPresenter"
+                Panel.ZIndex="0"
+                ContentTemplate="{TemplateBinding ContentTemplate}"
+                ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                Opacity="0" />
+
+            <!--  新内容：Z 在上  -->
+            <ContentPresenter
+                x:Name="PART_NewPresenter"
+                Panel.ZIndex="1"
+                ContentTemplate="{TemplateBinding ContentTemplate}"
+                ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                Opacity="1" />
+        </Grid>
+    </ControlTemplate>
+
+    <Style x:Key="TransitionBox.Style.Basic" TargetType="{x:Type ctl:TransitionBox}">
+        <Setter Property="Template" Value="{StaticResource TransitionBox.ControlTemplate.Basic}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
+
+    <Style BasedOn="{StaticResource TransitionBox.Style.Basic}" TargetType="{x:Type ctl:TransitionBox}" />
+
 </ResourceDictionary>

@@ -6,155 +6,242 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="Card.Style.Basic.Shadow" TargetType="{x:Type ctl:Card}">
+    <!--  ============================================================
+        ======================= CardHeader ==========================
+        视觉布局：
+        ┌─────────────────────────────────────────────────┐
+        │ ┌────┐ Title              [Action]              │
+        │ │Icon│                                          │
+        │ │    │ Subtitle                                 │
+        │ └────┘                                          │
+        └─────────────────────────────────────────────────┘
+        ============================================================  -->
+
+    <ControlTemplate x:Key="CardHeader.ControlTemplate.Basic" TargetType="{x:Type ctl:CardHeader}">
+        <Border
+            Padding="{TemplateBinding Padding}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!--  Icon  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  Title + Subtitle  -->
+                    <ColumnDefinition Width="*" />
+                    <!--  Action  -->
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Icon 槽  -->
+                <ContentPresenter
+                    x:Name="IconPresenter"
+                    Grid.Column="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Icon}" />
+
+                <!--  Title + Subtitle  -->
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        x:Name="TitleText"
+                        FontSize="{DynamicResource Font.Header}"
+                        FontWeight="SemiBold"
+                        Foreground="{TemplateBinding Foreground}"
+                        Text="{TemplateBinding Title}"
+                        TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        x:Name="SubtitleText"
+                        Margin="0,2,0,0"
+                        FontSize="{DynamicResource Font.Default}"
+                        Foreground="{DynamicResource Text.Secondary}"
+                        Text="{TemplateBinding Subtitle}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <!--  Action 槽  -->
+                <ContentPresenter
+                    x:Name="ActionPresenter"
+                    Grid.Column="2"
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Action}" />
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="IconPresenter" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Title" Value="{x:Null}">
+                <Setter TargetName="TitleText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Title" Value="">
+                <Setter TargetName="TitleText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Subtitle" Value="{x:Null}">
+                <Setter TargetName="SubtitleText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Subtitle" Value="">
+                <Setter TargetName="SubtitleText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Action" Value="{x:Null}">
+                <Setter TargetName="ActionPresenter" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="CardHeader.Style.Basic" TargetType="{x:Type ctl:CardHeader}">
+        <Setter Property="Template" Value="{StaticResource CardHeader.ControlTemplate.Basic}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Text.Header}" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style BasedOn="{StaticResource CardHeader.Style.Basic}" TargetType="{x:Type ctl:CardHeader}" />
+
+
+    <!--  ============================================================
+        ======================= CardFooter ==========================
+        简单 ContentControl 容器：只提供一致的 Padding / 字体基线
+        ============================================================  -->
+
+    <ControlTemplate x:Key="CardFooter.ControlTemplate.Basic" TargetType="{x:Type ctl:CardFooter}">
+        <Border
+            Padding="{TemplateBinding Padding}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
+            <ContentPresenter
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                Content="{TemplateBinding Content}"
+                ContentTemplate="{TemplateBinding ContentTemplate}"
+                ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+        </Border>
+    </ControlTemplate>
+
+    <Style x:Key="CardFooter.Style.Basic" TargetType="{x:Type ctl:CardFooter}">
+        <Setter Property="Template" Value="{StaticResource CardFooter.ControlTemplate.Basic}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Text.Default}" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style BasedOn="{StaticResource CardFooter.Style.Basic}" TargetType="{x:Type ctl:CardFooter}" />
+
+
+    <!--  ============================================================
+        ========================== Card =============================
+        三段结构：Header / Content / Footer
+        分隔线由 SeparatorVisibility 控制
+        Header / Footer 槽为 null 时整段收起（含分隔线和 padding）
+        ============================================================  -->
+
+    <ControlTemplate x:Key="Card.ControlTemplate.Basic" TargetType="{x:Type ctl:Card}">
+        <Border
+            x:Name="PART_RootBorder"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  Header 区  -->
+                <ContentPresenter
+                    x:Name="HeaderPresenter"
+                    Grid.Row="0"
+                    Content="{TemplateBinding Header}"
+                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                    ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" />
+
+                <!--  Header 下方分隔线  -->
+                <Rectangle
+                    x:Name="HeaderSeparator"
+                    Grid.Row="0"
+                    Height="1"
+                    VerticalAlignment="Bottom"
+                    Fill="{DynamicResource Border.Default}" />
+
+                <!--  Content 区  -->
+                <ContentPresenter
+                    Grid.Row="1"
+                    Margin="{TemplateBinding Padding}"
+                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                    Content="{TemplateBinding Content}"
+                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                    ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+
+                <!--  Footer 上方分隔线  -->
+                <Rectangle
+                    x:Name="FooterSeparator"
+                    Grid.Row="2"
+                    Height="1"
+                    VerticalAlignment="Top"
+                    Fill="{DynamicResource Border.Default}" />
+
+                <!--  Footer 区  -->
+                <ContentPresenter
+                    x:Name="FooterPresenter"
+                    Grid.Row="2"
+                    Content="{TemplateBinding Footer}" />
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+
+            <!--  Header 槽为空：整段收起（Presenter 和分隔线都隐藏）  -->
+            <Trigger Property="Header" Value="{x:Null}">
+                <Setter TargetName="HeaderPresenter" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="HeaderSeparator" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+
+            <!--  Footer 槽为空：整段收起  -->
+            <Trigger Property="Footer" Value="{x:Null}">
+                <Setter TargetName="FooterPresenter" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="FooterSeparator" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+
+            <!--  分隔线显隐控制（即便有 Header / Footer 也可强制不显示分隔线）  -->
+            <Trigger Property="SeparatorVisibility" Value="None">
+                <Setter TargetName="HeaderSeparator" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="FooterSeparator" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="SeparatorVisibility" Value="HeaderOnly">
+                <Setter TargetName="FooterSeparator" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="SeparatorVisibility" Value="FooterOnly">
+                <Setter TargetName="HeaderSeparator" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <!--  Both 是默认值，无需 Trigger  -->
+
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="Card.Style.Basic" TargetType="{x:Type ctl:Card}">
+        <Setter Property="Template" Value="{StaticResource Card.ControlTemplate.Basic}" />
         <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.Thin}" />
-        <Setter Property="Padding" Value="{DynamicResource Padding.All}" />
-        <Setter Property="Margin" Value="{DynamicResource Margin.All}" />
-        <Setter Property="HeaderBackground" Value="{DynamicResource Background.Header}" />
-        <Setter Property="HeaderForeground" Value="{DynamicResource Text.Header}" />
-        <Setter Property="FooterBackground" Value="{DynamicResource Background.Header}" />
-        <Setter Property="FooterForeground" Value="{DynamicResource Text.Header}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ctl:Card}">
-                    <Grid>
-                        <Border
-                            x:Name="PART_Shadow"
-                            Margin="0,0,5,5"
-                            Background="{DynamicResource Shadow.Default}" />
-                        <Border
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Border
-                                    Grid.Row="0"
-                                    Background="{TemplateBinding HeaderBackground}"
-                                    BorderBrush="{DynamicResource Border.Header}"
-                                    BorderThickness="0,0,0,1"
-                                    Visibility="{Binding Title, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringToVisibilityConverter}}">
-                                    <Grid Margin="{DynamicResource Margin.All}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <ContentPresenter
-                                            Grid.Column="0"
-                                            Margin="{DynamicResource Margin.Right}"
-                                            VerticalAlignment="Center"
-                                            Content="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            VerticalAlignment="Center"
-                                            FontSize="{DynamicResource Font.Header}"
-                                            Foreground="{TemplateBinding HeaderForeground}"
-                                            Text="{Binding Title, RelativeSource={RelativeSource TemplatedParent}}" />
-                                    </Grid>
-                                </Border>
-                                <ContentPresenter
-                                    Grid.Row="1"
-                                    Margin="{TemplateBinding Padding}"
-                                    Content="{TemplateBinding Content}"
-                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                <Border
-                                    Grid.Row="2"
-                                    Background="{TemplateBinding FooterBackground}"
-                                    BorderBrush="{DynamicResource Border.Header}"
-                                    BorderThickness="0,1,0,0">
-                                    <ContentPresenter
-                                        Margin="{DynamicResource Margin.All}"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Center"
-                                        Content="{Binding Footer, RelativeSource={RelativeSource TemplatedParent}}" />
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource Text.Default}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
 
-    <Style
-        x:Key="Card.Style.Basic"
-        BasedOn="{StaticResource Card.Style.Basic.Shadow}"
-        TargetType="{x:Type ctl:Card}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ctl:Card}">
-                    <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Border
-                                Grid.Row="0"
-                                Background="{TemplateBinding HeaderBackground}"
-                                BorderBrush="{DynamicResource Border.Header}"
-                                BorderThickness="0,0,0,1">
-                                <Grid Margin="{DynamicResource Margin.All}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter
-                                        Grid.Column="0"
-                                        Margin="{DynamicResource Margin.Right}"
-                                        VerticalAlignment="Center"
-                                        Content="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        FontSize="{DynamicResource Font.Header}"
-                                        Foreground="{TemplateBinding HeaderForeground}"
-                                        Text="{Binding Title, RelativeSource={RelativeSource TemplatedParent}}" />
-                                </Grid>
-                            </Border>
-                            <ContentPresenter
-                                Grid.Row="1"
-                                Margin="{TemplateBinding Padding}"
-                                Content="{TemplateBinding Content}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}" />
-                            <Border
-                                Grid.Row="2"
-                                Background="{TemplateBinding FooterBackground}"
-                                BorderBrush="{DynamicResource Border.Header}"
-                                BorderThickness="0,1,0,0">
-                                <ContentPresenter
-                                    Margin="{DynamicResource Margin.All}"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Center"
-                                    Content="{Binding Footer, RelativeSource={RelativeSource TemplatedParent}}" />
-                            </Border>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <Style BasedOn="{StaticResource Card.Style.Basic}" TargetType="{x:Type ctl:Card}" />
 
-    <!--  Default Style  -->
-    <Style BasedOn="{StaticResource Card.Style.Basic.Shadow}" TargetType="{x:Type ctl:Card}" />
 </ResourceDictionary>

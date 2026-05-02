@@ -183,11 +183,11 @@ public class NumberFilterBox : Control
     #region NumberStyle
 
     public static readonly DependencyProperty NumberStyleProperty =
-        NumberBox.NumberStyleProperty.AddOwner(typeof(NumberFilterBox), new PropertyMetadata(NumberStyles.Float));
+        NumberBox.NumberModeProperty.AddOwner(typeof(NumberFilterBox), new PropertyMetadata(NumberMode.Integer));
 
-    public NumberStyles NumberStyle
+    public NumberMode NumberStyle
     {
-        get => (NumberStyles)GetValue(NumberStyleProperty);
+        get => (NumberMode)GetValue(NumberStyleProperty);
         set => SetValue(NumberStyleProperty, value);
     }
 

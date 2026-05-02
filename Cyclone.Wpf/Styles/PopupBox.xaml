@@ -1,106 +1,164 @@
-﻿<ResourceDictionary
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
     <ResourceDictionary.MergedDictionaries>
-        <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="PopupBox.ToggleButtonStyle" TargetType="ToggleButton">
+    <!--
+        =================================================================
+        触发按钮(ToggleButton)样式 —— 内嵌于 PopupBox 模板
+        =================================================================
+    -->
+
+    <Style x:Key="PopupBox.ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=ctl:PopupBox}}" />
+        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=ctl:PopupBox}}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ToggleButton">
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Border
-                        x:Name="RootBorder"
+                        x:Name="Root"
                         Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
                         <ContentPresenter
-                            x:Name="PART_ButtonContent"
-                            Grid.Column="1"
-                            Margin="5,0,0,0"
-                            HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ctl:PopupBox}}"
-                            VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ctl:PopupBox}}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Content="{TemplateBinding Content}"
                             ContentStringFormat="{TemplateBinding ContentStringFormat}"
                             ContentTemplate="{TemplateBinding ContentTemplate}" />
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Hover}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Pressed}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Border.Pressed}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Checked}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Border.Checked}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Border.Focused}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Disabled}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Border.Disabled}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <ControlTemplate x:Key="PopupBox.ControlTemplate.Basic" TargetType="ctl:PopupBox">
-        <Grid>
-            <ToggleButton
-                x:Name="PART_ToggleButton"
-                Width="{TemplateBinding Width}"
-                Height="{TemplateBinding Height}"
-                Padding="{TemplateBinding Padding}"
-                Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                Content="{TemplateBinding Content}"
-                IsChecked="{Binding Path=IsOpened, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                SnapsToDevicePixels="True"
-                Style="{StaticResource PopupBox.ToggleButtonStyle}"
-                UseLayoutRounding="True" />
-            <Popup
-                x:Name="PART_Popup"
-                ctl:PopupBox.IsPositionUpdate="True"
-                ctl:PopupBox.IsTopmost="False"
-                AllowsTransparency="True"
-                HorizontalOffset="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=HorizontalOffset}"
-                IsOpen="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IsOpened}"
-                Placement="{Binding Path=Placement, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                PlacementTarget="{Binding ElementName=PART_ToggleButton}"
-                PopupAnimation="{Binding Path=PopupAnimation, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                StaysOpen="{Binding Path=StaysOpen, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                VerticalOffset="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VerticalOffset}">
-                <Grid x:Name="PopupContentBorder">
-                    <Border Padding="5">
-                        <Grid Background="{Binding Path=PopupContentBackground, RelativeSource={RelativeSource Mode=TemplatedParent}}">
-                            <Grid.Effect>
-                                <DropShadowEffect
-                                    BlurRadius="5"
-                                    Direction="0"
-                                    Opacity="0.5"
-                                    ShadowDepth="1"
-                                    Color="Black" />
-                            </Grid.Effect>
-                        </Grid>
-                    </Border>
-                    <ContentPresenter Content="{TemplateBinding PopupContent}" />
-                </Grid>
-            </Popup>
-        </Grid>
-        <ControlTemplate.Triggers>
-            <Trigger Property="IsOpened" Value="True">
-                <Setter Property="BorderBrush" Value="{StaticResource CheckedBorderBrush}" />
-            </Trigger>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource Background.Hover}" />
-                <Setter Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground.Hover}" />
-            </Trigger>
-            <Trigger SourceName="PART_ToggleButton" Property="IsPressed" Value="True">
-                <Setter Property="BorderBrush" Value="{DynamicResource Border.Pressed}" />
-                <Setter Property="Background" Value="{DynamicResource Background.Pressed}" />
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
+    <!--
+        =================================================================
+        PopupBox 主样式
+        关键改动 vs 旧版:
+        1) PopupBackground / PopupBorder / Effect 全部套在同一个 Border 上,与 ContentPresenter 一体化
+        2) ContentPresenter 通过 RelativeSource 拿 PopupBox.DataContext —— 解决 popup 内 MVVM 时序
+        3) ToggleButton.Command 通过 TemplateBinding 桥接 PopupBox.Command (PopupBox 内部 OnToggleButtonClick 也会触发)
+        4) Popup.IsOpen 用 TwoWay 绑定 —— popup 自关时同步回 SplitButton.IsOpen
+        =================================================================
+    -->
 
-    <Style TargetType="ctl:PopupBox">
+    <Style x:Key="PopupBox.Style.Basic" TargetType="{x:Type ctl:PopupBox}">
+        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="{DynamicResource Padding.Horizontal}" />
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-        <Setter Property="Template" Value="{StaticResource PopupBox.ControlTemplate.Basic}" />
-        <Setter Property="Placement" Value="Bottom" />
-        <Setter Property="StaysOpen" Value="True" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="PopupAnimation" Value="Scroll" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
+        <Setter Property="Focusable" Value="False" />
+
+        <!--  Popup 容器外观  -->
+        <Setter Property="PopupBackground" Value="{DynamicResource Background.Default}" />
+        <Setter Property="PopupBorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="PopupBorderThickness" Value="1" />
+        <Setter Property="PopupPadding" Value="0" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ctl:PopupBox}">
+                    <Grid>
+                        <!--  触发按钮  -->
+                        <ToggleButton
+                            x:Name="PART_ToggleButton"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            IsChecked="{Binding IsOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            SnapsToDevicePixels="True"
+                            Style="{StaticResource PopupBox.ToggleButtonStyle}" />
+
+                        <!--  Popup —— IsOpen 双向绑定保证 popup 自关时同步回 PopupBox  -->
+                        <Popup
+                            x:Name="PART_Popup"
+                            ctl:PopupBox.IsPositionUpdate="True"
+                            AllowsTransparency="True"
+                            HorizontalOffset="{TemplateBinding HorizontalOffset}"
+                            IsOpen="{Binding IsOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            Placement="{TemplateBinding Placement}"
+                            PlacementTarget="{Binding ElementName=PART_ToggleButton}"
+                            PopupAnimation="{TemplateBinding PopupAnimation}"
+                            StaysOpen="{TemplateBinding StaysOpen}"
+                            VerticalOffset="{TemplateBinding VerticalOffset}">
+
+                            <!--  外层 Grid 留出阴影空间(8px),内层 Border 是真正的内容容器  -->
+                            <Grid Margin="8">
+                                <Border
+                                    x:Name="PopupRoot"
+                                    MaxWidth="{TemplateBinding MaxDropDownWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    Padding="{TemplateBinding PopupPadding}"
+                                    Background="{TemplateBinding PopupBackground}"
+                                    BorderBrush="{TemplateBinding PopupBorderBrush}"
+                                    BorderThickness="{TemplateBinding PopupBorderThickness}"
+                                    SnapsToDevicePixels="True"
+                                    UseLayoutRounding="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect
+                                            BlurRadius="12"
+                                            Direction="270"
+                                            Opacity="0.25"
+                                            ShadowDepth="2"
+                                            Color="Black" />
+                                    </Border.Effect>
+                                    <ContentPresenter Content="{TemplateBinding PopupContent}" ContentTemplate="{TemplateBinding PopupContentTemplate}" />
+                                </Border>
+                            </Grid>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <!--  关闭阴影时把 Border.Effect 设为 null  -->
+                        <Trigger Property="HasDropShadow" Value="False">
+                            <Setter TargetName="PopupRoot" Property="Effect" Value="{x:Null}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
+
+    <Style BasedOn="{StaticResource PopupBox.Style.Basic}" TargetType="{x:Type ctl:PopupBox}" />
+
 </ResourceDictionary>

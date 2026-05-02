@@ -9,18 +9,26 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Button.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="NumberBox.SpinButtonStyle" TargetType="RepeatButton">
+    <!--  Path 几何资源：放在顶部便于复用与维护，不再散落在多个 RepeatButton.Content 里  -->
+    <Geometry x:Key="NumberBox.Geometry.Increase">M533.333333 384L341.333333 576l29.866667 29.866667 162.133333-162.133334 162.133334 162.133334 29.866666-29.866667L533.333333 384z</Geometry>
+    <Geometry x:Key="NumberBox.Geometry.Decrease">M533.333333 605.866667L341.333333 413.866667l29.866667-29.866667 162.133333 162.133333L695.466667 384l29.866666 29.866667-192 192z</Geometry>
+    <Geometry x:Key="NumberBox.Geometry.Clear">M558.933333 529.066667l285.866667 285.866666-29.866667 29.866667-285.866666-285.866667-285.866667 285.866667-29.866667-29.866667 285.866667-285.866666L213.333333 243.2l29.866667-29.866667 285.866667 285.866667L814.933333 213.333333l29.866667 29.866667-285.866667 285.866667z</Geometry>
+    <Geometry x:Key="NumberBox.Geometry.Plus">M427,213 H597 V427 H811 V597 H597 V811 H427 V597 H213 V427 H427 Z</Geometry>
+    <Geometry x:Key="NumberBox.Geometry.Minus">M213,470 H811 V554 H213 Z</Geometry>
+
+    <!--  通用 Spin / Clear 按钮样式  -->
+    <Style x:Key="NumberBox.SpinButton.Style.Basic" TargetType="{x:Type RepeatButton}">
         <Setter Property="Width" Value="Auto" />
         <Setter Property="Height" Value="Auto" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
-        <Setter Property="Foreground" Value="{Binding Path=BorderBrush, RelativeSource={RelativeSource AncestorType=ctl:NumberBox}}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type ctl:NumberBox}}}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="RepeatButton">
-                    <Grid x:Name="RootGrid" Background="Transparent">
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
                         <ContentPresenter
-                            x:Name="ContentContainer"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Content="{TemplateBinding Content}" />
@@ -41,19 +49,19 @@
         </Setter>
     </Style>
 
-    <Style x:Key="NumberBox.ClearButtonStyle" TargetType="Button">
+    <Style x:Key="NumberBox.ClearButton.Style.Basic" TargetType="{x:Type Button}">
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Margin" Value="0,0,4,0" />
-        <Setter Property="Foreground" Value="{Binding Path=BorderBrush, RelativeSource={RelativeSource AncestorType=ctl:NumberBox}}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type ctl:NumberBox}}}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Grid x:Name="RootGrid" Background="Transparent">
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
                         <ContentPresenter
-                            x:Name="ContentContainer"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Content="{TemplateBinding Content}" />
@@ -74,16 +82,18 @@
         </Setter>
     </Style>
 
-    <Style x:Key="NumberBox.InputTextBoxStyle" TargetType="TextBox">
+    <!--  内嵌 TextBox 样式：去掉自身边框，由 NumberBox 的外层 Border 提供边框/焦点视觉  -->
+    <Style x:Key="NumberBox.InputTextBox.Style.Basic" TargetType="{x:Type TextBox}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource Default.Foreground}" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Cursor" Value="IBeam" />
         <Setter Property="Padding" Value="4" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
+                <ControlTemplate TargetType="{x:Type TextBox}">
                     <Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
                         <ScrollViewer
                             x:Name="PART_ContentHost"
@@ -101,9 +111,13 @@
         </Setter>
     </Style>
 
-    <ControlTemplate x:Key="NumberBox.ControlTemplate.Basic" TargetType="ctl:NumberBox">
+    <!--
+        ===== 竖向布局（默认） =====
+        视觉：│ Prefix │ Input │ Suffix │ Clear │ │△▽│
+    -->
+    <ControlTemplate x:Key="NumberBox.ControlTemplate.Vertical" TargetType="{x:Type ctl:NumberBox}">
         <Border
-            x:Name="RootBorder"
+            x:Name="PART_RootBorder"
             Margin="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
@@ -112,11 +126,19 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
+                    <!--  Prefix  -->
                     <ColumnDefinition Width="*" />
+                    <!--  Input  -->
                     <ColumnDefinition Width="Auto" />
+                    <!--  Suffix  -->
                     <ColumnDefinition Width="Auto" />
+                    <!--  Clear  -->
                     <ColumnDefinition Width="Auto" />
+                    <!--  分隔条  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  上下叠步进按钮  -->
                 </Grid.ColumnDefinitions>
+
                 <ContentPresenter
                     x:Name="PrefixContainer"
                     Grid.Column="0"
@@ -124,6 +146,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Content="{TemplateBinding Prefix}" />
+
                 <TextBox
                     x:Name="PART_InputTextBox"
                     Grid.Column="1"
@@ -131,34 +154,40 @@
                     InputMethod.IsInputMethodEnabled="False"
                     IsReadOnly="{TemplateBinding IsReadOnly}"
                     KeyboardNavigation.TabNavigation="Local"
-                    Style="{StaticResource NumberBox.InputTextBoxStyle}" />
+                    Style="{StaticResource NumberBox.InputTextBox.Style.Basic}" />
+
+                <ContentPresenter
+                    x:Name="SuffixContainer"
+                    Grid.Column="2"
+                    Margin="0,0,4,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Suffix}" />
+
                 <Button
                     x:Name="PART_ClearButton"
-                    Grid.Column="2"
+                    Grid.Column="3"
                     Command="{x:Static ctl:NumberBox.ClearCommand}"
-                    Style="{StaticResource NumberBox.ClearButtonStyle}"
+                    Style="{StaticResource NumberBox.ClearButton.Style.Basic}"
                     Visibility="Collapsed">
-                    <Button.Content>
-                        <Path
-                            Width="12"
-                            Height="12"
-                            Data="M558.933333 529.066667l285.866667 285.866666-29.866667 29.866667-285.866666-285.866667-285.866667 285.866667-29.866667-29.866667 285.866667-285.866666L213.333333 243.2l29.866667-29.866667 285.866667 285.866667L814.933333 213.333333l29.866667 29.866667-285.866667 285.866667z"
-                            Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Stretch="Uniform" />
-                    </Button.Content>
+                    <Path
+                        Width="10"
+                        Height="10"
+                        Data="{StaticResource NumberBox.Geometry.Clear}"
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                        Stretch="Uniform" />
                 </Button>
 
                 <Rectangle
-                    x:Name="VerticalSeperater"
-                    Grid.Column="3"
+                    x:Name="VerticalSeparator"
+                    Grid.Column="4"
                     Width="1"
                     Fill="{TemplateBinding BorderBrush}" />
 
                 <Grid
-                    x:Name="SpinButtonGrid"
-                    Grid.Column="4"
-                    MinWidth="24"
-                    Visibility="Visible">
+                    x:Name="SpinGrid"
+                    Grid.Column="5"
+                    MinWidth="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -168,18 +197,16 @@
                         x:Name="PART_IncreaseRepeatButton"
                         Grid.Row="0"
                         Command="{x:Static ctl:NumberBox.IncreaseCommand}"
-                        Style="{StaticResource NumberBox.SpinButtonStyle}">
-                        <RepeatButton.Content>
-                            <Path
-                                Width="10"
-                                Height="10"
-                                Data="M533.333333 384L341.333333 576l29.866667 29.866667 162.133333-162.133334 162.133334 162.133334 29.866666-29.866667L533.333333 384z"
-                                Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}"
-                                Stretch="Uniform" />
-                        </RepeatButton.Content>
+                        Style="{StaticResource NumberBox.SpinButton.Style.Basic}">
+                        <Path
+                            Width="10"
+                            Height="10"
+                            Data="{StaticResource NumberBox.Geometry.Increase}"
+                            Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type RepeatButton}}}"
+                            Stretch="Uniform" />
                     </RepeatButton>
                     <Rectangle
-                        x:Name="SpinButtonSeperater"
+                        x:Name="SpinSeparator"
                         Grid.Row="1"
                         Height="1"
                         Fill="{TemplateBinding BorderBrush}" />
@@ -187,16 +214,14 @@
                         x:Name="PART_DecreaseRepeatButton"
                         Grid.Row="2"
                         Command="{x:Static ctl:NumberBox.DecreaseCommand}"
-                        Style="{StaticResource NumberBox.SpinButtonStyle}">
-                        <RepeatButton.Content>
-                            <Path
-                                Width="10"
-                                Height="10"
-                                Data="M533.333333 605.866667L341.333333 413.866667l29.866667-29.866667 162.133333 162.133333L695.466667 384l29.866666 29.866667-192 192z"
-                                Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}"
-                                Stretch="Uniform"
-                                UseLayoutRounding="True" />
-                        </RepeatButton.Content>
+                        Style="{StaticResource NumberBox.SpinButton.Style.Basic}">
+                        <Path
+                            Width="10"
+                            Height="10"
+                            Data="{StaticResource NumberBox.Geometry.Decrease}"
+                            Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type RepeatButton}}}"
+                            Stretch="Uniform"
+                            UseLayoutRounding="True" />
                     </RepeatButton>
                 </Grid>
             </Grid>
@@ -205,25 +230,150 @@
             <Trigger Property="Prefix" Value="{x:Null}">
                 <Setter TargetName="PrefixContainer" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="IsVisibleSpinButton" Value="False">
-                <Setter TargetName="VerticalSeperater" Property="Visibility" Value="Collapsed" />
-                <Setter TargetName="SpinButtonGrid" Property="Visibility" Value="Collapsed" />
+            <Trigger Property="Suffix" Value="{x:Null}">
+                <Setter TargetName="SuffixContainer" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="IsVisibleClearButton" Value="True">
+            <Trigger Property="IsClearButtonVisible" Value="True">
                 <Setter TargetName="PART_ClearButton" Property="Visibility" Value="Visible" />
             </Trigger>
+            <Trigger Property="IsSpinButtonVisible" Value="False">
+                <Setter TargetName="VerticalSeparator" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="SpinGrid" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <Trigger SourceName="PART_InputTextBox" Property="IsFocused" Value="True">
-                <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Editing}" />
-                <Setter TargetName="VerticalSeperater" Property="Fill" Value="{DynamicResource Border.Editing}" />
-                <Setter TargetName="SpinButtonSeperater" Property="Fill" Value="{DynamicResource Border.Editing}" />
+                <Setter TargetName="PART_RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Editing}" />
+                <Setter TargetName="VerticalSeparator" Property="Fill" Value="{DynamicResource Border.Editing}" />
+                <Setter TargetName="SpinSeparator" Property="Fill" Value="{DynamicResource Border.Editing}" />
             </Trigger>
             <Trigger Property="IsReadOnly" Value="True">
-                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Inactive}" />
+                <Setter TargetName="PART_RootBorder" Property="Background" Value="{DynamicResource Background.Inactive}" />
                 <Setter TargetName="PART_InputTextBox" Property="Foreground" Value="{DynamicResource Border.Inactive}" />
                 <Setter TargetName="PART_IncreaseRepeatButton" Property="IsEnabled" Value="False" />
                 <Setter TargetName="PART_DecreaseRepeatButton" Property="IsEnabled" Value="False" />
                 <Setter TargetName="PART_ClearButton" Property="IsEnabled" Value="False" />
-                <Setter TargetName="SpinButtonGrid" Property="Opacity" Value="0.5" />
+                <Setter TargetName="SpinGrid" Property="Opacity" Value="0.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!--
+        ===== 横向布局 =====
+        视觉：│ - │ Prefix │ Input │ Suffix │ Clear │ + │
+    -->
+    <ControlTemplate x:Key="NumberBox.ControlTemplate.Horizontal" TargetType="{x:Type ctl:NumberBox}">
+        <Border
+            x:Name="PART_RootBorder"
+            Margin="{TemplateBinding Padding}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <!--  左减号  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  Prefix  -->
+                    <ColumnDefinition Width="*" />
+                    <!--  Input  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  Suffix  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  Clear  -->
+                    <ColumnDefinition Width="Auto" />
+                    <!--  右加号  -->
+                </Grid.ColumnDefinitions>
+                <RepeatButton
+                    x:Name="PART_IncreaseRepeatButton"
+                    Grid.Column="0"
+                    MinWidth="28"
+                    Command="{x:Static ctl:NumberBox.IncreaseCommand}"
+                    Style="{StaticResource NumberBox.SpinButton.Style.Basic}">
+                    <Path
+                        Width="10"
+                        Height="10"
+                        Data="{StaticResource NumberBox.Geometry.Plus}"
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type RepeatButton}}}"
+                        Stretch="Uniform" />
+                </RepeatButton>
+
+                <ContentPresenter
+                    x:Name="PrefixContainer"
+                    Grid.Column="1"
+                    Margin="4,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Prefix}" />
+
+                <TextBox
+                    x:Name="PART_InputTextBox"
+                    Grid.Column="2"
+                    Foreground="{TemplateBinding Foreground}"
+                    InputMethod.IsInputMethodEnabled="False"
+                    IsReadOnly="{TemplateBinding IsReadOnly}"
+                    KeyboardNavigation.TabNavigation="Local"
+                    Style="{StaticResource NumberBox.InputTextBox.Style.Basic}"
+                    TextAlignment="Center" />
+
+                <ContentPresenter
+                    x:Name="SuffixContainer"
+                    Grid.Column="3"
+                    Margin="0,0,4,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Suffix}" />
+
+                <Button
+                    x:Name="PART_ClearButton"
+                    Grid.Column="4"
+                    Command="{x:Static ctl:NumberBox.ClearCommand}"
+                    Style="{StaticResource NumberBox.ClearButton.Style.Basic}"
+                    Visibility="Collapsed">
+                    <Path
+                        Width="10"
+                        Height="10"
+                        Data="{StaticResource NumberBox.Geometry.Clear}"
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                        Stretch="Uniform" />
+                </Button>
+                <RepeatButton
+                    x:Name="PART_DecreaseRepeatButton"
+                    Grid.Column="5"
+                    MinWidth="28"
+                    Command="{x:Static ctl:NumberBox.DecreaseCommand}"
+                    Style="{StaticResource NumberBox.SpinButton.Style.Basic}">
+                    <Path
+                        Width="10"
+                        Height="10"
+                        Data="{StaticResource NumberBox.Geometry.Minus}"
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type RepeatButton}}}"
+                        Stretch="Uniform" />
+                </RepeatButton>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Prefix" Value="{x:Null}">
+                <Setter TargetName="PrefixContainer" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Suffix" Value="{x:Null}">
+                <Setter TargetName="SuffixContainer" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsClearButtonVisible" Value="True">
+                <Setter TargetName="PART_ClearButton" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsSpinButtonVisible" Value="False">
+                <Setter TargetName="PART_DecreaseRepeatButton" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="PART_IncreaseRepeatButton" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger SourceName="PART_InputTextBox" Property="IsFocused" Value="True">
+                <Setter TargetName="PART_RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Editing}" />
+            </Trigger>
+            <Trigger Property="IsReadOnly" Value="True">
+                <Setter TargetName="PART_RootBorder" Property="Background" Value="{DynamicResource Background.Inactive}" />
+                <Setter TargetName="PART_InputTextBox" Property="Foreground" Value="{DynamicResource Border.Inactive}" />
+                <Setter TargetName="PART_IncreaseRepeatButton" Property="IsEnabled" Value="False" />
+                <Setter TargetName="PART_DecreaseRepeatButton" Property="IsEnabled" Value="False" />
+                <Setter TargetName="PART_ClearButton" Property="IsEnabled" Value="False" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -231,14 +381,21 @@
     <Style
         x:Key="NumberBox.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
-        TargetType="ctl:NumberBox">
-        <Setter Property="Template" Value="{StaticResource NumberBox.ControlTemplate.Basic}" />
+        TargetType="{x:Type ctl:NumberBox}">
+        <!--  默认走竖向 Template，Style.Trigger 检测到 Horizontal 时切到横向 Template  -->
+        <Setter Property="Template" Value="{StaticResource NumberBox.ControlTemplate.Vertical}" />
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Validation.ErrorTemplate" Value="{DynamicResource ValidationError.ControlTemplate}" />
+        <Style.Triggers>
+            <Trigger Property="SpinButtonOrientation" Value="Horizontal">
+                <Setter Property="Template" Value="{StaticResource NumberBox.ControlTemplate.Horizontal}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
-    <Style BasedOn="{StaticResource NumberBox.Style.Basic}" TargetType="ctl:NumberBox" />
+
+    <Style BasedOn="{StaticResource NumberBox.Style.Basic}" TargetType="{x:Type ctl:NumberBox}" />
 </ResourceDictionary>

@@ -1,105 +1,69 @@
-﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Cyclone.Wpf.Controls;
 
-public class Card : ContentControl
+/// <summary>
+/// 通用卡片容器：一个带可选 Header / Footer 槽位的内容控件。
+/// <para>
+/// 继承自 <see cref="HeaderedContentControl"/>，因此 Header / HeaderTemplate / Content / ContentTemplate
+/// 等成员均来自基类，无需重新声明。新增 <see cref="Footer"/> 一个槽位与 <see cref="SeparatorVisibility"/> 一个外观开关。
+/// </para>
+/// <para>
+/// 推荐用法是把 <see cref="CardHeader"/> 放进 Header 槽、<see cref="CardFooter"/> 放进 Footer 槽，
+/// 但两个槽位都接受任意 object，用户可以放任何想放的内容。
+/// </para>
+/// <para>
+/// 如果需要"整张卡片可点击"的语义，请把 Card 包在 <c>Button</c> 里——这是 WPF 的标准做法，
+/// 也是把"行为（可点击）"和"布局（卡片）"职责分开的体现。
+/// </para>
+/// </summary>
+public class Card : HeaderedContentControl
 {
     static Card()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(Card), new FrameworkPropertyMetadata(typeof(Card)));
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(Card),
+            new FrameworkPropertyMetadata(typeof(Card)));
     }
-
-    #region Title
-
-    public string Title
-    {
-        get => (string)GetValue(TitleProperty);
-        set => SetValue(TitleProperty, value);
-    }
-
-    public static readonly DependencyProperty TitleProperty =
-        DependencyProperty.Register(nameof(Title), typeof(string), typeof(Card), new PropertyMetadata(default(string)));
-
-    #endregion Title
-
-    #region Icon
-
-    public object Icon
-    {
-        get => (object)GetValue(IconProperty);
-        set => SetValue(IconProperty, value);
-    }
-
-    public static readonly DependencyProperty IconProperty =
-        DependencyProperty.Register(nameof(Icon), typeof(object), typeof(Card), new PropertyMetadata(default(object)));
-
-    #endregion Icon
-
-    #region HeaderBackground
-
-    public Brush HeaderBackground
-    {
-        get => (Brush)GetValue(HeaderBackgroundProperty);
-        set => SetValue(HeaderBackgroundProperty, value);
-    }
-
-    public static readonly DependencyProperty HeaderBackgroundProperty =
-        DependencyProperty.Register(nameof(HeaderBackground), typeof(Brush), typeof(Card), new PropertyMetadata(default(Brush)));
-
-    #endregion HeaderBackground
-
-    #region HeaderForeground
-
-    public Brush HeaderForeground
-    {
-        get => (Brush)GetValue(HeaderForegroundProperty);
-        set => SetValue(HeaderForegroundProperty, value);
-    }
-
-    public static readonly DependencyProperty HeaderForegroundProperty =
-        DependencyProperty.Register(nameof(HeaderForeground), typeof(Brush), typeof(Card), new PropertyMetadata(default(Brush)));
-
-    #endregion HeaderForeground
 
     #region Footer
 
+    public static readonly DependencyProperty FooterProperty =
+        DependencyProperty.Register(
+            nameof(Footer),
+            typeof(object),
+            typeof(Card),
+            new FrameworkPropertyMetadata(default(object)));
+
+    /// <summary>
+    /// 卡片底部内容槽。为 null 时模板会收起整个 Footer 区域（含分隔线和内边距）。
+    /// </summary>
     public object Footer
     {
-        get => (object)GetValue(FooterProperty);
+        get => GetValue(FooterProperty);
         set => SetValue(FooterProperty, value);
     }
 
-    public static readonly DependencyProperty FooterProperty =
-        DependencyProperty.Register(nameof(Footer), typeof(object), typeof(Card), new PropertyMetadata(default(object)));
-
     #endregion Footer
 
-    #region FooterBackground
+    #region SeparatorVisibility
 
-    public Brush FooterBackground
+    public static readonly DependencyProperty SeparatorVisibilityProperty =
+        DependencyProperty.Register(
+            nameof(SeparatorVisibility),
+            typeof(CardSeparatorVisibility),
+            typeof(Card),
+            new FrameworkPropertyMetadata(CardSeparatorVisibility.Both));
+
+    /// <summary>
+    /// Header / Footer 区域的分隔线可见性配置。默认 <see cref="CardSeparatorVisibility.Both"/>。
+    /// </summary>
+    public CardSeparatorVisibility SeparatorVisibility
     {
-        get => (Brush)GetValue(FooterBackgroundProperty);
-        set => SetValue(FooterBackgroundProperty, value);
+        get => (CardSeparatorVisibility)GetValue(SeparatorVisibilityProperty);
+        set => SetValue(SeparatorVisibilityProperty, value);
     }
 
-    public static readonly DependencyProperty FooterBackgroundProperty =
-        DependencyProperty.Register(nameof(FooterBackground), typeof(Brush), typeof(Card), new PropertyMetadata(default(Brush)));
-
-    #endregion FooterBackground
-
-    #region FooterForeground
-
-    public Brush FooterForeground
-    {
-        get => (Brush)GetValue(FooterForegroundProperty);
-        set => SetValue(FooterForegroundProperty, value);
-    }
-
-    public static readonly DependencyProperty FooterForegroundProperty =
-        DependencyProperty.Register(nameof(FooterForeground), typeof(Brush), typeof(Card), new PropertyMetadata(default(Brush)));
-
-    #endregion FooterForeground
+    #endregion SeparatorVisibility
 }

@@ -1,28 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Cyclone.Wpf.Demo.Views;
-using Cyclone.Wpf.Demo.Views.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Cyclone.Wpf.Demo.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public MainViewModel()
-    {
-        CurrentView = new ButtonView();
-    }
-
     [ObservableProperty]
     public partial SideMenuViewModel SideMenu { get; set; } = new SideMenuViewModel();
 
     [ObservableProperty]
-    public partial object CurrentView { get; set; } = new object();
+    public partial object? CurrentView { get; set; } = new object();
 
     [RelayCommand]
     private void SwitchView(object item)
@@ -33,6 +28,8 @@ public partial class MainViewModel : ObservableObject
         CurrentView = menuItem.Header switch
         {
             "Button" => new ButtonView(),
+            "SplitButton" => new SplitButtonView(),
+            "NumberBox" => new NumberBoxView(),
             "Input" => new InputView(),
             "Menu" => new MenuView(),
             "TreeView" => new TreeControlView(),
@@ -41,6 +38,7 @@ public partial class MainViewModel : ObservableObject
             "DataGrid" => new DataGridView(),
             "DateTime" => new DateView(),
             "Range" => new RangeView(),
+            "RangeSlider" => new RangeSliderView(),
             "TabControl" => new TabControlView(),
             "FluidTabControl" => new FluidTabControlView(),
             "ComboBox" => new ComboBoxView(),
@@ -65,18 +63,28 @@ public partial class MainViewModel : ObservableObject
             "Stepper" => new StepperView(),
             "Breadcrumb" => new BreadcrumbBarView(),
             "ColorPicker" => new ColorPickerView(),
-            "CountDown" => new CountDownView(),
-            "LcdDisplayer" => new LcdDisplayerView(),
             "EnumSelector" => new EnumSelectorView(),
             "SectionHeader" => new SectionHeaderView(),
+            "SettingItem" => new SettingItemView(),
+            "Card" => new CardView(),
+            "MultiComboBox" => new MultiComboBoxView(),
+            "PopupBox" => new PopupBoxView(),
             "Test" => new TestView(),
             _ => null,
         };
+    }
+
+    public MainViewModel()
+    {
+        CurrentView = new ButtonView();
     }
 }
 
 public partial class SideMenuViewModel : ObservableObject
 {
+    [ObservableProperty]
+    public partial ObservableCollection<SideMenuItemViewModel> Items { get; set; } = [];
+
     public SideMenuViewModel()
     {
         Items.Add(new SideMenuItemViewModel
@@ -90,9 +98,19 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="Button",
                     Icon= "\xe605",
                 },
+                   new SideMenuItemViewModel
+                {
+                    Header="SplitButton",
+                    Icon= "\xe605",
+                },
                 new SideMenuItemViewModel
                 {
                     Header="Input",
+                    Icon= "\xe603",
+                },
+                 new SideMenuItemViewModel
+                {
+                    Header="NumberBox",
                     Icon= "\xe603",
                 },
                 new SideMenuItemViewModel
@@ -100,9 +118,19 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="Range",
                     Icon= "\xe605",
                 },
+                new SideMenuItemViewModel
+                {
+                    Header="RangeSlider",
+                    Icon= "\xe605",
+                },
                  new SideMenuItemViewModel
                 {
                     Header="ComboBox",
+                    Icon= "\xe665",
+                },
+                 new SideMenuItemViewModel
+                {
+                    Header="MultiComboBox",
                     Icon= "\xe665",
                 },
 
@@ -139,6 +167,11 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel
                 {
                     Header="SectionHeader",
+                    Icon= "\xe888",
+                },
+                new SideMenuItemViewModel
+                {
+                    Header="SettingItem",
                     Icon= "\xe888",
                 },
                 new SideMenuItemViewModel
@@ -210,6 +243,11 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="Expander",
                     Icon= "\xe6dd",
                 },
+                  new SideMenuItemViewModel
+                {
+                    Header="Card",
+                    Icon= "\xe6dd",
+                },
                 new SideMenuItemViewModel
                 {
                     Header="Drawer",
@@ -223,6 +261,11 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel
                 {
                     Header="Breadcrumb",
+                    Icon= "\xe8d4",
+                },
+                 new SideMenuItemViewModel
+                {
+                    Header="PopupBox",
                     Icon= "\xe8d4",
                 },
 
@@ -303,16 +346,7 @@ public partial class SideMenuViewModel : ObservableObject
                     Header = "Loading",
                     Icon = "\xe891",
                 },
-                new SideMenuItemViewModel
-                {
-                    Header = "CountDown",
-                    Icon = "\xe661",
-                },
-               new SideMenuItemViewModel
-               {
-                   Header="LcdDisplayer",
-                   Icon = "\xe699",
-               },
+
                new SideMenuItemViewModel
                {
                    Header="IconBox",
@@ -326,9 +360,6 @@ public partial class SideMenuViewModel : ObservableObject
             Icon = "\xe629",
         });
     }
-
-    [ObservableProperty]
-    public partial ObservableCollection<SideMenuItemViewModel> Items { get; set; } = [];
 }
 
 public partial class SideMenuItemViewModel : ObservableObject

@@ -16,6 +16,7 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SectionHeader.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Form.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SettingItem.xaml" />
 
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ListBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/EnumSelector.xaml" />
@@ -72,8 +73,6 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CircularGauge.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/LoadingBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Pagination.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CountDown.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/LcdDisplayer.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/IconBox.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

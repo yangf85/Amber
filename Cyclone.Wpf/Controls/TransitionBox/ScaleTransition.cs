@@ -1,118 +1,67 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using System;
+using System.Windows;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 缩放过渡效果
+/// 缩放过渡：旧内容从 1 缩放至 0，新内容从 0 放大至 1，两阶段串行（共占 <c>duration</c>）。
 /// </summary>
-public class ScaleTransition : ITransition
+[MarkupExtensionReturnType(typeof(ITransition))]
+public class ScaleTransition : MarkupExtension, ITransition
 {
-    public void StartTransition(TransitionBox transitionBox, ContentPresenter oldContent, ContentPresenter newContent, Duration duration)
+    private static void AddScale(
+        Storyboard storyboard, FrameworkElement target, bool isX,
+        double from, double to, Duration duration, TimeSpan beginTime, IEasingFunction ease)
     {
-        oldContent.Visibility = Visibility.Visible;
-        oldContent.Opacity = 1.0;
-
-        newContent.Visibility = Visibility.Hidden;
-        newContent.Opacity = 1.0;
-
-        oldContent.RenderTransformOrigin = new Point(0.5, 0.5);
-        newContent.RenderTransformOrigin = new Point(0.5, 0.5);
-
-        ScaleTransform oldScaleTransform = new ScaleTransform(1, 1);
-        ScaleTransform newScaleTransform = new ScaleTransform(0, 0);
-
-        oldContent.RenderTransform = oldScaleTransform;
-        newContent.RenderTransform = newScaleTransform;
-
-        transitionBox.UpdateLayout();
-
-        Storyboard oldContentStoryboard = new Storyboard();
-        Storyboard newContentStoryboard = new Storyboard();
-
-        var easing = new PowerEase { Power = 2, EasingMode = EasingMode.EaseInOut };
-
-        DoubleAnimation oldScaleXAnimation = new DoubleAnimation
+        var anim = new DoubleAnimation
         {
-            From = 1.0,
-            To = 0.0,
+            From = from,
+            To = to,
             Duration = duration,
-            EasingFunction = easing
+            BeginTime = beginTime,
+            EasingFunction = ease,
         };
-
-        DoubleAnimation oldScaleYAnimation = new DoubleAnimation
-        {
-            From = 1.0,
-            To = 0.0,
-            Duration = duration,
-            EasingFunction = easing
-        };
-
-        Storyboard.SetTarget(oldScaleXAnimation, oldScaleTransform);
-        Storyboard.SetTargetProperty(oldScaleXAnimation, new PropertyPath(ScaleTransform.ScaleXProperty));
-
-        Storyboard.SetTarget(oldScaleYAnimation, oldScaleTransform);
-        Storyboard.SetTargetProperty(oldScaleYAnimation, new PropertyPath(ScaleTransform.ScaleYProperty));
-
-        oldContentStoryboard.Children.Add(oldScaleXAnimation);
-        oldContentStoryboard.Children.Add(oldScaleYAnimation);
-
-        DoubleAnimation newScaleXAnimation = new DoubleAnimation
-        {
-            From = 0.0,
-            To = 1.0,
-            Duration = duration,
-            EasingFunction = easing
-        };
-
-        DoubleAnimation newScaleYAnimation = new DoubleAnimation
-        {
-            From = 0.0,
-            To = 1.0,
-            Duration = duration,
-            EasingFunction = easing
-        };
-
-        Storyboard.SetTarget(newScaleXAnimation, newScaleTransform);
-        Storyboard.SetTargetProperty(newScaleXAnimation, new PropertyPath(ScaleTransform.ScaleXProperty));
-
-        Storyboard.SetTarget(newScaleYAnimation, newScaleTransform);
-        Storyboard.SetTargetProperty(newScaleYAnimation, new PropertyPath(ScaleTransform.ScaleYProperty));
-
-        newContentStoryboard.Children.Add(newScaleXAnimation);
-        newContentStoryboard.Children.Add(newScaleYAnimation);
-
-        oldContentStoryboard.Completed += (s, e) =>
-        {
-            oldContent.Visibility = Visibility.Hidden;
-
-            newContent.Visibility = Visibility.Visible;
-
-            newScaleTransform.ScaleX = 0;
-            newScaleTransform.ScaleY = 0;
-
-            transitionBox.UpdateLayout();
-
-            newContentStoryboard.Begin();
-        };
-
-        newContentStoryboard.Completed += (s, e) =>
-        {
-            System.Diagnostics.Debug.WriteLine("New content animation completed. Transition finished.");
-
-            newContent.RenderTransform = null;
-            newContent.RenderTransformOrigin = new Point(0, 0);
-            newContent.Opacity = 1.0;
-            newContent.Visibility = Visibility.Visible;
-
-            oldContent.Visibility = Visibility.Collapsed;
-            oldContent.Opacity = 0;
-            oldContent.Content = null;
-            oldContent.RenderTransform = null;
-        };
-
-        oldContentStoryboard.Begin(transitionBox);
+        Storyboard.SetTarget(anim, target);
+        var pathStr = isX
+            ? "(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+            : "(UIElement.RenderTransform).(ScaleTransform.ScaleY)";
+        Storyboard.SetTargetProperty(anim, new PropertyPath(pathStr));
+        storyboard.Children.Add(anim);
     }
+
+    public Storyboard CreateAnimation(
+            FrameworkElement oldElement,
+        FrameworkElement newElement,
+        Size containerSize,
+        Duration duration)
+    {
+        var halfDuration = new Duration(TimeSpan.FromMilliseconds(duration.TimeSpan.TotalMilliseconds / 2));
+        var phaseTwoBegin = halfDuration.TimeSpan;
+
+        // 给两个元素各装 ScaleTransform，origin 在中心
+        oldElement.RenderTransform = new ScaleTransform(1.0, 1.0);
+        newElement.RenderTransform = new ScaleTransform(0.0, 0.0);
+        oldElement.RenderTransformOrigin = new Point(0.5, 0.5);
+        newElement.RenderTransformOrigin = new Point(0.5, 0.5);
+        newElement.Opacity = 1.0;
+        oldElement.Opacity = 1.0;
+
+        var storyboard = new Storyboard();
+        var ease = new PowerEase { Power = 2, EasingMode = EasingMode.EaseInOut };
+
+        // 第一阶段：旧元素 ScaleX / Y 从 1 → 0
+        AddScale(storyboard, oldElement, isX: true, 1.0, 0.0, halfDuration, TimeSpan.Zero, ease);
+        AddScale(storyboard, oldElement, isX: false, 1.0, 0.0, halfDuration, TimeSpan.Zero, ease);
+
+        // 第二阶段：新元素 ScaleX / Y 从 0 → 1
+        AddScale(storyboard, newElement, isX: true, 0.0, 1.0, halfDuration, phaseTwoBegin, ease);
+        AddScale(storyboard, newElement, isX: false, 0.0, 1.0, halfDuration, phaseTwoBegin, ease);
+
+        return storyboard;
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider) => this;
 }

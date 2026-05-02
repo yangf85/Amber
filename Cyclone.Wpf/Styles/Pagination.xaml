@@ -194,11 +194,8 @@
                         x:Name="PART_GotoPageNumberBox"
                         MinWidth="75"
                         VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                        DecimalPlaces="0"
-                        IsVisibleSpinButton="False"
                         Maximum="{Binding Path=PageCount, RelativeSource={RelativeSource Mode=TemplatedParent}}"
                         Minimum="1"
-                        NumberStyle="Integer"
                         Value="{Binding Path=PageIndex, Mode=OneWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                     <TextBlock
                         Margin="5,0"

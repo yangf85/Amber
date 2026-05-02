@@ -28,22 +28,7 @@
             Grid.Row="1"
             FluidTabPlacement="Left"
             SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-            <cy:FluidTabItem DataContext="{Binding First}" Header="{Binding Header}">
-                <Grid Height="300">
-                    <cy:MultiComboBox MaxContainerHeight="200">
-                        <cy:MultiComboBoxItem Content="Item 1" />
-                        <cy:MultiComboBoxItem Content="Item 2" />
-                        <cy:MultiComboBoxItem Content="Item 3" />
-                        <cy:MultiComboBoxItem Content="Item 4" />
-                        <cy:MultiComboBoxItem Content="Item 5" />
-                        <cy:MultiComboBoxItem Content="Item 6" />
-                        <cy:MultiComboBoxItem Content="Item 7" />
-                        <cy:MultiComboBoxItem Content="Item 8" />
-                        <cy:MultiComboBoxItem Content="Item 9" />
-                        <cy:MultiComboBoxItem Content="Item 10" />
-                    </cy:MultiComboBox>
-                </Grid>
-            </cy:FluidTabItem>
+            <cy:FluidTabItem DataContext="{Binding First}" Header="{Binding Header}" />
             <cy:FluidTabItem DataContext="{Binding Second}" Header="{Binding Header}">
                 <Grid Height="300" Background="{Binding Background}">
                     <TextBlock
