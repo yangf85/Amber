@@ -6,9 +6,9 @@ using System.Windows.Input;
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// SettingItem 控件：用于设置页 / 偏好面板的"标签 + 描述 + 操作控件"语义化单元。
-/// 单独使用即可，无需放入特定容器；放入任意祖先容器（如 SettingGroup、StackPanel）后，
-/// 容器上设置的 <see cref="HeaderWidthProperty"/> 会通过属性继承自动下传，实现批量对齐。
+/// SettingItem 控件:用于设置页 / 偏好面板的"标签 + 描述 + 操作控件"语义化单元。
+/// 单独使用即可,无需放入特定容器;放入任意祖先容器(如 SettingGroup、StackPanel)后,
+/// 容器上设置的 <see cref="LabelWidthProperty"/> 会通过属性继承自动下传,实现批量对齐。
 /// </summary>
 [TemplatePart(Name = nameof(PART_RootBorder), Type = typeof(Border))]
 public class SettingItem : ContentControl
@@ -34,8 +34,8 @@ public class SettingItem : ContentControl
             new FrameworkPropertyMetadata(default(object)));
 
     /// <summary>
-    /// 获取或设置左侧图标，可以是字符串、Path、IconBox 或任意可视化内容。
-    /// 未设置时该列自动收起，不占用布局空间。
+    /// 获取或设置左侧图标,可以是字符串、Path、IconBox 或任意可视化内容。
+    /// 未设置时该列自动收起,不占用布局空间。
     /// </summary>
     public object Icon
     {
@@ -45,25 +45,25 @@ public class SettingItem : ContentControl
 
     #endregion Icon
 
-    #region Header
+    #region Label
 
-    public static readonly DependencyProperty HeaderProperty =
+    public static readonly DependencyProperty LabelProperty =
         DependencyProperty.Register(
-            nameof(Header),
+            nameof(Label),
             typeof(object),
             typeof(SettingItem),
             new FrameworkPropertyMetadata(default(object)));
 
     /// <summary>
-    /// 获取或设置主标题，渲染在标题列。
+    /// 获取或设置主标签,渲染在标签列。
     /// </summary>
-    public object Header
+    public object Label
     {
-        get => GetValue(HeaderProperty);
-        set => SetValue(HeaderProperty, value);
+        get => GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
     }
 
-    #endregion Header
+    #endregion Label
 
     #region Description
 
@@ -75,7 +75,7 @@ public class SettingItem : ContentControl
             new FrameworkPropertyMetadata(default(string)));
 
     /// <summary>
-    /// 获取或设置主标题下方的描述文本。空字符串或 null 时该行自动收起。
+    /// 获取或设置主标签下方的描述文本。空字符串或 null 时该行自动收起。
     /// </summary>
     public string Description
     {
@@ -85,11 +85,11 @@ public class SettingItem : ContentControl
 
     #endregion Description
 
-    #region HeaderWidth (附加属性 + Inherits + CLR 实例包装)
+    #region LabelWidth (附加属性 + Inherits + CLR 实例包装)
 
-    public static readonly DependencyProperty HeaderWidthProperty =
+    public static readonly DependencyProperty LabelWidthProperty =
         DependencyProperty.RegisterAttached(
-            "HeaderWidth",
+            "LabelWidth",
             typeof(GridLength),
             typeof(SettingItem),
             new FrameworkPropertyMetadata(
@@ -98,26 +98,26 @@ public class SettingItem : ContentControl
                 FrameworkPropertyMetadataOptions.AffectsMeasure));
 
     /// <summary>
-    /// 获取或设置标题列宽度。可在任意祖先容器上批量设置（通过 Inherits 自动下传给所有后代 SettingItem），
-    /// 也可在单个 SettingItem 上覆盖。默认 <see cref="GridLength.Auto"/>，即按内容自适应。
+    /// 获取或设置标签列宽度。可在任意祖先容器上批量设置(通过 Inherits 自动下传给所有后代 SettingItem),
+    /// 也可在单个 SettingItem 上覆盖。默认 <see cref="GridLength.Auto"/>,即按内容自适应。
     /// </summary>
-    public GridLength HeaderWidth
+    public GridLength LabelWidth
     {
-        get => GetHeaderWidth(this);
-        set => SetHeaderWidth(this, value);
+        get => GetLabelWidth(this);
+        set => SetLabelWidth(this, value);
     }
 
-    public static GridLength GetHeaderWidth(DependencyObject obj)
+    public static GridLength GetLabelWidth(DependencyObject obj)
     {
-        return (GridLength)obj.GetValue(HeaderWidthProperty);
+        return (GridLength)obj.GetValue(LabelWidthProperty);
     }
 
-    public static void SetHeaderWidth(DependencyObject obj, GridLength value)
+    public static void SetLabelWidth(DependencyObject obj, GridLength value)
     {
-        obj.SetValue(HeaderWidthProperty, value);
+        obj.SetValue(LabelWidthProperty, value);
     }
 
-    #endregion HeaderWidth (附加属性 + Inherits + CLR 实例包装)
+    #endregion LabelWidth (附加属性 + Inherits + CLR 实例包装)
 
     #region ContentAlignment (附加属性 + Inherits + CLR 实例包装)
 
@@ -134,7 +134,7 @@ public class SettingItem : ContentControl
 
     /// <summary>
     /// 获取或设置 Content 在剩余空间内的水平对齐方式。
-    /// 可在任意祖先容器上批量设置（通过 Inherits 自动下传给所有后代 SettingItem），
+    /// 可在任意祖先容器上批量设置(通过 Inherits 自动下传给所有后代 SettingItem),
     /// 也可在单个 SettingItem 上覆盖。默认 <see cref="HorizontalAlignment.Right"/>。
     /// </summary>
     public HorizontalAlignment ContentAlignment
@@ -144,9 +144,9 @@ public class SettingItem : ContentControl
     }
 
     /// <summary>
-    /// 当 ContentAlignment 通过 Inherits 或直接赋值发生变化时，
+    /// 当 ContentAlignment 通过 Inherits 或直接赋值发生变化时,
     /// 同步到 SettingItem 的 HorizontalContentAlignment 实例属性。
-    /// 这样模板里可以用最稳定的 TemplateBinding HorizontalContentAlignment，
+    /// 这样模板里可以用最稳定的 TemplateBinding HorizontalContentAlignment,
     /// 避免"模板内 Binding 附加属性"在某些场景下不可靠的问题。
     /// </summary>
     private static void OnContentAlignmentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -179,8 +179,8 @@ public class SettingItem : ContentControl
             new FrameworkPropertyMetadata(false));
 
     /// <summary>
-    /// 获取或设置整行是否可点击。为 true 时显示 Hover 反馈、鼠标变手型，并响应 <see cref="ClickEvent"/>
-    /// 与 <see cref="Command"/>。子控件（如 Button、ComboBox）的点击因事件已被标记 Handled，不会冒泡触发本行点击。
+    /// 获取或设置整行是否可点击。为 true 时显示 Hover 反馈、鼠标变手型,并响应 <see cref="ClickEvent"/>
+    /// 与 <see cref="Command"/>。子控件(如 Button、ComboBox)的点击因事件已被标记 Handled,不会冒泡触发本行点击。
     /// </summary>
     public bool IsClickable
     {
