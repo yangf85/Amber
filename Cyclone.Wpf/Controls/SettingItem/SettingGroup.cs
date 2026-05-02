@@ -52,7 +52,7 @@ public class SettingGroup : HeaderedItemsControl
         set => SettingItem.SetLabelWidth(this, value);
     }
 
-    #endregion LabelWidth
+    #endregion LabelWidth (转发到 SettingItem.LabelWidth 附加属性)
 
     #region ContentAlignment (转发到 SettingItem.ContentAlignment 附加属性)
 
@@ -67,5 +67,15 @@ public class SettingGroup : HeaderedItemsControl
         set => SettingItem.SetContentAlignment(this, value);
     }
 
-    #endregion ContentAlignment
+    #endregion ContentAlignment (转发到 SettingItem.ContentAlignment 附加属性)
+
+    #region ContentSpacing
+
+    public GridLength ContentSpacing
+    {
+        get => SettingItem.GetContentSpacing(this);
+        set => SettingItem.SetContentSpacing(this, value);
+    }
+
+    #endregion ContentSpacing
 }

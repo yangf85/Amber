@@ -169,6 +169,28 @@ public class SettingItem : ContentControl
 
     #endregion ContentAlignment (附加属性 + Inherits + CLR 实例包装)
 
+    #region ContentSpacing
+
+    public static readonly DependencyProperty ContentSpacingProperty =
+                DependencyProperty.RegisterAttached(
+                    "ContentSpacing", typeof(GridLength),
+                    typeof(SettingItem),
+                    new FrameworkPropertyMetadata(new GridLength(0),
+                     FrameworkPropertyMetadataOptions.Inherits |
+                     FrameworkPropertyMetadataOptions.AffectsMeasure));
+
+    public static GridLength GetContentSpacing(DependencyObject obj)
+    {
+        return (GridLength)obj.GetValue(ContentSpacingProperty);
+    }
+
+    public static void SetContentSpacing(DependencyObject obj, GridLength value)
+    {
+        obj.SetValue(ContentSpacingProperty, value);
+    }
+
+    #endregion ContentSpacing
+
     #region IsClickable
 
     public static readonly DependencyProperty IsClickableProperty =

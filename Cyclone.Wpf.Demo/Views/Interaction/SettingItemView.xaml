@@ -198,11 +198,14 @@
                             <StackPanel Margin="0,0,0,16">
                                 <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="LabelWidth 批量对齐(在容器上设一次,全部子项跟随)" />
                                 <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                    <StackPanel cy:SettingItem.LabelWidth="160">
-                                        <cy:SettingItem Description="有新消息时弹出" Label="桌面通知">
+                                    <StackPanel
+                                        cy:SettingItem.ContentAlignment="Left"
+                                        cy:SettingItem.ContentSpacing="30"
+                                        cy:SettingItem.LabelWidth="60">
+                                        <cy:SettingItem Description="显示桌面通知" Label="桌面通知">
                                             <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
                                         </cy:SettingItem>
-                                        <cy:SettingItem Description="切换后立即生效" Label="界面语言">
+                                        <cy:SettingItem Description="切换立即生效" Label="界面语言">
                                             <ComboBox
                                                 MinWidth="140"
                                                 ItemsSource="{Binding Languages}"
