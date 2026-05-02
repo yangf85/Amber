@@ -116,8 +116,7 @@
     <Style x:Key="SettingItem.Style.Basic" TargetType="{x:Type ctl:SettingItem}">
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.None}" />
-        <Setter Property="Padding" Value="{DynamicResource Padding.All}" />
-        <Setter Property="MinHeight" Value="{DynamicResource Height.Horizontal.Caption}" />
+        <Setter Property="MinHeight" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Right" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -146,7 +145,6 @@
                 <!--  组标题(SettingGroup.Header,继承自 HeaderedItemsControl)  -->
                 <ContentPresenter
                     x:Name="HeaderPresenter"
-                    Margin="0,0,0,4"
                     Content="{TemplateBinding Header}"
                     ContentTemplate="{TemplateBinding HeaderTemplate}"
                     DockPanel.Dock="Top"
@@ -156,7 +154,6 @@
                 <!--  组描述  -->
                 <TextBlock
                     x:Name="DescriptionTextBlock"
-                    Margin="0,0,0,8"
                     DockPanel.Dock="Top"
                     FontSize="{DynamicResource Font.Prompt}"
                     Foreground="{DynamicResource Text.Prompt}"
