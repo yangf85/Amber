@@ -6,7 +6,8 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!--  ============================================================
+    <!--
+        ============================================================
         ======================= CardHeader ==========================
         视觉布局：
         ┌─────────────────────────────────────────────────┐
@@ -15,7 +16,8 @@
         │ │    │ Subtitle                                 │
         │ └────┘                                          │
         └─────────────────────────────────────────────────┘
-        ============================================================  -->
+        ============================================================
+    -->
 
     <ControlTemplate x:Key="CardHeader.ControlTemplate.Basic" TargetType="{x:Type ctl:CardHeader}">
         <Border
@@ -43,9 +45,7 @@
                     Content="{TemplateBinding Icon}" />
 
                 <!--  Title + Subtitle  -->
-                <StackPanel
-                    Grid.Column="1"
-                    VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock
                         x:Name="TitleText"
                         FontSize="{DynamicResource Font.Header}"
@@ -105,10 +105,12 @@
     <Style BasedOn="{StaticResource CardHeader.Style.Basic}" TargetType="{x:Type ctl:CardHeader}" />
 
 
-    <!--  ============================================================
+    <!--
+        ============================================================
         ======================= CardFooter ==========================
         简单 ContentControl 容器：只提供一致的 Padding / 字体基线
-        ============================================================  -->
+        ============================================================
+    -->
 
     <ControlTemplate x:Key="CardFooter.ControlTemplate.Basic" TargetType="{x:Type ctl:CardFooter}">
         <Border
@@ -139,12 +141,14 @@
     <Style BasedOn="{StaticResource CardFooter.Style.Basic}" TargetType="{x:Type ctl:CardFooter}" />
 
 
-    <!--  ============================================================
+    <!--
+        ============================================================
         ========================== Card =============================
         三段结构：Header / Content / Footer
         分隔线由 SeparatorVisibility 控制
         Header / Footer 槽为 null 时整段收起（含分隔线和 padding）
-        ============================================================  -->
+        ============================================================
+    -->
 
     <ControlTemplate x:Key="Card.ControlTemplate.Basic" TargetType="{x:Type ctl:Card}">
         <Border

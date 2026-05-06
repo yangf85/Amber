@@ -1,19 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Cyclone.Wpf.Controls;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// FilterBoxView.xaml 的交互逻辑
-/// </summary>
 public partial class FilterBoxView : UserControl
 {
     public FilterBoxView()
@@ -23,540 +20,337 @@ public partial class FilterBoxView : UserControl
     }
 }
 
-public partial class FilterBoxViewModel : ObservableValidator
+public sealed record FilterProduct(string Name, string Category, double Price, int Stock, double Rating);
+
+public partial class FilterBoxViewModel : ObservableObject
 {
-    #region 数字过滤器属性
+    // ① 基础用法 - 数字 + 文本对照
+    [ObservableProperty]
+    public partial bool BasicNumberIsActive { get; set; }
 
     [ObservableProperty]
-    public partial bool IsPriceFilterActive { get; set; } = true;
+    public partial NumberOperator BasicNumberOperator { get; set; }
 
     [ObservableProperty]
-    public partial NumberOperator PriceOperator { get; set; } = NumberOperator.GreaterThanOrEqual;
+    public partial double BasicNumberValue { get; set; }
 
     [ObservableProperty]
-    public partial double PriceValue { get; set; } = 100.0;
+    public partial bool BasicTextIsActive { get; set; }
 
     [ObservableProperty]
-    public partial bool IsAgeFilterActive { get; set; } = false;
+    public partial TextOperator BasicTextOperator { get; set; }
 
     [ObservableProperty]
-    public partial NumberOperator AgeOperator { get; set; } = NumberOperator.GreaterThan;
+    public partial string BasicTextValue { get; set; }
+
+    // ② 操作符全集
+    [ObservableProperty]
+    public partial NumberOperator NumOperatorOperator { get; set; }
 
     [ObservableProperty]
-    public partial double AgeValue { get; set; } = 18;
+    public partial double NumOperatorValue { get; set; }
 
     [ObservableProperty]
-    public partial bool IsRatingFilterActive { get; set; } = true;
+    public partial TextOperator TextOperatorOperator { get; set; }
 
     [ObservableProperty]
-    public partial NumberOperator RatingOperator { get; set; } = NumberOperator.GreaterThanOrEqual;
+    public partial string TextOperatorValue { get; set; }
+
+    // ③ Decimal 模式 + Tolerance
+    [ObservableProperty]
+    public partial bool DecimalIsActive { get; set; }
 
     [ObservableProperty]
-    public partial double RatingValue { get; set; } = 4.0;
-
-    // 数字过滤器对齐示例
-    [ObservableProperty]
-    public partial bool IsAlignedPriceFilterActive { get; set; } = true;
+    public partial NumberOperator DecimalOperator { get; set; }
 
     [ObservableProperty]
-    public partial NumberOperator AlignedPriceOperator { get; set; } = NumberOperator.LessThanOrEqual;
+    public partial double DecimalValue { get; set; }
 
     [ObservableProperty]
-    public partial double AlignedPriceValue { get; set; } = 999.99;
+    public partial double DecimalTolerance { get; set; }
+
+    // ④ IsCaseSensitive 对照
+    [ObservableProperty]
+    public partial bool CaseInsensitiveActive { get; set; }
 
     [ObservableProperty]
-    public partial bool IsAlignedStockFilterActive { get; set; } = false;
+    public partial string CaseInsensitiveText { get; set; }
 
     [ObservableProperty]
-    public partial NumberOperator AlignedStockOperator { get; set; } = NumberOperator.GreaterThan;
+    public partial bool CaseSensitiveActive { get; set; }
 
     [ObservableProperty]
-    public partial double AlignedStockValue { get; set; } = 10;
+    public partial string CaseSensitiveText { get; set; }
+
+    // ⑤ Regex
+    [ObservableProperty]
+    public partial bool RegexIsActive { get; set; }
 
     [ObservableProperty]
-    public partial bool IsAlignedWeightFilterActive { get; set; } = false;
+    public partial string RegexText { get; set; }
+
+    // ⑥ MVVM 联合过滤
+    public ObservableCollection<FilterProduct> Products { get; }
+
+    public ICollectionView ProductsView { get; }
 
     [ObservableProperty]
-    public partial NumberOperator AlignedWeightOperator { get; set; } = NumberOperator.LessThan;
+    public partial bool PriceFilterActive { get; set; }
 
     [ObservableProperty]
-    public partial double AlignedWeightValue { get; set; } = 5.0;
+    public partial NumberOperator PriceFilterOperator { get; set; }
 
     [ObservableProperty]
-    public partial string NumberFilterResults { get; set; } = "点击按钮查看数字过滤结果...";
-
-    #endregion 数字过滤器属性
-
-    #region 文本过滤器属性
+    public partial double PriceFilterValue { get; set; }
 
     [ObservableProperty]
-    public partial bool IsProductNameFilterActive { get; set; } = true;
+    public partial bool NameFilterActive { get; set; }
 
     [ObservableProperty]
-    public partial TextOperator ProductNameOperator { get; set; } = TextOperator.Contains;
+    public partial TextOperator NameFilterOperator { get; set; }
 
     [ObservableProperty]
-    public partial string ProductNameText { get; set; } = "手机";
+    public partial string NameFilterText { get; set; }
 
     [ObservableProperty]
-    public partial bool IsBrandFilterActive { get; set; } = false;
+    public partial bool NameFilterCaseSensitive { get; set; }
 
-    [ObservableProperty]
-    public partial TextOperator BrandOperator { get; set; } = TextOperator.Equal;
+    public string BasicNumberSummary => BasicNumberIsActive
+        ? $"x {DescOf(BasicNumberOperator)} {BasicNumberValue:F0}"
+        : "未启用";
 
-    [ObservableProperty]
-    public partial string BrandText { get; set; } = "苹果";
+    public string BasicTextSummary => BasicTextIsActive
+        ? $"s {DescOf(BasicTextOperator)} \"{BasicTextValue}\""
+        : "未启用";
 
-    [ObservableProperty]
-    public partial bool IsDescriptionFilterActive { get; set; } = true;
+    public string NumOperatorSummary => $"x {DescOf(NumOperatorOperator)} {NumOperatorValue:F0}";
 
-    [ObservableProperty]
-    public partial TextOperator DescriptionOperator { get; set; } = TextOperator.Contains;
+    public string TextOperatorSummary => $"s {DescOf(TextOperatorOperator)} \"{TextOperatorValue}\"";
 
-    [ObservableProperty]
-    public partial string DescriptionText { get; set; } = "高清";
+    public string DecimalSummary => DecimalIsActive
+        ? $"|x − {DecimalValue:F2}| ≤ {DecimalTolerance:F3}"
+        : "未启用";
 
-    // 文本过滤器对齐示例
-    [ObservableProperty]
-    public partial bool IsAlignedEmailFilterActive { get; set; } = true;
+    public int CaseInsensitiveMatchCount => CaseInsensitiveActive
+        ? Products.Count(p => (p.Name ?? "").IndexOf(CaseInsensitiveText ?? "", StringComparison.OrdinalIgnoreCase) >= 0)
+        : Products.Count;
 
-    [ObservableProperty]
-    public partial TextOperator AlignedEmailOperator { get; set; } = TextOperator.EndsWith;
+    public int CaseSensitiveMatchCount => CaseSensitiveActive
+        ? Products.Count(p => (p.Name ?? "").IndexOf(CaseSensitiveText ?? "", StringComparison.Ordinal) >= 0)
+        : Products.Count;
 
-    [ObservableProperty]
-    public partial string AlignedEmailText { get; set; } = "@gmail.com";
-
-    [ObservableProperty]
-    public partial bool IsAlignedNameFilterActive { get; set; } = false;
-
-    [ObservableProperty]
-    public partial TextOperator AlignedNameOperator { get; set; } = TextOperator.StartsWith;
-
-    [ObservableProperty]
-    public partial string AlignedNameText { get; set; } = "张";
-
-    [ObservableProperty]
-    public partial bool IsAlignedCompanyFilterActive { get; set; } = true;
-
-    [ObservableProperty]
-    public partial TextOperator AlignedCompanyOperator { get; set; } = TextOperator.Contains;
-
-    [ObservableProperty]
-    public partial string AlignedCompanyText { get; set; } = "科技";
-
-    // 扩展功能
-    [ObservableProperty]
-    public partial bool IsAdvancedFilterActive { get; set; } = true;
-
-    [ObservableProperty]
-    public partial TextOperator AdvancedOperator { get; set; } = TextOperator.Contains;
-
-    [ObservableProperty]
-    public partial string AdvancedText { get; set; } = "智能";
-
-    [ObservableProperty]
-    public partial bool IsRegexFilterActive { get; set; } = false;
-
-    [ObservableProperty]
-    public partial string RegexText { get; set; } = @"\d{4}";
-
-    [ObservableProperty]
-    public partial string TextFilterResults { get; set; } = "点击按钮查看文本过滤结果...";
-
-    #endregion 文本过滤器属性
-
-    #region 数字过滤器命令
-
-    [RelayCommand]
-    private void ApplyNumberFilters()
+    public int RegexMatchCount
     {
-        var activeFilters = new List<string>();
-
-        if (IsPriceFilterActive)
-            activeFilters.Add($"价格 {GetNumberOperatorSymbol(PriceOperator)} {PriceValue:F2}");
-
-        if (IsAgeFilterActive)
-            activeFilters.Add($"年龄 {GetNumberOperatorSymbol(AgeOperator)} {AgeValue:F0}");
-
-        if (IsRatingFilterActive)
-            activeFilters.Add($"评分 {GetNumberOperatorSymbol(RatingOperator)} {RatingValue:F1}");
-
-        if (IsAlignedPriceFilterActive)
-            activeFilters.Add($"对齐价格 {GetNumberOperatorSymbol(AlignedPriceOperator)} {AlignedPriceValue:F2}");
-
-        if (IsAlignedStockFilterActive)
-            activeFilters.Add($"对齐库存 {GetNumberOperatorSymbol(AlignedStockOperator)} {AlignedStockValue:F0}");
-
-        if (IsAlignedWeightFilterActive)
-            activeFilters.Add($"对齐重量 {GetNumberOperatorSymbol(AlignedWeightOperator)} {AlignedWeightValue:F2}kg");
-
-        var message = activeFilters.Any()
-            ? $"数字过滤条件:\n\n{string.Join("\n", activeFilters.Select(f => $"• {f}"))}\n\n共 {activeFilters.Count} 个条件"
-            : "没有激活的数字过滤条件";
-
-        NumberFilterResults = message;
-        MessageBox.Show(message, "数字过滤", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void ClearNumberFilters()
-    {
-        IsPriceFilterActive = false;
-        IsAgeFilterActive = false;
-        IsRatingFilterActive = false;
-        IsAlignedPriceFilterActive = false;
-        IsAlignedStockFilterActive = false;
-        IsAlignedWeightFilterActive = false;
-
-        NumberFilterResults = "数字过滤条件已清除";
-        MessageBox.Show("数字过滤条件已清除", "清除", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void TestNumberFilters()
-    {
-        var testData = new[]
+        get
         {
-            new { Name = "产品A", Price = 150.0, Age = 25, Rating = 4.2, Stock = 45, Weight = 1.8 },
-            new { Name = "产品B", Price = 75.0, Age = 17, Rating = 3.8, Stock = 120, Weight = 3.2 },
-            new { Name = "产品C", Price = 350.0, Age = 30, Rating = 4.8, Stock = 8, Weight = 0.9 },
-            new { Name = "产品D", Price = 99.99, Age = 22, Rating = 3.5, Stock = 50, Weight = 2.1 },
-            new { Name = "产品E", Price = 650.0, Age = 45, Rating = 4.9, Stock = 75, Weight = 6.7 }
-        };
-
-        var results = new StringBuilder();
-        results.AppendLine("数字过滤测试:");
-        results.AppendLine(new string('=', 40));
-
-        foreach (var item in testData)
-        {
-            var passed = true;
-            var reasons = new List<string>();
-
-            if (IsPriceFilterActive && !CheckNumberFilter(item.Price, PriceOperator, PriceValue))
+            if (!RegexIsActive || string.IsNullOrEmpty(RegexText))
             {
-                passed = false;
-                reasons.Add($"价格 {item.Price:F2} 不满足 {GetNumberOperatorSymbol(PriceOperator)} {PriceValue:F2}");
+                return Products.Count;
             }
-
-            if (IsAgeFilterActive && !CheckNumberFilter(item.Age, AgeOperator, AgeValue))
+            try
             {
-                passed = false;
-                reasons.Add($"年龄 {item.Age} 不满足 {GetNumberOperatorSymbol(AgeOperator)} {AgeValue:F0}");
+                var regex = new Regex(RegexText);
+                return Products.Count(p => regex.IsMatch(p.Name ?? ""));
             }
-
-            if (IsRatingFilterActive && !CheckNumberFilter(item.Rating, RatingOperator, RatingValue))
+            catch (ArgumentException)
             {
-                passed = false;
-                reasons.Add($"评分 {item.Rating:F1} 不满足 {GetNumberOperatorSymbol(RatingOperator)} {RatingValue:F1}");
-            }
-
-            if (IsAlignedPriceFilterActive && !CheckNumberFilter(item.Price, AlignedPriceOperator, AlignedPriceValue))
-            {
-                passed = false;
-                reasons.Add($"对齐价格不满足条件");
-            }
-
-            if (IsAlignedStockFilterActive && !CheckNumberFilter(item.Stock, AlignedStockOperator, AlignedStockValue))
-            {
-                passed = false;
-                reasons.Add($"对齐库存不满足条件");
-            }
-
-            if (IsAlignedWeightFilterActive && !CheckNumberFilter(item.Weight, AlignedWeightOperator, AlignedWeightValue))
-            {
-                passed = false;
-                reasons.Add($"对齐重量不满足条件");
-            }
-
-            results.AppendLine($"{item.Name}: {(passed ? "✓" : "✗")}");
-            if (!passed)
-            {
-                foreach (var reason in reasons)
-                {
-                    results.AppendLine($"  - {reason}");
-                }
+                return 0;
             }
         }
-
-        var passedCount = testData.Count(item =>
-        {
-            bool passes = true;
-            if (IsPriceFilterActive) passes &= CheckNumberFilter(item.Price, PriceOperator, PriceValue);
-            if (IsAgeFilterActive) passes &= CheckNumberFilter(item.Age, AgeOperator, AgeValue);
-            if (IsRatingFilterActive) passes &= CheckNumberFilter(item.Rating, RatingOperator, RatingValue);
-            if (IsAlignedPriceFilterActive) passes &= CheckNumberFilter(item.Price, AlignedPriceOperator, AlignedPriceValue);
-            if (IsAlignedStockFilterActive) passes &= CheckNumberFilter(item.Stock, AlignedStockOperator, AlignedStockValue);
-            if (IsAlignedWeightFilterActive) passes &= CheckNumberFilter(item.Weight, AlignedWeightOperator, AlignedWeightValue);
-            return passes;
-        });
-
-        results.AppendLine($"\n通过: {passedCount}/{testData.Length}");
-        NumberFilterResults = results.ToString();
     }
 
-    #endregion 数字过滤器命令
-
-    #region 文本过滤器命令
-
-    [RelayCommand]
-    private void ApplyTextFilters()
+    private static Func<string, bool> BuildRegexPredicate(string pattern, bool caseSensitive)
     {
-        var activeFilters = new List<string>();
-
-        if (IsProductNameFilterActive)
-            activeFilters.Add($"产品名称 {GetTextOperatorSymbol(ProductNameOperator)} \"{ProductNameText}\"");
-
-        if (IsBrandFilterActive)
-            activeFilters.Add($"品牌 {GetTextOperatorSymbol(BrandOperator)} \"{BrandText}\"");
-
-        if (IsDescriptionFilterActive)
-            activeFilters.Add($"描述 {GetTextOperatorSymbol(DescriptionOperator)} \"{DescriptionText}\"");
-
-        if (IsAlignedEmailFilterActive)
-            activeFilters.Add($"邮箱 {GetTextOperatorSymbol(AlignedEmailOperator)} \"{AlignedEmailText}\"");
-
-        if (IsAlignedNameFilterActive)
-            activeFilters.Add($"姓名 {GetTextOperatorSymbol(AlignedNameOperator)} \"{AlignedNameText}\"");
-
-        if (IsAlignedCompanyFilterActive)
-            activeFilters.Add($"公司 {GetTextOperatorSymbol(AlignedCompanyOperator)} \"{AlignedCompanyText}\"");
-
-        if (IsAdvancedFilterActive)
-            activeFilters.Add($"高级搜索 {GetTextOperatorSymbol(AdvancedOperator)} \"{AdvancedText}\"");
-
-        if (IsRegexFilterActive)
-            activeFilters.Add($"正则搜索 R \"{RegexText}\"");
-
-        var message = activeFilters.Any()
-            ? $"文本过滤条件:\n\n{string.Join("\n", activeFilters.Select(f => $"• {f}"))}\n\n共 {activeFilters.Count} 个条件"
-            : "没有激活的文本过滤条件";
-
-        TextFilterResults = message;
-        MessageBox.Show(message, "文本过滤", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void ClearTextFilters()
-    {
-        IsProductNameFilterActive = false;
-        IsBrandFilterActive = false;
-        IsDescriptionFilterActive = false;
-        IsAlignedEmailFilterActive = false;
-        IsAlignedNameFilterActive = false;
-        IsAlignedCompanyFilterActive = false;
-        IsAdvancedFilterActive = false;
-        IsRegexFilterActive = false;
-
-        TextFilterResults = "文本过滤条件已清除";
-        MessageBox.Show("文本过滤条件已清除", "清除", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void TestTextFilters()
-    {
-        var testData = new[]
+        var options = RegexOptions.CultureInvariant;
+        if (!caseSensitive)
         {
-            new { Name = "iPhone 15 Pro 手机", Brand = "苹果", Description = "高清摄像头，智能芯片", Email = "user1@gmail.com", FullName = "张三", Company = "北京苹果科技" },
-            new { Name = "华为 Mate 60 手机", Brand = "华为", Description = "麒麟芯片，智能拍照", Email = "user2@qq.com", FullName = "李四", Company = "深圳华为科技" },
-            new { Name = "小米14 智能手机", Brand = "小米", Description = "骁龙处理器，高清屏幕", Email = "admin@gmail.com", FullName = "王五", Company = "小米科技公司" },
-            new { Name = "三星 Galaxy S24", Brand = "三星", Description = "AMOLED屏幕，AI相机", Email = "test@163.com", FullName = "赵六", Company = "三星电子" },
-            new { Name = "OPPO Find X7", Brand = "OPPO", Description = "影像旗舰，停产型号", Email = "support@gmail.com", FullName = "钱七", Company = "OPPO科技" }
-        };
-
-        var results = new StringBuilder();
-        results.AppendLine("文本过滤测试:");
-        results.AppendLine(new string('=', 40));
-
-        foreach (var item in testData)
-        {
-            var passed = true;
-            var reasons = new List<string>();
-
-            if (IsProductNameFilterActive && !CheckTextFilter(item.Name, ProductNameOperator, ProductNameText))
-            {
-                passed = false;
-                reasons.Add($"产品名称不满足 {GetTextOperatorSymbol(ProductNameOperator)} \"{ProductNameText}\"");
-            }
-
-            if (IsBrandFilterActive && !CheckTextFilter(item.Brand, BrandOperator, BrandText))
-            {
-                passed = false;
-                reasons.Add($"品牌不满足 {GetTextOperatorSymbol(BrandOperator)} \"{BrandText}\"");
-            }
-
-            if (IsDescriptionFilterActive && !CheckTextFilter(item.Description, DescriptionOperator, DescriptionText))
-            {
-                passed = false;
-                reasons.Add($"描述不满足 {GetTextOperatorSymbol(DescriptionOperator)} \"{DescriptionText}\"");
-            }
-
-            if (IsAlignedEmailFilterActive && !CheckTextFilter(item.Email, AlignedEmailOperator, AlignedEmailText))
-            {
-                passed = false;
-                reasons.Add($"邮箱不满足条件");
-            }
-
-            if (IsAlignedNameFilterActive && !CheckTextFilter(item.FullName, AlignedNameOperator, AlignedNameText))
-            {
-                passed = false;
-                reasons.Add($"姓名不满足条件");
-            }
-
-            if (IsAlignedCompanyFilterActive && !CheckTextFilter(item.Company, AlignedCompanyOperator, AlignedCompanyText))
-            {
-                passed = false;
-                reasons.Add($"公司不满足条件");
-            }
-
-            if (IsAdvancedFilterActive && !CheckTextFilter(item.Description, AdvancedOperator, AdvancedText))
-            {
-                passed = false;
-                reasons.Add($"高级搜索不满足条件");
-            }
-
-            if (IsRegexFilterActive && !CheckTextFilter(item.Name, TextOperator.Regex, RegexText))
-            {
-                passed = false;
-                reasons.Add($"正则搜索不匹配");
-            }
-
-            results.AppendLine($"{item.Name}: {(passed ? "✓" : "✗")}");
-            if (!passed)
-            {
-                foreach (var reason in reasons)
-                {
-                    results.AppendLine($"  - {reason}");
-                }
-            }
+            options |= RegexOptions.IgnoreCase;
         }
-
-        var passedCount = testData.Count(item =>
-        {
-            bool passes = true;
-            if (IsProductNameFilterActive) passes &= CheckTextFilter(item.Name, ProductNameOperator, ProductNameText);
-            if (IsBrandFilterActive) passes &= CheckTextFilter(item.Brand, BrandOperator, BrandText);
-            if (IsDescriptionFilterActive) passes &= CheckTextFilter(item.Description, DescriptionOperator, DescriptionText);
-            if (IsAlignedEmailFilterActive) passes &= CheckTextFilter(item.Email, AlignedEmailOperator, AlignedEmailText);
-            if (IsAlignedNameFilterActive) passes &= CheckTextFilter(item.FullName, AlignedNameOperator, AlignedNameText);
-            if (IsAlignedCompanyFilterActive) passes &= CheckTextFilter(item.Company, AlignedCompanyOperator, AlignedCompanyText);
-            if (IsAdvancedFilterActive) passes &= CheckTextFilter(item.Description, AdvancedOperator, AdvancedText);
-            if (IsRegexFilterActive) passes &= CheckTextFilter(item.Name, TextOperator.Regex, RegexText);
-            return passes;
-        });
-
-        results.AppendLine($"\n通过: {passedCount}/{testData.Length}");
-        TextFilterResults = results.ToString();
-    }
-
-    [RelayCommand]
-    private void ClearAdvancedFilter()
-    {
-        AdvancedText = string.Empty;
-        MessageBox.Show("高级搜索已清除", "清除", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void ClearRegexFilter()
-    {
-        RegexText = string.Empty;
-        MessageBox.Show("正则搜索已清除", "清除", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void ShowRegexHelp()
-    {
-        var helpText = @"正则表达式常用语法:
-
-• ^     - 匹配行首
-• $     - 匹配行尾
-• .     - 匹配任意单个字符
-• *     - 匹配前面的字符0次或多次
-• +     - 匹配前面的字符1次或多次
-• \d    - 匹配数字
-• \w    - 匹配字母、数字或下划线
-• [a-z] - 匹配a到z的任意字符
-
-示例:
-• \d{4}         - 匹配4位数字
-• ^[A-Z][a-z]+  - 以大写字母开头的单词
-• \w+@\w+\.\w+  - 简单邮箱格式";
-
-        MessageBox.Show(helpText, "正则表达式帮助", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    #endregion 文本过滤器命令
-
-    #region 辅助方法
-
-    private string GetNumberOperatorSymbol(NumberOperator op) => op switch
-    {
-        NumberOperator.Equal => "=",
-        NumberOperator.NotEqual => "≠",
-        NumberOperator.LessThan => "<",
-        NumberOperator.LessThanOrEqual => "≤",
-        NumberOperator.GreaterThan => ">",
-        NumberOperator.GreaterThanOrEqual => "≥",
-        _ => "?"
-    };
-
-    private string GetTextOperatorSymbol(TextOperator op) => op switch
-    {
-        TextOperator.Equal => "=",
-        TextOperator.NotEqual => "≠",
-        TextOperator.Contains => "~",
-        TextOperator.NotContains => "!~",
-        TextOperator.StartsWith => "^",
-        TextOperator.EndsWith => "$",
-        TextOperator.Regex => "R",
-        _ => "?"
-    };
-
-    /// <summary>
-    /// 检查数值是否满足过滤条件
-    /// </summary>
-    public static bool CheckNumberFilter(double value, NumberOperator filterOperator, double filterValue, double tolerance = double.Epsilon)
-    {
-        return filterOperator switch
-        {
-            NumberOperator.Equal => Math.Abs(value - filterValue) <= tolerance,
-            NumberOperator.NotEqual => Math.Abs(value - filterValue) > tolerance,
-            NumberOperator.LessThan => value < filterValue,
-            NumberOperator.LessThanOrEqual => value <= filterValue,
-            NumberOperator.GreaterThan => value > filterValue,
-            NumberOperator.GreaterThanOrEqual => value >= filterValue,
-            _ => false
-        };
-    }
-
-    /// <summary>
-    /// 检查文本是否满足过滤条件
-    /// </summary>
-    public static bool CheckTextFilter(string text, TextOperator textOperator, string filterText)
-    {
-        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(filterText))
-            return textOperator == TextOperator.NotEqual || textOperator == TextOperator.NotContains;
-
         try
         {
-            return textOperator switch
-            {
-                TextOperator.Equal => text.Equals(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.NotEqual => !text.Equals(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.Contains => text.Contains(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.NotContains => !text.Contains(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.StartsWith => text.StartsWith(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.EndsWith => text.EndsWith(filterText, StringComparison.OrdinalIgnoreCase),
-                TextOperator.Regex => Regex.IsMatch(text, filterText, RegexOptions.IgnoreCase),
-                _ => false
-            };
+            var regex = new Regex(pattern, options);
+            return s => regex.IsMatch(s ?? "");
         }
         catch (ArgumentException)
         {
-            // 正则表达式语法错误时返回false
-            return false;
+            return static _ => false;
         }
     }
 
-    #endregion 辅助方法
+    /// <summary>
+    /// 读取枚举值的 [Description] attribute,失败时回退到枚举名。
+    /// 单一真相源:符号显示完全跟随枚举定义,demo 不维护重复映射。
+    /// </summary>
+    private static string DescOf<TEnum>(TEnum value) where TEnum : Enum
+        => typeof(TEnum).GetField(value.ToString())
+                        ?.GetCustomAttribute<DescriptionAttribute>()
+                        ?.Description ?? value.ToString();
+
+    private bool FilterProductPredicate(object item)
+    {
+        if (item is not FilterProduct product)
+        {
+            return false;
+        }
+        var pricePred = BuildPricePredicate();
+        var namePred = BuildNamePredicate();
+        return pricePred(product.Price) && namePred(product.Name);
+    }
+
+    private Func<double, bool> BuildPricePredicate()
+    {
+        if (!PriceFilterActive)
+        {
+            return static _ => true;
+        }
+        var target = PriceFilterValue;
+        return PriceFilterOperator switch
+        {
+            NumberOperator.Equal => x => Math.Abs(x - target) <= 1e-9,
+            NumberOperator.NotEqual => x => Math.Abs(x - target) > 1e-9,
+            NumberOperator.LessThan => x => x < target,
+            NumberOperator.LessThanOrEqual => x => x <= target,
+            NumberOperator.GreaterThan => x => x > target,
+            NumberOperator.GreaterThanOrEqual => x => x >= target,
+            _ => static _ => true,
+        };
+    }
+
+    private Func<string, bool> BuildNamePredicate()
+    {
+        if (!NameFilterActive || string.IsNullOrEmpty(NameFilterText))
+        {
+            return static _ => true;
+        }
+        var pattern = NameFilterText;
+        var cmp = NameFilterCaseSensitive
+            ? StringComparison.Ordinal
+            : StringComparison.OrdinalIgnoreCase;
+
+        return NameFilterOperator switch
+        {
+            TextOperator.Equal => s => string.Equals(s ?? "", pattern, cmp),
+            TextOperator.NotEqual => s => !string.Equals(s ?? "", pattern, cmp),
+            TextOperator.Contains => s => (s ?? "").IndexOf(pattern, cmp) >= 0,
+            TextOperator.NotContains => s => (s ?? "").IndexOf(pattern, cmp) < 0,
+            TextOperator.StartsWith => s => (s ?? "").StartsWith(pattern, cmp),
+            TextOperator.EndsWith => s => (s ?? "").EndsWith(pattern, cmp),
+            TextOperator.Regex => BuildRegexPredicate(pattern, NameFilterCaseSensitive),
+            _ => static _ => true,
+        };
+    }
+
+    partial void OnPriceFilterActiveChanged(bool value) => ProductsView?.Refresh();
+
+    partial void OnPriceFilterOperatorChanged(NumberOperator value) => ProductsView?.Refresh();
+
+    partial void OnPriceFilterValueChanged(double value) => ProductsView?.Refresh();
+
+    partial void OnNameFilterActiveChanged(bool value) => ProductsView?.Refresh();
+
+    partial void OnNameFilterOperatorChanged(TextOperator value) => ProductsView?.Refresh();
+
+    partial void OnNameFilterTextChanged(string value) => ProductsView?.Refresh();
+
+    partial void OnNameFilterCaseSensitiveChanged(bool value) => ProductsView?.Refresh();
+
+    partial void OnBasicNumberIsActiveChanged(bool value) => OnPropertyChanged(nameof(BasicNumberSummary));
+
+    partial void OnBasicNumberOperatorChanged(NumberOperator value) => OnPropertyChanged(nameof(BasicNumberSummary));
+
+    partial void OnBasicNumberValueChanged(double value) => OnPropertyChanged(nameof(BasicNumberSummary));
+
+    partial void OnBasicTextIsActiveChanged(bool value) => OnPropertyChanged(nameof(BasicTextSummary));
+
+    partial void OnBasicTextOperatorChanged(TextOperator value) => OnPropertyChanged(nameof(BasicTextSummary));
+
+    partial void OnBasicTextValueChanged(string value) => OnPropertyChanged(nameof(BasicTextSummary));
+
+    partial void OnNumOperatorOperatorChanged(NumberOperator value) => OnPropertyChanged(nameof(NumOperatorSummary));
+
+    partial void OnNumOperatorValueChanged(double value) => OnPropertyChanged(nameof(NumOperatorSummary));
+
+    partial void OnTextOperatorOperatorChanged(TextOperator value) => OnPropertyChanged(nameof(TextOperatorSummary));
+
+    partial void OnTextOperatorValueChanged(string value) => OnPropertyChanged(nameof(TextOperatorSummary));
+
+    partial void OnDecimalIsActiveChanged(bool value) => OnPropertyChanged(nameof(DecimalSummary));
+
+    partial void OnDecimalOperatorChanged(NumberOperator value) => OnPropertyChanged(nameof(DecimalSummary));
+
+    partial void OnDecimalValueChanged(double value) => OnPropertyChanged(nameof(DecimalSummary));
+
+    partial void OnDecimalToleranceChanged(double value) => OnPropertyChanged(nameof(DecimalSummary));
+
+    partial void OnCaseInsensitiveActiveChanged(bool value) => OnPropertyChanged(nameof(CaseInsensitiveMatchCount));
+
+    partial void OnCaseInsensitiveTextChanged(string value) => OnPropertyChanged(nameof(CaseInsensitiveMatchCount));
+
+    partial void OnCaseSensitiveActiveChanged(bool value) => OnPropertyChanged(nameof(CaseSensitiveMatchCount));
+
+    partial void OnCaseSensitiveTextChanged(string value) => OnPropertyChanged(nameof(CaseSensitiveMatchCount));
+
+    partial void OnRegexIsActiveChanged(bool value) => OnPropertyChanged(nameof(RegexMatchCount));
+
+    partial void OnRegexTextChanged(string value) => OnPropertyChanged(nameof(RegexMatchCount));
+
+    public FilterBoxViewModel()
+    {
+        // ① ~ ⑤ 与列表无关的展示属性,先全部赋默认值
+        BasicNumberOperator = NumberOperator.GreaterThanOrEqual;
+        BasicNumberValue = 50;
+
+        BasicTextOperator = TextOperator.Contains;
+        BasicTextValue = "abc";
+
+        NumOperatorOperator = NumberOperator.Equal;
+        NumOperatorValue = 100;
+
+        TextOperatorOperator = TextOperator.StartsWith;
+        TextOperatorValue = string.Empty;
+
+        DecimalIsActive = true;
+        DecimalOperator = NumberOperator.Equal;
+        DecimalValue = 3.14;
+        DecimalTolerance = 0.01;
+
+        CaseInsensitiveActive = true;
+        CaseInsensitiveText = "Pro";
+
+        CaseSensitiveActive = true;
+        CaseSensitiveText = "Pro";
+
+        RegexIsActive = true;
+        RegexText = @"^[A-Z]\w+$";
+
+        // ⑥ 联合过滤:必须先建数据 + ICollectionView,再赋值过滤参数,
+        // 否则 OnXxxChanged partial 钩子里 ProductsView 仍为 null,导致 NRE。
+        Products = new ObservableCollection<FilterProduct>(new[]
+        {
+            new FilterProduct("Wireless Headphones Pro", "音频", 199, 42, 4.5),
+            new FilterProduct("Mechanical Keyboard", "外设", 599, 18, 4.7),
+            new FilterProduct("Gaming Mouse", "外设", 299, 65, 4.3),
+            new FilterProduct("USB Hub", "配件", 79, 120, 4.0),
+            new FilterProduct("4K Monitor Pro", "显示", 2499, 8, 4.8),
+            new FilterProduct("Ergonomic Chair", "家具", 1899, 5, 4.6),
+            new FilterProduct("HDMI Cable", "配件", 39, 230, 4.1),
+            new FilterProduct("Portable SSD", "存储", 449, 33, 4.4),
+            new FilterProduct("Webcam HD", "音频", 159, 27, 3.9),
+            new FilterProduct("Studio Microphone", "音频", 899, 14, 4.5),
+            new FilterProduct("Standing Desk", "家具", 1299, 12, 4.4),
+            new FilterProduct("Cable Organizer", "配件", 29, 350, 3.8),
+        });
+
+        ProductsView = CollectionViewSource.GetDefaultView(Products);
+        ProductsView.Filter = FilterProductPredicate;
+
+        // 此时 ProductsView 已就绪,设过滤参数会自然触发一次正确的 Refresh
+        PriceFilterActive = true;
+        PriceFilterOperator = NumberOperator.LessThanOrEqual;
+        PriceFilterValue = 1000;
+
+        NameFilterActive = false;
+        NameFilterOperator = TextOperator.Contains;
+        NameFilterText = string.Empty;
+    }
 }

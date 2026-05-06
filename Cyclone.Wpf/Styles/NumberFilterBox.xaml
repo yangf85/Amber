@@ -5,6 +5,7 @@
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls"
     xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers">
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CheckBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ComboBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/NumberBox.xaml" />
@@ -16,117 +17,31 @@
         TargetType="CheckBox">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
-    </Style>
-
-    <Style x:Key="NumberFilterBox.OperatorComboBox" TargetType="ComboBox">
-        <Setter Property="IsTabStop" Value="False" />
-        <Setter Property="Focusable" Value="False" />
-        <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="ItemContainerStyle" Value="{StaticResource ComboBoxItem.Style.Basic}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ComboBox">
-                    <Border
-                        x:Name="RootBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="True">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ContentPresenter
-                                Name="ContentSite"
-                                Grid.Column="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Content="{TemplateBinding SelectionBoxItem}"
-                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                IsHitTestVisible="False" />
-                            <TextBox
-                                Name="PART_EditableTextBox"
-                                Grid.Column="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                Focusable="True"
-                                IsReadOnly="{TemplateBinding IsReadOnly}"
-                                Style="{x:Null}"
-                                Template="{StaticResource ComboBox.TextBox}"
-                                Visibility="Hidden" />
-                            <ToggleButton
-                                x:Name="OpenButton"
-                                Grid.Column="1"
-                                Margin="0,0,5,0"
-                                ClickMode="Press"
-                                Focusable="False"
-                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                Style="{StaticResource ComboBox.OpenButtonStyle}" />
-                            <Popup
-                                x:Name="Popup"
-                                AllowsTransparency="True"
-                                Focusable="False"
-                                IsOpen="{TemplateBinding IsDropDownOpen}"
-                                Placement="Bottom"
-                                PlacementTarget="{Binding ElementName=RootBorder}"
-                                PopupAnimation="Slide">
-                                <Grid
-                                    x:Name="DropDown"
-                                    MinWidth="{TemplateBinding ActualWidth}"
-                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                    SnapsToDevicePixels="True">
-                                    <Border
-                                        x:Name="DropDownBorder"
-                                        Background="{DynamicResource Background.Global}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1">
-                                        <ScrollViewer
-                                            x:Name="DropDownScrollViewer"
-                                            Focusable="False"
-                                            HorizontalScrollBarVisibility="Auto"
-                                            VerticalScrollBarVisibility="Auto">
-                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
-                                        </ScrollViewer>
-                                    </Border>
-                                </Grid>
-                            </Popup>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsEditable" Value="True">
-                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
-                            <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="RootBorder" Property="Opacity" Value="0.5" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style
-        x:Key="NumberFilterBox.ValueNumberBox"
+        x:Key="NumberFilterBox.OperatorComboBoxStyle"
+        BasedOn="{StaticResource ComboBox.Style.Basic}"
+        TargetType="ComboBox">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="MinWidth" Value="50" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style
+        x:Key="NumberFilterBox.ValueNumberBoxStyle"
         BasedOn="{StaticResource NumberBox.Style.Basic}"
         TargetType="ctl:NumberBox">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
     </Style>
 
-    <ControlTemplate x:Key="NumberFilterBox.ControlTemplate.Basic" TargetType="ctl:NumberFilterBox">
+    <ControlTemplate x:Key="NumberFilterBox.Template.Basic" TargetType="ctl:NumberFilterBox">
         <Border
             x:Name="RootBorder"
-            Margin="{TemplateBinding Padding}"
+            Padding="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
@@ -141,48 +56,52 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+
                 <CheckBox
-                    x:Name="PART_ActivedCheckBox"
+                    x:Name="PART_ActiveCheckBox"
                     Grid.Row="0"
                     Grid.Column="0"
-                    VerticalContentAlignment="Center"
                     Content="{TemplateBinding Label}"
-                    Focusable="False"
-                    IsChecked="{Binding Path=IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                    IsChecked="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
                     Style="{StaticResource NumberFilterBox.ActiveCheckBoxStyle}" />
+
                 <ComboBox
                     x:Name="PART_OperatorComboBox"
                     Grid.Row="0"
                     Grid.Column="1"
-                    MinWidth="50"
                     Margin="5,0"
-                    IsEnabled="{Binding Path=IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                    IsEnabled="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
                     ItemsSource="{hp:EnumToItemsSource EnumType=ctl:NumberOperator}"
                     SelectedValue="{Binding Operator, RelativeSource={RelativeSource TemplatedParent}}"
-                    Style="{StaticResource NumberFilterBox.OperatorComboBox}" />
+                    Style="{StaticResource NumberFilterBox.OperatorComboBoxStyle}" />
+
                 <ctl:NumberBox
                     x:Name="PART_ValueNumberBox"
                     Grid.Row="0"
                     Grid.Column="2"
-                    DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                    IsEnabled="{Binding Path=IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                    DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource TemplatedParent}}"
+                    IsEnabled="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
+                    LargeChange="{Binding LargeChange, RelativeSource={RelativeSource TemplatedParent}}"
                     Maximum="{TemplateBinding Maximum}"
                     Minimum="{TemplateBinding Minimum}"
-                    Value="{Binding Path=Value, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                    NumberMode="{Binding NumberMode, RelativeSource={RelativeSource TemplatedParent}}"
+                    SmallChange="{Binding SmallChange, RelativeSource={RelativeSource TemplatedParent}}"
+                    Style="{StaticResource NumberFilterBox.ValueNumberBoxStyle}"
+                    Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}}" />
+
                 <ContentPresenter
                     x:Name="DescriptionContainer"
                     Grid.Row="1"
                     Grid.Column="2"
                     Content="{TemplateBinding Description}"
-                    TextElement.Foreground="{DynamicResource Text.Prompt}" />
+                    TextElement.Foreground="{DynamicResource Text.Prompt}"
+                    Visibility="{Binding Description, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static conv:VisibilityConverter.VisibleWhenNotNull}}" />
             </Grid>
         </Border>
-        <ControlTemplate.Triggers />
     </ControlTemplate>
 
     <Style x:Key="NumberFilterBox.Style.Basic" TargetType="ctl:NumberFilterBox">
-        <Setter Property="Template" Value="{StaticResource NumberFilterBox.ControlTemplate.Basic}" />
-        <Setter Property="Height" Value="Auto" />
+        <Setter Property="Template" Value="{StaticResource NumberFilterBox.Template.Basic}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />

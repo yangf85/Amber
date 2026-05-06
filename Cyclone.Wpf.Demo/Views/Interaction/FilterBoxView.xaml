@@ -6,306 +6,1356 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="600"
-    d:DesignWidth="900"
+    d:DataContext="{d:DesignInstance Type={x:Type local:FilterBoxViewModel}}"
+    d:DesignHeight="3200"
+    d:DesignWidth="1400"
     mc:Ignorable="d">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <UserControl.Resources>
 
-        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="20,20,10,20">
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
 
-                <TextBlock
-                    Margin="0,0,0,15"
-                    FontSize="18"
-                    FontWeight="Bold"
-                    Text="NumberFilterBox 数字过滤器" />
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
 
-                <GroupBox
-                    Margin="0,10"
-                    Padding="15"
-                    Header="基本示例">
-                    <StackPanel>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
 
-                        <cy:NumberFilterBox
-                            Margin="0,5"
-                            DecimalPlaces="2"
-                            Description="设置产品的价格过滤条件"
-                            IsActived="{Binding IsPriceFilterActive}"
-                            Label="价格:"
-                            Maximum="10000"
-                            Minimum="0"
-                            Operator="{Binding PriceOperator}"
-                            Value="{Binding PriceValue}" />
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
 
-                        <cy:NumberFilterBox
-                            Margin="0,5"
-                            DecimalPlaces="0"
-                            Description="筛选用户年龄"
-                            IsActived="{Binding IsAgeFilterActive}"
-                            Label="年龄:"
-                            Maximum="120"
-                            Minimum="0"
-                            Operator="{Binding AgeOperator}"
-                            Value="{Binding AgeValue}" />
+        <Style x:Key="SummaryBoxStyle" TargetType="{x:Type Border}">
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
 
-                        <cy:NumberFilterBox
-                            Margin="0,5"
-                            DecimalPlaces="1"
-                            Description="产品评分要求"
-                            IsActived="{Binding IsRatingFilterActive}"
-                            Label="评分:"
-                            Maximum="5"
-                            Minimum="0"
-                            Operator="{Binding RatingOperator}"
-                            Value="{Binding RatingValue}" />
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+
+        <Style x:Key="SubTableTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M3,5 L21,5 L14,12 L14,19 L10,17 L10,12 Z"
+                            Stroke="White"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="2" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="FilterBox 系列" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="过滤控件对——NumberFilterBox(数字过滤,= ≠ &lt; ≤ &gt; ≥)与 TextFilterBox(文本过滤,= ≠ ∋ ∌ ^ $ .*)。结构对称、用法一致:复选框启用 + 操作符下拉 + 输入框。控件只暴露状态,过滤委托由调用方根据状态拼装。" />
                     </StackPanel>
-                </GroupBox>
+                </StackPanel>
+            </Border>
 
-                <GroupBox
-                    Margin="0,10"
-                    Padding="15"
-                    Header="标签对齐示例 (SharedName)">
-                    <Grid IsSharedSizeScope="True">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+            <!--  ============ 主体两列(① ~ ⑤)============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                        <cy:NumberFilterBox
-                            Grid.Row="0"
-                            Margin="0,5"
-                            DecimalPlaces="2"
-                            Description="产品单价过滤"
-                            IsActived="{Binding IsAlignedPriceFilterActive}"
-                            Label="产品价格:"
-                            Operator="{Binding AlignedPriceOperator}"
-                            SharedName="NumberFilterLabels"
-                            Value="{Binding AlignedPriceValue}" />
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
 
-                        <cy:NumberFilterBox
-                            Grid.Row="1"
-                            Margin="0,5"
-                            DecimalPlaces="0"
-                            Description="库存数量过滤"
-                            IsActived="{Binding IsAlignedStockFilterActive}"
-                            Label="库存数量:"
-                            Operator="{Binding AlignedStockOperator}"
-                            SharedName="NumberFilterLabels"
-                            Value="{Binding AlignedStockValue}" />
+                    <!--  ① 基础用法对照  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法对照" Subtitle="NumberFilterBox / TextFilterBox 结构相同">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
 
-                        <cy:NumberFilterBox
-                            Grid.Row="2"
-                            Margin="0,5"
-                            DecimalPlaces="2"
-                            Description="产品重量限制"
-                            IsActived="{Binding IsAlignedWeightFilterActive}"
-                            Label="重量(kg):"
-                            Maximum="100"
-                            Minimum="0"
-                            Operator="{Binding AlignedWeightOperator}"
-                            SharedName="NumberFilterLabels"
-                            Value="{Binding AlignedWeightValue}" />
-                    </Grid>
-                </GroupBox>
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="两个控件三段结构完全一致:复选框 Label + Operator 下拉 + Value/Text 输入。勾选启用,未启用时下拉与输入框被禁用。" />
 
-                <StackPanel
-                    Margin="0,20"
-                    HorizontalAlignment="Center"
-                    Orientation="Horizontal">
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding ApplyNumberFiltersCommand}"
-                        Content="应用数字过滤" />
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding ClearNumberFiltersCommand}"
-                        Content="清除" />
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding TestNumberFiltersCommand}"
-                        Content="测试" />
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="NumberFilterBox" />
+                            <cy:NumberFilterBox
+                                IsActive="{Binding BasicNumberIsActive, Mode=TwoWay}"
+                                Label="价格"
+                                Maximum="9999"
+                                Minimum="0"
+                                Operator="{Binding BasicNumberOperator, Mode=TwoWay}"
+                                Value="{Binding BasicNumberValue, Mode=TwoWay}" />
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="谓词:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding BasicNumberSummary, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+
+                            <TextBlock
+                                Margin="0,20,0,8"
+                                Style="{StaticResource DemoItemTitleStyle}"
+                                Text="TextFilterBox" />
+                            <cy:TextFilterBox
+                                IsActive="{Binding BasicTextIsActive, Mode=TwoWay}"
+                                Label="名称"
+                                Operator="{Binding BasicTextOperator, Mode=TwoWay}"
+                                Text="{Binding BasicTextValue, Mode=TwoWay}"
+                                Watermark="输入要匹配的文本…" />
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="谓词:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding BasicTextSummary, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 操作符全集  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="操作符全集" Subtitle="数字 6 个 / 文本 7 个">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="操作符以数学符号显示在 ComboBox 中,可读性优于英文枚举。展开下拉切换观察。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="数字: =  ≠  &lt;  ≤  &gt;  ≥" />
+                            <cy:NumberFilterBox
+                                IsActive="True"
+                                Label="x"
+                                Maximum="1000"
+                                Minimum="0"
+                                Operator="{Binding NumOperatorOperator, Mode=TwoWay}"
+                                Value="{Binding NumOperatorValue, Mode=TwoWay}" />
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="谓词:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding NumOperatorSummary, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+
+                            <TextBlock
+                                Margin="0,20,0,8"
+                                Style="{StaticResource DemoItemTitleStyle}"
+                                Text="文本: =  ≠  ∋  ∌  ^  $  .*" />
+                            <cy:TextFilterBox
+                                IsActive="True"
+                                Label="s"
+                                MaxLength="40"
+                                Operator="{Binding TextOperatorOperator, Mode=TwoWay}"
+                                Text="{Binding TextOperatorValue, Mode=TwoWay}"
+                                Watermark="∋=Contains, ^=StartsWith, .*=Regex…" />
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="谓词:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding TextOperatorSummary, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ Decimal 模式 + Tolerance  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="Decimal 模式 / Tolerance" Subtitle="数字过滤特有">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="切到 Decimal 模式时浮点比较容差不可避免。Tolerance 由控件暴露给 VM,典型用法:|x − Value| ≤ Tolerance 视为相等。Integer 模式建议把 Tolerance 设为 0。" />
+
+                            <cy:NumberFilterBox
+                                DecimalPlaces="2"
+                                IsActive="{Binding DecimalIsActive, Mode=TwoWay}"
+                                Label="温度"
+                                Maximum="100"
+                                Minimum="-100"
+                                NumberMode="{x:Static cy:NumberMode.Decimal}"
+                                Operator="{Binding DecimalOperator, Mode=TwoWay}"
+                                SmallChange="0.01"
+                                Tolerance="{Binding DecimalTolerance, Mode=TwoWay}"
+                                Value="{Binding DecimalValue, Mode=TwoWay}" />
+
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="谓词:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding DecimalSummary, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
                 </StackPanel>
 
-                <GroupBox
-                    Margin="0,10"
-                    Padding="10"
-                    Header="数字过滤结果">
-                    <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
-                        <TextBlock
-                            Padding="8"
-                            Background="{DynamicResource Background.Card}"
-                            FontFamily="Consolas"
-                            FontSize="11"
-                            Foreground="{DynamicResource Text.Secondary}"
-                            Text="{Binding NumberFilterResults}"
-                            TextWrapping="Wrap" />
-                    </ScrollViewer>
-                </GroupBox>
-            </StackPanel>
-        </ScrollViewer>
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
 
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="10,20,20,20">
+                    <!--  ④ IsCaseSensitive 对照  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="IsCaseSensitive 大小写" Subtitle="文本过滤特有">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
 
-                <TextBlock
-                    Margin="0,0,0,15"
-                    FontSize="18"
-                    FontWeight="Bold"
-                    Text="TextFilterBox 文本过滤器" />
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="数据集中商品名包含 Pro / pro 等大小写混杂的字串。同一关键字 Pro 在两种模式下命中数不同。" />
 
-                <GroupBox
-                    Margin="0,10"
-                    Padding="15"
-                    Header="基本示例">
-                    <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="不区分大小写 (默认)" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="80" />
+                                    </Grid.ColumnDefinitions>
+                                    <cy:TextFilterBox
+                                        Grid.Column="0"
+                                        IsActive="{Binding CaseInsensitiveActive, Mode=TwoWay}"
+                                        IsCaseSensitive="False"
+                                        Label="名称"
+                                        Operator="{x:Static cy:TextOperator.Contains}"
+                                        Text="{Binding CaseInsensitiveText, Mode=TwoWay}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Success}">
+                                        <Run Text="{Binding CaseInsensitiveMatchCount, Mode=OneWay}" />
+                                        <Run Text="条" />
+                                    </TextBlock>
+                                </Grid>
+                            </StackPanel>
 
-                        <cy:TextFilterBox
-                            Margin="0,5"
-                            Description="根据产品名称进行筛选"
-                            IsActived="{Binding IsProductNameFilterActive}"
-                            Label="产品名称:"
-                            Operator="{Binding ProductNameOperator}"
-                            Text="{Binding ProductNameText}" />
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="区分大小写" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="80" />
+                                    </Grid.ColumnDefinitions>
+                                    <cy:TextFilterBox
+                                        Grid.Column="0"
+                                        IsActive="{Binding CaseSensitiveActive, Mode=TwoWay}"
+                                        IsCaseSensitive="True"
+                                        Label="名称"
+                                        Operator="{x:Static cy:TextOperator.Contains}"
+                                        Text="{Binding CaseSensitiveText, Mode=TwoWay}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Warning}">
+                                        <Run Text="{Binding CaseSensitiveMatchCount, Mode=OneWay}" />
+                                        <Run Text="条" />
+                                    </TextBlock>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
 
-                        <cy:TextFilterBox
-                            Margin="0,5"
-                            Description="筛选特定品牌的产品"
-                            IsActived="{Binding IsBrandFilterActive}"
-                            Label="品牌:"
-                            Operator="{Binding BrandOperator}"
-                            Text="{Binding BrandText}" />
+                    <!--  ⑤ Regex 模式  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="Regex 模式" Subtitle="Operator=Regex 时 Text 作正则解释">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
 
-                        <cy:TextFilterBox
-                            Margin="0,5"
-                            Description="在产品描述中搜索关键词"
-                            IsActived="{Binding IsDescriptionFilterActive}"
-                            Label="描述:"
-                            Operator="{Binding DescriptionOperator}"
-                            Text="{Binding DescriptionText}" />
-                    </StackPanel>
-                </GroupBox>
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="检测哪些商品名以大写字母开头(^[A-Z]\w+$)。表达式无效与否如何处理由 VM 决定,控件不抢策略。" />
 
-                <GroupBox
-                    Margin="0,10"
-                    Padding="15"
-                    Header="标签对齐示例 (SharedName)">
-                    <cy:SpacingStackPanel Grid.IsSharedSizeScope="True">
+                            <cy:TextFilterBox
+                                IsActive="{Binding RegexIsActive, Mode=TwoWay}"
+                                Label="名称"
+                                Operator="{x:Static cy:TextOperator.Regex}"
+                                Text="{Binding RegexText, Mode=TwoWay}"
+                                Watermark="输入正则表达式…" />
 
-                        <cy:TextFilterBox
-                            Grid.Row="0"
-                            Margin="0,5"
-                            Description="用户邮箱地址过滤"
-                            IsActived="{Binding IsAlignedEmailFilterActive}"
-                            Label="电子邮箱地址:"
-                            Operator="{Binding AlignedEmailOperator}"
-                            SharedName="TextFilterLabels"
-                            Text="{Binding AlignedEmailText}" />
-
-                        <cy:TextFilterBox
-                            Grid.Row="1"
-                            Margin="0,5"
-                            Description="用户真实姓名过滤"
-                            IsActived="{Binding IsAlignedNameFilterActive}"
-                            Label="用户姓名:"
-                            Operator="{Binding AlignedNameOperator}"
-                            SharedName="TextFilterLabels"
-                            Text="{Binding AlignedNameText}" />
-
-                        <cy:TextFilterBox
-                            Grid.Row="2"
-                            Margin="0,5"
-                            Description="公司或组织名称"
-                            IsActived="{Binding IsAlignedCompanyFilterActive}"
-                            Label="公司名称:"
-                            Operator="{Binding AlignedCompanyOperator}"
-                            SharedName="TextFilterLabels"
-                            Text="{Binding AlignedCompanyText}" />
-                    </cy:SpacingStackPanel>
-                </GroupBox>
-
-                <GroupBox
-                    Margin="0,10"
-                    Padding="15"
-                    Header="扩展功能 (ExtendObject)">
-                    <StackPanel>
-
-                        <cy:TextFilterBox
-                            Margin="0,5"
-                            Description="带有清除按钮的文本过滤器"
-                            IsActived="{Binding IsAdvancedFilterActive}"
-                            Label="高级搜索:"
-                            Operator="{Binding AdvancedOperator}"
-                            Text="{Binding AdvancedText}">
-                            <cy:TextFilterBox.ExtendObject>
-                                <Button Command="{Binding ClearAdvancedFilterCommand}" Content="清除" />
-                            </cy:TextFilterBox.ExtendObject>
-                        </cy:TextFilterBox>
-
-                        <cy:TextFilterBox
-                            Margin="0,5"
-                            Description="支持正则表达式的高级文本过滤"
-                            IsActived="{Binding IsRegexFilterActive}"
-                            Label="正则搜索:"
-                            Operator="{x:Static cy:TextOperator.Regex}"
-                            Text="{Binding RegexText}">
-                            <cy:TextFilterBox.ExtendObject>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button
-                                        Command="{Binding ShowRegexHelpCommand}"
-                                        Content="?"
-                                        ToolTip="正则表达式帮助" />
-                                    <Button Command="{Binding ClearRegexFilterCommand}" Content="清除" />
-                                </StackPanel>
-                            </cy:TextFilterBox.ExtendObject>
-                        </cy:TextFilterBox>
-                    </StackPanel>
-                </GroupBox>
-
-                <StackPanel
-                    Margin="0,20"
-                    HorizontalAlignment="Center"
-                    Orientation="Horizontal">
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding ApplyTextFiltersCommand}"
-                        Content="应用文本过滤" />
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding ClearTextFiltersCommand}"
-                        Content="清除" />
-                    <Button
-                        Margin="3,0"
-                        Padding="15,6"
-                        Command="{Binding TestTextFiltersCommand}"
-                        Content="测试" />
+                            <Border Style="{StaticResource SummaryBoxStyle}">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}">
+                                    <Run Text="符合正则的商品:" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Success}"
+                                        Text="{Binding RegexMatchCount, Mode=OneWay}" />
+                                    <Run Text="/ 12 条" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
                 </StackPanel>
-                <GroupBox
-                    Margin="0,10"
-                    Padding="10"
-                    Header="文本过滤结果">
-                    <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+            </Grid>
+
+            <!--  ============ ⑥ MVVM 联合过滤(全宽)============  -->
+            <cy:Card Grid.Row="2" Margin="0,20,0,0">
+                <cy:Card.Header>
+                    <cy:CardHeader Title="MVVM 联合过滤" Subtitle="NumberFilterBox 与 TextFilterBox 同时作用于同一个列表">
+                        <cy:CardHeader.Icon>
+                            <Border Style="{StaticResource SectionNumberStyle}">
+                                <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                            </Border>
+                        </cy:CardHeader.Icon>
+                    </cy:CardHeader>
+                </cy:Card.Header>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="380" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  左:两个 FilterBox 控制面板  -->
+                    <StackPanel Grid.Column="0">
                         <TextBlock
-                            Padding="8"
-                            Background="{DynamicResource Background.Card}"
-                            FontFamily="Consolas"
-                            FontSize="11"
-                            Foreground="{DynamicResource Text.Secondary}"
-                            Text="{Binding TextFilterResults}"
-                            TextWrapping="Wrap" />
-                    </ScrollViewer>
-                </GroupBox>
-            </StackPanel>
-        </ScrollViewer>
-    </Grid>
+                            Margin="0,0,0,12"
+                            FontSize="13"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="两个 FilterBox 各自控制一个维度,VM 把两个谓词 AND 组合后用作 ICollectionView.Filter。任一控件状态变化都触发刷新。" />
+
+                        <StackPanel Grid.IsSharedSizeScope="True">
+                            <cy:NumberFilterBox
+                                Margin="0,0,0,8"
+                                IsActive="{Binding PriceFilterActive, Mode=TwoWay}"
+                                Label="价格"
+                                Maximum="3000"
+                                Minimum="0"
+                                Operator="{Binding PriceFilterOperator, Mode=TwoWay}"
+                                SharedName="filter-label"
+                                SmallChange="50"
+                                Value="{Binding PriceFilterValue, Mode=TwoWay}" />
+
+                            <cy:TextFilterBox
+                                IsActive="{Binding NameFilterActive, Mode=TwoWay}"
+                                IsCaseSensitive="{Binding NameFilterCaseSensitive, Mode=TwoWay}"
+                                Label="名称"
+                                Operator="{Binding NameFilterOperator, Mode=TwoWay}"
+                                SharedName="filter-label"
+                                Text="{Binding NameFilterText, Mode=TwoWay}"
+                                Watermark="按商品名搜索…">
+                                <cy:TextFilterBox.ExtraContent>
+                                    <CheckBox
+                                        VerticalAlignment="Center"
+                                        Content="Aa"
+                                        IsChecked="{Binding NameFilterCaseSensitive, Mode=TwoWay}"
+                                        ToolTip="区分大小写" />
+                                </cy:TextFilterBox.ExtraContent>
+                            </cy:TextFilterBox>
+                        </StackPanel>
+
+                        <Border Style="{StaticResource SummaryBoxStyle}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    TextWrapping="Wrap">
+                                    <Run Text="提示:" />
+                                    <Run Text="同一个 SharedName 让两个控件的 Label 列宽自动对齐。需在外层容器设置 Grid.IsSharedSizeScope=&quot;True&quot;。" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!--  右:实时过滤的 ListView  -->
+                    <Border
+                        Grid.Column="2"
+                        BorderBrush="{DynamicResource Border.Default}"
+                        BorderThickness="1">
+                        <ListView BorderThickness="0" ItemsSource="{Binding ProductsView}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn
+                                        Width="220"
+                                        DisplayMemberBinding="{Binding Name}"
+                                        Header="商品" />
+                                    <GridViewColumn
+                                        Width="80"
+                                        DisplayMemberBinding="{Binding Category}"
+                                        Header="分类" />
+                                    <GridViewColumn
+                                        Width="100"
+                                        DisplayMemberBinding="{Binding Price, StringFormat=¥{0:F0}}"
+                                        Header="价格" />
+                                    <GridViewColumn
+                                        Width="80"
+                                        DisplayMemberBinding="{Binding Stock}"
+                                        Header="库存" />
+                                    <GridViewColumn
+                                        Width="80"
+                                        DisplayMemberBinding="{Binding Rating, StringFormat=F1}"
+                                        Header="评分" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Border>
+                </Grid>
+            </cy:Card>
+
+            <!--  ============ ⑦ 常见使用场景 + ⑧ 属性表 + ⑨ XAML + ⑩ 设计要点 ============  -->
+            <Grid Grid.Row="3" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑦ 常见场景 6 张小卡  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="常见使用场景">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <UniformGrid Columns="3" Rows="2">
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M12,3 L21,12 L18,12 L18,21 L13,21 L13,15 L11,15 L11,21 L6,21 L6,12 L3,12 Z"
+                                    Stroke="{DynamicResource Foreground.Warning}"
+                                    StrokeLineJoin="Round"
+                                    StrokeThickness="1.5" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="价格区间下限" />
+                                <cy:NumberFilterBox
+                                    IsActive="True"
+                                    Label="≥"
+                                    Maximum="10000"
+                                    Minimum="0"
+                                    Operator="{x:Static cy:NumberOperator.GreaterThanOrEqual}"
+                                    SmallChange="100"
+                                    Value="500" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="电商商品列表过滤"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M12,2 A10,10 0 1,1 2,12 A10,10 0 0,1 12,2 M12,6 L12,12 L17,15"
+                                    Stroke="{DynamicResource Foreground.Link}"
+                                    StrokeLineJoin="Round"
+                                    StrokeThickness="2" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="年龄段" />
+                                <cy:NumberFilterBox
+                                    IsActive="True"
+                                    Label="≤"
+                                    Maximum="120"
+                                    Minimum="0"
+                                    Operator="{x:Static cy:NumberOperator.LessThanOrEqual}"
+                                    Value="35" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="用户筛选、人口统计"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M12,2 L15,9 L22,9 L17,14 L19,21 L12,17 L5,21 L7,14 L2,9 L9,9 Z"
+                                    Fill="{DynamicResource Foreground.Warning}"
+                                    Stroke="{DynamicResource Foreground.Warning}"
+                                    StrokeThickness="1" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="评分门槛" />
+                                <cy:NumberFilterBox
+                                    DecimalPlaces="1"
+                                    IsActive="True"
+                                    Label="≥"
+                                    Maximum="5"
+                                    Minimum="0"
+                                    NumberMode="{x:Static cy:NumberMode.Decimal}"
+                                    Operator="{x:Static cy:NumberOperator.GreaterThanOrEqual}"
+                                    SmallChange="0.1"
+                                    Value="4.5" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="商品/酒店/餐厅评分"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M5,5 L19,5 M5,9 L19,9 M5,13 L13,13 M15,15 L21,21 M16,17 A2,2 0 1,1 12,17 A2,2 0 0,1 16,17"
+                                    Stroke="{DynamicResource Foreground.Link}"
+                                    StrokeEndLineCap="Round"
+                                    StrokeStartLineCap="Round"
+                                    StrokeThickness="1.5" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="姓名搜索" />
+                                <cy:TextFilterBox
+                                    IsActive="True"
+                                    Label="∋"
+                                    Operator="{x:Static cy:TextOperator.Contains}"
+                                    Text="张"
+                                    Watermark="输入姓名…" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="员工列表、客户搜索"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M3,4 L21,4 L21,20 L3,20 Z M3,4 L12,13 L21,4"
+                                    Stroke="{DynamicResource Foreground.Success}"
+                                    StrokeLineJoin="Round"
+                                    StrokeThickness="1.5" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="邮箱正则" />
+                                <cy:TextFilterBox
+                                    IsActive="True"
+                                    Label=".*"
+                                    Operator="{x:Static cy:TextOperator.Regex}"
+                                    Text="@example\.com$" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="邮箱域名筛选"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Margin="6,6">
+                            <StackPanel>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Data="M3,3 L21,3 L21,21 L3,21 Z M3,3 L21,21 M21,3 L3,21"
+                                    Stroke="#8B5CF6"
+                                    StrokeThickness="1.5" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="编号前缀" />
+                                <cy:TextFilterBox
+                                    IsActive="True"
+                                    Label="^"
+                                    Operator="{x:Static cy:TextOperator.StartsWith}"
+                                    Text="ORD-"
+                                    Watermark="如 ORD-、INV-" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="订单/发票编号过滤"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:Card>
+                    </UniformGrid>
+                </cy:Card>
+
+                <!--  ⑧ 属性表  -->
+                <cy:Card Grid.Row="1" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="属性参考">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <StackPanel>
+
+                        <!--  共有属性  -->
+                        <TextBlock Style="{StaticResource SubTableTitleStyle}" Text="共有属性" />
+                        <Border
+                            Margin="0,0,0,20"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Background="{DynamicResource Background.Header}" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="属性" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="类型" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="说明" />
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="1"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource Border.Default}" />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Label" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="object" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="复选框 Content。挂入逻辑树以支持 DataContext 继承,可绑定复杂内容。" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="IsActive" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="bool (TwoWay)" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="是否启用此过滤项。false 时下拉/输入禁用,通常被调用方用于(短路)该过滤条件。" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Description" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="object" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="第二行描述区。null 时整行收起。" />
+
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="SharedName" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="string" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="Grid.SharedSizeScope 标识,用于多个 FilterBox Label 列对齐。需在外层容器设置 Grid.IsSharedSizeScope=&quot;True&quot;。" />
+
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Operator" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="enum (TwoWay)" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="比较操作符:NumberOperator(6 个) / TextOperator(7 个)。ComboBox 显示数学符号。" />
+                            </Grid>
+                        </Border>
+
+                        <!--  NumberFilterBox 独有  -->
+                        <TextBlock Style="{StaticResource SubTableTitleStyle}" Text="NumberFilterBox 独有" />
+                        <Border
+                            Margin="0,0,0,20"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Background="{DynamicResource Background.Header}" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="属性" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="类型" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="说明" />
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="1"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource Border.Default}" />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Value" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="double (TwoWay)" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="比较右值。绑到内部 NumberBox.Value。" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Minimum / Maximum" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="double" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="Value 输入范围,透传给 NumberBox。默认 int.MinValue / int.MaxValue。" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="NumberMode / DecimalPlaces" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="NumberMode / int" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="Integer / Decimal 模式;小数位数。Integer 模式强制 DecimalPlaces=0。默认 Integer。" />
+
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="SmallChange / LargeChange" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="double" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="方向键/滚轮 与 PageUp/Down 步长。透传给 NumberBox。默认 1 / 10。" />
+
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Tolerance" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="double" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="浮点比较容差。控件不使用此值,仅作为状态供 VM 拼装委托时使用。Integer 模式建议 0,Decimal 模式默认 1e-9。" />
+                            </Grid>
+                        </Border>
+
+                        <!--  TextFilterBox 独有  -->
+                        <TextBlock Style="{StaticResource SubTableTitleStyle}" Text="TextFilterBox 独有" />
+                        <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Background="{DynamicResource Background.Header}" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="属性" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="类型" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="说明" />
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="1"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource Border.Default}" />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Text" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="string (TwoWay)" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="比较模式串/正则。绑到内部 TextBox.Text,UpdateSourceTrigger=PropertyChanged。" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Watermark" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="string" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="空状态占位提示。透传到 TextBoxHelper.Watermark。" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="MaxLength" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="int" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="最大字符数。0 表示不限制。透传到内部 TextBox。" />
+
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="IsCaseSensitive" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="bool" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="状态属性。控件不使用,供 VM 映射 StringComparison/RegexOptions。默认 false。" />
+
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="ExtraContent" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="object" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="输入框右侧附加内容(按钮/复选框等)。null 时该列收起。" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </cy:Card>
+
+                <!--  ⑨ XAML 示例 + ⑩ 设计要点  -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- NumberFilterBox 基础 -->
+<cy:NumberFilterBox
+    Label="价格"
+    IsActive="{Binding PriceFilterEnabled, Mode=TwoWay}"
+    Operator="{Binding PriceOperator, Mode=TwoWay}"
+    Value="{Binding PriceValue, Mode=TwoWay}"
+    Minimum="0" Maximum="9999" />
+
+<!-- TextFilterBox + ExtraContent -->
+<cy:TextFilterBox
+    Label="名称"
+    Watermark="按名称搜索…"
+    IsActive="{Binding NameFilterEnabled, Mode=TwoWay}"
+    Operator="{Binding NameOperator, Mode=TwoWay}"
+    Text="{Binding NameText, Mode=TwoWay}"
+    IsCaseSensitive="{Binding NameCaseSensitive, Mode=TwoWay}">
+    <cy:TextFilterBox.ExtraContent>
+        <CheckBox Content="Aa"
+                  IsChecked="{Binding NameCaseSensitive, Mode=TwoWay}"
+                  ToolTip="区分大小写" />
+    </cy:TextFilterBox.ExtraContent>
+</cy:TextFilterBox>
+
+<!-- VM 自己拼委托接入 ICollectionView -->
+// Func<double, bool> BuildPricePredicate() => PriceOperator switch {
+//     NumberOperator.LessThanOrEqual    => x => x <= PriceValue,
+//     NumberOperator.GreaterThanOrEqual => x => x >= PriceValue,
+//     NumberOperator.Equal              => x => Math.Abs(x - PriceValue) <= Tolerance,
+//     // …其余 case
+//     _ => static _ => true,
+// };
+//
+// Func<string, bool> BuildNamePredicate() {
+//     var cmp = NameCaseSensitive ? StringComparison.Ordinal
+//                                 : StringComparison.OrdinalIgnoreCase;
+//     return NameOperator switch {
+//         TextOperator.Contains   => s => (s ?? "").IndexOf(NameText, cmp) >= 0,
+//         TextOperator.StartsWith => s => (s ?? "").StartsWith(NameText, cmp),
+//         // …其余 case
+//         _ => static _ => true,
+//     };
+// }
+//
+// view.Filter = o => {
+//     var p = (Product)o;
+//     return (!PriceFilterEnabled || BuildPricePredicate()(p.Price))
+//         && (!NameFilterEnabled  || BuildNamePredicate()(p.Name));
+// };
+
+<!-- SharedName 让多个 FilterBox 的 Label 列对齐 -->
+<StackPanel Grid.IsSharedSizeScope="True">
+    <cy:NumberFilterBox SharedName="lbl" Label="价格" ... />
+    <cy:TextFilterBox   SharedName="lbl" Label="名称" ... />
+</StackPanel>]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="10" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="符号化 Operator" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="ComboBox 显示 = ≠ &lt; ≤ &gt; ≥ ∋ ∌ ^ $ .* 等数学/正则符号,可读性远高于英文枚举。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="状态/逻辑分离" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="控件只暴露状态——浮点容差、Regex 无效如何处理、空字符串语义,这些策略由 VM 决定。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="IsActive 即开即关" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="未启用时下拉/输入禁用。VM 通常将其作为整体过滤的短路条件,与多过滤组合时无副作用。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="实时绑定" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="TextFilterBox.Text 走 UpdateSourceTrigger=PropertyChanged,边输入边触发 VM 过滤管线。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="ExtraContent 扩展位" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="TextFilterBox 输入框右侧的开放槽位,常用于放大小写切换/正则模式切换/清空按钮。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

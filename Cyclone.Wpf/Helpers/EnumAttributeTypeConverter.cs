@@ -30,10 +30,6 @@ namespace Cyclone.Wpf.Helpers;
 /// </remarks>
 public class EnumDescriptionTypeConverter : EnumConverter
 {
-    public EnumDescriptionTypeConverter(Type type) : base(type)
-    {
-    }
-
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
     {
         if (destinationType == typeof(string))
@@ -55,5 +51,9 @@ public class EnumDescriptionTypeConverter : EnumConverter
             return string.Empty;
         }
         return base.ConvertTo(context, culture, value, destinationType);
+    }
+
+    public EnumDescriptionTypeConverter(Type type) : base(type)
+    {
     }
 }

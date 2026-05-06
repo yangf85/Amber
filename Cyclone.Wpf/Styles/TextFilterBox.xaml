@@ -17,114 +17,28 @@
         TargetType="CheckBox">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
-    </Style>
-
-    <Style x:Key="TextFilterBox.OperatorComboBoxStyle" TargetType="ComboBox">
-        <Setter Property="IsTabStop" Value="False" />
-        <Setter Property="Focusable" Value="False" />
-        <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="ItemContainerStyle" Value="{StaticResource ComboBoxItem.Style.Basic}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ComboBox">
-                    <Border
-                        x:Name="RootBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="True">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ContentPresenter
-                                Name="ContentSite"
-                                Grid.Column="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Content="{TemplateBinding SelectionBoxItem}"
-                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                IsHitTestVisible="False" />
-                            <TextBox
-                                Name="PART_EditableTextBox"
-                                Grid.Column="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                Focusable="True"
-                                IsReadOnly="{TemplateBinding IsReadOnly}"
-                                Style="{x:Null}"
-                                Template="{StaticResource ComboBox.TextBox}"
-                                Visibility="Hidden" />
-                            <ToggleButton
-                                x:Name="OpenButton"
-                                Grid.Column="1"
-                                Margin="0,0,5,0"
-                                ClickMode="Press"
-                                Focusable="False"
-                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                Style="{StaticResource ComboBox.OpenButtonStyle}" />
-                            <Popup
-                                x:Name="Popup"
-                                AllowsTransparency="True"
-                                Focusable="False"
-                                IsOpen="{TemplateBinding IsDropDownOpen}"
-                                Placement="Bottom"
-                                PlacementTarget="{Binding ElementName=RootBorder}"
-                                PopupAnimation="Slide">
-                                <Grid
-                                    x:Name="DropDown"
-                                    MinWidth="{TemplateBinding ActualWidth}"
-                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                    SnapsToDevicePixels="True">
-                                    <Border
-                                        x:Name="DropDownBorder"
-                                        Background="{DynamicResource Background.Global}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1">
-                                        <ScrollViewer
-                                            x:Name="DropDownScrollViewer"
-                                            Focusable="False"
-                                            HorizontalScrollBarVisibility="Auto"
-                                            VerticalScrollBarVisibility="Auto">
-                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
-                                        </ScrollViewer>
-                                    </Border>
-                                </Grid>
-                            </Popup>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsEditable" Value="True">
-                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
-                            <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="RootBorder" Property="Opacity" Value="0.5" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style
-        x:Key="TextFilterBox.TextBoxStyle"
+        x:Key="TextFilterBox.OperatorComboBoxStyle"
+        BasedOn="{StaticResource ComboBox.Style.Basic}"
+        TargetType="ComboBox">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="MinWidth" Value="50" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style
+        x:Key="TextFilterBox.InputTextBoxStyle"
         BasedOn="{StaticResource TextBox.Style.Basic}"
         TargetType="TextBox" />
 
-    <ControlTemplate x:Key="TextFilterBox.ControlTemplate.Basic" TargetType="ctl:TextFilterBox">
+    <ControlTemplate x:Key="TextFilterBox.Template.Basic" TargetType="ctl:TextFilterBox">
         <Border
             x:Name="RootBorder"
-            Margin="{TemplateBinding Padding}"
+            Padding="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
@@ -140,55 +54,62 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+
                 <CheckBox
-                    x:Name="PART_ActivedCheckBox"
+                    x:Name="PART_ActiveCheckBox"
                     Grid.Row="0"
                     Grid.Column="0"
-                    VerticalContentAlignment="Center"
                     Content="{TemplateBinding Label}"
-                    IsChecked="{Binding Path=IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                    IsChecked="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
                     Style="{StaticResource TextFilterBox.ActiveCheckBoxStyle}" />
+
                 <ComboBox
                     x:Name="PART_OperatorComboBox"
                     Grid.Row="0"
                     Grid.Column="1"
-                    MinWidth="50"
                     Margin="5,0"
-                    IsEnabled="{Binding IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                    IsEnabled="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
                     ItemsSource="{hp:EnumToItemsSource EnumType=ctl:TextOperator}"
                     SelectedValue="{Binding Operator, RelativeSource={RelativeSource TemplatedParent}}"
                     Style="{StaticResource TextFilterBox.OperatorComboBoxStyle}" />
+
                 <TextBox
                     x:Name="PART_InputTextBox"
                     Grid.Row="0"
                     Grid.Column="2"
-                    IsEnabled="{Binding IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                    Style="{StaticResource TextFilterBox.TextBoxStyle}"
-                    Text="{Binding Text, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                    hp:TextBoxHelper.Watermark="{Binding Watermark, RelativeSource={RelativeSource TemplatedParent}}"
+                    IsEnabled="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
+                    MaxLength="{Binding MaxLength, RelativeSource={RelativeSource TemplatedParent}}"
+                    Style="{StaticResource TextFilterBox.InputTextBoxStyle}"
+                    Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}" />
+
                 <ContentPresenter
-                    x:Name="PART_ExtendObjectContainer"
+                    x:Name="ExtraContentContainer"
                     Grid.Row="0"
                     Grid.Column="3"
-                    Content="{TemplateBinding ExtendObject}"
-                    IsEnabled="{Binding IsActived, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                    Margin="5,0,0,0"
+                    Content="{TemplateBinding ExtraContent}"
+                    IsEnabled="{Binding IsActive, RelativeSource={RelativeSource TemplatedParent}}"
+                    Visibility="{Binding ExtraContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static conv:VisibilityConverter.VisibleWhenNotNull}}" />
+
                 <ContentPresenter
                     x:Name="DescriptionContainer"
                     Grid.Row="1"
                     Grid.Column="2"
+                    Grid.ColumnSpan="2"
                     Content="{TemplateBinding Description}"
-                    TextElement.Foreground="{DynamicResource Text.Prompt}" />
+                    TextElement.Foreground="{DynamicResource Text.Prompt}"
+                    Visibility="{Binding Description, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static conv:VisibilityConverter.VisibleWhenNotNull}}" />
             </Grid>
         </Border>
     </ControlTemplate>
 
     <Style x:Key="TextFilterBox.Style.Basic" TargetType="ctl:TextFilterBox">
-        <Setter Property="Template" Value="{StaticResource TextFilterBox.ControlTemplate.Basic}" />
-        <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
+        <Setter Property="Template" Value="{StaticResource TextFilterBox.Template.Basic}" />
+        <Setter Property="Height" Value="Auto" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-
-        <Style.Triggers />
     </Style>
 
     <Style BasedOn="{StaticResource TextFilterBox.Style.Basic}" TargetType="ctl:TextFilterBox" />
