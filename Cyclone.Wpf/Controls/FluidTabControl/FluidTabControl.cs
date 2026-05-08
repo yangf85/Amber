@@ -1,13 +1,5 @@
-﻿// 完整的 FluidTabControl.cs 修复
-
-using Cyclone.Wpf.Helpers;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -18,41 +10,73 @@ using System.Windows.Media.Animation;
 
 namespace Cyclone.Wpf.Controls;
 
+/// <summary>
+/// 标签项相对内容容器的位置。
+/// </summary>
 public enum FluidTabPlacement
 {
+    /// <summary>标签列在左、内容在右。</summary>
     Left,
+
+    /// <summary>标签列在右、内容在左。</summary>
     Right,
 }
 
-[TemplatePart(Name = "PART_ItemsPanel", Type = typeof(Panel))]
-[TemplatePart(Name = "PART_Container", Type = typeof(ScrollViewer))]
+/// <summary>
+/// 滚动定位的锚点位置——决定哪个内容项被视作"当前项"。
+/// </summary>
+public enum FluidTabSnapAlignment
+{
+    /// <summary>视口顶部所在的内容项被视作当前项（默认）。</summary>
+    Top,
+
+    /// <summary>视口中心所在的内容项被视作当前项。</summary>
+    Center,
+}
+
+/// <summary>
+/// 流式标签控件：左/右侧标签列表 + 一侧的内容长滚动面板。
+/// 选中标签时平滑滚动到对应内容；滚动内容时反向同步选中标签。
+/// </summary>
+[TemplatePart(Name = nameof(PART_Container), Type = typeof(ScrollViewer))]
+[TemplatePart(Name = nameof(PART_ContentPanel), Type = typeof(Panel))]
 public class FluidTabControl : Selector
 {
+    private const string PART_Container = "PART_Container";
+    private const string PART_ContentPanel = "PART_ContentPanel";
+
     private ScrollViewer _container;
-    private Panel _itemsPanel;
-    private bool _isSelecting;
-    private bool _isScrolling;
-    private Storyboard _currentStoryboard;
+    private Panel _contentPanel;
 
-    #region AnimationDuration
+    /// <summary>正在因 Selection 变化而执行滚动动画。</summary>
+    private bool _isSyncingSelection;
 
-    public static readonly DependencyProperty AnimationDurationProperty =
-    DependencyProperty.Register("AnimationDuration", typeof(TimeSpan), typeof(FluidTabControl),
-        new FrameworkPropertyMetadata(TimeSpan.FromSeconds(1d)));
+    /// <summary>正在因 Scroll 变化而更新 Selection。</summary>
+    private bool _isSyncingScroll;
 
-    public TimeSpan AnimationDuration
+    private Storyboard _scrollStoryboard;
+
+    static FluidTabControl()
     {
-        get => (TimeSpan)GetValue(AnimationDurationProperty);
-        set => SetValue(AnimationDurationProperty, value);
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(FluidTabControl),
+            new FrameworkPropertyMetadata(typeof(FluidTabControl)));
     }
-
-    #endregion AnimationDuration
 
     #region FluidTabPlacement
 
+    /// <summary>
+    /// 定义标签列位置的依赖属性。
+    /// </summary>
     public static readonly DependencyProperty FluidTabPlacementProperty =
-        DependencyProperty.Register(nameof(FluidTabPlacement), typeof(FluidTabPlacement), typeof(FluidTabControl), new PropertyMetadata(default(FluidTabPlacement)));
+        DependencyProperty.Register(
+            nameof(FluidTabPlacement),
+            typeof(FluidTabPlacement),
+            typeof(FluidTabControl),
+            new PropertyMetadata(FluidTabPlacement.Left));
 
+    /// <summary>
+    /// 获取或设置标签列相对内容区的位置。
+    /// </summary>
     public FluidTabPlacement FluidTabPlacement
     {
         get => (FluidTabPlacement)GetValue(FluidTabPlacementProperty);
@@ -61,80 +85,475 @@ public class FluidTabControl : Selector
 
     #endregion FluidTabPlacement
 
-    #region ItemHeaderHorizontal
+    #region ItemHeaderHorizontalAlignment
 
-    public static readonly DependencyProperty ItemHeaderHorizontalProperty =
-        DependencyProperty.Register(nameof(ItemHeaderHorizontal), typeof(HorizontalAlignment), typeof(FluidTabControl), new PropertyMetadata(default(HorizontalAlignment)));
+    /// <summary>
+    /// 定义标签项 Header 水平对齐的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty ItemHeaderHorizontalAlignmentProperty =
+        DependencyProperty.Register(
+            nameof(ItemHeaderHorizontalAlignment),
+            typeof(HorizontalAlignment),
+            typeof(FluidTabControl),
+            new PropertyMetadata(HorizontalAlignment.Left));
 
-    public HorizontalAlignment ItemHeaderHorizontal
+    /// <summary>
+    /// 获取或设置标签项内 Header 的水平对齐方式。
+    /// </summary>
+    public HorizontalAlignment ItemHeaderHorizontalAlignment
     {
-        get => (HorizontalAlignment)GetValue(ItemHeaderHorizontalProperty);
-        set => SetValue(ItemHeaderHorizontalProperty, value);
+        get => (HorizontalAlignment)GetValue(ItemHeaderHorizontalAlignmentProperty);
+        set => SetValue(ItemHeaderHorizontalAlignmentProperty, value);
     }
 
-    #endregion ItemHeaderHorizontal
+    #endregion ItemHeaderHorizontalAlignment
 
-    static FluidTabControl()
+    #region ItemHeaderTemplate
+
+    /// <summary>
+    /// 定义标签项 Header 模板的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty ItemHeaderTemplateProperty =
+        DependencyProperty.Register(
+            nameof(ItemHeaderTemplate),
+            typeof(DataTemplate),
+            typeof(FluidTabControl),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置应用到所有标签项 Header 的统一模板。等同于 ItemTemplate 的标头版本。
+    /// </summary>
+    public DataTemplate ItemHeaderTemplate
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(FluidTabControl),
-            new FrameworkPropertyMetadata(typeof(FluidTabControl)));
+        get => (DataTemplate)GetValue(ItemHeaderTemplateProperty);
+        set => SetValue(ItemHeaderTemplateProperty, value);
     }
 
-    #region Private
+    #endregion ItemHeaderTemplate
 
+    #region ItemHeaderTemplateSelector
+
+    /// <summary>
+    /// 定义标签项 Header 模板选择器的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty ItemHeaderTemplateSelectorProperty =
+        DependencyProperty.Register(
+            nameof(ItemHeaderTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(FluidTabControl),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置标签项 Header 模板选择器。
+    /// </summary>
+    public DataTemplateSelector ItemHeaderTemplateSelector
+    {
+        get => (DataTemplateSelector)GetValue(ItemHeaderTemplateSelectorProperty);
+        set => SetValue(ItemHeaderTemplateSelectorProperty, value);
+    }
+
+    #endregion ItemHeaderTemplateSelector
+
+    #region ItemHeaderMemberPath
+
+    /// <summary>
+    /// 定义标签项 Header 数据路径的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty ItemHeaderMemberPathProperty =
+        DependencyProperty.Register(
+            nameof(ItemHeaderMemberPath),
+            typeof(string),
+            typeof(FluidTabControl),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置数据项中作为 Header 显示的属性路径（类似 DisplayMemberPath）。
+    /// </summary>
+    public string ItemHeaderMemberPath
+    {
+        get => (string)GetValue(ItemHeaderMemberPathProperty);
+        set => SetValue(ItemHeaderMemberPathProperty, value);
+    }
+
+    #endregion ItemHeaderMemberPath
+
+    #region AnimationDuration
+
+    /// <summary>
+    /// 定义滚动动画时长的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty AnimationDurationProperty =
+        DependencyProperty.Register(
+            nameof(AnimationDuration),
+            typeof(Duration),
+            typeof(FluidTabControl),
+            new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(450))));
+
+    /// <summary>
+    /// 获取或设置选中切换时滚动到目标位置的动画时长。
+    /// </summary>
+    public Duration AnimationDuration
+    {
+        get => (Duration)GetValue(AnimationDurationProperty);
+        set => SetValue(AnimationDurationProperty, value);
+    }
+
+    #endregion AnimationDuration
+
+    #region EasingFunction
+
+    /// <summary>
+    /// 定义滚动动画缓动函数的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty EasingFunctionProperty =
+        DependencyProperty.Register(
+            nameof(EasingFunction),
+            typeof(IEasingFunction),
+            typeof(FluidTabControl),
+            new PropertyMetadata(new QuadraticEase { EasingMode = EasingMode.EaseInOut }));
+
+    /// <summary>
+    /// 获取或设置滚动动画的缓动函数。
+    /// </summary>
+    public IEasingFunction EasingFunction
+    {
+        get => (IEasingFunction)GetValue(EasingFunctionProperty);
+        set => SetValue(EasingFunctionProperty, value);
+    }
+
+    #endregion EasingFunction
+
+    #region SnapAlignment
+
+    /// <summary>
+    /// 定义滚动定位锚点的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty SnapAlignmentProperty =
+        DependencyProperty.Register(
+            nameof(SnapAlignment),
+            typeof(FluidTabSnapAlignment),
+            typeof(FluidTabControl),
+            new PropertyMetadata(FluidTabSnapAlignment.Top));
+
+    /// <summary>
+    /// 获取或设置滚动定位的锚点（决定哪个内容项被视作当前选中项）。
+    /// </summary>
+    public FluidTabSnapAlignment SnapAlignment
+    {
+        get => (FluidTabSnapAlignment)GetValue(SnapAlignmentProperty);
+        set => SetValue(SnapAlignmentProperty, value);
+    }
+
+    #endregion SnapAlignment
+
+    #region Override Methods
+
+    /// <inheritdoc />
+    protected override DependencyObject GetContainerForItemOverride() => new FluidTabItem();
+
+    /// <inheritdoc />
+    protected override bool IsItemItsOwnContainerOverride(object item) => item is FluidTabItem;
+
+    /// <inheritdoc />
+    protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+    {
+        base.PrepareContainerForItemOverride(element, item);
+
+        if (element is not FluidTabItem container || ReferenceEquals(container, item))
+        {
+            return;
+        }
+
+        ApplyItemHeaderBindings(container, item);
+    }
+
+    /// <inheritdoc />
+    protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
+    {
+        base.OnItemsChanged(e);
+        SyncContentPanel(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+    {
+        base.OnSelectionChanged(e);
+
+        if (!_isSyncingScroll)
+        {
+            ScrollToSelectedItem();
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || Items.Count == 0)
+        {
+            return;
+        }
+
+        var currentIndex = SelectedIndex;
+        var targetIndex = currentIndex;
+
+        switch (e.Key)
+        {
+            case Key.Up:
+                targetIndex = Math.Max(0, currentIndex - 1);
+                break;
+
+            case Key.Down:
+                targetIndex = Math.Min(Items.Count - 1, currentIndex + 1);
+                break;
+
+            case Key.Home:
+                targetIndex = 0;
+                break;
+
+            case Key.End:
+                targetIndex = Items.Count - 1;
+                break;
+
+            default:
+                return;
+        }
+
+        if (targetIndex != currentIndex && targetIndex >= 0 && targetIndex < Items.Count)
+        {
+            SelectedIndex = targetIndex;
+            e.Handled = true;
+        }
+    }
+
+    /// <inheritdoc />
+    public override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+
+        if (_container != null)
+        {
+            _container.ScrollChanged -= OnContainerScrollChanged;
+        }
+
+        _container = GetTemplateChild(PART_Container) as ScrollViewer;
+        _contentPanel = GetTemplateChild(PART_ContentPanel) as Panel;
+
+        if (_container != null)
+        {
+            _container.ScrollChanged += OnContainerScrollChanged;
+        }
+
+        RebuildContentPanel();
+    }
+
+    #endregion Override Methods
+
+    #region Private Methods - Header binding
+
+    /// <summary>
+    /// 为 ItemsSource 模式生成的 FluidTabItem 容器配置 Header 相关绑定。
+    /// </summary>
+    private void ApplyItemHeaderBindings(FluidTabItem container, object item)
+    {
+        // Header 数据：优先 MemberPath；否则用整个数据项让 HeaderTemplate 渲染
+        if (!string.IsNullOrEmpty(ItemHeaderMemberPath))
+        {
+            container.SetBinding(HeaderedContentControl.HeaderProperty,
+                new Binding(ItemHeaderMemberPath));
+        }
+        else if (container.Header == null
+                 && container.ReadLocalValue(HeaderedContentControl.HeaderProperty) == DependencyProperty.UnsetValue)
+        {
+            // DataContext 由框架自动设为 item，绑定空路径即拿到 item 自身
+            container.SetBinding(HeaderedContentControl.HeaderProperty, new Binding());
+        }
+
+        // Header 模板：仅在容器自身没设时应用控件级模板
+        if (ItemHeaderTemplate != null && container.HeaderTemplate == null)
+        {
+            container.HeaderTemplate = ItemHeaderTemplate;
+        }
+
+        if (ItemHeaderTemplateSelector != null && container.HeaderTemplateSelector == null)
+        {
+            container.HeaderTemplateSelector = ItemHeaderTemplateSelector;
+        }
+    }
+
+    #endregion Private Methods - Header binding
+
+    #region Private Methods - Content sync
+
+    /// <summary>
+    /// 全量重建内容面板（OnApplyTemplate 时调用）。
+    /// </summary>
+    private void RebuildContentPanel()
+    {
+        if (_contentPanel == null)
+        {
+            return;
+        }
+
+        _contentPanel.Children.Clear();
+
+        foreach (var item in Items)
+        {
+            _contentPanel.Children.Add(CreateContentPresenter(item));
+        }
+    }
+
+    /// <summary>
+    /// 增量同步内容面板，按照 NotifyCollectionChangedAction 处理。
+    /// </summary>
+    private void SyncContentPanel(NotifyCollectionChangedEventArgs e)
+    {
+        if (_contentPanel == null)
+        {
+            return;
+        }
+
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems != null)
+                {
+                    var insertAt = e.NewStartingIndex;
+                    for (var i = 0; i < e.NewItems.Count; i++)
+                    {
+                        _contentPanel.Children.Insert(insertAt + i, CreateContentPresenter(e.NewItems[i]));
+                    }
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems != null)
+                {
+                    for (var i = e.OldItems.Count - 1; i >= 0; i--)
+                    {
+                        var removeAt = e.OldStartingIndex + i;
+                        if (removeAt >= 0 && removeAt < _contentPanel.Children.Count)
+                        {
+                            _contentPanel.Children.RemoveAt(removeAt);
+                        }
+                    }
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Replace:
+                if (e.NewItems != null)
+                {
+                    for (var i = 0; i < e.NewItems.Count; i++)
+                    {
+                        var idx = e.OldStartingIndex + i;
+                        if (idx >= 0 && idx < _contentPanel.Children.Count)
+                        {
+                            _contentPanel.Children.RemoveAt(idx);
+                            _contentPanel.Children.Insert(idx, CreateContentPresenter(e.NewItems[i]));
+                        }
+                    }
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Move:
+                if (e.OldStartingIndex >= 0 && e.OldStartingIndex < _contentPanel.Children.Count)
+                {
+                    var moving = _contentPanel.Children[e.OldStartingIndex];
+                    _contentPanel.Children.RemoveAt(e.OldStartingIndex);
+                    _contentPanel.Children.Insert(e.NewStartingIndex, moving);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Reset:
+                RebuildContentPanel();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 为单个 item 创建对应的内容 ContentPresenter，绑定到容器的 Content / ContentTemplate。
+    /// </summary>
+    private ContentPresenter CreateContentPresenter(object item)
+    {
+        var presenter = new ContentPresenter();
+
+        if (item is FluidTabItem tabItem)
+        {
+            // 直接添加的 FluidTabItem：绑定到它的 Content / ContentTemplate
+            // 注意：FluidTabItem 自身模板不渲染 Content，所以这里独占该对象不会冲突
+            presenter.SetBinding(ContentPresenter.ContentProperty,
+                new Binding(nameof(FluidTabItem.Content)) { Source = tabItem });
+            presenter.SetBinding(ContentPresenter.ContentTemplateProperty,
+                new Binding(nameof(FluidTabItem.ContentTemplate)) { Source = tabItem });
+            presenter.SetBinding(ContentPresenter.ContentTemplateSelectorProperty,
+                new Binding(nameof(FluidTabItem.ContentTemplateSelector)) { Source = tabItem });
+        }
+        else
+        {
+            // ItemsSource 模式：item 是数据，由控件级 ItemTemplate / Selector 渲染
+            presenter.Content = item;
+            presenter.ContentTemplate = ItemTemplate;
+            presenter.ContentTemplateSelector = ItemTemplateSelector;
+        }
+
+        return presenter;
+    }
+
+    #endregion Private Methods - Content sync
+
+    #region Private Methods - Scroll sync
+
+    /// <summary>
+    /// 滚动到当前选中项对应的内容。
+    /// </summary>
     private void ScrollToSelectedItem()
     {
-        if (SelectedItem == null) return;
-
-        // 获取选中项的索引
-        int selectedIndex = Items.IndexOf(SelectedItem);
-        if (selectedIndex < 0) return;
-
-        // 查找对应索引的内容元素
-        FrameworkElement targetElement = null;
-
-        foreach (var child in _itemsPanel.Children)
+        if (_container == null || _contentPanel == null || SelectedItem == null)
         {
-            if (child is Border border && border.Tag is int index && index == selectedIndex)
-            {
-                targetElement = border;
-                break;
-            }
+            return;
         }
 
-        if (targetElement != null)
+        var selectedIndex = Items.IndexOf(SelectedItem);
+        if (selectedIndex < 0 || selectedIndex >= _contentPanel.Children.Count)
         {
-            var position = targetElement.TranslatePoint(new Point(), _itemsPanel);
-            ScrollToOffset(position.Y);
+            return;
         }
+
+        if (_contentPanel.Children[selectedIndex] is not FrameworkElement target)
+        {
+            return;
+        }
+
+        // 计算目标内容相对内容面板的 Y 偏移
+        var targetTop = target.TranslatePoint(new Point(), _contentPanel).Y;
+
+        // SnapAlignment.Center 时，把目标元素居中于视口
+        var targetOffset = SnapAlignment == FluidTabSnapAlignment.Center
+            ? targetTop - Math.Max(0, (_container.ViewportHeight - target.ActualHeight) / 2)
+            : targetTop;
+
+        // 限制在可滚动范围内
+        targetOffset = Math.Max(0, Math.Min(targetOffset, _container.ScrollableHeight));
+
+        AnimateToOffset(targetOffset);
     }
 
-    private FluidTabItem GetFluidTabItem(object item)
+    /// <summary>
+    /// 启动到目标垂直偏移的滚动动画。
+    /// </summary>
+    private void AnimateToOffset(double targetOffset)
     {
-        if (item is FluidTabItem tabItem) return tabItem;
+        StopScrollAnimation();
 
-        // 当使用 ItemsSource 时，ItemContainerGenerator 会为每个数据项生成容器
-        var container = ItemContainerGenerator.ContainerFromItem(item) as FluidTabItem;
-        if (container != null) return container;
-
-        // 如果还没有生成容器，通过索引查找
-        int index = Items.IndexOf(item);
-        if (index >= 0)
+        if (_container == null)
         {
-            return ItemContainerGenerator.ContainerFromIndex(index) as FluidTabItem;
+            return;
         }
 
-        return null;
-    }
-
-    private void ScrollToOffset(double targetOffset)
-    {
-        if (_container == null) return;
-
-        // 停止正在进行的动画
-        _currentStoryboard?.Stop();
-
-        if (AnimationDuration == TimeSpan.Zero || _container.VerticalOffset == targetOffset)
+        if (AnimationDuration.HasTimeSpan == false
+            || AnimationDuration.TimeSpan == TimeSpan.Zero
+            || Math.Abs(_container.VerticalOffset - targetOffset) < 0.5)
         {
             _container.ScrollToVerticalOffset(targetOffset);
             return;
@@ -145,228 +564,155 @@ public class FluidTabControl : Selector
             From = _container.VerticalOffset,
             To = targetOffset,
             Duration = AnimationDuration,
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            EasingFunction = EasingFunction,
         };
 
-        _currentStoryboard = new Storyboard();
-        _currentStoryboard.Children.Add(animation);
-
         Storyboard.SetTarget(animation, _container);
-        Storyboard.SetTargetProperty(animation, new PropertyPath(ScrollViewerBehavior.VerticalOffsetProperty));
+        Storyboard.SetTargetProperty(animation, new PropertyPath(ScrollViewerOffsetBehavior.VerticalOffsetProperty));
 
-        _currentStoryboard.Completed += (s, e) => _currentStoryboard = null;
-        _currentStoryboard.Begin();
+        _scrollStoryboard = new Storyboard();
+        _scrollStoryboard.Children.Add(animation);
+
+        _isSyncingSelection = true;
+        _scrollStoryboard.Completed += OnScrollStoryboardCompleted;
+        _scrollStoryboard.Begin();
     }
 
+    private void OnScrollStoryboardCompleted(object sender, EventArgs e)
+    {
+        if (_scrollStoryboard != null)
+        {
+            _scrollStoryboard.Completed -= OnScrollStoryboardCompleted;
+        }
+
+        _scrollStoryboard = null;
+        _isSyncingSelection = false;
+    }
+
+    private void StopScrollAnimation()
+    {
+        if (_scrollStoryboard == null)
+        {
+            return;
+        }
+
+        _scrollStoryboard.Completed -= OnScrollStoryboardCompleted;
+        _scrollStoryboard.Stop();
+        _scrollStoryboard = null;
+        _isSyncingSelection = false;
+    }
+
+    /// <summary>
+    /// 内容滚动时反向同步 Selection。
+    /// </summary>
     private void OnContainerScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        if (_isSelecting || _container == null || _currentStoryboard != null) return;
-
-        // 找到当前可见的内容项
-        var hitTestPoint = new Point(_container.ActualWidth / 2, e.VerticalOffset + _container.ActualHeight / 2);
-        var hitTestResult = VisualTreeHelper.HitTest(_itemsPanel, hitTestPoint);
-
-        if (hitTestResult?.VisualHit != null)
+        // 仅处理垂直方向变化
+        if (Math.Abs(e.VerticalChange) < 0.001)
         {
-            // 向上查找 Border
-            DependencyObject current = hitTestResult.VisualHit;
-            while (current != null && !(current is Border border && border.Tag is int))
-            {
-                current = VisualTreeHelper.GetParent(current);
-            }
+            return;
+        }
 
-            if (current is Border targetBorder && targetBorder.Tag is int index)
-            {
-                // 通过索引获取对应的项
-                if (index >= 0 && index < Items.Count)
-                {
-                    var item = Items[index];
-                    if (!Equals(SelectedItem, item))
-                    {
-                        _isScrolling = true;
-                        SelectedItem = item;
-                        _isScrolling = false;
-                    }
-                }
-            }
+        if (_isSyncingSelection || _scrollStoryboard != null || _container == null || _contentPanel == null)
+        {
+            return;
+        }
+
+        if (_contentPanel.Children.Count == 0)
+        {
+            return;
+        }
+
+        var anchorY = SnapAlignment == FluidTabSnapAlignment.Center
+            ? e.VerticalOffset + (_container.ViewportHeight / 2)
+            : e.VerticalOffset;
+
+        var anchorIndex = FindAnchorIndex(anchorY);
+        if (anchorIndex < 0 || anchorIndex >= Items.Count)
+        {
+            return;
+        }
+
+        var item = Items[anchorIndex];
+        if (Equals(SelectedItem, item))
+        {
+            return;
+        }
+
+        _isSyncingScroll = true;
+        try
+        {
+            SelectedItem = item;
+        }
+        finally
+        {
+            _isSyncingScroll = false;
         }
     }
 
-    internal void UpdateItemsContent()
+    /// <summary>
+    /// 找出包含锚点 Y 坐标的内容项索引；锚点不命中任何项时返回最近项。
+    /// </summary>
+    private int FindAnchorIndex(double anchorY)
     {
-        if (_container == null || _itemsPanel == null) return;
-
-        _itemsPanel.Children.Clear();
-
-        for (int i = 0; i < Items.Count; i++)
+        if (_contentPanel == null || _contentPanel.Children.Count == 0)
         {
-            var item = Items[i];
-            var container = GetFluidTabItem(item);
+            return -1;
+        }
 
-            // 创建内容包装器
-            var contentWrapper = new Border
+        var lastIndex = -1;
+        for (var i = 0; i < _contentPanel.Children.Count; i++)
+        {
+            if (_contentPanel.Children[i] is not FrameworkElement child)
             {
-                Background = Brushes.Transparent,
-                Tag = i  // 使用索引作为标识
-            };
-
-            // 使用 ContentPresenter 来显示内容，避免直接使用已有父元素的内容
-            ContentPresenter contentPresenter = null;
-
-            if (item is FluidTabItem tabItem)
-            {
-                // 对于 FluidTabItem，创建 ContentPresenter 并绑定到其 Content
-                contentPresenter = new ContentPresenter();
-                contentPresenter.SetBinding(ContentPresenter.ContentProperty, new Binding("Content") { Source = tabItem });
-
-                // 绑定 DataContext
-                var dataContextBinding = new Binding("DataContext")
-                {
-                    Source = tabItem,
-                    Mode = BindingMode.OneWay
-                };
-                contentWrapper.SetBinding(Border.DataContextProperty, dataContextBinding);
-            }
-            else
-            {
-                // 对于通过 ItemsSource 绑定的项，使用 ItemTemplate
-                contentPresenter = new ContentPresenter
-                {
-                    ContentTemplate = ItemTemplate,
-                    Content = item
-                };
-                contentWrapper.DataContext = item;
+                continue;
             }
 
-            // 设置 ContentOwner，建立关联
-            if (container != null && contentPresenter != null)
+            var top = child.TranslatePoint(new Point(), _contentPanel).Y;
+            var bottom = top + child.ActualHeight;
+
+            if (anchorY < top)
             {
-                FluidTabItem.SetContentOwner(contentPresenter, container);
-                // 同时在 wrapper 上也设置，以便查找
-                FluidTabItem.SetContentOwner(contentWrapper, container);
+                // 锚点在第一个项之前
+                return lastIndex < 0 ? i : lastIndex;
             }
 
-            contentWrapper.Child = contentPresenter;
-            _itemsPanel.Children.Add(contentWrapper);
-        }
-    }
-
-    #endregion Private
-
-    #region Override
-
-    // 使用普通的 MouseWheel 事件，只有当其他控件没有处理时才会到达这里
-    private void FluidTabControl_MouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        // 如果事件已经被处理，则不再处理
-        if (e.Handled || _container == null || _isScrolling) return;
-
-        // 检查鼠标是否在内容区域内
-        var containerPosition = e.GetPosition(_container);
-        var contentBounds = new Rect(0, 0, _container.ActualWidth, _container.ActualHeight);
-
-        if (contentBounds.Contains(containerPosition))
-        {
-            // 计算新的垂直偏移
-            double newOffset = _container.VerticalOffset - (e.Delta / 3.0);
-            newOffset = Math.Max(0, Math.Min(newOffset, _container.ScrollableHeight));
-
-            // 滚动到新位置
-            _container.ScrollToVerticalOffset(newOffset);
-
-            // 标记事件为已处理
-            e.Handled = true;
-        }
-    }
-
-    protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
-    {
-        base.OnItemsChanged(e);
-
-        // 延迟更新内容，确保容器已经生成
-        Dispatcher.BeginInvoke(new Action(() => UpdateItemsContent()),
-            System.Windows.Threading.DispatcherPriority.Loaded);
-    }
-
-    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
-    {
-        base.OnSelectionChanged(e);
-
-        if (!_isScrolling && _container != null)
-        {
-            _isSelecting = true;
-            ScrollToSelectedItem();
-            _isSelecting = false;
-        }
-    }
-
-    protected override DependencyObject GetContainerForItemOverride() => new FluidTabItem();
-
-    protected override bool IsItemItsOwnContainerOverride(object item) => item is FluidTabItem;
-
-    protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
-    {
-        base.PrepareContainerForItemOverride(element, item);
-
-        if (element is FluidTabItem container && !(item is FluidTabItem))
-        {
-            var itemType = item.GetType();
-            var headerProperty = itemType.GetProperty("Header");
-            if (headerProperty != null)
+            if (anchorY < bottom)
             {
-                var headerBinding = new Binding("Header")
-                {
-                    Source = item,
-                    Mode = BindingMode.OneWay
-                };
-                container.SetBinding(FluidTabItem.HeaderProperty, headerBinding);
+                return i;
             }
 
-            container.DataContext = item;
-        }
-    }
-
-    public override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-
-        _container = GetTemplateChild("PART_Container") as ScrollViewer;
-        _itemsPanel = new VirtualizingStackPanel();
-        VirtualizingPanel.SetVirtualizationMode(_itemsPanel, VirtualizationMode.Recycling);
-
-        if (_container != null)
-        {
-            _container.ScrollChanged -= OnContainerScrollChanged;
-            _container.ScrollChanged += OnContainerScrollChanged;
-            _container.Content = _itemsPanel;
+            lastIndex = i;
         }
 
-        UpdateItemsContent();
-
-        // 移除旧的事件处理器（如果存在）
-        MouseWheel -= FluidTabControl_MouseWheel;
-        // 使用普通的 MouseWheel 事件而不是 PreviewMouseWheel
-        MouseWheel += FluidTabControl_MouseWheel;
+        // 锚点超出最后一项末尾
+        return lastIndex;
     }
 
-    #endregion Override
+    #endregion Private Methods - Scroll sync
 
-    private static class ScrollViewerBehavior
+    /// <summary>
+    /// 通过附加属性桥接 ScrollViewer 的只读 VerticalOffset，使其支持动画。
+    /// </summary>
+    private static class ScrollViewerOffsetBehavior
     {
         public static readonly DependencyProperty VerticalOffsetProperty =
-            DependencyProperty.RegisterAttached("VerticalOffset", typeof(double), typeof(ScrollViewerBehavior),
-                new FrameworkPropertyMetadata(0.0, OnVerticalOffsetChanged));
+            DependencyProperty.RegisterAttached(
+                "VerticalOffset",
+                typeof(double),
+                typeof(ScrollViewerOffsetBehavior),
+                new FrameworkPropertyMetadata(0d, OnVerticalOffsetChanged));
 
         private static void OnVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScrollViewer scrollViewer)
+            if (d is ScrollViewer sv)
             {
-                scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
+                sv.ScrollToVerticalOffset((double)e.NewValue);
             }
         }
 
-        public static double GetVerticalOffset(ScrollViewer obj) => obj.VerticalOffset;
+        public static double GetVerticalOffset(DependencyObject obj) => (double)obj.GetValue(VerticalOffsetProperty);
 
-        public static void SetVerticalOffset(ScrollViewer obj, double value) => obj.ScrollToVerticalOffset(value);
+        public static void SetVerticalOffset(DependencyObject obj, double value) => obj.SetValue(VerticalOffsetProperty, value);
     }
 }

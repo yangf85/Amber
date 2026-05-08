@@ -1,154 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Markup;
 
 namespace Cyclone.Wpf.Controls;
 
-[ContentProperty("Content")]//不能继承ContentControl 会导致视觉元素连接错误
-public class FluidTabItem : Control
+/// <summary>
+/// 流式标签控件的标签项。继承自 <see cref="HeaderedContentControl"/>：
+/// Header 在 Tab 头列表中渲染；Content 不出现在 FluidTabItem 自身的视觉树里，
+/// 而是由 <see cref="FluidTabControl"/> 在内容滚动区独立渲染，避免单个对象被多父级持有。
+/// </summary>
+public class FluidTabItem : HeaderedContentControl
 {
-    public FluidTabItem()
-    {
-        // 监听 DataContext 变化
-        DataContextChanged += OnDataContextChanged;
-    }
-
-    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        // 触发父控件更新内容
-        if (Parent is FluidTabControl tabControl)
-        {
-            tabControl.UpdateItemsContent();
-        }
-    }
-
     static FluidTabItem()
     {
-        FrameworkElement.DefaultStyleKeyProperty.OverrideMetadata(typeof(FluidTabItem), new FrameworkPropertyMetadata(typeof(FluidTabItem)));
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(FluidTabItem),
+            new FrameworkPropertyMetadata(typeof(FluidTabItem)));
     }
 
-    #region Content
+    #region Icon
 
-    public static readonly DependencyProperty ContentProperty =
-        DependencyProperty.Register("Content", typeof(object), typeof(FluidTabItem), new PropertyMetadata(ContentPropertyChangedCallback));
+    /// <summary>
+    /// 定义图标内容的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty IconProperty =
+        DependencyProperty.Register(
+            nameof(Icon),
+            typeof(object),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
 
-    public object Content
+    /// <summary>
+    /// 获取或设置标签项左侧的图标内容。
+    /// </summary>
+    public object Icon
     {
-        get => GetValue(ContentProperty);
-
-        set => SetValue(ContentProperty, value);
+        get => GetValue(IconProperty);
+        set => SetValue(IconProperty, value);
     }
 
-    public static void ContentPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    #endregion Icon
+
+    #region IconTemplate
+
+    /// <summary>
+    /// 定义图标模板的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty IconTemplateProperty =
+        DependencyProperty.Register(
+            nameof(IconTemplate),
+            typeof(DataTemplate),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置图标模板。
+    /// </summary>
+    public DataTemplate IconTemplate
     {
-        SetContentOwner(e.NewValue as DependencyObject, d as FluidTabItem);
+        get => (DataTemplate)GetValue(IconTemplateProperty);
+        set => SetValue(IconTemplateProperty, value);
     }
 
-    #endregion Content
-
-    #region Header
-
-    public static readonly DependencyProperty HeaderProperty =
-        DependencyProperty.Register("Header", typeof(object), typeof(FluidTabItem), new PropertyMetadata(default));
-
-    public object Header
-    {
-        get => GetValue(HeaderProperty);
-
-        set => SetValue(HeaderProperty, value);
-    }
-
-    #endregion Header
-
-    #region ContentOwner
-
-    internal static readonly DependencyProperty ContentOwnerProperty =
-        DependencyProperty.RegisterAttached("ContentOwner", typeof(FluidTabItem), typeof(FluidTabItem));
-
-    internal static FluidTabItem GetContentOwner(DependencyObject obj)
-    {
-        return (FluidTabItem)obj.GetValue(ContentOwnerProperty);
-    }
-
-    internal static void SetContentOwner(DependencyObject obj, FluidTabItem value)
-    {
-        obj.SetValue(ContentOwnerProperty, value);
-    }
-
-    #endregion ContentOwner
+    #endregion IconTemplate
 
     #region IsSelected
 
+    /// <summary>
+    /// 定义是否选中的依赖属性（来自 <see cref="Selector.IsSelectedProperty"/>）。
+    /// </summary>
+    public static readonly DependencyProperty IsSelectedProperty =
+        Selector.IsSelectedProperty.AddOwner(
+            typeof(FluidTabItem),
+            new FrameworkPropertyMetadata(false, OnIsSelectedChanged));
+
+    /// <summary>
+    /// 获取或设置标签项是否被选中。
+    /// </summary>
     public bool IsSelected
     {
         get => (bool)GetValue(IsSelectedProperty);
-
         set => SetValue(IsSelectedProperty, value);
     }
 
-    public static readonly DependencyProperty IsSelectedProperty =
-        Selector.IsSelectedProperty.AddOwner(typeof(FluidTabItem), new FrameworkPropertyMetadata(OnIsSelectedChanged));
-
     private static void OnIsSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        FluidTabItem fluidTabItem = d as FluidTabItem;
-        if ((bool)e.NewValue)
+        if (d is not FluidTabItem item)
         {
-            fluidTabItem.OnSelected(new RoutedEventArgs(Selector.SelectedEvent, fluidTabItem));
+            return;
         }
-        else
-        {
-            fluidTabItem.OnUnselected(new RoutedEventArgs(Selector.UnselectedEvent, fluidTabItem));
-        }
-    }
 
-    private void HandleIsSelectedChanged(bool newValue, RoutedEventArgs e)
-    {
-        RaiseEvent(e);
-    }
-
-    protected virtual void OnSelected(RoutedEventArgs e)
-    {
-        HandleIsSelectedChanged(newValue: true, e);
-    }
-
-    protected virtual void OnUnselected(RoutedEventArgs e)
-    {
-        HandleIsSelectedChanged(newValue: false, e);
+        var routed = (bool)e.NewValue ? Selector.SelectedEvent : Selector.UnselectedEvent;
+        item.RaiseEvent(new RoutedEventArgs(routed, item));
     }
 
     #endregion IsSelected
 
-    #region Override
+    #region Override Methods
 
+    /// <inheritdoc />
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);
 
-        if (ItemsControl.ItemsControlFromItemContainer(this) is FluidTabControl tabControl)
+        if (ItemsControl.ItemsControlFromItemContainer(this) is not FluidTabControl tab)
         {
-            // 获取当前 FluidTabItem 对应的数据项
-            var dataItem = tabControl.ItemContainerGenerator.ItemFromContainer(this);
-
-            if (dataItem != null)
-            {
-                // 如果找到了数据项，设置它为选中项
-                tabControl.SelectedItem = dataItem;
-            }
-            else
-            {
-                // 如果没有找到数据项（可能是直接添加的 FluidTabItem），则设置控件本身
-                tabControl.SelectedItem = this;
-            }
+            return;
         }
+
+        var dataItem = tab.ItemContainerGenerator.ItemFromContainer(this);
+        tab.SelectedItem = dataItem != DependencyProperty.UnsetValue ? dataItem : this;
     }
 
-    #endregion Override
+    #endregion Override Methods
 }

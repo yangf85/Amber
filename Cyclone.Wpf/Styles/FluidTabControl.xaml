@@ -3,50 +3,124 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
     <ResourceDictionary.MergedDictionaries>
-        <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <ControlTemplate x:Key="FluidTabItem.ControlTemplate.Basic" TargetType="{x:Type ctl:FluidTabItem}">
+    <!--  ============ FluidTabItem 模板 ============  -->
+    <ControlTemplate x:Key="FluidTabItem.Template.Basic" TargetType="{x:Type ctl:FluidTabItem}">
         <Border
             x:Name="RootBorder"
             Height="{TemplateBinding Height}"
             Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
             SnapsToDevicePixels="True">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="LeftColumn" Width="*" />
-                    <ColumnDefinition x:Name="MiddleColumn" Width="5" />
-                    <ColumnDefinition x:Name="RightColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="IndicatorColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="IconColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="HeaderColumn" Width="*" />
                 </Grid.ColumnDefinitions>
-                <ContentPresenter
-                    Name="ContentContainer"
+
+                <!--  指示器：选中时通过 ScaleY 0→1 平滑滑入  -->
+                <Rectangle
+                    x:Name="Indicator"
                     Grid.Column="0"
-                    Margin="5,0"
-                    HorizontalAlignment="{Binding Path=ItemHeaderHorizontal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}"
+                    Width="3"
+                    Margin="0"
+                    Fill="{DynamicResource Border.Selected}"
+                    RenderTransformOrigin="0.5,0.5"
+                    SnapsToDevicePixels="True">
+                    <Rectangle.RenderTransform>
+                        <ScaleTransform x:Name="IndicatorScale" ScaleY="0" />
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+
+                <!--  图标：仅在 Icon 不为空时占位  -->
+                <ContentPresenter
+                    x:Name="IconPresenter"
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Icon}"
+                    ContentTemplate="{TemplateBinding IconTemplate}"
+                    Focusable="False"
+                    Visibility="Collapsed" />
+
+                <!--  Header  -->
+                <ContentPresenter
+                    x:Name="HeaderPresenter"
+                    Grid.Column="2"
+                    Margin="8,0,8,0"
+                    HorizontalAlignment="{Binding ItemHeaderHorizontalAlignment, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}"
                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                     ContentSource="Header"
                     Focusable="False"
                     RecognizesAccessKey="True" />
-                <Rectangle
-                    x:Name="Indicator"
-                    Grid.Column="2"
-                    Width="3"
-                    Fill="Transparent" />
             </Grid>
         </Border>
+
         <ControlTemplate.Triggers>
-            <DataTrigger Binding="{Binding Path=FluidTabPlacement, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}" Value="Right">
-                <Setter TargetName="Indicator" Property="Grid.Column" Value="0" />
-                <Setter TargetName="Indicator" Property="HorizontalAlignment" Value="Left" />
-                <Setter TargetName="ContentContainer" Property="Grid.Column" Value="2" />
+
+            <!--  Icon 不为空时显示  -->
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="IconPresenter" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="IconPresenter" Property="Margin" Value="0" />
+            </Trigger>
+
+            <!--  Right 排列时反转列顺序：Indicator 移到右侧  -->
+            <DataTrigger Binding="{Binding FluidTabPlacement, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}" Value="Right">
+                <Setter TargetName="Indicator" Property="Grid.Column" Value="2" />
+                <Setter TargetName="IconPresenter" Property="Grid.Column" Value="0" />
+                <Setter TargetName="HeaderPresenter" Property="Grid.Column" Value="1" />
+                <Setter TargetName="IndicatorColumn" Property="Width" Value="*" />
+                <Setter TargetName="IconColumn" Property="Width" Value="Auto" />
+                <Setter TargetName="HeaderColumn" Property="Width" Value="Auto" />
             </DataTrigger>
+
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource Background.Hover}" />
             </Trigger>
+
+            <!--  IsSelected 切换时驱动 Indicator 动画  -->
             <Trigger Property="IsSelected" Value="True">
-                <Setter TargetName="Indicator" Property="Fill" Value="{DynamicResource Border.Selected}" />
+                <Setter Property="Background" Value="{DynamicResource Background.Selected}" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground.Selected}" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="IndicatorScale"
+                                Storyboard.TargetProperty="ScaleY"
+                                To="1"
+                                Duration="0:0:0.25">
+                                <DoubleAnimation.EasingFunction>
+                                    <CubicEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="IndicatorScale"
+                                Storyboard.TargetProperty="ScaleY"
+                                To="0"
+                                Duration="0:0:0.15">
+                                <DoubleAnimation.EasingFunction>
+                                    <CubicEase EasingMode="EaseIn" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -57,77 +131,90 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Header}" />
-        <Setter Property="Template" Value="{StaticResource FluidTabItem.ControlTemplate.Basic}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template" Value="{StaticResource FluidTabItem.Template.Basic}" />
     </Style>
 
     <Style BasedOn="{StaticResource FluidTabItem.Style.Basic}" TargetType="{x:Type ctl:FluidTabItem}" />
+
+    <!--  ============ FluidTabControl 模板 ============  -->
+    <ControlTemplate x:Key="FluidTabControl.Template.Basic" TargetType="{x:Type ctl:FluidTabControl}">
+        <Border
+            x:Name="RootBorder"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}">
+            <Grid
+                ClipToBounds="True"
+                KeyboardNavigation.TabNavigation="Local"
+                SnapsToDevicePixels="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="HeaderColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="DividerColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="ContentColumn" Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Header 列：ItemsPresenter 渲染所有 FluidTabItem，包在 ScrollViewer 中支持长列表滚动  -->
+                <ScrollViewer
+                    x:Name="HeaderScroll"
+                    Grid.Column="0"
+                    Panel.ZIndex="1"
+                    Focusable="False"
+                    HorizontalScrollBarVisibility="Disabled"
+                    KeyboardNavigation.TabIndex="1"
+                    VerticalScrollBarVisibility="Auto">
+                    <ItemsPresenter />
+                </ScrollViewer>
+
+                <!--  分隔线  -->
+                <Rectangle
+                    x:Name="Divider"
+                    Grid.Column="1"
+                    Width="1"
+                    Fill="{TemplateBinding BorderBrush}" />
+
+                <!--  内容列：ScrollViewer + 内容面板（每项一个 ContentPresenter，由 code-behind 同步）  -->
+                <Grid
+                    x:Name="ContentArea"
+                    Grid.Column="2"
+                    Background="{TemplateBinding Background}"
+                    KeyboardNavigation.DirectionalNavigation="Contained"
+                    KeyboardNavigation.TabIndex="2"
+                    KeyboardNavigation.TabNavigation="Local">
+                    <ScrollViewer
+                        x:Name="PART_Container"
+                        Focusable="False"
+                        HorizontalScrollBarVisibility="Disabled"
+                        IsDeferredScrollingEnabled="False"
+                        VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="PART_ContentPanel" Orientation="Vertical" />
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <ControlTemplate.Triggers>
+            <!--  Right 排列：Header 移到右、内容移到左  -->
+            <Trigger Property="FluidTabPlacement" Value="Right">
+                <Setter TargetName="HeaderScroll" Property="Grid.Column" Value="2" />
+                <Setter TargetName="ContentArea" Property="Grid.Column" Value="0" />
+                <Setter TargetName="HeaderColumn" Property="Width" Value="Auto" />
+                <Setter TargetName="ContentColumn" Property="Width" Value="*" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 
     <Style
         x:Key="FluidTabControl.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type ctl:FluidTabControl}">
-        <Setter Property="ItemHeaderHorizontal" Value="Left" />
+        <Setter Property="ItemHeaderHorizontalAlignment" Value="Left" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ctl:FluidTabControl}">
-                    <Border
-                        x:Name="RootBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid
-                            ClipToBounds="True"
-                            KeyboardNavigation.TabNavigation="Local"
-                            SnapsToDevicePixels="true">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition x:Name="LeftColumn" Width="Auto" />
-                                <ColumnDefinition x:Name="MiddleColumn" Width="Auto" />
-                                <ColumnDefinition x:Name="RightColumn" Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid
-                                x:Name="ItemHeaderContainer"
-                                Grid.Column="0"
-                                Panel.ZIndex="1"
-                                KeyboardNavigation.TabIndex="1">
-                                <ItemsPresenter />
-                            </Grid>
-                            <Rectangle
-                                Grid.Column="1"
-                                Width="1"
-                                Fill="{TemplateBinding BorderBrush}" />
-                            <Grid
-                                x:Name="ContentPanel"
-                                Grid.Column="2"
-                                Background="{TemplateBinding Background}"
-                                KeyboardNavigation.DirectionalNavigation="Contained"
-                                KeyboardNavigation.TabIndex="2"
-                                KeyboardNavigation.TabNavigation="Local">
-                                <ScrollViewer
-                                    x:Name="PART_Container"
-                                    Focusable="False"
-                                    HorizontalScrollBarVisibility="Disabled"
-                                    IsDeferredScrollingEnabled="False"
-                                    VerticalScrollBarVisibility="Auto">
-                                    <VirtualizingStackPanel x:Name="PART_ItemsPanel" VirtualizingPanel.VirtualizationMode="Recycling" />
-                                </ScrollViewer>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="FluidTabPlacement" Value="Right">
-                            <Setter TargetName="ContentPanel" Property="Grid.Column" Value="0" />
-                            <Setter TargetName="ItemHeaderContainer" Property="Grid.Column" Value="2" />
-                            <Setter TargetName="LeftColumn" Property="Width" Value="*" />
-                            <Setter TargetName="RightColumn" Property="Width" Value="Auto" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Template" Value="{StaticResource FluidTabControl.Template.Basic}" />
     </Style>
 
     <Style BasedOn="{StaticResource FluidTabControl.Style.Basic}" TargetType="ctl:FluidTabControl" />

@@ -1,109 +1,571 @@
-﻿// CascadePicker.cs - 添加键盘支持的版本
-using Cyclone.Wpf.Helpers;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Controls;
 
+/// <summary>
+/// 级联选择器。支持三种绑定方式：
+/// <see cref="SelectedItem"/>（对象引用，通用）、
+/// <see cref="SelectedValue"/> + <see cref="SelectedValuePath"/>（按 ID，O(1) 无歧义，推荐），
+/// <see cref="SelectedPath"/>（字符串路径，best-effort，路径唯一时可双向）。
+/// </summary>
 [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(CascadePickerItem))]
-[TemplatePart(Name = PART_DisplayedTextBox, Type = typeof(TextBox))]
-[TemplatePart(Name = PART_ItemsPopup, Type = typeof(Popup))]
-[TemplatePart(Name = PART_ClearButton, Type = typeof(Button))]
-[TemplatePart(Name = PART_OpenToggleButton, Type = typeof(ToggleButton))]
+[TemplatePart(Name = nameof(PART_DisplayedTextBox), Type = typeof(TextBox))]
+[TemplatePart(Name = nameof(PART_ItemsPopup), Type = typeof(Popup))]
+[TemplatePart(Name = nameof(PART_ClearButton), Type = typeof(Button))]
+[TemplatePart(Name = nameof(PART_OpenToggleButton), Type = typeof(ToggleButton))]
 public class CascadePicker : ItemsControl
 {
     private const string PART_DisplayedTextBox = "PART_DisplayedTextBox";
-
     private const string PART_ItemsPopup = "PART_ItemsPopup";
-
     private const string PART_ClearButton = "PART_ClearButton";
-
     private const string PART_OpenToggleButton = "PART_OpenToggleButton";
 
+    private static readonly Dictionary<(Type, string), PropertyInfo> _propertyCache = new();
+
+    // ---- 反射缓存 ----
+    private static readonly object _propertyCacheLock = new();
+
+    private readonly Dictionary<object, NodeInfo> _byItem
+        = new(ReferenceComparer.Instance);
+
+    // ---- 索引：三张表，ItemsSource 变化时重建 ----
+    /// <summary>SelectedValuePath 设置后才建。</summary>
+    private readonly Dictionary<object, object> _byValue
+        = new();
+
+    /// <summary>路径字符串到 item；可能存在路径冲突，遇冲突保留首个。</summary>
+    private readonly Dictionary<string, object> _byPath
+        = new(StringComparer.Ordinal);
+
     private TextBox _textBox;
-
     private Popup _popup;
-
     private Button _clearButton;
-
     private ToggleButton _openToggleButton;
 
-    private CascadePickerItem _currentFocusedItem;
+    private CascadePickerItem _focusedItem;
 
-    #region Commands
+    /// <summary>正在内部同步三个 Selected 属性，防止回环。</summary>
+    private bool _isSyncing;
 
-    public static readonly RoutedCommand ClearCommand = new RoutedCommand(
-        "Clear",
-        typeof(CascadePicker),
-        new InputGestureCollection { new KeyGesture(Key.Delete) });
+    /// <summary>SelectedValue / SelectedPath 在 ItemsSource 就绪前被设置时的暂存值。</summary>
+    private object _pendingValue;
 
-    #endregion Commands
+    private string _pendingPath;
 
-    private void CascadePicker_LostFocus(object sender, RoutedEventArgs e)
-    {
-        // 检查焦点是否还在控件内部
-        if (!IsKeyboardFocusWithin)
-        {
-            SetValue(IsOpenedProperty, false);
-            SetFocusedItem(null);
-        }
-    }
-
-    private void CascadePicker_Unloaded(object sender, RoutedEventArgs e)
-    {
-        RemoveHandler(CascadePickerItem.ItemClickEvent, new RoutedEventHandler(Item_Click));
-    }
-
-    private void CascadePicker_Loaded(object sender, RoutedEventArgs e)
-    {
-        AddHandler(CascadePickerItem.ItemClickEvent, new RoutedEventHandler(Item_Click));
-    }
+    /// <summary>路径冲突列表，仅 trace 警告用。</summary>
+    private List<string> _pathConflicts;
 
     static CascadePicker()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(CascadePicker), new FrameworkPropertyMetadata(typeof(CascadePicker)));
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(CascadePicker),
+            new FrameworkPropertyMetadata(typeof(CascadePicker)));
 
-        // 注册命令绑定
-        CommandManager.RegisterClassCommandBinding(
-            typeof(CascadePicker),
-            new CommandBinding(
-                ClearCommand,
-                OnClearCommandExecuted,
-                OnClearCommandCanExecute));
+        CommandManager.RegisterClassCommandBinding(typeof(CascadePicker),
+            new CommandBinding(ClearCommand, OnClearCommandExecuted, OnClearCommandCanExecute));
     }
 
     public CascadePicker()
     {
-        Loaded += CascadePicker_Loaded;
-        Unloaded += CascadePicker_Unloaded;
-        LostFocus += CascadePicker_LostFocus;
+        // 一次性挂载子项点击事件，不放在 Loaded 里避免重复注册
+        AddHandler(CascadePickerItem.ItemClickEvent, new RoutedEventHandler(OnChildItemClick));
     }
 
-    #region Keyboard Navigation
+    private struct NodeInfo
+    {
+        public object Item;
+        public object[] Ancestors;   // 根到该节点（不含自身）
+        public string Path;          // 完整路径字符串（含自身）
+        public string NodeText;      // 自身节点文本
+    }
 
+    /// <summary>
+    /// 引用相等比较器——避免数据 model 重写 Equals 后字典 key 冲突。
+    /// （.NET 5+ 自带 ReferenceEqualityComparer，但要兼容 .NET Framework 4.8 故自带一份。）
+    /// </summary>
+    private sealed class ReferenceComparer : IEqualityComparer<object>
+    {
+        public static readonly ReferenceComparer Instance = new();
+
+        public new bool Equals(object x, object y) => ReferenceEquals(x, y);
+
+        public int GetHashCode(object obj)
+            => obj is null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+
+        private ReferenceComparer()
+        {
+        }
+    }
+
+    #region IsOpened
+
+    public static readonly DependencyProperty IsOpenedProperty =
+        DependencyProperty.Register(
+            nameof(IsOpened),
+            typeof(bool),
+            typeof(CascadePicker),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsOpenedChanged));
+
+    /// <summary>
+    /// 获取或设置下拉是否打开。
+    /// </summary>
+    public bool IsOpened
+    {
+        get => (bool)GetValue(IsOpenedProperty);
+        set => SetValue(IsOpenedProperty, value);
+    }
+
+    private static void OnIsOpenedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CascadePicker p)
+        {
+            return;
+        }
+
+        if (p.IsReadOnly && (bool)e.NewValue)
+        {
+            p.SetCurrentValue(IsOpenedProperty, false);
+            return;
+        }
+
+        if ((bool)e.NewValue)
+        {
+            p.SetFocusedItem(null);
+        }
+        else
+        {
+            // 关闭时折叠所有子菜单
+            p.CollapseAllItems();
+        }
+
+        p.RaiseEvent(new RoutedEventArgs(OpenedChangedEvent, p));
+    }
+
+    #endregion IsOpened
+
+    #region IsReadOnly
+
+    public static readonly DependencyProperty IsReadOnlyProperty =
+        DependencyProperty.Register(
+            nameof(IsReadOnly),
+            typeof(bool),
+            typeof(CascadePicker),
+            new PropertyMetadata(false, OnIsReadOnlyChanged));
+
+    /// <summary>
+    /// 获取或设置控件是否只读。
+    /// </summary>
+    public bool IsReadOnly
+    {
+        get => (bool)GetValue(IsReadOnlyProperty);
+        set => SetValue(IsReadOnlyProperty, value);
+    }
+
+    private static void OnIsReadOnlyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CascadePicker p)
+        {
+            return;
+        }
+
+        if ((bool)e.NewValue && p.IsOpened)
+        {
+            p.SetCurrentValue(IsOpenedProperty, false);
+        }
+
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    #endregion IsReadOnly
+
+    #region IsShowFullPath
+
+    public static readonly DependencyProperty IsShowFullPathProperty =
+        DependencyProperty.Register(
+            nameof(IsShowFullPath),
+            typeof(bool),
+            typeof(CascadePicker),
+            new PropertyMetadata(false, OnIsShowFullPathChanged));
+
+    /// <summary>
+    /// 获取或设置是否在文本框中显示完整路径（false 时只显示叶子节点文本）。
+    /// </summary>
+    public bool IsShowFullPath
+    {
+        get => (bool)GetValue(IsShowFullPathProperty);
+        set => SetValue(IsShowFullPathProperty, value);
+    }
+
+    private static void OnIsShowFullPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is CascadePicker p)
+        {
+            p.UpdateText();
+        }
+    }
+
+    #endregion IsShowFullPath
+
+    #region Separator
+
+    public static readonly DependencyProperty SeparatorProperty =
+        DependencyProperty.Register(
+            nameof(Separator),
+            typeof(string),
+            typeof(CascadePicker),
+            new PropertyMetadata("/", OnSeparatorChanged));
+
+    /// <summary>
+    /// 获取或设置路径分隔符。
+    /// </summary>
+    public string Separator
+    {
+        get => (string)GetValue(SeparatorProperty);
+        set => SetValue(SeparatorProperty, value);
+    }
+
+    private static void OnSeparatorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is CascadePicker p)
+        {
+            p.RebuildIndex();
+        }
+    }
+
+    #endregion Separator
+
+    #region Watermark
+
+    public static readonly DependencyProperty WatermarkProperty =
+        DependencyProperty.Register(
+            nameof(Watermark),
+            typeof(string),
+            typeof(CascadePicker),
+            new PropertyMetadata(string.Empty));
+
+    /// <summary>
+    /// 获取或设置无值时显示的占位文本。
+    /// </summary>
+    public string Watermark
+    {
+        get => (string)GetValue(WatermarkProperty);
+        set => SetValue(WatermarkProperty, value);
+    }
+
+    #endregion Watermark
+
+    #region NodeMemberPath
+
+    public static readonly DependencyProperty NodeMemberPathProperty =
+        DependencyProperty.Register(
+            nameof(NodeMemberPath),
+            typeof(string),
+            typeof(CascadePicker),
+            new PropertyMetadata(null, OnIndexAffectingPropertyChanged));
+
+    /// <summary>
+    /// 获取或设置数据项中作为节点显示文本的属性路径（类似 DisplayMemberPath）。
+    /// </summary>
+    public string NodeMemberPath
+    {
+        get => (string)GetValue(NodeMemberPathProperty);
+        set => SetValue(NodeMemberPathProperty, value);
+    }
+
+    #endregion NodeMemberPath
+
+    #region ChildrenMemberPath
+
+    public static readonly DependencyProperty ChildrenMemberPathProperty =
+        DependencyProperty.Register(
+            nameof(ChildrenMemberPath),
+            typeof(string),
+            typeof(CascadePicker),
+            new PropertyMetadata(null, OnIndexAffectingPropertyChanged));
+
+    /// <summary>
+    /// 获取或设置数据项中作为子集合的属性路径（如 "Children" / "Cities"）。
+    /// 设置后控件能递归索引整棵树并自动给容器装配 ItemsSource binding。
+    /// </summary>
+    public string ChildrenMemberPath
+    {
+        get => (string)GetValue(ChildrenMemberPathProperty);
+        set => SetValue(ChildrenMemberPathProperty, value);
+    }
+
+    #endregion ChildrenMemberPath
+
+    #region SelectedValuePath
+
+    public static readonly DependencyProperty SelectedValuePathProperty =
+        DependencyProperty.Register(
+            nameof(SelectedValuePath),
+            typeof(string),
+            typeof(CascadePicker),
+            new PropertyMetadata(null, OnIndexAffectingPropertyChanged));
+
+    /// <summary>
+    /// 获取或设置数据项中作为唯一值（ID）的属性路径。配合 <see cref="SelectedValue"/> 使用。
+    /// </summary>
+    public string SelectedValuePath
+    {
+        get => (string)GetValue(SelectedValuePathProperty);
+        set => SetValue(SelectedValuePathProperty, value);
+    }
+
+    #endregion SelectedValuePath
+
+    #region SelectedItem
+
+    public static readonly DependencyProperty SelectedItemProperty =
+        DependencyProperty.Register(
+            nameof(SelectedItem),
+            typeof(object),
+            typeof(CascadePicker),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedItemChanged));
+
+    /// <summary>
+    /// 获取或设置当前选中的数据项（对象引用）。所有绑定方式中最通用。
+    /// </summary>
+    public object SelectedItem
+    {
+        get => GetValue(SelectedItemProperty);
+        set => SetValue(SelectedItemProperty, value);
+    }
+
+    private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CascadePicker p || p._isSyncing)
+        {
+            return;
+        }
+
+        p.SyncFromSelectedItem(e.NewValue);
+        p.RaiseEvent(new RoutedEventArgs(SelectedChangedEvent, p));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    #endregion SelectedItem
+
+    #region SelectedValue
+
+    public static readonly DependencyProperty SelectedValueProperty =
+        DependencyProperty.Register(
+            nameof(SelectedValue),
+            typeof(object),
+            typeof(CascadePicker),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedValueChanged));
+
+    /// <summary>
+    /// 获取或设置当前选中项的值（来自 <see cref="SelectedValuePath"/> 字段）。推荐用于 MVVM 绑定。
+    /// </summary>
+    public object SelectedValue
+    {
+        get => GetValue(SelectedValueProperty);
+        set => SetValue(SelectedValueProperty, value);
+    }
+
+    private static void OnSelectedValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CascadePicker p || p._isSyncing)
+        {
+            return;
+        }
+
+        p.SyncFromSelectedValue(e.NewValue);
+    }
+
+    #endregion SelectedValue
+
+    #region SelectedPath
+
+    public static readonly DependencyProperty SelectedPathProperty =
+        DependencyProperty.Register(
+            nameof(SelectedPath),
+            typeof(string),
+            typeof(CascadePicker),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedPathChanged));
+
+    /// <summary>
+    /// 获取或设置当前选中项的字符串路径。仅当树中路径唯一时支持反向定位。
+    /// </summary>
+    public string SelectedPath
+    {
+        get => (string)GetValue(SelectedPathProperty);
+        set => SetValue(SelectedPathProperty, value);
+    }
+
+    private static void OnSelectedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CascadePicker p || p._isSyncing)
+        {
+            return;
+        }
+
+        p.SyncFromSelectedPath(e.NewValue as string);
+    }
+
+    #endregion SelectedPath
+
+    #region Text
+
+    public static readonly DependencyProperty TextProperty =
+        DependencyProperty.Register(
+            nameof(Text),
+            typeof(string),
+            typeof(CascadePicker),
+            new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnTextChanged));
+
+    /// <summary>
+    /// 获取或设置文本框中显示的文本（受 <see cref="IsShowFullPath"/> 影响）。
+    /// </summary>
+    public string Text
+    {
+        get => (string)GetValue(TextProperty);
+        set => SetValue(TextProperty, value);
+    }
+
+    private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    #endregion Text
+
+    #region MaxDropDownHeight
+
+    public static readonly DependencyProperty MaxDropDownHeightProperty =
+        DependencyProperty.Register(
+            nameof(MaxDropDownHeight),
+            typeof(double),
+            typeof(CascadePicker),
+            new PropertyMetadata(300d));
+
+    /// <summary>
+    /// 获取或设置下拉面板的最大高度。
+    /// </summary>
+    public double MaxDropDownHeight
+    {
+        get => (double)GetValue(MaxDropDownHeightProperty);
+        set => SetValue(MaxDropDownHeightProperty, value);
+    }
+
+    #endregion MaxDropDownHeight
+
+    #region RoutedEvents
+
+    /// <summary>
+    /// SelectedItem 变化时触发。
+    /// </summary>
+    public static readonly RoutedEvent SelectedChangedEvent =
+        EventManager.RegisterRoutedEvent(
+            nameof(SelectedChanged),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(CascadePicker));
+
+    /// <summary>
+    /// IsOpened 变化时触发。
+    /// </summary>
+    public static readonly RoutedEvent OpenedChangedEvent =
+        EventManager.RegisterRoutedEvent(
+            nameof(OpenedChanged),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(CascadePicker));
+
+    /// <summary>
+    /// 选中项改变时触发。
+    /// </summary>
+    public event RoutedEventHandler SelectedChanged
+    {
+        add => AddHandler(SelectedChangedEvent, value);
+        remove => RemoveHandler(SelectedChangedEvent, value);
+    }
+
+    /// <summary>
+    /// 下拉打开 / 关闭时触发。
+    /// </summary>
+    public event RoutedEventHandler OpenedChanged
+    {
+        add => AddHandler(OpenedChangedEvent, value);
+        remove => RemoveHandler(OpenedChangedEvent, value);
+    }
+
+    #endregion RoutedEvents
+
+    #region Commands
+
+    /// <summary>
+    /// 清空选中项的命令（默认绑定 Delete 键）。
+    /// </summary>
+    public static readonly RoutedCommand ClearCommand =
+        new RoutedCommand(
+            "Clear",
+            typeof(CascadePicker),
+            new InputGestureCollection { new KeyGesture(Key.Delete) });
+
+    private static void OnClearCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is CascadePicker p && !p.IsReadOnly)
+        {
+            p.Clear();
+            e.Handled = true;
+        }
+    }
+
+    private static void OnClearCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
+    {
+        if (sender is CascadePicker p)
+        {
+            e.CanExecute = !p.IsReadOnly && (p.SelectedItem != null || !string.IsNullOrEmpty(p.Text));
+        }
+    }
+
+    /// <summary>
+    /// 清空当前选中项与文本。
+    /// </summary>
+    public void Clear()
+    {
+        SetCurrentValue(SelectedItemProperty, null);
+        // SelectedItem 变化会自动同步 SelectedValue / SelectedPath / Text
+        _textBox?.Focus();
+    }
+
+    #endregion Commands
+
+    #region Override Methods
+
+    /// <inheritdoc />
+    protected override void OnIsKeyboardFocusWithinChanged(DependencyPropertyChangedEventArgs e)
+    {
+        base.OnIsKeyboardFocusWithinChanged(e);
+
+        // 焦点离开整个控件（含 Popup 子树）时关闭下拉
+        if (!(bool)e.NewValue && IsOpened)
+        {
+            SetCurrentValue(IsOpenedProperty, false);
+            SetFocusedItem(null);
+        }
+    }
+
+    /// <inheritdoc />
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
 
         if (IsReadOnly)
+        {
             return;
+        }
 
         switch (e.Key)
         {
@@ -111,13 +573,12 @@ public class CascadePicker : ItemsControl
                 if (!IsOpened)
                 {
                     SetCurrentValue(IsOpenedProperty, true);
-                    e.Handled = true;
                 }
                 else
                 {
                     NavigateToNextItem();
-                    e.Handled = true;
                 }
+                e.Handled = true;
                 break;
 
             case Key.Up:
@@ -129,9 +590,9 @@ public class CascadePicker : ItemsControl
                 break;
 
             case Key.Right:
-                if (IsOpened && _currentFocusedItem?.HasItems == true)
+                if (IsOpened && _focusedItem?.HasItems == true)
                 {
-                    ExpandCurrentItem();
+                    ExpandFocusedItem();
                     e.Handled = true;
                 }
                 break;
@@ -139,15 +600,15 @@ public class CascadePicker : ItemsControl
             case Key.Left:
                 if (IsOpened)
                 {
-                    CollapseCurrentItem();
+                    CollapseFocusedItem();
                     e.Handled = true;
                 }
                 break;
 
             case Key.Enter:
-                if (IsOpened && _currentFocusedItem != null)
+                if (IsOpened && _focusedItem != null)
                 {
-                    SelectCurrentItem();
+                    SelectFocusedItem();
                     e.Handled = true;
                 }
                 break;
@@ -171,417 +632,79 @@ public class CascadePicker : ItemsControl
         }
     }
 
-    private void NavigateToNextItem()
+    /// <inheritdoc />
+    protected override void OnItemsChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        var items = GetAllVisibleItems();
-        if (items.Count == 0) return;
+        base.OnItemsChanged(e);
+        RebuildIndex();
 
-        if (_currentFocusedItem == null)
+        // 暂存的 value / path 在 ItemsSource 就绪后再尝试解析
+        if (_pendingValue != null)
         {
-            SetFocusedItem(items.First());
+            SyncFromSelectedValue(_pendingValue);
         }
-        else
+        if (_pendingPath != null)
         {
-            var currentIndex = items.IndexOf(_currentFocusedItem);
-            if (currentIndex < items.Count - 1)
-            {
-                SetFocusedItem(items[currentIndex + 1]);
-            }
+            SyncFromSelectedPath(_pendingPath);
         }
     }
 
-    private void NavigateToPreviousItem()
-    {
-        var items = GetAllVisibleItems();
-        if (items.Count == 0) return;
+    /// <inheritdoc />
+    protected override bool IsItemItsOwnContainerOverride(object item) => item is CascadePickerItem;
 
-        if (_currentFocusedItem == null)
+    /// <inheritdoc />
+    protected override DependencyObject GetContainerForItemOverride() => new CascadePickerItem();
+
+    /// <inheritdoc />
+    protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+    {
+        base.PrepareContainerForItemOverride(element, item);
+
+        if (element is not CascadePickerItem container || ReferenceEquals(container, item))
         {
-            SetFocusedItem(items.Last());
+            return;
         }
-        else
+
+        // Header 来源：NodeMemberPath > DisplayMemberPath > item 本身
+        if (container.ReadLocalValue(HeaderedItemsControl.HeaderProperty) == DependencyProperty.UnsetValue)
         {
-            var currentIndex = items.IndexOf(_currentFocusedItem);
-            if (currentIndex > 0)
+            if (!string.IsNullOrEmpty(NodeMemberPath))
             {
-                SetFocusedItem(items[currentIndex - 1]);
+                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(NodeMemberPath));
             }
-        }
-    }
-
-    private void ExpandCurrentItem()
-    {
-        if (_currentFocusedItem?.HasItems == true)
-        {
-            _currentFocusedItem.IsExpanded = true;
-
-            // 焦点移动到第一个子项
-            var firstChild = _currentFocusedItem.ItemContainerGenerator.ContainerFromIndex(0) as CascadePickerItem;
-            if (firstChild != null)
+            else if (!string.IsNullOrEmpty(DisplayMemberPath))
             {
-                SetFocusedItem(firstChild);
-            }
-        }
-    }
-
-    private void CollapseCurrentItem()
-    {
-        if (_currentFocusedItem != null)
-        {
-            // 如果当前项是展开的，先折叠
-            if (_currentFocusedItem.IsExpanded)
-            {
-                _currentFocusedItem.IsExpanded = false;
+                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(DisplayMemberPath));
             }
             else
             {
-                // 否则，导航到父项
-                var parent = ItemsControl.ItemsControlFromItemContainer(_currentFocusedItem) as CascadePickerItem;
-                if (parent != null)
-                {
-                    SetFocusedItem(parent);
-                    parent.IsExpanded = false;
-                }
+                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding());
             }
         }
-    }
 
-    private void SelectCurrentItem()
-    {
-        if (_currentFocusedItem != null)
+        // ItemTemplate 用作 HeaderTemplate
+        if (ItemTemplate != null && container.HeaderTemplate == null)
         {
-            SetValue(TextProperty, GetSelectedPath(_currentFocusedItem));
-            SetCurrentValue(SelectedItemProperty, _currentFocusedItem.DataContext);
+            container.HeaderTemplate = ItemTemplate;
+        }
 
-            // 如果没有子项，关闭弹出窗口
-            if (!_currentFocusedItem.HasItems)
-            {
-                SetValue(IsOpenedProperty, false);
-                _textBox?.Focus();
-            }
+        // 子项数据来源：仅当 ChildrenMemberPath 设置且容器没有自定义 ItemsSource 时绑定
+        if (!string.IsNullOrEmpty(ChildrenMemberPath)
+            && container.ItemsSource == null
+            && container.ReadLocalValue(ItemsSourceProperty) == DependencyProperty.UnsetValue)
+        {
+            container.SetBinding(ItemsSourceProperty, new Binding(ChildrenMemberPath));
         }
     }
 
-    private List<CascadePickerItem> GetAllVisibleItems()
-    {
-        var items = new List<CascadePickerItem>();
-        CollectVisibleItems(this, items);
-        return items;
-    }
-
-    private void CollectVisibleItems(ItemsControl itemsControl, List<CascadePickerItem> items)
-    {
-        for (int i = 0; i < itemsControl.Items.Count; i++)
-        {
-            var container = itemsControl.ItemContainerGenerator.ContainerFromIndex(i) as CascadePickerItem;
-            if (container != null && container.IsVisible)
-            {
-                items.Add(container);
-
-                // 如果项是展开的，递归收集子项
-                if (container.IsExpanded && container.HasItems)
-                {
-                    CollectVisibleItems(container, items);
-                }
-            }
-        }
-    }
-
-    private void SetFocusedItem(CascadePickerItem item)
-    {
-        // 移除之前的高亮样式
-        if (_currentFocusedItem != null)
-        {
-            _currentFocusedItem.IsHighlighted = false;
-        }
-
-        // 设置新的焦点项
-        _currentFocusedItem = item;
-        if (_currentFocusedItem != null)
-        {
-            _currentFocusedItem.IsHighlighted = true;
-            _currentFocusedItem.BringIntoView();
-        }
-    }
-
-    #endregion Keyboard Navigation
-
-    #region Command Handlers
-
-    public void Clear()
-    {
-        SetCurrentValue(TextProperty, string.Empty);
-        SetCurrentValue(SelectedItemProperty, null);
-        _textBox?.Focus();
-    }
-
-    private static void OnClearCommandExecuted(object sender, ExecutedRoutedEventArgs e)
-    {
-        if (sender is CascadePicker picker && !picker.IsReadOnly)
-        {
-            picker.Clear();
-        }
-    }
-
-    private static void OnClearCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
-    {
-        if (sender is CascadePicker picker)
-        {
-            e.CanExecute = !picker.IsReadOnly && !string.IsNullOrEmpty(picker.Text);
-        }
-    }
-
-    #endregion Command Handlers
-
-    #region IsReadOnly
-
-    public static readonly DependencyProperty IsReadOnlyProperty =
-        DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(CascadePicker),
-            new PropertyMetadata(default(bool), OnIsReadOnlyChanged));
-
-    public bool IsReadOnly
-    {
-        get => (bool)GetValue(IsReadOnlyProperty);
-        set => SetValue(IsReadOnlyProperty, value);
-    }
-
-    private static void OnIsReadOnlyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is CascadePicker picker)
-        {
-            picker.UpdateIsReadOnlyState();
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    private void UpdateIsReadOnlyState()
-    {
-        if (_clearButton != null)
-        {
-            _clearButton.IsEnabled = !IsReadOnly;
-        }
-
-        if (_openToggleButton != null)
-        {
-            _openToggleButton.IsEnabled = !IsReadOnly;
-        }
-
-        if (IsReadOnly && IsOpened)
-        {
-            SetValue(IsOpenedProperty, false);
-        }
-    }
-
-    #endregion IsReadOnly
-
-    #region NodeMemberPath
-
-    public static readonly DependencyProperty NodeMemberPathProperty =
-        DependencyProperty.Register(nameof(NodeMemberPath), typeof(string), typeof(CascadePicker),
-            new PropertyMetadata(null, OnNodeMemberPathChanged));
-
-    public string NodeMemberPath
-    {
-        get => (string)GetValue(NodeMemberPathProperty);
-        set => SetValue(NodeMemberPathProperty, value);
-    }
-
-    private static void OnNodeMemberPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is CascadePicker picker)
-        {
-            picker.UpdateAllItemsNodePath();
-        }
-    }
-
-    private void UpdateAllItemsNodePath()
-    {
-        for (int i = 0; i < Items.Count; i++)
-        {
-            if (ItemContainerGenerator.ContainerFromIndex(i) is CascadePickerItem container)
-            {
-                container.UpdateNodePath();
-            }
-        }
-    }
-
-    #endregion NodeMemberPath
-
-    #region SelectedItem
-
-    public static readonly DependencyProperty SelectedItemProperty =
-        DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(CascadePicker),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedItemChanged));
-
-    public object SelectedItem
-    {
-        get => GetValue(SelectedItemProperty);
-        set => SetValue(SelectedItemProperty, value);
-    }
-
-    private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is CascadePicker picker)
-        {
-            picker.RaiseEvent(new RoutedEventArgs(SelectedChangedEvent));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    #endregion SelectedItem
-
-    #region Item_Click
-
-    public string GetSelectedPath(CascadePickerItem item)
-    {
-        if (item == null) { return string.Empty; }
-
-        if (IsShowFullPath)
-        {
-            var pathList = new List<string>();
-            var currentItem = item;
-
-            while (currentItem != null)
-            {
-                pathList.Insert(0, currentItem.NodePath);
-                var parentContainer = ItemsControl.ItemsControlFromItemContainer(currentItem) as CascadePickerItem;
-                currentItem = parentContainer;
-            }
-            return string.Join(Separator, pathList);
-        }
-        else
-        {
-            return item.NodePath;
-        }
-    }
-
-    private void Item_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is CascadePickerItem item && !IsReadOnly)
-        {
-            SetValue(TextProperty, GetSelectedPath(item));
-            SetCurrentValue(SelectedItemProperty, item.DataContext);
-            if (!item.HasItems)
-            {
-                SetValue(IsOpenedProperty, false);
-            }
-        }
-    }
-
-    #endregion Item_Click
-
-    #region Watermark
-
-    public static readonly DependencyProperty WatermarkProperty =
-        DependencyProperty.Register(nameof(Watermark), typeof(string), typeof(CascadePicker), new PropertyMetadata(string.Empty));
-
-    public string Watermark
-    {
-        get => (string)GetValue(WatermarkProperty);
-        set => SetValue(WatermarkProperty, value);
-    }
-
-    #endregion Watermark
-
-    #region Text
-
-    public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register(nameof(Text), typeof(string), typeof(CascadePicker),
-            new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnTextChanged));
-
-    public string Text
-    {
-        get => (string)GetValue(TextProperty);
-        set => SetValue(TextProperty, value);
-    }
-
-    private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is CascadePicker picker)
-        {
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    #endregion Text
-
-    #region SelectedChanged
-
-    public static readonly RoutedEvent SelectedChangedEvent = EventManager.RegisterRoutedEvent("SelectedChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(CascadePicker));
-
-    public event RoutedEventHandler SelectedChanged
-    {
-        add => AddHandler(SelectedChangedEvent, value);
-        remove => RemoveHandler(SelectedChangedEvent, value);
-    }
-
-    #endregion SelectedChanged
-
-    #region IsOpened
-
-    public static readonly DependencyProperty IsOpenedProperty =
-        DependencyProperty.Register(nameof(IsOpened), typeof(bool), typeof(CascadePicker),
-            new FrameworkPropertyMetadata(default(bool), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsOpenedChanged));
-
-    public bool IsOpened
-    {
-        get => (bool)GetValue(IsOpenedProperty);
-        set => SetValue(IsOpenedProperty, value);
-    }
-
-    private static void OnIsOpenedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is CascadePicker picker)
-        {
-            if (picker.IsReadOnly && (bool)e.NewValue)
-            {
-                picker.SetValue(IsOpenedProperty, false);
-            }
-            else if ((bool)e.NewValue)
-            {
-                // 当打开时，重置焦点项
-                picker.SetFocusedItem(null);
-            }
-        }
-    }
-
-    #endregion IsOpened
-
-    #region IsShowFullPath
-
-    public static readonly DependencyProperty IsShowFullPathProperty =
-        DependencyProperty.Register(nameof(IsShowFullPath), typeof(bool), typeof(CascadePicker), new PropertyMetadata(default(bool)));
-
-    public bool IsShowFullPath
-    {
-        get => (bool)GetValue(IsShowFullPathProperty);
-        set => SetValue(IsShowFullPathProperty, value);
-    }
-
-    #endregion IsShowFullPath
-
-    #region Separator
-
-    public static readonly DependencyProperty SeparatorProperty =
-        DependencyProperty.Register(nameof(Separator), typeof(string), typeof(CascadePicker), new PropertyMetadata("/"));
-
-    public string Separator
-    {
-        get => (string)GetValue(SeparatorProperty);
-        set => SetValue(SeparatorProperty, value);
-    }
-
-    #endregion Separator
-
-    #region Override
-
+    /// <inheritdoc />
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
 
         if (_clearButton != null)
         {
-            _clearButton.Click -= ClearButton_Click;
+            _clearButton.Click -= OnClearButtonClick;
         }
 
         _textBox = GetTemplateChild(PART_DisplayedTextBox) as TextBox;
@@ -593,37 +716,475 @@ public class CascadePicker : ItemsControl
         {
             _clearButton.Command = ClearCommand;
             _clearButton.CommandTarget = this;
-            _clearButton.Click += ClearButton_Click;
+            _clearButton.Click += OnClearButtonClick;
         }
-
-        UpdateIsReadOnlyState();
     }
 
-    protected override bool IsItemItsOwnContainerOverride(object item)
-    {
-        return item is CascadePickerItem;
-    }
+    #endregion Override Methods
 
-    protected override DependencyObject GetContainerForItemOverride()
-    {
-        return new CascadePickerItem();
-    }
+    #region Private Methods - Index
 
-    protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+    /// <summary>
+    /// 数据结构变化或关键属性（NodeMemberPath / ChildrenMemberPath / SelectedValuePath / Separator）变化时重建索引。
+    /// </summary>
+    private static void OnIndexAffectingPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        base.PrepareContainerForItemOverride(element, item);
-
-        if (element is CascadePickerItem container)
+        if (d is CascadePicker p)
         {
-            container.DataContext = item;
-            container.NodeMemberPath = this.NodeMemberPath;
+            p.RebuildIndex();
         }
     }
 
-    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// 反射读取属性，按 (类型, 路径) 缓存 PropertyInfo。仅支持单层属性名。
+    /// </summary>
+    private static object GetMemberValue(object item, string path)
     {
+        if (item == null || string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        var key = (item.GetType(), path);
+        PropertyInfo prop;
+        lock (_propertyCacheLock)
+        {
+            if (!_propertyCache.TryGetValue(key, out prop))
+            {
+                prop = item.GetType().GetProperty(path);
+                _propertyCache[key] = prop;
+            }
+        }
+
+        return prop?.GetValue(item);
+    }
+
+    private void IndexNode(object item, List<object> ancestors)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        var nodeText = GetNodeText(item);
+        var ancestorsArray = ancestors.ToArray();
+
+        var info = new NodeInfo
+        {
+            Item = item,
+            Ancestors = ancestorsArray,
+            NodeText = nodeText,
+            Path = BuildPathString(ancestorsArray, nodeText),
+        };
+
+        _byItem[item] = info;
+
+        // SelectedValue 索引
+        if (!string.IsNullOrEmpty(SelectedValuePath))
+        {
+            var value = GetMemberValue(item, SelectedValuePath);
+            if (value != null && !_byValue.ContainsKey(value))
+            {
+                _byValue[value] = item;
+            }
+        }
+
+        // 路径索引（冲突保留首个）
+        if (!string.IsNullOrEmpty(info.Path))
+        {
+            if (_byPath.ContainsKey(info.Path))
+            {
+                (_pathConflicts ??= new List<string>()).Add(info.Path);
+            }
+            else
+            {
+                _byPath[info.Path] = item;
+            }
+        }
+
+        // 递归子项
+        if (!string.IsNullOrEmpty(ChildrenMemberPath))
+        {
+            var children = GetMemberValue(item, ChildrenMemberPath) as IEnumerable;
+            if (children != null)
+            {
+                ancestors.Add(item);
+                foreach (var child in children)
+                {
+                    IndexNode(child, ancestors);
+                }
+                ancestors.RemoveAt(ancestors.Count - 1);
+            }
+        }
+    }
+
+    private string BuildPathString(object[] ancestors, string nodeText)
+    {
+        if (ancestors.Length == 0)
+        {
+            return nodeText;
+        }
+
+        var parts = new string[ancestors.Length + 1];
+        for (var i = 0; i < ancestors.Length; i++)
+        {
+            parts[i] = GetNodeText(ancestors[i]);
+        }
+        parts[ancestors.Length] = nodeText;
+        return string.Join(Separator ?? "/", parts);
+    }
+
+    private string GetNodeText(object item)
+    {
+        if (item == null)
+        {
+            return string.Empty;
+        }
+
+        if (!string.IsNullOrEmpty(NodeMemberPath))
+        {
+            return GetMemberValue(item, NodeMemberPath)?.ToString() ?? string.Empty;
+        }
+
+        return item.ToString() ?? string.Empty;
+    }
+
+    private void RebuildIndex()
+    {
+        _byItem.Clear();
+        _byValue.Clear();
+        _byPath.Clear();
+        _pathConflicts?.Clear();
+
+        if (Items == null || Items.Count == 0)
+        {
+            return;
+        }
+
+        var ancestors = new List<object>();
+        foreach (var item in Items)
+        {
+            IndexNode(item, ancestors);
+        }
+
+        if (_pathConflicts != null && _pathConflicts.Count > 0)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
+        }
+    }
+
+    #endregion Private Methods - Index
+
+    #region Private Methods - Selection sync
+
+    /// <summary>
+    /// SelectedItem 改变时同步 SelectedValue / SelectedPath / Text。
+    /// </summary>
+    private void SyncFromSelectedItem(object item)
+    {
+        _isSyncing = true;
+        try
+        {
+            if (item == null)
+            {
+                SetCurrentValue(SelectedValueProperty, null);
+                SetCurrentValue(SelectedPathProperty, null);
+                SetCurrentValue(TextProperty, string.Empty);
+                _pendingValue = null;
+                _pendingPath = null;
+                return;
+            }
+
+            if (_byItem.TryGetValue(item, out var info))
+            {
+                if (!string.IsNullOrEmpty(SelectedValuePath))
+                {
+                    SetCurrentValue(SelectedValueProperty, GetMemberValue(item, SelectedValuePath));
+                }
+                SetCurrentValue(SelectedPathProperty, info.Path);
+                SetCurrentValue(TextProperty, IsShowFullPath ? info.Path : info.NodeText);
+                _pendingValue = null;
+                _pendingPath = null;
+            }
+            else
+            {
+                // item 不在索引：可能是用户给了一个不在 ItemsSource 里的对象
+                SetCurrentValue(TextProperty, GetNodeText(item));
+            }
+        }
+        finally
+        {
+            _isSyncing = false;
+        }
+    }
+
+    /// <summary>
+    /// SelectedValue 改变时反查 item。
+    /// </summary>
+    private void SyncFromSelectedValue(object value)
+    {
+        if (value == null)
+        {
+            _pendingValue = null;
+            SetCurrentValue(SelectedItemProperty, null);
+            return;
+        }
+
+        if (_byValue.TryGetValue(value, out var item))
+        {
+            _pendingValue = null;
+            SetCurrentValue(SelectedItemProperty, item);
+        }
+        else
+        {
+            // ItemsSource 还没就绪或 SelectedValuePath 还没设——暂存
+            _pendingValue = value;
+        }
+    }
+
+    /// <summary>
+    /// SelectedPath 改变时反查 item。
+    /// </summary>
+    private void SyncFromSelectedPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            _pendingPath = null;
+            SetCurrentValue(SelectedItemProperty, null);
+            return;
+        }
+
+        if (_byPath.TryGetValue(path, out var item))
+        {
+            _pendingPath = null;
+            SetCurrentValue(SelectedItemProperty, item);
+        }
+        else
+        {
+            _pendingPath = path;
+        }
+    }
+
+    private void UpdateText()
+    {
+        if (SelectedItem != null && _byItem.TryGetValue(SelectedItem, out var info))
+        {
+            SetCurrentValue(TextProperty, IsShowFullPath ? info.Path : info.NodeText);
+        }
+    }
+
+    #endregion Private Methods - Selection sync
+
+    #region Private Methods - Item click & keyboard
+
+    private void OnChildItemClick(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not CascadePickerItem container || IsReadOnly)
+        {
+            return;
+        }
+
+        var item = ItemContainerGenerator.ItemFromContainer(container);
+        if (item == DependencyProperty.UnsetValue)
+        {
+            // 嵌套层级容器，从其本身的 DataContext 拿数据
+            item = container.DataContext ?? container;
+        }
+
+        SetCurrentValue(SelectedItemProperty, item);
+
+        if (!container.HasItems)
+        {
+            SetCurrentValue(IsOpenedProperty, false);
+        }
+    }
+
+    private void SetFocusedItem(CascadePickerItem item)
+    {
+        if (_focusedItem != null)
+        {
+            _focusedItem.IsHighlighted = false;
+        }
+
+        _focusedItem = item;
+
+        if (_focusedItem != null)
+        {
+            _focusedItem.IsHighlighted = true;
+            _focusedItem.BringIntoView();
+        }
+    }
+
+    private void NavigateToNextItem()
+    {
+        var visible = CollectVisibleContainers();
+        if (visible.Count == 0)
+        {
+            return;
+        }
+
+        if (_focusedItem == null)
+        {
+            SetFocusedItem(visible[0]);
+            return;
+        }
+
+        var idx = visible.IndexOf(_focusedItem);
+        if (idx >= 0 && idx < visible.Count - 1)
+        {
+            SetFocusedItem(visible[idx + 1]);
+        }
+    }
+
+    private void NavigateToPreviousItem()
+    {
+        var visible = CollectVisibleContainers();
+        if (visible.Count == 0)
+        {
+            return;
+        }
+
+        if (_focusedItem == null)
+        {
+            SetFocusedItem(visible[visible.Count - 1]);
+            return;
+        }
+
+        var idx = visible.IndexOf(_focusedItem);
+        if (idx > 0)
+        {
+            SetFocusedItem(visible[idx - 1]);
+        }
+    }
+
+    private void ExpandFocusedItem()
+    {
+        if (_focusedItem?.HasItems != true)
+        {
+            return;
+        }
+
+        _focusedItem.IsExpanded = true;
+        if (_focusedItem.ItemContainerGenerator.ContainerFromIndex(0) is CascadePickerItem firstChild)
+        {
+            SetFocusedItem(firstChild);
+        }
+    }
+
+    private void CollapseFocusedItem()
+    {
+        if (_focusedItem == null)
+        {
+            return;
+        }
+
+        // 当前项已展开 → 先折叠
+        if (_focusedItem.IsExpanded)
+        {
+            _focusedItem.IsExpanded = false;
+            return;
+        }
+
+        // 否则定位到父项；若已经在顶层，关闭整个下拉
+        var parent = ItemsControl.ItemsControlFromItemContainer(_focusedItem) as CascadePickerItem;
+        if (parent != null)
+        {
+            parent.IsExpanded = false;
+            SetFocusedItem(parent);
+        }
+        else
+        {
+            SetCurrentValue(IsOpenedProperty, false);
+            _textBox?.Focus();
+        }
+    }
+
+    private void SelectFocusedItem()
+    {
+        if (_focusedItem == null)
+        {
+            return;
+        }
+
+        // 分支节点 → 仅展开（焦点转入子项）；叶子节点 → 选中并关闭
+        if (_focusedItem.HasItems)
+        {
+            ExpandFocusedItem();
+        }
+        else
+        {
+            var item = ItemContainerGenerator.ItemFromContainer(_focusedItem);
+            if (item == DependencyProperty.UnsetValue)
+            {
+                item = _focusedItem.DataContext ?? _focusedItem;
+            }
+
+            SetCurrentValue(SelectedItemProperty, item);
+            SetCurrentValue(IsOpenedProperty, false);
+            _textBox?.Focus();
+        }
+    }
+
+    private List<CascadePickerItem> CollectVisibleContainers()
+    {
+        var list = new List<CascadePickerItem>();
+        Walk(this, list);
+        return list;
+
+        static void Walk(ItemsControl host, List<CascadePickerItem> output)
+        {
+            for (var i = 0; i < host.Items.Count; i++)
+            {
+                if (host.ItemContainerGenerator.ContainerFromIndex(i) is not CascadePickerItem container)
+                {
+                    continue;
+                }
+
+                if (!container.IsVisible)
+                {
+                    continue;
+                }
+
+                output.Add(container);
+
+                if (container.IsExpanded && container.HasItems)
+                {
+                    Walk(container, output);
+                }
+            }
+        }
+    }
+
+    private void CollapseAllItems()
+    {
+        for (var i = 0; i < Items.Count; i++)
+        {
+            if (ItemContainerGenerator.ContainerFromIndex(i) is CascadePickerItem container)
+            {
+                CollapseRecursive(container);
+            }
+        }
+
+        static void CollapseRecursive(CascadePickerItem item)
+        {
+            item.IsExpanded = false;
+            item.IsHighlighted = false;
+            for (var i = 0; i < item.Items.Count; i++)
+            {
+                if (item.ItemContainerGenerator.ContainerFromIndex(i) is CascadePickerItem child)
+                {
+                    CollapseRecursive(child);
+                }
+            }
+        }
+    }
+
+    private void OnClearButtonClick(object sender, RoutedEventArgs e)
+    {
+        // 防止按钮点击冒泡触发其他处理；实际清空走 RoutedCommand
         e.Handled = true;
     }
 
-    #endregion Override
+    #endregion Private Methods - Item click & keyboard
 }

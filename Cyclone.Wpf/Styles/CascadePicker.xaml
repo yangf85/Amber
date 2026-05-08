@@ -1,97 +1,100 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style BasedOn="{StaticResource Control.Style.Basic}" TargetType="ctl:CascadePickerItem">
+    <!--  ============ CascadePickerItem 模板 ============  -->
+    <ControlTemplate x:Key="CascadePickerItem.Template.Basic" TargetType="{x:Type ctl:CascadePickerItem}">
+        <Border
+            x:Name="RootBorder"
+            Padding="3"
+            Background="{TemplateBinding Background}"
+            BorderBrush="Transparent"
+            BorderThickness="1"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ContentPresenter
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Content="{TemplateBinding Header}"
+                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                    ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" />
+                <Path
+                    x:Name="Arrow"
+                    Grid.Column="1"
+                    Width="12"
+                    Height="12"
+                    Margin="5,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Data="M761.6 489.6l-432-435.2c-9.6-9.6-25.6-9.6-35.2 0-9.6 9.6-9.6 25.6 0 35.2l416 416-416 425.6c-9.6 9.6-9.6 25.6 0 35.2s25.6 9.6 35.2 0l432-441.6C771.2 515.2 771.2 499.2 761.6 489.6z"
+                    Fill="{DynamicResource Icon.Foreground.Default}"
+                    Stretch="Uniform" />
+                <Popup
+                    x:Name="PART_ItemsPopup"
+                    AllowsTransparency="True"
+                    HorizontalOffset="0"
+                    IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    Placement="Right"
+                    PlacementTarget="{Binding ElementName=RootBorder}"
+                    VerticalOffset="-1">
+                    <Border
+                        MinWidth="150"
+                        BorderBrush="{DynamicResource Border.Default}"
+                        BorderThickness="1">
+                        <Grid Background="{DynamicResource Background.Global}">
+                            <ItemsPresenter />
+                        </Grid>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Focused}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Pressed}" />
+            </Trigger>
+            <Trigger SourceName="RootBorder" Property="IsMouseOver" Value="True">
+                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+            </Trigger>
+            <Trigger Property="HasItems" Value="False">
+                <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsExpanded" Value="True">
+                <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Icon.Foreground.Hover}" />
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsHighlighted" Value="True" />
+                    <Condition Property="IsMouseOver" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+            </MultiTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="CascadePickerItem.Style.Basic" TargetType="{x:Type ctl:CascadePickerItem}">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="Background" Value="{DynamicResource Background.Global}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Focusable" Value="True" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ctl:CascadePickerItem">
-                    <Border
-                        x:Name="RootBorder"
-                        Padding="3"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="Transparent"
-                        BorderThickness="1"
-                        SnapsToDevicePixels="True">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ContentPresenter
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Content="{TemplateBinding Header}"
-                                ContentTemplate="{TemplateBinding HeaderTemplate}" />
-                            <Path
-                                x:Name="Arrow"
-                                Grid.Column="1"
-                                Width="12"
-                                Height="12"
-                                Margin="5,0"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Data="M761.6 489.6l-432-435.2c-9.6-9.6-25.6-9.6-35.2 0-9.6 9.6-9.6 25.6 0 35.2l416 416-416 425.6c-9.6 9.6-9.6 25.6 0 35.2s25.6 9.6 35.2 0l432-441.6C771.2 515.2 771.2 499.2 761.6 489.6z"
-                                Fill="{DynamicResource Icon.Foreground.Default}"
-                                Stretch="Uniform" />
-                            <Popup
-                                x:Name="PART_ItemsPopup"
-                                AllowsTransparency="True"
-                                HorizontalOffset="0"
-                                IsOpen="{TemplateBinding IsExpanded}"
-                                Placement="Right"
-                                PlacementTarget="{Binding ElementName=RootBorder}"
-                                VerticalOffset="-1">
-                                <Border
-                                    MinWidth="150"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <Grid x:Name="ItemPresenterBoder" Background="{DynamicResource Background.Global}">
-                                        <ItemsPresenter />
-                                    </Grid>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Focus}" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Pressed}" />
-                        </Trigger>
-                        <Trigger SourceName="RootBorder" Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
-                        </Trigger>
-                        <Trigger Property="HasItems" Value="False">
-                            <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
-                        </Trigger>
-                        <Trigger Property="IsExpanded" Value="True">
-                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Icon.Foreground.Hover}" />
-                        </Trigger>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsHighlighted" Value="True" />
-                                <Condition Property="IsMouseOver" Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
-                        </MultiTrigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Template" Value="{StaticResource CascadePickerItem.Template.Basic}" />
     </Style>
 
+    <Style BasedOn="{StaticResource CascadePickerItem.Style.Basic}" TargetType="{x:Type ctl:CascadePickerItem}" />
+
+    <!--  ============ 内部样式：清除按钮 ============  -->
     <Style x:Key="CascadePicker.ClearButtonStyle" TargetType="Button">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Cursor" Value="Hand" />
@@ -124,9 +127,10 @@
         </Setter>
     </Style>
 
+    <!--  ============ 内部样式：显示文本框 ============  -->
     <Style x:Key="CascadePicker.DisplayedTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource Default.Foreground}" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Padding" Value="2,0" />
@@ -146,7 +150,8 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CascadePicker.OpenToggleButton" TargetType="ToggleButton">
+    <!--  ============ 内部样式：开关按钮 ============  -->
+    <Style x:Key="CascadePicker.OpenToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
@@ -177,18 +182,18 @@
         </Setter>
     </Style>
 
+    <!--  ============ CascadePicker 主样式 ============  -->
     <Style
         x:Key="CascadePicker.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
-        TargetType="ctl:CascadePicker">
+        TargetType="{x:Type ctl:CascadePicker}">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Focusable" Value="True" />
         <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
-        <Setter Property="Validation.ErrorTemplate" Value="{DynamicResource ValidationError.ControlTemplate}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ctl:CascadePicker">
+                <ControlTemplate TargetType="{x:Type ctl:CascadePicker}">
                     <Border
                         x:Name="RootBorder"
                         Background="{TemplateBinding Background}"
@@ -218,7 +223,7 @@
                                 BorderThickness="0"
                                 IsReadOnly="{TemplateBinding IsReadOnly}"
                                 Style="{StaticResource CascadePicker.DisplayedTextBoxStyle}"
-                                Text="{TemplateBinding Text}" />
+                                Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
                             <Button
                                 x:Name="PART_ClearButton"
                                 Grid.Column="1"
@@ -228,25 +233,24 @@
                                 x:Name="PART_OpenToggleButton"
                                 Grid.Column="2"
                                 Margin="0,0,5,0"
-                                IsChecked="{Binding Path=IsOpened, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                                Style="{StaticResource CascadePicker.OpenToggleButton}" />
+                                IsChecked="{Binding IsOpened, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                Style="{StaticResource CascadePicker.OpenToggleButtonStyle}" />
                             <Popup
                                 x:Name="PART_ItemsPopup"
                                 AllowsTransparency="True"
                                 Focusable="False"
                                 HorizontalOffset="0"
-                                IsOpen="{Binding ElementName=PART_OpenToggleButton, Path=IsChecked, Mode=TwoWay}"
+                                IsOpen="{Binding IsOpened, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                 Placement="Bottom"
                                 PlacementTarget="{Binding ElementName=RootBorder}"
                                 PopupAnimation="Slide"
                                 VerticalOffset="0">
                                 <Border
                                     MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ctl:CascadePicker}}"
-                                    MaxHeight="300"
+                                    MaxHeight="{Binding MaxDropDownHeight, RelativeSource={RelativeSource AncestorType=ctl:CascadePicker}}"
                                     BorderBrush="{DynamicResource Border.Default}"
                                     BorderThickness="1">
                                     <ScrollViewer
-                                        x:Name="ItemPresenterScrollViewer"
                                         Background="{DynamicResource Background.Global}"
                                         HorizontalScrollBarVisibility="Disabled"
                                         VerticalScrollBarVisibility="Auto">
@@ -259,7 +263,7 @@
                     <ControlTemplate.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition SourceName="PART_DisplayedTextBox" Property="Text" Value="" />
+                                <Condition Property="Text" Value="" />
                                 <Condition SourceName="PART_DisplayedTextBox" Property="IsKeyboardFocused" Value="False" />
                             </MultiTrigger.Conditions>
                             <Setter TargetName="Watermark" Property="Visibility" Value="Visible" />
@@ -282,8 +286,8 @@
                         </Trigger>
 
                         <Trigger Property="IsReadOnly" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.ReadOnly}" />
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.ReadOnly}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Inactive}" />
+                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Inactive}" />
                             <Setter TargetName="PART_DisplayedTextBox" Property="Cursor" Value="Arrow" />
                             <Setter TargetName="PART_ClearButton" Property="IsEnabled" Value="False" />
                             <Setter TargetName="PART_OpenToggleButton" Property="IsEnabled" Value="False" />
@@ -292,8 +296,8 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Disabled}" />
                             <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Disabled}" />
-                            <Setter TargetName="PART_DisplayedTextBox" Property="Foreground" Value="{DynamicResource Text.Disabled}" />
-                            <Setter TargetName="Watermark" Property="Foreground" Value="{DynamicResource Text.Disabled}" />
+                            <Setter TargetName="PART_DisplayedTextBox" Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter TargetName="Watermark" Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

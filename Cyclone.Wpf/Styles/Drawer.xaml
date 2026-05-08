@@ -4,25 +4,59 @@
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <ControlTemplate x:Key="Drawer.ControlTemplate.Basic" TargetType="{x:Type ctl:Drawer}">
+    <!--  抽屉投影：朝向主内容方向投射  -->
+    <DropShadowEffect
+        x:Key="Drawer.Shadow.Left"
+        BlurRadius="16"
+        Direction="0"
+        Opacity="0.25"
+        ShadowDepth="3"
+        Color="Black" />
+    <DropShadowEffect
+        x:Key="Drawer.Shadow.Right"
+        BlurRadius="16"
+        Direction="180"
+        Opacity="0.25"
+        ShadowDepth="3"
+        Color="Black" />
+    <DropShadowEffect
+        x:Key="Drawer.Shadow.Top"
+        BlurRadius="16"
+        Direction="270"
+        Opacity="0.25"
+        ShadowDepth="3"
+        Color="Black" />
+    <DropShadowEffect
+        x:Key="Drawer.Shadow.Bottom"
+        BlurRadius="16"
+        Direction="90"
+        Opacity="0.25"
+        ShadowDepth="3"
+        Color="Black" />
+
+    <ControlTemplate x:Key="Drawer.Template.Basic" TargetType="{x:Type ctl:Drawer}">
         <Grid>
             <ContentPresenter Content="{TemplateBinding Content}" />
+
             <Border
                 x:Name="PART_Overlay"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Panel.ZIndex="998"
-                Background="{DynamicResource Background.TransparentLight}"
+                Background="{DynamicResource Overlay.Dark}"
                 Opacity="0"
                 Visibility="Collapsed" />
+
             <Border
                 x:Name="PART_DrawerPanel"
-                Panel.ZIndex="999"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}">
+                BorderThickness="{TemplateBinding BorderThickness}"
+                FocusManager.IsFocusScope="True"
+                KeyboardNavigation.DirectionalNavigation="Cycle"
+                KeyboardNavigation.TabNavigation="Cycle">
                 <ContentPresenter Margin="{TemplateBinding Padding}" Content="{TemplateBinding DrawerContent}" />
             </Border>
         </Grid>
@@ -31,29 +65,33 @@
             <Trigger Property="Placement" Value="Left">
                 <Setter TargetName="PART_DrawerPanel" Property="HorizontalAlignment" Value="Left" />
                 <Setter TargetName="PART_DrawerPanel" Property="VerticalAlignment" Value="Stretch" />
+                <Setter TargetName="PART_DrawerPanel" Property="Effect" Value="{StaticResource Drawer.Shadow.Left}" />
             </Trigger>
             <Trigger Property="Placement" Value="Right">
                 <Setter TargetName="PART_DrawerPanel" Property="HorizontalAlignment" Value="Right" />
                 <Setter TargetName="PART_DrawerPanel" Property="VerticalAlignment" Value="Stretch" />
+                <Setter TargetName="PART_DrawerPanel" Property="Effect" Value="{StaticResource Drawer.Shadow.Right}" />
             </Trigger>
             <Trigger Property="Placement" Value="Top">
                 <Setter TargetName="PART_DrawerPanel" Property="HorizontalAlignment" Value="Stretch" />
                 <Setter TargetName="PART_DrawerPanel" Property="VerticalAlignment" Value="Top" />
+                <Setter TargetName="PART_DrawerPanel" Property="Effect" Value="{StaticResource Drawer.Shadow.Top}" />
             </Trigger>
             <Trigger Property="Placement" Value="Bottom">
                 <Setter TargetName="PART_DrawerPanel" Property="HorizontalAlignment" Value="Stretch" />
                 <Setter TargetName="PART_DrawerPanel" Property="VerticalAlignment" Value="Bottom" />
+                <Setter TargetName="PART_DrawerPanel" Property="Effect" Value="{StaticResource Drawer.Shadow.Bottom}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
     <Style x:Key="Drawer.Style.Basic" TargetType="{x:Type ctl:Drawer}">
         <Setter Property="Background" Value="{DynamicResource Background.Container}" />
-
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CloseOnOverlayClick" Value="True" />
-        <Setter Property="Panel.ZIndex" Value="1000" />
-        <Setter Property="Template" Value="{StaticResource Drawer.ControlTemplate.Basic}" />
+        <Setter Property="CloseOnEscape" Value="True" />
+        <Setter Property="FocusOnOpen" Value="True" />
+        <Setter Property="Template" Value="{StaticResource Drawer.Template.Basic}" />
     </Style>
 
     <Style BasedOn="{StaticResource Drawer.Style.Basic}" TargetType="ctl:Drawer" />

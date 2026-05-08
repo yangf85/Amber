@@ -40,7 +40,7 @@ public partial class MainViewModel : ObservableObject
             "Range" => new RangeView(),
             "RangeSlider" => new RangeSliderView(),
             "TabControl" => new TabControlView(),
-            "FluidTabControl" => new FluidTabControlView(),
+            "FluidTab" => new FluidTabView(),
             "ComboBox" => new ComboBoxView(),
             "ListView" => new CollectionView(),
             "ListBox" => new ListBoxView(),
@@ -225,7 +225,7 @@ public partial class SideMenuViewModel : ObservableObject
                 },
                  new SideMenuItemViewModel
                 {
-                    Header="FluidTabControl",
+                    Header="FluidTab",
                     Icon= "\xe609",
                 },
                 new SideMenuItemViewModel
