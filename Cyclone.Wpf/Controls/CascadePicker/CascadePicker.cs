@@ -25,8 +25,11 @@ namespace Cyclone.Wpf.Controls;
 public class CascadePicker : ItemsControl
 {
     private const string PART_DisplayedTextBox = "PART_DisplayedTextBox";
+
     private const string PART_ItemsPopup = "PART_ItemsPopup";
+
     private const string PART_ClearButton = "PART_ClearButton";
+
     private const string PART_OpenToggleButton = "PART_OpenToggleButton";
 
     private static readonly Dictionary<(Type, string), PropertyInfo> _propertyCache = new();
@@ -47,8 +50,11 @@ public class CascadePicker : ItemsControl
         = new(StringComparer.Ordinal);
 
     private TextBox _textBox;
+
     private Popup _popup;
+
     private Button _clearButton;
+
     private ToggleButton _openToggleButton;
 
     private CascadePickerItem _focusedItem;
@@ -79,14 +85,6 @@ public class CascadePicker : ItemsControl
         AddHandler(CascadePickerItem.ItemClickEvent, new RoutedEventHandler(OnChildItemClick));
     }
 
-    private struct NodeInfo
-    {
-        public object Item;
-        public object[] Ancestors;   // 根到该节点（不含自身）
-        public string Path;          // 完整路径字符串（含自身）
-        public string NodeText;      // 自身节点文本
-    }
-
     /// <summary>
     /// 引用相等比较器——避免数据 model 重写 Equals 后字典 key 冲突。
     /// （.NET 5+ 自带 ReferenceEqualityComparer，但要兼容 .NET Framework 4.8 故自带一份。）
@@ -103,6 +101,17 @@ public class CascadePicker : ItemsControl
         private ReferenceComparer()
         {
         }
+    }
+
+    private struct NodeInfo
+    {
+        public object Item;
+
+        public object[] Ancestors;   // 根到该节点（不含自身）
+
+        public string Path;          // 完整路径字符串（含自身）
+
+        public string NodeText;      // 自身节点文本
     }
 
     #region IsOpened
@@ -513,6 +522,17 @@ public class CascadePicker : ItemsControl
             typeof(CascadePicker),
             new InputGestureCollection { new KeyGesture(Key.Delete) });
 
+    /// <summary>
+    /// 清空当前选中项与文本。
+    /// </summary>
+    public void Clear()
+    {
+        SetCurrentValue(SelectedItemProperty, null);
+
+        // SelectedItem 变化会自动同步 SelectedValue / SelectedPath / Text
+        _textBox?.Focus();
+    }
+
     private static void OnClearCommandExecuted(object sender, ExecutedRoutedEventArgs e)
     {
         if (sender is CascadePicker p && !p.IsReadOnly)
@@ -530,19 +550,73 @@ public class CascadePicker : ItemsControl
         }
     }
 
-    /// <summary>
-    /// 清空当前选中项与文本。
-    /// </summary>
-    public void Clear()
-    {
-        SetCurrentValue(SelectedItemProperty, null);
-        // SelectedItem 变化会自动同步 SelectedValue / SelectedPath / Text
-        _textBox?.Focus();
-    }
-
     #endregion Commands
 
     #region Override Methods
+
+    /// <inheritdoc />
+    public override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+
+        if (_clearButton != null)
+        {
+            _clearButton.Click -= OnClearButtonClick;
+        }
+
+        _textBox = GetTemplateChild(PART_DisplayedTextBox) as TextBox;
+        _popup = GetTemplateChild(PART_ItemsPopup) as Popup;
+        _clearButton = GetTemplateChild(PART_ClearButton) as Button;
+        _openToggleButton = GetTemplateChild(PART_OpenToggleButton) as ToggleButton;
+
+        if (_clearButton != null)
+        {
+            _clearButton.Command = ClearCommand;
+            _clearButton.CommandTarget = this;
+            _clearButton.Click += OnClearButtonClick;
+        }
+    }
+
+    /// <summary>
+    /// 装配单个容器的 Header / ItemsSource binding。任意层级共用此方法——
+    /// 顶层由本类的 PrepareContainerForItemOverride 调用，深层级由 CascadePickerItem 调用。
+    /// </summary>
+    internal void PrepareCascadeContainer(CascadePickerItem container, object item)
+    {
+        if (container == null || ReferenceEquals(container, item))
+        {
+            return;
+        }
+
+        // 注意：base.PrepareContainerForItemOverride 已经把 Header 默认设为 item 本身
+        // （HeaderedItemsControl 标准行为，让数据驱动也能用 HeaderTemplate）。
+        // 所以这里若有 NodeMemberPath / DisplayMemberPath，需要强制覆盖那个默认值——
+        // 不能用 ReadLocalValue == UnsetValue 判断（base 已经设过本地值）。
+        if (!string.IsNullOrEmpty(NodeMemberPath))
+        {
+            container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(NodeMemberPath));
+        }
+        else if (!string.IsNullOrEmpty(DisplayMemberPath))
+        {
+            container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(DisplayMemberPath));
+        }
+
+        // else: 不动，保留 base 设置的 Header = item，由 HeaderTemplate 渲染
+
+        // ItemTemplate 用作 HeaderTemplate
+        if (ItemTemplate != null && container.HeaderTemplate == null)
+        {
+            container.HeaderTemplate = ItemTemplate;
+        }
+
+        // 子集合 binding：用 BindingExpression 检测，避免与 HierarchicalDataTemplate 冲突
+        if (!string.IsNullOrEmpty(ChildrenMemberPath)
+            && container.ItemsSource == null
+            && BindingOperations.GetBindingExpression(container, ItemsSourceProperty) == null)
+        {
+            container.SetBinding(ItemsSourceProperty, new Binding(ChildrenMemberPath));
+        }
+    }
 
     /// <inheritdoc />
     protected override void OnIsKeyboardFocusWithinChanged(DependencyPropertyChangedEventArgs e)
@@ -660,69 +734,40 @@ public class CascadePicker : ItemsControl
     {
         base.PrepareContainerForItemOverride(element, item);
 
-        if (element is not CascadePickerItem container || ReferenceEquals(container, item))
+        if (element is CascadePickerItem container)
         {
-            return;
-        }
-
-        // Header 来源：NodeMemberPath > DisplayMemberPath > item 本身
-        if (container.ReadLocalValue(HeaderedItemsControl.HeaderProperty) == DependencyProperty.UnsetValue)
-        {
-            if (!string.IsNullOrEmpty(NodeMemberPath))
-            {
-                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(NodeMemberPath));
-            }
-            else if (!string.IsNullOrEmpty(DisplayMemberPath))
-            {
-                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding(DisplayMemberPath));
-            }
-            else
-            {
-                container.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding());
-            }
-        }
-
-        // ItemTemplate 用作 HeaderTemplate
-        if (ItemTemplate != null && container.HeaderTemplate == null)
-        {
-            container.HeaderTemplate = ItemTemplate;
-        }
-
-        // 子项数据来源：仅当 ChildrenMemberPath 设置且容器没有自定义 ItemsSource 时绑定
-        if (!string.IsNullOrEmpty(ChildrenMemberPath)
-            && container.ItemsSource == null
-            && container.ReadLocalValue(ItemsSourceProperty) == DependencyProperty.UnsetValue)
-        {
-            container.SetBinding(ItemsSourceProperty, new Binding(ChildrenMemberPath));
-        }
-    }
-
-    /// <inheritdoc />
-    public override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-
-        if (_clearButton != null)
-        {
-            _clearButton.Click -= OnClearButtonClick;
-        }
-
-        _textBox = GetTemplateChild(PART_DisplayedTextBox) as TextBox;
-        _popup = GetTemplateChild(PART_ItemsPopup) as Popup;
-        _clearButton = GetTemplateChild(PART_ClearButton) as Button;
-        _openToggleButton = GetTemplateChild(PART_OpenToggleButton) as ToggleButton;
-
-        if (_clearButton != null)
-        {
-            _clearButton.Command = ClearCommand;
-            _clearButton.CommandTarget = this;
-            _clearButton.Click += OnClearButtonClick;
+            PrepareCascadeContainer(container, item);
         }
     }
 
     #endregion Override Methods
 
     #region Private Methods - Index
+
+    private void RebuildIndex()
+    {
+        _byItem.Clear();
+        _byValue.Clear();
+        _byPath.Clear();
+        _pathConflicts?.Clear();
+
+        if (Items == null || Items.Count == 0)
+        {
+            return;
+        }
+
+        var ancestors = new List<object>();
+        foreach (var item in Items)
+        {
+            IndexNode(item, ancestors);
+        }
+
+        if (_pathConflicts != null && _pathConflicts.Count > 0)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
+        }
+    }
 
     /// <summary>
     /// 数据结构变化或关键属性（NodeMemberPath / ChildrenMemberPath / SelectedValuePath / Separator）变化时重建索引。
@@ -802,19 +847,25 @@ public class CascadePicker : ItemsControl
             }
         }
 
-        // 递归子项
-        if (!string.IsNullOrEmpty(ChildrenMemberPath))
+        // 递归子项：直接嵌套场景从 CascadePickerItem.Items 取，数据驱动场景从 ChildrenMemberPath 取
+        IEnumerable children = null;
+        if (item is CascadePickerItem cpItem && cpItem.HasItems)
         {
-            var children = GetMemberValue(item, ChildrenMemberPath) as IEnumerable;
-            if (children != null)
+            children = cpItem.Items;
+        }
+        else if (!string.IsNullOrEmpty(ChildrenMemberPath))
+        {
+            children = GetMemberValue(item, ChildrenMemberPath) as IEnumerable;
+        }
+
+        if (children != null)
+        {
+            ancestors.Add(item);
+            foreach (var child in children)
             {
-                ancestors.Add(item);
-                foreach (var child in children)
-                {
-                    IndexNode(child, ancestors);
-                }
-                ancestors.RemoveAt(ancestors.Count - 1);
+                IndexNode(child, ancestors);
             }
+            ancestors.RemoveAt(ancestors.Count - 1);
         }
     }
 
@@ -841,37 +892,18 @@ public class CascadePicker : ItemsControl
             return string.Empty;
         }
 
+        // 直接嵌套场景：item 是 CascadePickerItem 容器本身，取它的 Header
+        if (item is CascadePickerItem container)
+        {
+            return container.Header?.ToString() ?? string.Empty;
+        }
+
         if (!string.IsNullOrEmpty(NodeMemberPath))
         {
             return GetMemberValue(item, NodeMemberPath)?.ToString() ?? string.Empty;
         }
 
         return item.ToString() ?? string.Empty;
-    }
-
-    private void RebuildIndex()
-    {
-        _byItem.Clear();
-        _byValue.Clear();
-        _byPath.Clear();
-        _pathConflicts?.Clear();
-
-        if (Items == null || Items.Count == 0)
-        {
-            return;
-        }
-
-        var ancestors = new List<object>();
-        foreach (var item in Items)
-        {
-            IndexNode(item, ancestors);
-        }
-
-        if (_pathConflicts != null && _pathConflicts.Count > 0)
-        {
-            System.Diagnostics.Trace.TraceWarning(
-                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
-        }
     }
 
     #endregion Private Methods - Index
@@ -985,11 +1017,15 @@ public class CascadePicker : ItemsControl
             return;
         }
 
-        var item = ItemContainerGenerator.ItemFromContainer(container);
-        if (item == DependencyProperty.UnsetValue)
+        // 用容器的"直接 owner ItemsControl"取数据 item，
+        // 这样无论是 CascadePicker 顶层还是嵌套的 CascadePickerItem 都能正确拿到数据
+        var owner = ItemsControl.ItemsControlFromItemContainer(container);
+        var item = owner?.ItemContainerGenerator.ItemFromContainer(container);
+
+        if (item == null || item == DependencyProperty.UnsetValue)
         {
-            // 嵌套层级容器，从其本身的 DataContext 拿数据
-            item = container.DataContext ?? container;
+            // 直接嵌套场景：item 即容器本身
+            item = container;
         }
 
         SetCurrentValue(SelectedItemProperty, item);
@@ -1114,10 +1150,12 @@ public class CascadePicker : ItemsControl
         }
         else
         {
-            var item = ItemContainerGenerator.ItemFromContainer(_focusedItem);
-            if (item == DependencyProperty.UnsetValue)
+            var owner = ItemsControl.ItemsControlFromItemContainer(_focusedItem);
+            var item = owner?.ItemContainerGenerator.ItemFromContainer(_focusedItem);
+
+            if (item == null || item == DependencyProperty.UnsetValue)
             {
-                item = _focusedItem.DataContext ?? _focusedItem;
+                item = _focusedItem;
             }
 
             SetCurrentValue(SelectedItemProperty, item);

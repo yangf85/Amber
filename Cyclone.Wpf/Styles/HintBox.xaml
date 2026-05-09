@@ -72,11 +72,11 @@
 
     <Style x:Key="HintBox.EditableTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource Default.Foreground}" />
+        <!--  资源键修正：原写法 Default.Foreground 不存在，BasicTheme 里是 Foreground.Default  -->
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Padding" Value="2,0" />
-
         <Setter Property="Cursor" Value="IBeam" />
         <Setter Property="Template">
             <Setter.Value>
@@ -91,6 +91,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <!--  IsReadOnly 时鼠标光标改成箭头，避免视觉误导  -->
+            <Trigger Property="IsReadOnly" Value="True">
+                <Setter Property="Cursor" Value="Arrow" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <ControlTemplate x:Key="HintBox.Template.Basic" TargetType="ctl:HintBox">
@@ -135,10 +141,11 @@
                 <Popup
                     x:Name="PART_Popup"
                     Grid.Column="0"
+                    AllowsTransparency="True"
                     Focusable="False"
                     IsOpen="{TemplateBinding IsDropDownOpen}"
                     Placement="Bottom"
-                    PlacementTarget="{Binding ElementName=RootBorder}"
+                    PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                     PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}"
                     VerticalOffset="2">
                     <Border
@@ -149,12 +156,23 @@
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="1"
                         SnapsToDevicePixels="True">
-                        <ScrollViewer x:Name="DropDownScrollViewer">
-                            <ItemsPresenter
-                                x:Name="ItemsPresenter"
-                                KeyboardNavigation.DirectionalNavigation="Contained"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                        </ScrollViewer>
+                        <Grid>
+                            <ScrollViewer x:Name="DropDownScrollViewer">
+                                <ItemsPresenter
+                                    x:Name="ItemsPresenter"
+                                    KeyboardNavigation.DirectionalNavigation="Contained"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </ScrollViewer>
+                            <!--  空状态占位：filter 后无匹配项时显示，比 popup 直接折叠为细条体验更好  -->
+                            <TextBlock
+                                x:Name="EmptyHint"
+                                Padding="14,12"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="无匹配项"
+                                Visibility="Collapsed" />
+                        </Grid>
                     </Border>
                 </Popup>
             </Grid>
@@ -175,8 +193,12 @@
                 <Setter Property="IsDropDownOpen" Value="True" />
                 <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Editing}" />
             </Trigger>
+
+            <!--  filter 后无匹配项：显示占位文本（不再折叠 popup）  -->
+            <!--  注意：因为我们用 ListCollectionView 自管 ItemsSource，HasItems 反映的是 filter 后的 count——准确  -->
             <Trigger Property="HasItems" Value="False">
-                <Setter TargetName="PART_Popup" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="DropDownScrollViewer" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="EmptyHint" Property="Visibility" Value="Visible" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>

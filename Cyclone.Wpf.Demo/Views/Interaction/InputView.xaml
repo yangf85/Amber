@@ -164,17 +164,6 @@
                         </cy:SpacingUniformGrid>
                     </StackPanel>
 
-                    <!--  文本高亮  -->
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="文本高亮 (输入关键词):" />
-                        <cy:HighlightTextBlock
-                            HighlightBackground="Yellow"
-                            HighlightForeground="Black"
-                            QueriesText="{Binding SearchText}"
-                            SourceText="{Binding HighlightText}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-
                     <!--  滚动文本  -->
                     <StackPanel>
                         <DockPanel>

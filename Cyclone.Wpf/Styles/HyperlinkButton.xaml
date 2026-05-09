@@ -3,33 +3,26 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
     <ResourceDictionary.MergedDictionaries>
-        <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <ControlTemplate x:Key="HyperlinkButton.ControlTemplate.Basic" TargetType="ctl:HyperlinkButton">
-        <Button x:Name="PART_NavigationButton" Command="{x:Static ctl:HyperlinkButton.OpenUrlCommand}">
-            <TextBlock
-                x:Name="PART_DisplayTextBlock"
-                Text="{TemplateBinding DisplayText}"
-                TextDecorations="Underline" />
-            <Button.Template>
-                <ControlTemplate TargetType="Button">
-                    <Grid x:Name="RootGrid">
-                        <ContentPresenter
-                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            Content="{TemplateBinding Content}" />
-                    </Grid>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
+        <!--  纯 TextBlock 模板——HyperlinkButton 现在继承 ButtonBase，不再需要内嵌 Button 中转  -->
+        <TextBlock
+            x:Name="PartDisplayTextBlock"
+            Foreground="{TemplateBinding Foreground}"
+            Text="{TemplateBinding DisplayText}"
+            TextDecorations="Underline" />
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="PART_DisplayTextBlock" Property="Foreground" Value="{DynamicResource Foreground.Hover}" />
+                <Setter TargetName="PartDisplayTextBlock" Property="Foreground" Value="{DynamicResource Link.Hover}" />
             </Trigger>
-            <Trigger Property="Button.IsPressed" Value="True">
-                <Setter TargetName="PART_DisplayTextBlock" Property="Foreground" Value="{DynamicResource Foreground.Pressed}" />
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PartDisplayTextBlock" Property="Foreground" Value="{DynamicResource Foreground.Pressed}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="PartDisplayTextBlock" Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                <Setter TargetName="PartDisplayTextBlock" Property="TextDecorations" Value="{x:Null}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -38,9 +31,19 @@
         x:Key="HyperlinkButton.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type ctl:HyperlinkButton}">
+        <Setter Property="Foreground" Value="{DynamicResource Link.Default}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template" Value="{StaticResource HyperlinkButton.ControlTemplate.Basic}" />
-        <Setter Property="ToolTip" Value="{Binding Path=NavigateUri.AbsoluteUri, RelativeSource={RelativeSource Mode=Self}}" />
-        <Setter Property="ToolTipService.InitialShowDelay" Value="100" />
+        <!--  ToolTip 直接 binding NavigateUri（WPF 自动 ToString），避免 NavigateUri.AbsoluteUri 在 null 时 binding 报错  -->
+        <Setter Property="ToolTip" Value="{Binding NavigateUri, RelativeSource={RelativeSource Mode=Self}}" />
+        <Setter Property="ToolTipService.InitialShowDelay" Value="500" />
+        <!--  NavigateUri 为 null 时不显示 ToolTip  -->
+        <Style.Triggers>
+            <Trigger Property="NavigateUri" Value="{x:Null}">
+                <Setter Property="ToolTip" Value="{x:Null}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style BasedOn="{StaticResource HyperlinkButton.Style.Basic}" TargetType="ctl:HyperlinkButton" />

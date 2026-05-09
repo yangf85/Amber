@@ -18,10 +18,6 @@ public class LoadingTesseract : LoadingIndicator
         DependencyProperty.Register(nameof(LineColor), typeof(Color), typeof(LoadingTesseract),
             new PropertyMetadata(Colors.Black, OnVisualPropertyChanged));
 
-    public static readonly DependencyProperty IsActiveProperty =
-        DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(LoadingTesseract),
-            new PropertyMetadata(true, OnIsActiveChanged));
-
     public static readonly DependencyProperty AnimationSpeedProperty =
         DependencyProperty.Register(nameof(AnimationSpeed), typeof(double), typeof(LoadingTesseract),
             new PropertyMetadata(0.3));
@@ -37,15 +33,6 @@ public class LoadingTesseract : LoadingIndicator
     {
         get { return (Color)GetValue(LineColorProperty); }
         set { SetValue(LineColorProperty, value); }
-    }
-
-    /// <summary>
-    /// 是否激活动画
-    /// </summary>
-    public bool IsActive
-    {
-        get { return (bool)GetValue(IsActiveProperty); }
-        set { SetValue(IsActiveProperty, value); }
     }
 
     /// <summary>
@@ -372,15 +359,15 @@ public class LoadingTesseract : LoadingIndicator
         control.UpdateTesseractProjection();
     }
 
-    private static void OnIsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    protected override void OnIsActiveChanged(bool oldValue, bool newValue)
     {
-        var control = (LoadingTesseract)d;
-        if (control.IsLoaded)
+        base.OnIsActiveChanged(oldValue, newValue);
+        if (IsLoaded)
         {
-            if (control.IsActive)
-                control.StartAnimation();
+            if (IsActive)
+                StartAnimation();
             else
-                control.StopAnimation();
+                StopAnimation();
         }
     }
 

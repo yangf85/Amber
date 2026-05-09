@@ -26,10 +26,6 @@ public class LoadingPulse : LoadingIndicator
         DependencyProperty.Register(nameof(DotSpacing), typeof(double), typeof(LoadingPulse),
             new PropertyMetadata(8.0, OnVisualPropertyChanged));
 
-    public static readonly DependencyProperty IsActiveProperty =
-        DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(LoadingPulse),
-            new PropertyMetadata(true, OnIsActiveChanged));
-
     public static readonly DependencyProperty PulseDurationProperty =
         DependencyProperty.Register(nameof(PulseDuration), typeof(double), typeof(LoadingPulse),
             new PropertyMetadata(0.6, OnAnimationPropertyChanged));
@@ -66,15 +62,6 @@ public class LoadingPulse : LoadingIndicator
     }
 
     /// <summary>
-    /// 是否激活动画
-    /// </summary>
-    public bool IsActive
-    {
-        get { return (bool)GetValue(IsActiveProperty); }
-        set { SetValue(IsActiveProperty, value); }
-    }
-
-    /// <summary>
     /// 脉冲动画持续时间（秒）
     /// </summary>
     public double PulseDuration
@@ -102,10 +89,14 @@ public class LoadingPulse : LoadingIndicator
     {
         CreateVisualTree();
 
-        if (IsActive)
+        Loaded += (s, e) =>
         {
-            Loaded += (s, e) => StartAnimation();
-        }
+            if (IsActive)
+            {
+                StartAnimation();
+            }
+        };
+        Unloaded += (s, e) => StopAnimation();
     }
 
     private void CreateVisualTree()
@@ -152,12 +143,12 @@ public class LoadingPulse : LoadingIndicator
         pulse.UpdateVisualProperties();
     }
 
-    private static void OnIsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    protected override void OnIsActiveChanged(bool oldValue, bool newValue)
     {
-        var pulse = (LoadingPulse)d;
-        if (pulse.IsLoaded)
+        base.OnIsActiveChanged(oldValue, newValue);
+        if (IsLoaded)
         {
-            pulse.UpdateAnimationState();
+            UpdateAnimationState();
         }
     }
 

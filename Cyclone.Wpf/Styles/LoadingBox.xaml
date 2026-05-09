@@ -4,29 +4,34 @@
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
 
     <Style x:Key="LoadingBox.Style.Basic" TargetType="{x:Type ctl:LoadingBox}">
-        <Setter Property="LoadingContent">
-            <Setter.Value>
-                <ctl:LoadingRing />
-            </Setter.Value>
-        </Setter>
+        <!--  MaskBackground 通过 token 设——支持暗色主题切换  -->
+        <Setter Property="MaskBackground" Value="{DynamicResource Background.Mask}" />
+        <Setter Property="Background" Value="Transparent" />
+        <!--  注：不要在这里设 LoadingContent 默认值，多个 LoadingBox 会共享同一 Visual instance 崩溃。
+              LoadingBox.OnApplyTemplate 会按需 new 一个 LoadingRing 默认实例。  -->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ctl:LoadingBox}">
-                    <Grid>
-                        <ContentPresenter Panel.ZIndex="1" Content="{TemplateBinding Content}" />
-
-                        <Rectangle
-                            x:Name="PART_Mask"
-                            Panel.ZIndex="2"
-                            Fill="{TemplateBinding MaskBackground}"
-                            Visibility="Collapsed" />
-
-                        <ContentPresenter
-                            x:Name="PART_LoadingPresenter"
-                            Panel.ZIndex="3"
-                            Content="{TemplateBinding LoadingContent}"
-                            Visibility="Collapsed" />
-                    </Grid>
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid>
+                            <!--  Grid 子元素按声明顺序渲染——后者覆盖前者，无需 Panel.ZIndex  -->
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <Rectangle
+                                x:Name="PART_Mask"
+                                Fill="{TemplateBinding MaskBackground}"
+                                Visibility="Collapsed" />
+                            <ContentPresenter
+                                x:Name="PART_LoadingPresenter"
+                                Content="{TemplateBinding LoadingContent}"
+                                Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsLoading" Value="True">
                             <Setter TargetName="PART_LoadingPresenter" Property="Visibility" Value="Visible" />
@@ -37,5 +42,6 @@
             </Setter.Value>
         </Setter>
     </Style>
+
     <Style BasedOn="{StaticResource LoadingBox.Style.Basic}" TargetType="{x:Type ctl:LoadingBox}" />
 </ResourceDictionary>

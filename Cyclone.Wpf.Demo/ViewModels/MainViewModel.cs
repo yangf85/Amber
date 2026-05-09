@@ -28,13 +28,14 @@ public partial class MainViewModel : ObservableObject
         CurrentView = menuItem.Header switch
         {
             "Button" => new ButtonView(),
+            "SwitchButton" => new SwitchButtonView(),
             "SplitButton" => new SplitButtonView(),
             "NumberBox" => new NumberBoxView(),
             "Input" => new InputView(),
             "Menu" => new MenuView(),
             "TreeView" => new TreeControlView(),
             "CascadePicker" => new CascadePickerView(),
-            "Loading" => new LoadingView(),
+            "LoadingBox" => new LoadingBoxView(),
             "DataGrid" => new DataGridView(),
             "DateTime" => new DateView(),
             "Range" => new RangeView(),
@@ -44,7 +45,8 @@ public partial class MainViewModel : ObservableObject
             "ComboBox" => new ComboBoxView(),
             "ListView" => new CollectionView(),
             "ListBox" => new ListBoxView(),
-            "Notification" => new MessageBoxView(),
+            "Notification" => new NotificationView(),
+            "Alert" => new AlertView(),
             "TransferBox" => new TransferBoxView(),
             "HintBox" => new HintBoxView(),
             "CyclicPanel" => new CyclicPanelView(),
@@ -69,6 +71,8 @@ public partial class MainViewModel : ObservableObject
             "Card" => new CardView(),
             "MultiComboBox" => new MultiComboBoxView(),
             "PopupBox" => new PopupBoxView(),
+            "HighlightTextBlock" => new HighlightTextBlockView(),
+
             "Test" => new TestView(),
             _ => null,
         };
@@ -98,6 +102,11 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="Button",
                     Icon= "\xe605",
                 },
+                 new SideMenuItemViewModel
+                {
+                    Header="SwitchButton",
+                    Icon= "\xe605",
+                },
                    new SideMenuItemViewModel
                 {
                     Header="SplitButton",
@@ -107,6 +116,11 @@ public partial class SideMenuViewModel : ObservableObject
                 {
                     Header="Input",
                     Icon= "\xe603",
+                },
+                new SideMenuItemViewModel
+                {
+                    Header="HighlightTextBlock",
+                    Icon= "\xe605",
                 },
                  new SideMenuItemViewModel
                 {
@@ -144,11 +158,7 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="DateTime",
                     Icon= "\xe604",
                 },
-                new SideMenuItemViewModel
-                {
-                    Header="CascadePicker",
-                    Icon= "\xe78a",
-                },
+
                   new SideMenuItemViewModel
                 {
                     Header="EnumSelector",
@@ -288,13 +298,32 @@ public partial class SideMenuViewModel : ObservableObject
                     Header="TreeView",
                     Icon= "\xe970",
                 },
+                new SideMenuItemViewModel
+                {
+                    Header="CascadePicker",
+                    Icon= "\xe78a",
+                },
             ]
         });
 
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Notification",
+            Header = "Message",
             Icon = "\xe60e",
+            Items =
+            [
+                 new SideMenuItemViewModel
+                {
+                    Header="Notification",
+                    Icon= "\xe60e",
+                },
+                new SideMenuItemViewModel
+                {
+                    Header="Alert",
+                    Icon= "\xe60e",
+                },
+
+            ]
         });
         Items.Add(new SideMenuItemViewModel
         {
@@ -343,7 +372,7 @@ public partial class SideMenuViewModel : ObservableObject
             [
                 new SideMenuItemViewModel
                 {
-                    Header = "Loading",
+                    Header = "LoadingBox",
                     Icon = "\xe891",
                 },
 

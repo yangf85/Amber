@@ -10,11 +10,6 @@ namespace Cyclone.Wpf.Controls;
 
 public class BreadCrumbBar : ListBox
 {
-    static BreadCrumbBar()
-    {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(BreadCrumbBar), new FrameworkPropertyMetadata(typeof(BreadCrumbBar)));
-    }
-
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -45,5 +40,10 @@ public class BreadCrumbBar : ListBox
             breadCrumbItem.IsFirst = (index == 0);
             breadCrumbItem.IsLast = (index == Items.Count - 1);
         }
+    }
+
+    static BreadCrumbBar()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(BreadCrumbBar), new FrameworkPropertyMetadata(typeof(BreadCrumbBar)));
     }
 }

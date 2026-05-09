@@ -4,25 +4,29 @@
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls"
     xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers">
     <ResourceDictionary.MergedDictionaries>
-        <!--<ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />-->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  RepeatButton：中间两个箭头按钮  -->
     <Style x:Key="TransferBox.TransferButtonStyle" TargetType="RepeatButton">
         <Setter Property="MinWidth" Value="{DynamicResource Width.Vertical.Item}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
                     <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
-                        <ContentPresenter />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Pressed}" />
                             <Setter Property="Foreground" Value="{DynamicResource Foreground.Pressed}" />
                         </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="RootGrid" Property="Opacity" Value="0.4" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -30,8 +34,10 @@
         </Setter>
     </Style>
 
+    <!--  ListBoxItem 默认样式：左侧 CheckBox + 内容  -->
     <Style x:Key="TransferBox.ListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
+        <Setter Property="Padding" Value="8,0" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="Transparent" />
@@ -40,7 +46,7 @@
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border
                         x:Name="RootBorder"
-                        Height="{TemplateBinding Height}"
+                        Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
                         SnapsToDevicePixels="True"
                         UseLayoutRounding="True">
@@ -57,19 +63,19 @@
                                 IsChecked="{Binding Path=IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}" />
                             <ContentPresenter
                                 Grid.Column="1"
-                                Margin="5,0,0,0"
+                                Margin="8,0,0,0"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
-                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                             <Setter Property="Foreground" Value="{DynamicResource Foreground.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -77,9 +83,11 @@
         </Setter>
     </Style>
 
+    <!--  ListBox 默认样式：顶部"全选" + ScrollViewer + 列表项  -->
     <Style x:Key="TransferBox.ListBoxStyle" TargetType="ListBox">
-        <Setter Property="ItemContainerStyle" Value="{StaticResource TransferBox.ListBoxItemStyle}" />
         <Setter Property="hp:ListBoxHelper.IsSelectAllEnabled" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBox">
@@ -88,8 +96,19 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <CheckBox Content="选择全部" IsChecked="{Binding Path=(hp:ListBoxHelper.IsSelectedAll), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
-                        <StackPanel Grid.Row="1" IsItemsHost="True" />
+                        <CheckBox
+                            Grid.Row="0"
+                            Margin="8,6"
+                            Content="全选"
+                            IsChecked="{Binding Path=(hp:ListBoxHelper.IsSelectedAll), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
+                        <!--  ScrollViewer 之前缺失——大量 items 时无法滚动  -->
+                        <ScrollViewer
+                            Grid.Row="1"
+                            Padding="0"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter SnapsToDevicePixels="True" />
+                        </ScrollViewer>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -98,7 +117,6 @@
 
     <ControlTemplate x:Key="TransferBox.ControlTemplate.Basic" TargetType="ctl:TransferBox">
         <Border
-            Height="{TemplateBinding Height}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}">
@@ -115,22 +133,29 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+
+                <!--  Header 背景  -->
                 <Grid
-                    x:Name="HeaderContainer"
                     Grid.Row="0"
                     Grid.Column="0"
                     Grid.ColumnSpan="5"
                     Background="{DynamicResource Background.Header}" />
+
+                <!--  Source / Target 标题  -->
                 <ContentPresenter
                     Grid.Row="0"
                     Grid.Column="0"
+                    Margin="12,0"
                     VerticalAlignment="Center"
                     Content="{TemplateBinding SourceHeader}" />
                 <ContentPresenter
                     Grid.Row="0"
                     Grid.Column="4"
+                    Margin="12,0"
                     VerticalAlignment="Center"
                     Content="{TemplateBinding TargetHeader}" />
+
+                <!--  分隔线  -->
                 <Rectangle
                     Grid.Row="1"
                     Grid.Column="0"
@@ -149,17 +174,21 @@
                     Grid.Column="3"
                     Width="1"
                     Fill="{TemplateBinding BorderBrush}" />
+
+                <!--  Source 列表  -->
                 <ListBox
                     x:Name="PART_SourceListBox"
                     Grid.Row="2"
                     Grid.Column="0"
-                    DisplayMemberPath="{TemplateBinding SourceDismemberPath}"
+                    DisplayMemberPath="{TemplateBinding SourceDisplayMemberPath}"
+                    ItemContainerStyle="{TemplateBinding ItemContainerStyle}"
                     ItemTemplate="{TemplateBinding ItemTemplate}"
-                    ItemsPanel="{TemplateBinding ItemPanel}"
-                    ItemsSource="{TemplateBinding ItemsSource}"
+                    ItemsPanel="{TemplateBinding ItemsPanel}"
+                    ItemsSource="{TemplateBinding SourceItems}"
                     SelectionMode="Multiple"
                     Style="{StaticResource TransferBox.ListBoxStyle}" />
 
+                <!--  中间箭头按钮区  -->
                 <Grid
                     Grid.Row="0"
                     Grid.RowSpan="3"
@@ -170,6 +199,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+
+                    <!--  → 移到目标  -->
                     <RepeatButton
                         x:Name="PART_ToTargetRepeatButton"
                         Grid.Row="0"
@@ -179,7 +210,6 @@
                         Style="{StaticResource TransferBox.TransferButtonStyle}">
                         <RepeatButton.Content>
                             <Path
-                                x:Name="ToTargetPath"
                                 Width="14"
                                 Height="14"
                                 Data="M516.266667 494.933333l-192 192-29.866667-29.866666 162.133333-162.133334-162.133333-162.133333 29.866667-29.866667 192 192z m256 0l-192 192-29.866667-29.866666 162.133333-162.133334-162.133333-162.133333 29.866667-29.866667 192 192z"
@@ -187,10 +217,13 @@
                                 Stretch="Uniform" />
                         </RepeatButton.Content>
                     </RepeatButton>
+
                     <Rectangle
                         Grid.Row="1"
                         Height="1"
                         Fill="{TemplateBinding BorderBrush}" />
+
+                    <!--  ← 移回源  -->
                     <RepeatButton
                         x:Name="PART_ToSourceRepeatButton"
                         Grid.Row="2"
@@ -200,7 +233,6 @@
                         Style="{StaticResource TransferBox.TransferButtonStyle}">
                         <RepeatButton.Content>
                             <Path
-                                x:Name="ToSourcePath"
                                 Width="14"
                                 Height="14"
                                 Data="M550.4 494.933333l192 192 29.866667-29.866666-162.133334-162.133334 162.133334-162.133333-29.866667-29.866667-192 192z m-256 0l192 192 29.866667-29.866666-162.133334-162.133334 162.133334-162.133333-29.866667-29.866667-192 192z"
@@ -210,14 +242,16 @@
                     </RepeatButton>
                 </Grid>
 
+                <!--  Target 列表  -->
                 <ListBox
                     x:Name="PART_TargetListBox"
                     Grid.Row="2"
                     Grid.Column="4"
-                    DisplayMemberPath="{TemplateBinding TargetDismemberPath}"
+                    DisplayMemberPath="{TemplateBinding TargetDisplayMemberPath}"
+                    ItemContainerStyle="{TemplateBinding ItemContainerStyle}"
                     ItemTemplate="{TemplateBinding ItemTemplate}"
-                    ItemsPanel="{TemplateBinding ItemPanel}"
-                    ItemsSource="{TemplateBinding ItemsTarget}"
+                    ItemsPanel="{TemplateBinding ItemsPanel}"
+                    ItemsSource="{TemplateBinding TargetItems}"
                     SelectionMode="Multiple"
                     Style="{StaticResource TransferBox.ListBoxStyle}" />
             </Grid>
@@ -231,7 +265,17 @@
         <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Height" Value="Auto" />
+        <!--  ItemContainerStyle 默认值——user 可通过设 TransferBox.ItemContainerStyle 覆盖  -->
+        <Setter Property="ItemContainerStyle" Value="{StaticResource TransferBox.ListBoxItemStyle}" />
+        <!--  ItemsPanel 默认值——必须设，否则 TemplateBinding 写 null 给 ListBox.ItemsPanel 会让 items 不渲染。
+              用 StackPanel 而不是 VirtualizingStackPanel，因为 ListBoxItem 模板里用了 SharedSizeGroup（跟虚拟化不兼容）  -->
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
         <Setter Property="Template" Value="{StaticResource TransferBox.ControlTemplate.Basic}" />
     </Style>
 

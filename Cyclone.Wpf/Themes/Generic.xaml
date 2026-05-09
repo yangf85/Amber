@@ -70,6 +70,9 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RadioButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CheckBox.xaml" />
 
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/NotificationMessage.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Alert.xaml" />
+
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CircularGauge.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/LoadingBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Pagination.xaml" />

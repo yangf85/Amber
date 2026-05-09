@@ -253,5 +253,6 @@ public class LoadingParticle : LoadingIndicator
         CreateVisualTree();
 
         Loaded += OnLoaded;
+        Unloaded += (s, e) => StopAnimation();
     }
 }

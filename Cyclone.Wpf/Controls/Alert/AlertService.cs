@@ -1,44 +1,42 @@
 ﻿using System;
-using System.Windows;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Controls;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 警告框服务实现类
+/// 警告对话框服务的默认实现。单例（<see cref="Instance"/>）或手动 new。
 /// </summary>
-public class AlertService : IAlertService, IDisposable
+public class AlertService : IAlertService
 {
-    // 使用非readonly的静态字段，允许重新分配
-    private static Lazy<AlertService> _lazyInstance;
+    // ---- 静态单例 ----
 
-    // 确保实例重置线程安全的锁对象
     private static readonly object _instanceLock = new object();
 
-    // 使用原子操作控制对象状态
+    private static Lazy<AlertService> _lazyInstance =
+            new Lazy<AlertService>(() => new AlertService(), LazyThreadSafetyMode.ExecutionAndPublication);
+
     private int _isDisposed;
 
-    // 自定义Dispatcher，用于在非WPF环境下工作
-    private Dispatcher _customDispatcher;
+    // ---- 实例字段 ----
+    private Window _ownerWindow;
 
-    /// <summary>
-    /// 静态构造函数，初始化单例实例
-    /// </summary>
-    static AlertService()
-    {
-        _lazyInstance = new Lazy<AlertService>(() =>
-            new AlertService(), LazyThreadSafetyMode.ExecutionAndPublication);
-    }
+    private IntPtr _ownerHandle;
 
-    /// <summary>
-    /// 获取AlertService的单例实例
-    /// </summary>
+    // SetOwner 挂在 owner 上的 Closed handler——保存引用以便重入时解绑
+    private EventHandler _ownerClosedHandler;
+
+    private AlertWindow _currentAlert;
+
+    private Window _currentMask;
+
+    /// <summary>获取单例实例。</summary>
     public static AlertService Instance
     {
         get
@@ -50,148 +48,37 @@ public class AlertService : IAlertService, IDisposable
         }
     }
 
-    public AlertOption Option
-    {
-        get;
-        private set;
-    }
+    public AlertOption Option { get; }
+
+    private bool HasOwner => _ownerWindow != null || _ownerHandle != IntPtr.Zero;
 
     /// <summary>
-    /// 重置警告服务单例实例
-    /// 用于服务处置后重新开始使用的情况
+    /// 重置单例。<b>注意：Dispose 不再自动调用此方法</b>——
+    /// 单例语义和 Dispose 语义独立，如需释放后重新启用一个干净单例，由调用方显式触发。
     /// </summary>
     public static void ResetInstance()
     {
         lock (_instanceLock)
         {
-            _lazyInstance = new Lazy<AlertService>(() =>
-                new AlertService(), LazyThreadSafetyMode.ExecutionAndPublication);
+            _lazyInstance = new Lazy<AlertService>(
+                () => new AlertService(),
+                LazyThreadSafetyMode.ExecutionAndPublication);
         }
     }
 
-    private Window _ownerWindow;               // 拥有者WPF窗口
-    private IntPtr _ownerHandle;               // 拥有者窗口句柄
-    private Window _maskWindow;                // 蒙版窗口
-    private AlertWindow _currentAlertWindow;   // 当前活动的警告窗口
-
-    // 非WPF窗口的事件钩子句柄
-    private IntPtr _winEventHook = IntPtr.Zero;
-
-    // 窗口事件委托（保持引用以防止被垃圾回收）
-    private WindowsNativeService.WinEventDelegate _winEventProc;
-
-    /// <summary>
-    /// 使用默认选项初始化AlertService的新实例
-    /// </summary>
     public AlertService() : this(new AlertOption())
     {
     }
 
-    /// <summary>
-    /// 使用自定义选项初始化AlertService的新实例
-    /// </summary>
     public AlertService(AlertOption option)
     {
         Option = option ?? throw new ArgumentNullException(nameof(option));
-
-        // 确保Dispatcher已初始化
-        GetDispatcher();
     }
 
-    /// <summary>
-    /// 获取可用的Dispatcher，确保在非WPF环境下也能正常工作
-    /// </summary>
-    private Dispatcher GetDispatcher()
-    {
-        // 如果已有自定义Dispatcher，直接返回
-        if (_customDispatcher != null)
-            return _customDispatcher;
-
-        // 尝试获取Application.Current.Dispatcher
-        if (Application.Current != null && Application.Current.Dispatcher != null)
-            return Application.Current.Dispatcher;
-
-        // 在非WPF环境下，创建并使用自己的Dispatcher线程
-        _customDispatcher = Dispatcher.CurrentDispatcher;
-        return _customDispatcher;
-    }
+    #region SetOwner
 
     /// <summary>
-    /// 检查是否需要在Dispatcher上调用并执行操作
-    /// </summary>
-    private void InvokeOnDispatcher(Action action)
-    {
-        if (action == null)
-            return;
-
-        var dispatcher = GetDispatcher();
-
-        if (dispatcher == null)
-        {
-            // 如果无法获取任何Dispatcher，则直接执行操作
-            action();
-            return;
-        }
-
-        if (dispatcher.CheckAccess())
-        {
-            // 已在UI线程上，直接执行
-            action();
-        }
-        else
-        {
-            // 需要在UI线程上执行
-            dispatcher.BeginInvoke(action);
-        }
-    }
-
-    /// <summary>
-    /// 同步在Dispatcher上执行操作并返回结果
-    /// </summary>
-    private T InvokeOnDispatcherWithResult<T>(Func<T> func)
-    {
-        if (func == null)
-            throw new ArgumentNullException(nameof(func));
-
-        var dispatcher = GetDispatcher();
-
-        if (dispatcher == null || dispatcher.CheckAccess())
-        {
-            // 如果无法获取任何Dispatcher或已在UI线程上，直接执行
-            return func();
-        }
-        else
-        {
-            // 需要在UI线程上执行并等待结果
-            return (T)dispatcher.Invoke(func);
-        }
-    }
-
-    /// <summary>
-    /// 异步在Dispatcher上执行操作
-    /// </summary>
-    private Task InvokeOnDispatcherAsync(Action action)
-    {
-        if (action == null)
-            return Task.CompletedTask;
-
-        var dispatcher = GetDispatcher();
-
-        if (dispatcher == null || dispatcher.CheckAccess())
-        {
-            // 如果无法获取任何Dispatcher或已在UI线程上，直接执行
-            action();
-            return Task.CompletedTask;
-        }
-        else
-        {
-            // 需要在UI线程上执行
-            return dispatcher.InvokeAsync(action).Task;
-        }
-    }
-
-    /// <summary>
-    /// 将WPF窗口设置为警告框的所有者
+    /// 把 WPF 窗口设为 alert 的 owner。多次调用先解绑旧 owner 的事件。
     /// </summary>
     public void SetOwner(Window owner)
     {
@@ -199,160 +86,250 @@ public class AlertService : IAlertService, IDisposable
         {
             throw new ArgumentNullException(nameof(owner));
         }
-
-        // 检查是否已被处置
         ThrowIfDisposed();
 
-        // 清理任何已存在的事件钩子
-        UnhookEvents();
+        DetachOwnerHandlers();
 
         _ownerWindow = owner;
         _ownerHandle = new WindowInteropHelper(owner).Handle;
 
-        // 添加窗口关闭事件，确保在Owner关闭时释放资源
-        owner.Closed += (sender, args) => Dispose();
+        _ownerClosedHandler = (_, _) => OnOwnerClosed();
+        owner.Closed += _ownerClosedHandler;
     }
 
-    /// <summary>
-    /// 将非WPF窗口句柄设置为警告框的所有者
-    /// </summary>
+    /// <summary>把非 WPF 窗口（任意 hwnd）设为 owner。</summary>
     public void SetOwner(IntPtr windowHandle)
     {
         if (windowHandle == IntPtr.Zero)
         {
-            throw new ArgumentNullException(nameof(windowHandle), "无效的窗口句柄");
+            throw new ArgumentNullException(nameof(windowHandle), "Invalid WindowHandle");
         }
-
-        // 检查是否已被处置
         ThrowIfDisposed();
 
         if (!WindowsNativeService.IsWindow(windowHandle))
         {
-            throw new ArgumentException("句柄不是一个窗口", nameof(windowHandle));
+            throw new ArgumentException("Handle is not a Window", nameof(windowHandle));
         }
 
-        // 清理任何已存在的事件钩子
-        UnhookEvents();
-
+        DetachOwnerHandlers();
         _ownerWindow = null;
         _ownerHandle = windowHandle;
     }
 
-    /// <summary>
-    /// 将当前前台窗口设置为所有者
-    /// </summary>
+    /// <summary>把当前前台窗口设为 owner。</summary>
     public void SetOwnerToForegroundWindow()
     {
-        // 检查是否已被处置
         ThrowIfDisposed();
 
-        IntPtr foregroundHandle = WindowsNativeService.GetForegroundWindow();
+        var foregroundHandle = WindowsNativeService.GetForegroundWindow();
         if (foregroundHandle != IntPtr.Zero && WindowsNativeService.IsWindow(foregroundHandle))
         {
-            // 清理任何已存在的事件钩子
-            UnhookEvents();
-
+            DetachOwnerHandlers();
             _ownerWindow = null;
             _ownerHandle = foregroundHandle;
         }
     }
 
-    /// <summary>
-    /// 取消任何活动的窗口事件钩子
-    /// </summary>
-    private void UnhookEvents()
+    private void DetachOwnerHandlers()
     {
-        try
+        if (_ownerWindow != null && _ownerClosedHandler != null)
         {
-            if (_winEventHook != IntPtr.Zero)
-            {
-                WindowsNativeService.UnhookWinEvent(_winEventHook);
-                _winEventHook = IntPtr.Zero;
-                _winEventProc = null;
-            }
+            _ownerWindow.Closed -= _ownerClosedHandler;
         }
-        catch (Exception)
+        _ownerWindow = null;
+        _ownerHandle = IntPtr.Zero;
+        _ownerClosedHandler = null;
+    }
+
+    private void OnOwnerClosed()
+    {
+        // owner 关闭：关掉活动 alert + mask，清理 owner 引用。但<b>不</b> Dispose 单例。
+        InvokeOnDispatcher(() =>
         {
-            // 忽略可能的异常
+            try { _currentAlert?.Close(); } catch { }
+            try { _currentMask?.Close(); } catch { }
+            _currentAlert = null;
+            _currentMask = null;
+            DetachOwnerHandlers();
+        });
+    }
+
+    #endregion SetOwner
+
+    #region Show implementations
+
+    /// <inheritdoc />
+    public AlertResult Show(object content, string title = null)
+        => ShowDialogCore(content, Option.DefaultButtonType, syncValidation: null, asyncValidation: null, title);
+
+    /// <inheritdoc />
+    public AlertResult Show(object content, AlertButton buttons, string title = null)
+        => ShowDialogCore(content, buttons, syncValidation: null, asyncValidation: null, title);
+
+    /// <inheritdoc />
+    public AlertResult Show(object content, Func<bool> validation, string title = null)
+    {
+        if (validation == null)
+        {
+            throw new ArgumentNullException(nameof(validation));
         }
+        return ShowDialogCore(content, AlertButton.OkCancel, validation, asyncValidation: null, title);
+    }
+
+    /// <inheritdoc />
+    public Task<AlertResult> ShowAsync(object content, Func<Task<bool>> asyncValidation, string title = null)
+    {
+        if (asyncValidation == null)
+        {
+            throw new ArgumentNullException(nameof(asyncValidation));
+        }
+
+        // ShowDialog 本身阻塞，在 UI 线程上跑。返回时已经关闭——所以包成已完成的 Task 即可。
+        var result = ShowDialogCore(content, AlertButton.OkCancel, syncValidation: null, asyncValidation, title);
+        return Task.FromResult(result);
+    }
+
+    private static AlertResult MapDialogResult(bool? dialogResult)
+    {
+        return dialogResult switch
+        {
+            true => AlertResult.Ok,
+            false => AlertResult.Cancel,
+            _ => AlertResult.Closed,
+        };
     }
 
     /// <summary>
-    /// 创建警告窗口实例
+    /// 三个 Show 实现的统一核心。之前 60 行核心逻辑被复制 3 份的问题在这里收敛。
     /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>创建的AlertWindow实例</returns>
-    private AlertWindow CreateAlertWindow(object content, string title)
+    private AlertResult ShowDialogCore(object content, AlertButton buttons,
+        Func<bool> syncValidation, Func<Task<bool>> asyncValidation, string title)
     {
-        // 检查是否已被处置
+        if (content == null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
         ThrowIfDisposed();
 
+        var dispatcher = GetDispatcher();
+        AlertResult result = AlertResult.Closed;
+
+        Action work = () =>
+        {
+            if (Interlocked.CompareExchange(ref _isDisposed, 0, 0) == 1)
+            {
+                return;
+            }
+
+            Window mask = null;
+            AlertWindow window = null;
+
+            try
+            {
+                // 1. 蒙版（如果开启 + 有 owner）
+                if (Option.IsShowMask && HasOwner)
+                {
+                    mask = CreateMaskWindow();
+                    mask?.Show();
+                }
+                _currentMask = mask;
+
+                // 2. Alert window
+                window = CreateAlertWindow(content, buttons, title);
+                window.ValidationCallback = syncValidation;
+                window.AsyncValidationCallback = asyncValidation;
+                _currentAlert = window;
+
+                // 3. owner / 居中——alert.Owner 必须优先指向 mask（如有），否则 mask 会盖住 alert
+                ConfigureOwnership(window, mask);
+
+                // 4. mask 跟着 alert 关闭
+                window.Closed += (_, _) =>
+                {
+                    try
+                    {
+                        if (mask != null && mask.IsLoaded)
+                        {
+                            mask.Close();
+                        }
+                    }
+                    catch { }
+                };
+
+                // 5. 模态显示并等待关闭
+                bool? dialogResult = window.ShowDialog();
+                result = MapDialogResult(dialogResult);
+            }
+            finally
+            {
+                _currentAlert = null;
+                if (mask != null)
+                {
+                    try { mask.Close(); } catch { }
+                }
+                _currentMask = null;
+
+                ActivateOwnerWindow();
+            }
+        };
+
+        if (dispatcher.CheckAccess())
+        {
+            work();
+        }
+        else
+        {
+            dispatcher.Invoke(work);
+        }
+
+        return result;
+    }
+
+    #endregion Show implementations
+
+    #region Window creation helpers
+
+    private AlertWindow CreateAlertWindow(object content, AlertButton buttons, string title)
+    {
         var window = new AlertWindow
         {
-            ButtonType = Option.ButtonType,
-            Title = title ?? Option.Title,
-            Icon = Option.Icon,
-            CaptionHeight = Option.CaptionHeight,
-            CaptionBackground = Option.CaptionBackground,
-            TitleForeground = Option.TitleForeground,
-            AlertButtonGroupBackground = Option.AlertButtonGroupBackground,
-            AlertButtonGroupHeight = Option.AlertButtonGroupHeight,
-            AlertButtonGroupHorizontalAlignment = Option.AlertButtonGroupHorizontalAlignment,
+            Title = title ?? string.Empty,
+            Content = content,
+            ButtonType = buttons,
             OkButtonText = Option.OkButtonText,
             CancelButtonText = Option.CancelButtonText,
-            Content = content,
-            Topmost = false,
-            ShowInTaskbar = false,
-            // 设置加载动画相关属性
-            IsShowLoadingOnAsync = Option.IsShowLoadingOnAsync,
-            LoadingContent = Option.LoadingContent,
-            LoadingMaskBrush = Option.LoadingMaskBrush
         };
+
+        // 如果 content 是 AlertMessage，把它的 Level 同步到 window——标题栏图标自动跟内容图标一致
+        if (content is AlertMessage alertMessage)
+        {
+            window.Level = alertMessage.Level;
+        }
 
         return window;
     }
 
-    /// <summary>
-    /// 为所有者窗口创建蒙版窗口
-    /// </summary>
-    /// <returns>创建的蒙版窗口或null</returns>
     private Window CreateMaskWindow()
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        if (_ownerWindow == null && _ownerHandle == IntPtr.Zero)
-        {
-            return null; // 没有所有者，不创建蒙版
-        }
-
-        // 获取所有者窗口的位置和尺寸
         Rect ownerRect;
 
         if (_ownerWindow != null)
         {
-            // 使用WPF窗口
             ownerRect = new Rect(_ownerWindow.Left, _ownerWindow.Top, _ownerWindow.Width, _ownerWindow.Height);
         }
         else
         {
-            // 使用句柄窗口
             var wpfRect = WindowsNativeService.GetWindowRectAsWpfRect(_ownerHandle);
-            if (wpfRect.HasValue)
+            if (!wpfRect.HasValue)
             {
-                ownerRect = wpfRect.Value;
+                return null;
             }
-            else
-            {
-                return null; // 无法获取窗口尺寸
-            }
+            ownerRect = wpfRect.Value;
         }
 
         try
         {
-            // 创建蒙版窗口
-            var maskWindow = new Window
+            var mask = new Window
             {
                 Width = ownerRect.Width,
                 Height = ownerRect.Height,
@@ -364,600 +341,167 @@ public class AlertService : IAlertService, IDisposable
                 AllowsTransparency = true,
                 Background = Brushes.Transparent,
                 WindowStartupLocation = WindowStartupLocation.Manual,
-                // 修改：设置为接收点击事件但不获取焦点
                 IsHitTestVisible = false,
-                // 修改：允许获取焦点以便正确处理Z顺序
-                Focusable = true,
-                // 设置为不是最上层，让Alert窗口可以在其上方
+                Focusable = false,
                 Topmost = false,
             };
 
-            // 添加矩形蒙版
-            var rectangle = new Rectangle
+            // 蒙版用主题里的 Overlay.Dark
+            var overlayBrush = Application.Current?.TryFindResource("Overlay.Dark") as Brush
+                               ?? new SolidColorBrush(Color.FromArgb(0x80, 0, 0, 0));
+
+            mask.Content = new Rectangle
             {
                 Width = ownerRect.Width,
                 Height = ownerRect.Height,
-                Fill = Option.MaskBrush ?? new SolidColorBrush(Color.FromArgb(128, 0, 0, 0))
+                Fill = overlayBrush,
             };
 
-            maskWindow.Content = rectangle;
-
-            // 如果有WPF Owner，设置蒙版窗口的Owner，确保Z顺序和焦点行为正确
             if (_ownerWindow != null)
             {
-                maskWindow.Owner = _ownerWindow;
+                mask.Owner = _ownerWindow;
             }
 
-            // 添加事件处理，确保点击蒙版时不会让蒙版获得焦点
-            maskWindow.PreviewMouseDown += (sender, e) =>
-            {
-                e.Handled = true;
-            };
-
-            return maskWindow;
+            return mask;
         }
         catch (Exception ex)
         {
-            // 记录异常但不中断流程
-            System.Diagnostics.Debug.WriteLine($"创建蒙版窗口时出错: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[AlertService] 创建蒙版窗口失败: {ex.Message}");
             return null;
         }
     }
 
-    /// <summary>
-    /// 计算窗口中心位置
-    /// </summary>
-    /// <param name="window">要定位的窗口</param>
-    private void PositionWindowInCenter(Window window)
+    private void ConfigureOwnership(AlertWindow window, Window mask)
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        if (window == null)
+        // alert.Owner 优先级：mask > realOwner > hwnd 居中 > 屏幕居中
+        // 这里 alert.Owner = mask 是<b>必须</b>的——WPF owner 关系保证子窗口 Z 序始终在父窗口之上。
+        // 如果让 mask 和 alert 平级（都以 realOwner 为 owner），Z 序未定，mask 可能盖住 alert，
+        // 导致 alert 收不到点击和焦点——这是"弹窗卡死"的真凶。
+        if (mask != null)
         {
-            throw new ArgumentNullException(nameof(window));
+            window.Owner = mask;
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            return;
         }
 
-        try
+        if (_ownerWindow != null)
         {
-            // 如果有WPF窗口作为拥有者，使用WPF的标准居中逻辑
-            if (_ownerWindow != null)
+            window.Owner = _ownerWindow;
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            return;
+        }
+
+        if (WindowsNativeService.IsValidWindow(_ownerHandle))
+        {
+            if (AlertWindowPositioner.CenterAlertInOwner(window, _ownerHandle))
             {
-                window.Owner = _ownerWindow;
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 return;
             }
-
-            // 如果有非WPF窗口作为拥有者，使用专用的Alert窗口定位器
-            if (WindowsNativeService.IsValidWindow(_ownerHandle))
-            {
-                // 尝试使用AlertWindowPositioner在拥有者窗口中心定位警告窗口
-                if (AlertWindowPositioner.CenterAlertInOwner(window, _ownerHandle))
-                {
-                    return;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // 记录异常但不中断流程
-            System.Diagnostics.Debug.WriteLine($"定位警告窗口时出错: {ex.Message}");
         }
 
-        // 如果以上方法都失败，则默认使用屏幕中心
+        // 兜底：屏幕居中
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
     }
 
-    /// <summary>
-    /// 从句柄窗口更新蒙版窗口位置和大小
-    /// </summary>
-    private void UpdateMaskPositionFromHandle()
-    {
-        try
-        {
-            if (_currentAlertWindow != null && _currentAlertWindow.IsLoaded)
-            {
-                _currentAlertWindow.Visibility = Visibility.Visible;
-                _currentAlertWindow.Activate();
-            }
-
-            if (_maskWindow != null && WindowsNativeService.IsValidWindow(_ownerHandle))
-            {
-                var wpfRect = WindowsNativeService.GetWindowRectAsWpfRect(_ownerHandle);
-                if (wpfRect.HasValue)
-                {
-                    _maskWindow.Left = wpfRect.Value.Left;
-                    _maskWindow.Top = wpfRect.Value.Top;
-                    _maskWindow.Width = wpfRect.Value.Width;
-                    _maskWindow.Height = wpfRect.Value.Height;
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // 忽略可能的异常
-        }
-    }
-
-    /// <summary>
-    /// 用于监控非WPF窗口变化的窗口事件回调
-    /// </summary>
-    private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
-    {
-        try
-        {
-            // 只处理我们拥有者窗口的事件
-            if (hwnd == _ownerHandle)
-            {
-                InvokeOnDispatcher(() =>
-                {
-                    UpdateMaskPositionFromHandle();
-                });
-            }
-        }
-        catch (Exception)
-        {
-            // 忽略可能的异常
-        }
-    }
-
-    /// <summary>
-    /// 为非WPF窗口设置窗口事件监控
-    /// </summary>
-    private void SetupNonWpfWindowMonitoring()
-    {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        try
-        {
-            // 只有在有非WPF所有者且尚未设置钩子时才设置
-            if (_ownerHandle != IntPtr.Zero && _winEventHook == IntPtr.Zero && _ownerWindow == null)
-            {
-                // 创建委托（保持引用以防止垃圾回收）
-                _winEventProc = new WindowsNativeService.WinEventDelegate(WinEventProc);
-
-                // 为窗口位置变化设置事件钩子
-                _winEventHook = WindowsNativeService.SetWinEventHook(
-                    WindowsNativeService.EVENT_OBJECT_LOCATIONCHANGE,
-                    WindowsNativeService.EVENT_OBJECT_LOCATIONCHANGE,
-                    IntPtr.Zero,
-                    _winEventProc,
-                    0,
-                    0,
-                    WindowsNativeService.WINEVENT_OUTOFCONTEXT);
-            }
-        }
-        catch (Exception)
-        {
-            // 忽略可能的异常
-        }
-    }
-
-    /// <summary>
-    /// 激活所有者窗口并将其置于前台
-    /// </summary>
     private void ActivateOwnerWindow()
     {
         try
         {
-            // 如果有WPF窗口作为Owner
-            if (_ownerWindow != null)
+            if (_ownerWindow != null && _ownerWindow.Visibility == Visibility.Visible)
             {
-                // 确保窗口可见
-                if (_ownerWindow.Visibility == Visibility.Visible)
-                {
-                    // 激活WPF窗口
-                    _ownerWindow.Activate();
-
-                    // 获取并使用窗口句柄来确保窗口位于前台
-                    IntPtr ownerHandle = new WindowInteropHelper(_ownerWindow).Handle;
-                    WindowsNativeService.ActivateAndBringToFront(ownerHandle);
-                }
+                _ownerWindow.Activate();
+                var hwnd = new WindowInteropHelper(_ownerWindow).Handle;
+                WindowsNativeService.ActivateAndBringToFront(hwnd);
             }
-            // 如果只有Owner句柄
             else if (WindowsNativeService.IsValidWindow(_ownerHandle))
             {
-                // 使用Win32 API设置窗口到前台
                 WindowsNativeService.ActivateAndBringToFront(_ownerHandle);
             }
         }
         catch (Exception ex)
         {
-            // 记录异常但不阻止程序继续运行
-            System.Diagnostics.Debug.WriteLine($"激活Owner窗口时出错: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[AlertService] 激活 owner 失败: {ex.Message}");
         }
     }
 
-    #region 实现IAlertService接口
+    #endregion Window creation helpers
 
-    /// <summary>
-    /// 显示模态警告框并返回对话框结果
-    /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>对话框结果</returns>
-    public bool? Show(object content, string title = null)
+    #region Dispatcher
+
+    private static Dispatcher GetDispatcher()
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        // 使用自定义的Dispatcher调用方法执行
-        return InvokeOnDispatcherWithResult(() =>
-        {
-            return ShowDialogInternal(content, title);
-        });
+        return Application.Current?.Dispatcher
+            ?? throw new InvalidOperationException(
+                "AlertService 需要 Application.Current.Dispatcher——请在 WPF 应用启动后使用。");
     }
 
-    /// <summary>
-    /// 显示带同步验证回调的警告框
-    /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="validation">验证回调函数</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>对话框结果</returns>
-    public bool? Show(object content, Func<bool> validation, string title = null)
+    private static void InvokeOnDispatcherStatic(Action action)
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        if (validation == null)
+        var d = Application.Current?.Dispatcher;
+        if (d == null || d.CheckAccess())
         {
-            throw new ArgumentNullException(nameof(validation), "验证回调函数不能为空");
+            action();
         }
-
-        // 使用自定义的Dispatcher调用方法执行
-        return InvokeOnDispatcherWithResult(() =>
+        else
         {
-            return ShowDialogWithValidationInternal(content, validation, title);
-        });
-    }
-
-    /// <summary>
-    /// 显示带异步验证回调的警告框
-    /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="asyncValidation">异步验证回调函数，返回 true 允许关闭，false 阻止关闭</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>返回一个Task，当对话框关闭时完成</returns>
-    public Task ShowAsync(object content, Func<Task<bool>> asyncValidation, string title = null)
-    {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        if (asyncValidation == null)
-        {
-            throw new ArgumentNullException(nameof(asyncValidation), "异步验证回调函数不能为空");
+            d.BeginInvoke(action);
         }
-
-        // 创建一个TaskCompletionSource来控制任务完成
-        var tcs = new TaskCompletionSource<bool>();
-
-        // 使用自定义的Dispatcher调用方法执行
-        InvokeOnDispatcher(() =>
-        {
-            try
-            {
-                ShowDialogWithAsyncValidationInternal(content, asyncValidation, title, tcs);
-            }
-            catch (Exception ex)
-            {
-                // 如果在显示对话框过程中出现异常，设置任务为失败状态
-                tcs.TrySetException(ex);
-            }
-        });
-
-        // 返回不包含结果的Task
-        return tcs.Task.ContinueWith(t => { }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 
-    /// <summary>
-    /// 显示带泛型异步验证回调的警告框
-    /// </summary>
-    /// <typeparam name="T">数据类型</typeparam>
-    /// <param name="content">窗口内容</param>
-    /// <param name="asyncValidation">异步验证回调函数，接收类型为T的参数</param>
-    /// <param name="validationParameter">传递给验证函数的参数</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>返回一个Task，当对话框关闭时完成</returns>
-    public Task ShowAsync<T>(object content, Func<T, Task<bool>> asyncValidation, T validationParameter, string title = null)
+    private void InvokeOnDispatcher(Action action)
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        if (asyncValidation == null)
+        if (action == null)
         {
-            throw new ArgumentNullException(nameof(asyncValidation), "异步验证回调函数不能为空");
+            return;
         }
-
-        // 创建一个无参数的异步验证函数，内部调用带参数的版本
-        Func<Task<bool>> wrappedValidation = async () => await asyncValidation(validationParameter);
-
-        // 调用原有的无参数版本
-        return ShowAsync(content, wrappedValidation, title);
+        InvokeOnDispatcherStatic(action);
     }
 
+    #endregion Dispatcher
+
+    #region IDisposable
+
     /// <summary>
-    /// 内部方法，用于显示对话框
+    /// 释放服务。立即关闭所有活动的 alert + mask，解绑 owner 事件。
+    /// <b>不再自动 ResetInstance</b>——单例语义独立于 Dispose。
     /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>对话框结果</returns>
-    private bool? ShowDialogInternal(object content, string title)
+    public void Dispose()
     {
-        // 检查是否已被处置
-        ThrowIfDisposed();
+        if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+        {
+            return;
+        }
 
         try
         {
-            // 如果启用了蒙版并且有所有者，显示蒙版
-            if (Option.IsShowMask && (_ownerWindow != null || _ownerHandle != IntPtr.Zero))
-            {
-                _maskWindow = CreateMaskWindow();
-                // 显示蒙版窗口但不激活它
-                _maskWindow?.Show();
-            }
+            var d = Application.Current?.Dispatcher;
 
-            var window = CreateAlertWindow(content, title);
-            // 添加蒙版窗口作为警告窗口的关闭回调
-            window.Closed += (sender, e) =>
+            Action cleanup = () =>
             {
-                try
-                {
-                    // 确保蒙版窗口关闭
-                    if (_maskWindow != null && _maskWindow.IsLoaded)
-                    {
-                        _maskWindow.Close();
-                    }
-
-                    // 清理事件钩子
-                    UnhookEvents();
-                }
-                catch
-                {
-                    // 忽略关闭时的异常
-                }
+                DetachOwnerHandlers();
+                try { _currentAlert?.Close(); } catch { }
+                try { _currentMask?.Close(); } catch { }
+                _currentAlert = null;
+                _currentMask = null;
             };
 
-            _currentAlertWindow = window;
-            PositionWindowInCenter(window);
-            window.Owner = _maskWindow;
-            bool? result = null;
-            try
+            if (d == null || d.CheckAccess())
             {
-                // 显示模态对话框
-                result = window.ShowDialog();
-
-                return result;
+                cleanup();
             }
-            finally
+            else
             {
-                _currentAlertWindow = null;
-
-                // 关闭蒙版窗口
-                if (_maskWindow != null)
-                {
-                    try
-                    {
-                        _maskWindow.Close();
-                    }
-                    catch
-                    {
-                        // 忽略关闭时可能发生的异常
-                    }
-                    _maskWindow = null;
-                }
-
-                // 清理事件钩子
-                UnhookEvents();
-
-                // 在弹窗关闭后激活Owner窗口以确保它保持在前台
-                ActivateOwnerWindow();
+                d.Invoke(cleanup);
             }
         }
-        catch (Exception ex)
+        catch
         {
-            // 记录任何显示过程中的异常
-            System.Diagnostics.Debug.WriteLine($"显示警告对话框时出错: {ex.Message}");
-            return null;
+            // Dispose 必须 swallow 一切异常
         }
+
+        GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// 内部方法，用于显示带同步验证的对话框
-    /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="validation">验证回调函数</param>
-    /// <param name="title">窗口标题</param>
-    /// <returns>对话框结果</returns>
-    private bool? ShowDialogWithValidationInternal(object content, Func<bool> validation, string title)
-    {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        try
-        {
-            // 如果启用了蒙版并且有所有者，显示蒙版
-            if (Option.IsShowMask && (_ownerWindow != null || _ownerHandle != IntPtr.Zero))
-            {
-                _maskWindow = CreateMaskWindow();
-                _maskWindow?.Show();
-            }
-
-            // 创建普通的AlertWindow，然后设置验证回调
-            var window = CreateAlertWindow(content, title);
-            window.ValidationCallback = validation; // 设置验证回调
-
-            // 添加蒙版窗口关闭回调
-            window.Closed += (sender, e) =>
-            {
-                try
-                {
-                    // 确保蒙版窗口关闭
-                    if (_maskWindow != null && _maskWindow.IsLoaded)
-                    {
-                        _maskWindow.Close();
-                    }
-
-                    // 清理事件钩子
-                    UnhookEvents();
-                }
-                catch
-                {
-                    // 忽略关闭时的异常
-                }
-            };
-
-            _currentAlertWindow = window;
-            PositionWindowInCenter(window);
-            window.Owner = _maskWindow;
-
-            bool? result = null;
-            try
-            {
-                // 显示模态对话框
-                result = window.ShowDialog();
-                return result;
-            }
-            finally
-            {
-                _currentAlertWindow = null;
-
-                // 关闭蒙版窗口
-                if (_maskWindow != null)
-                {
-                    try
-                    {
-                        _maskWindow.Close();
-                    }
-                    catch
-                    {
-                        // 忽略关闭时可能发生的异常
-                    }
-                    _maskWindow = null;
-                }
-
-                // 清理事件钩子
-                UnhookEvents();
-
-                // 在弹窗关闭后激活Owner窗口
-                ActivateOwnerWindow();
-            }
-        }
-        catch (Exception ex)
-        {
-            // 记录任何显示过程中的异常
-            System.Diagnostics.Debug.WriteLine($"显示验证警告对话框时出错: {ex.Message}");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 内部方法，用于显示带异步验证的对话框
-    /// </summary>
-    /// <param name="content">窗口内容</param>
-    /// <param name="asyncValidation">异步验证回调函数</param>
-    /// <param name="title">窗口标题</param>
-    /// <param name="tcs">任务完成源</param>
-    private void ShowDialogWithAsyncValidationInternal(object content, Func<Task<bool>> asyncValidation, string title, TaskCompletionSource<bool> tcs)
-    {
-        // 检查是否已被处置
-        ThrowIfDisposed();
-
-        try
-        {
-            // 如果启用了蒙版并且有所有者，显示蒙版
-            if (Option.IsShowMask && (_ownerWindow != null || _ownerHandle != IntPtr.Zero))
-            {
-                _maskWindow = CreateMaskWindow();
-                _maskWindow?.Show();
-            }
-
-            // 创建AlertWindow
-            var window = CreateAlertWindow(content, title);
-
-            // 设置异步验证回调 - 直接使用新的AsyncValidationCallback属性
-            window.AsyncValidationCallback = asyncValidation;
-
-            // 添加窗口关闭事件处理
-            window.Closed += (sender, e) =>
-            {
-                try
-                {
-                    // 确保蒙版窗口关闭
-                    if (_maskWindow != null && _maskWindow.IsLoaded)
-                    {
-                        _maskWindow.Close();
-                    }
-
-                    // 清理事件钩子
-                    UnhookEvents();
-
-                    // 设置任务完成状态（不需要返回具体的DialogResult值）
-                    tcs.TrySetResult(true);
-                }
-                catch (Exception ex)
-                {
-                    // 如果关闭过程中出现异常，设置任务为失败状态
-                    tcs.TrySetException(ex);
-                }
-            };
-
-            _currentAlertWindow = window;
-            PositionWindowInCenter(window);
-            window.Owner = _maskWindow;
-
-            try
-            {
-                // 显示模态对话框
-                window.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                // 如果ShowDialog过程中出现异常，设置任务为失败状态
-                tcs.TrySetException(ex);
-                throw;
-            }
-            finally
-            {
-                _currentAlertWindow = null;
-
-                // 关闭蒙版窗口
-                if (_maskWindow != null)
-                {
-                    try
-                    {
-                        _maskWindow.Close();
-                    }
-                    catch
-                    {
-                        // 忽略关闭时可能发生的异常
-                    }
-                    _maskWindow = null;
-                }
-
-                // 清理事件钩子
-                UnhookEvents();
-
-                // 在弹窗关闭后激活Owner窗口
-                ActivateOwnerWindow();
-            }
-        }
-        catch (Exception ex)
-        {
-            // 记录任何显示过程中的异常
-            System.Diagnostics.Debug.WriteLine($"显示异步验证警告对话框时出错: {ex.Message}");
-
-            // 确保任务不会永远挂起
-            tcs.TrySetException(ex);
-        }
-    }
-
-    #endregion 实现IAlertService接口
-
-    #region 实现IDisposable接口
-
-    // 使用无锁方式检查是否已处置
     private void ThrowIfDisposed()
     {
         if (Interlocked.CompareExchange(ref _isDisposed, 0, 0) == 1)
@@ -966,70 +510,10 @@ public class AlertService : IAlertService, IDisposable
         }
     }
 
-    /// <summary>
-    /// 处置警告服务并清除所有活动资源
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// 释放警告服务使用的所有资源
-    /// </summary>
-    /// <param name="disposing">是否为显式释放</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        // 使用原子操作设置处置标志
-        if (Interlocked.Exchange(ref _isDisposed, 1) == 0)
-        {
-            if (disposing)
-            {
-                // 清理非托管资源
-                UnhookEvents();
-
-                // 使用安全的Dispatcher调用清理UI资源
-                InvokeOnDispatcher(() =>
-                {
-                    try
-                    {
-                        // 关闭警告窗口
-                        if (_currentAlertWindow != null)
-                        {
-                            _currentAlertWindow.Close();
-                            _currentAlertWindow = null;
-                        }
-
-                        // 关闭蒙版窗口
-                        if (_maskWindow != null)
-                        {
-                            _maskWindow.Close();
-                            _maskWindow = null;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // 记录任何清理过程中的异常，但不阻止释放继续进行
-                        System.Diagnostics.Debug.WriteLine($"释放AlertService资源时出错: {ex.Message}");
-                    }
-                });
-
-                // 释放引用
-                _ownerWindow = null;
-                _ownerHandle = IntPtr.Zero;
-                _customDispatcher = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 析构函数，确保非托管资源释放
-    /// </summary>
     ~AlertService()
     {
-        Dispose(false);
+        Interlocked.Exchange(ref _isDisposed, 1);
     }
 
-    #endregion 实现IDisposable接口
+    #endregion IDisposable
 }

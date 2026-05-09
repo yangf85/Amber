@@ -48,23 +48,6 @@
                 <CheckBox Content="Four" />
             </cy:SpacingUniformGrid>
         </HeaderedContentControl>
-        <HeaderedContentControl Header="Switch">
-            <cy:SpacingUniformGrid HorizontalSpacing="5" Rows="1">
-                <cy:SwitchButton Content="Default Style" />
-
-                <cy:SwitchButton Content="Toggle Style" Style="{StaticResource SwitchButton.Style.Toggle}" />
-
-                <cy:SwitchButton
-                    CheckedBackground="#9C27B0"
-                    Content="Rectangle Style"
-                    ThumbCornerRadius="0"
-                    ThumbMargin="2,2,2,2"
-                    ThumbSize="20"
-                    TrackCornerRadius="0"
-                    TrackHeight="24"
-                    TrackWidth="60" />
-            </cy:SpacingUniformGrid>
-        </HeaderedContentControl>
         <HeaderedContentControl Header="HyperlinkButton">
             <cy:SpacingUniformGrid HorizontalSpacing="5" Rows="1">
                 <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />

@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 处理通知窗口的定位
+/// 处理通知窗口的定位。所有计算统一使用 WPF DIPs，
+/// 所有外部坐标（Win32 RECT 等）按 owner 所在显示器的 DPI 转换后再用。
 /// </summary>
 internal class NotificationWindowPositioner
 {
     private readonly NotificationOption _option;
-    private IntPtr _ownerHandle;
-    private volatile bool _useScreenForPositioning = true;
 
-    public NotificationWindowPositioner(NotificationOption option)
-    {
-        _option = option ?? throw new ArgumentNullException(nameof(option));
-    }
+    private IntPtr _ownerHandle;
+
+    private volatile bool _useScreenForPositioning = true;
 
     /// <summary>
     /// 设置用于定位通知的所有者句柄
@@ -34,7 +31,6 @@ internal class NotificationWindowPositioner
             throw new ArgumentException("Handle is not a Window", nameof(windowHandle));
         }
 
-        // 原子操作设置状态
         _ownerHandle = windowHandle;
         _useScreenForPositioning = false;
     }
@@ -44,31 +40,13 @@ internal class NotificationWindowPositioner
     /// </summary>
     public void UseScreenPositioning()
     {
-        // 原子操作设置状态
         _useScreenForPositioning = true;
     }
 
     /// <summary>
-    /// 获取当前可用的工作区
-    /// </summary>
-    private Rect GetWorkArea()
-    {
-        // 尝试获取System.Windows.SystemParameters.WorkArea
-        // 如果失败，则使用默认屏幕尺寸
-        try
-        {
-            return SystemParameters.WorkArea;
-        }
-        catch
-        {
-            // 在非WPF环境中，创建一个合理的默认工作区
-            // 可以尝试使用P/Invoke获取屏幕信息
-            return new Rect(0, 0, 1920, 1080); // 默认1080p分辨率
-        }
-    }
-
-    /// <summary>
-    /// 根据当前设置定位所有通知窗口
+    /// 根据当前设置定位所有通知窗口。
+    /// 入参 activeWindows 已由 NotificationService 按时间戳排序——本方法保持顺序，
+    /// 不再重排（之前的 OrderBy(IndexOf) 是 O(N²) 且冗余）。
     /// </summary>
     public void PositionWindows(IList<NotificationWindow> activeWindows)
     {
@@ -77,143 +55,129 @@ internal class NotificationWindowPositioner
             return;
         }
 
-        // 创建只读状态副本，避免计算过程中状态变化
-        bool useScreen = _useScreenForPositioning;
-        IntPtr ownerHandle = _ownerHandle;
+        var useScreen = _useScreenForPositioning;
+        var ownerHandle = _ownerHandle;
 
-        WindowsNativeService.RECT ownerRect;
-        var screenBounds = GetWorkArea();
+        // 锚点矩形 + 工作区，全部 DIPs
+        Rect anchorRect;
+        Rect workArea;
 
-        if (useScreen || !WindowsNativeService.IsValidWindow(ownerHandle) ||
-            !WindowsNativeService.GetWindowRect(ownerHandle, out ownerRect))
+        if (useScreen || !WindowsNativeService.IsValidWindow(ownerHandle))
         {
-            // 使用屏幕作为定位参考
-            ownerRect = new WindowsNativeService.RECT
-            {
-                Left = (int)screenBounds.Left,
-                Top = (int)screenBounds.Top,
-                Right = (int)screenBounds.Right,
-                Bottom = (int)screenBounds.Bottom
-            };
+            // 屏幕模式：用主屏 work area，没有 owner 上下文
+            workArea = WindowsNativeService.GetSystemWorkArea();
+            anchorRect = workArea;
         }
         else
         {
-            // 窗口坐标已经通过WindowsNativeService.GetWindowRect转换为WPF单位
-            var wpfRect = WindowsNativeService.GetWindowRectAsWpfRect(ownerHandle);
-            if (wpfRect.HasValue)
+            // 跟随 owner 模式：按 owner 所在 monitor 的 DPI 转换坐标
+            var ownerRect = WindowsNativeService.GetWindowRectAsWpfRect(ownerHandle);
+            workArea = WindowsNativeService.GetWorkAreaForWindow(ownerHandle);
+
+            if (ownerRect.HasValue)
             {
-                ownerRect = new WindowsNativeService.RECT
-                {
-                    Left = (int)wpfRect.Value.Left,
-                    Top = (int)wpfRect.Value.Top,
-                    Right = (int)wpfRect.Value.Right,
-                    Bottom = (int)wpfRect.Value.Bottom
-                };
+                anchorRect = ownerRect.Value;
+            }
+            else
+            {
+                // owner rect 拿不到，退到工作区
+                anchorRect = workArea;
             }
         }
 
-        double baseLeft = 0;
-        double baseTop = 0;
-        bool isTop = false;  // 是否从顶部定位
+        // 计算第一个通知的左上角位置（DIPs）
+        double baseLeft;
+        double baseTop;
+        bool isTop;
 
-        // 计算基础位置
         switch (_option.Position)
         {
             case NotificationPosition.TopLeft:
-                baseLeft = ownerRect.Left + _option.OffsetX;
-                baseTop = ownerRect.Top + _option.OffsetY;
+                baseLeft = anchorRect.Left + _option.OffsetX;
+                baseTop = anchorRect.Top + _option.OffsetY;
                 isTop = true;
                 break;
 
             case NotificationPosition.TopRight:
-                baseLeft = ownerRect.Right - _option.Width - _option.OffsetX;
-                baseTop = ownerRect.Top + _option.OffsetY;
+                baseLeft = anchorRect.Right - _option.Width - _option.OffsetX;
+                baseTop = anchorRect.Top + _option.OffsetY;
                 isTop = true;
                 break;
 
             case NotificationPosition.BottomLeft:
-                baseLeft = ownerRect.Left + _option.OffsetX;
-                baseTop = ownerRect.Bottom - _option.OffsetY;
+                baseLeft = anchorRect.Left + _option.OffsetX;
+                baseTop = anchorRect.Bottom - _option.OffsetY;
                 isTop = false;
                 break;
 
             case NotificationPosition.BottomRight:
-                baseLeft = ownerRect.Right - _option.Width - _option.OffsetX;
-                baseTop = ownerRect.Bottom - _option.OffsetY;
+            default:
+                baseLeft = anchorRect.Right - _option.Width - _option.OffsetX;
+                baseTop = anchorRect.Bottom - _option.OffsetY;
                 isTop = false;
                 break;
         }
 
-        // 确保左侧位置在屏幕边界内
-        if (baseLeft + _option.Width > screenBounds.Right)
+        // 横向裁剪到工作区
+        if (baseLeft + _option.Width > workArea.Right)
         {
-            baseLeft = screenBounds.Right - _option.Width;
+            baseLeft = workArea.Right - _option.Width;
+        }
+        if (baseLeft < workArea.Left)
+        {
+            baseLeft = workArea.Left;
         }
 
-        if (baseLeft < screenBounds.Left)
+        // 纵向起点裁剪到工作区
+        if (isTop && baseTop < workArea.Top)
         {
-            baseLeft = screenBounds.Left;
+            baseTop = workArea.Top;
+        }
+        else if (!isTop && baseTop > workArea.Bottom)
+        {
+            baseTop = workArea.Bottom;
         }
 
-        // 调整顶部位置以确保它在屏幕上
-        if (isTop && baseTop < screenBounds.Top)
+        // 按顺序堆叠定位（不再重排，service 已经排好了）
+        var currentTop = baseTop;
+        foreach (var window in activeWindows)
         {
-            baseTop = screenBounds.Top;
-        }
-        else if (!isTop && baseTop > screenBounds.Bottom)
-        {
-            baseTop = screenBounds.Bottom;
-        }
+            var windowHeight = window.ActualHeight > 0 ? window.ActualHeight : _option.Height;
 
-        // 重新排序窗口
-        List<NotificationWindow> orderedWindows;
-
-        if (isTop)
-        {
-            // 最新的窗口在底部（数组开始）
-            orderedWindows = activeWindows.OrderBy(w => activeWindows.IndexOf(w)).ToList();
-        }
-        else
-        {
-            // 最新的窗口在顶部（数组末尾）
-            orderedWindows = activeWindows.OrderByDescending(w => activeWindows.IndexOf(w)).ToList();
-        }
-
-        // 按顺序定位窗口
-        double currentPosition = baseTop;
-
-        foreach (var window in orderedWindows)
-        {
-            // 获取实际窗口高度
-            double windowHeight = window.ActualHeight > 0 ? window.ActualHeight : _option.Height;
-
-            // 设置水平位置
             window.Left = baseLeft;
 
             if (isTop)
             {
-                // 顶部定位：向下增长
-                window.Top = currentPosition;
-                currentPosition += windowHeight + _option.Spacing;
-
-                // 确保不超过屏幕底部
-                if (window.Top + windowHeight > screenBounds.Bottom)
+                // 顶部定位：第一条贴顶部，向下堆叠
+                if (currentTop + windowHeight > workArea.Bottom)
                 {
-                    window.Top = screenBounds.Bottom - windowHeight;
+                    // 超出工作区底部：跳过这条（视觉上让最早的几条留在屏幕里，
+                    // 而不是单独 clamp 导致全部叠在屏幕底部互相覆盖）
+                    window.Top = workArea.Bottom;   // 推到屏外
+                    window.Visibility = Visibility.Hidden;
                 }
+                else
+                {
+                    window.Top = currentTop;
+                    window.Visibility = Visibility.Visible;
+                }
+                currentTop += windowHeight + _option.Spacing;
             }
             else
             {
-                // 底部定位：向上增长
-                // 计算窗口顶部位置
-                window.Top = currentPosition - windowHeight;
-                currentPosition = window.Top - _option.Spacing;
-
-                // 确保不超过屏幕顶部
-                if (window.Top < screenBounds.Top)
+                // 底部定位：第一条贴底部，向上堆叠
+                var top = currentTop - windowHeight;
+                if (top < workArea.Top)
                 {
-                    window.Top = screenBounds.Top;
+                    window.Top = workArea.Top - windowHeight;   // 推到屏外
+                    window.Visibility = Visibility.Hidden;
                 }
+                else
+                {
+                    window.Top = top;
+                    window.Visibility = Visibility.Visible;
+                }
+                currentTop = top - _option.Spacing;
             }
         }
     }
@@ -228,26 +192,20 @@ internal class NotificationWindowPositioner
             throw new ArgumentNullException(nameof(window));
         }
 
-        // 设置窗口动画方向
-        NotificationAnimationDirection animDirection;
-
         switch (_option.Position)
         {
             case NotificationPosition.TopLeft:
             case NotificationPosition.BottomLeft:
-                animDirection = NotificationAnimationDirection.FromLeft;
+                window.AnimationDirection = NotificationAnimationDirection.FromLeft;
                 break;
 
             case NotificationPosition.TopRight:
             case NotificationPosition.BottomRight:
             default:
-                animDirection = NotificationAnimationDirection.FromRight;
+                window.AnimationDirection = NotificationAnimationDirection.FromRight;
                 break;
         }
 
-        window.AnimationDirection = animDirection;
-
-        // 如果需要，设置初始尺寸
         if (window.ActualWidth == 0)
         {
             window.Width = _option.Width;
@@ -257,5 +215,10 @@ internal class NotificationWindowPositioner
         {
             window.Height = _option.Height;
         }
+    }
+
+    public NotificationWindowPositioner(NotificationOption option)
+    {
+        _option = option ?? throw new ArgumentNullException(nameof(option));
     }
 }

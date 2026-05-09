@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Cyclone.Wpf.Demo.ViewModels"
     Title="MainWindow"
-    Width="1280"
+    Width="1080"
     Height="960"
     cy:WindowHelper.IsClosing="{Binding IsClosing, Mode=OneWayToSource}"
     cy:WindowHelper.IsClosingMonitorEnabled="True"

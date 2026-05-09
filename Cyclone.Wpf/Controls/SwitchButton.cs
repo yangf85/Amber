@@ -6,156 +6,62 @@ using System.Windows.Media.Animation;
 
 namespace Cyclone.Wpf.Controls;
 
-[TemplatePart(Name = PART_Track, Type = typeof(FrameworkElement))]
-[TemplatePart(Name = PART_Thumb, Type = typeof(FrameworkElement))]
-[TemplatePart(Name = PART_ThumbTransform, Type = typeof(TranslateTransform))]
+/// <summary>
+/// 滑动开关控件。继承自 <see cref="ToggleButton"/>，在 <see cref="ToggleButton.IsChecked"/>
+/// 切换时滑块带动画从一端移到另一端。<br/>
+/// 锁定为二态（<see cref="ToggleButton.IsThreeState"/> 默认 false）——switch 控件
+/// 本质不存在 indeterminate 状态。
+/// </summary>
+[TemplatePart(Name = PartTrack, Type = typeof(FrameworkElement))]
+[TemplatePart(Name = PartThumb, Type = typeof(FrameworkElement))]
+[TemplatePart(Name = PartThumbTransform, Type = typeof(TranslateTransform))]
 public class SwitchButton : ToggleButton
 {
-    #region Part Names
+    private const string PartTrack = "PART_Track";
 
-    private const string PART_Track = "PART_Track";
-    private const string PART_Thumb = "PART_Thumb";
-    private const string PART_ThumbTransform = "PART_ThumbTransform";
+    private const string PartThumb = "PART_Thumb";
 
-    #endregion Part Names
+    private const string PartThumbTransform = "PART_ThumbTransform";
 
-    #region Fields
+    private static readonly Brush DefaultUncheckedBackground = CreateFrozenBrush(204, 204, 204);
+
+    // ============ 默认 Brush（freeze 共享，避免每实例分配）============
+    private static readonly Brush DefaultCheckedBackground = CreateFrozenBrush(255, 75, 75);
 
     private FrameworkElement _track;
+
     private FrameworkElement _thumb;
+
     private TranslateTransform _thumbTransform;
 
-    #endregion Fields
-
-    #region Constructor
+    private static Brush CreateFrozenBrush(byte r, byte g, byte b)
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+        brush.Freeze();
+        return brush;
+    }
 
     static SwitchButton()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(SwitchButton), new FrameworkPropertyMetadata(typeof(SwitchButton)));
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(SwitchButton),
+            new FrameworkPropertyMetadata(typeof(SwitchButton)));
+
+        // SwitchButton 本质二态——锁定 IsThreeState 默认 false。
+        // 防止 user 设 IsThreeState=true + IsChecked=null 时 thumb 卡住不动（因为 OnIndeterminate 不会触发动画）。
+        IsThreeStateProperty.OverrideMetadata(typeof(SwitchButton),
+            new FrameworkPropertyMetadata(false));
     }
-
-    #endregion Constructor
-
-    #region Overrides
-
-    protected override void OnChecked(RoutedEventArgs e)
-    {
-        base.OnChecked(e);
-        AnimateThumb(true);
-    }
-
-    protected override void OnUnchecked(RoutedEventArgs e)
-    {
-        base.OnUnchecked(e);
-        AnimateThumb(false);
-    }
-
-    public override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-
-        // 获取模板部件
-        _track = GetTemplateChild(PART_Track) as FrameworkElement;
-        _thumb = GetTemplateChild(PART_Thumb) as FrameworkElement;
-        _thumbTransform = GetTemplateChild(PART_ThumbTransform) as TranslateTransform;
-
-        // 初始化控件尺寸和滑块位置
-        UpdateControlSize();
-        UpdateThumbPosition(false);
-    }
-
-    #endregion Overrides
-
-    #region Private Methods
-
-    // 当布局相关属性改变时更新滑块位置
-    private static void OnLayoutPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is SwitchButton switchButton)
-        {
-            switchButton.UpdateThumbPosition();
-            switchButton.UpdateControlSize();
-        }
-    }
-
-    private void AnimateThumb(bool isChecked)
-    {
-        if (_thumbTransform == null) return;
-
-        var targetX = isChecked ? GetThumbMoveDistance() : 0;
-
-        var animation = new DoubleAnimation
-        {
-            To = targetX,
-            Duration = AnimationDuration,
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-        };
-
-        _thumbTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-    }
-
-    private void UpdateThumbPosition(bool animate = true)
-    {
-        if (_thumbTransform == null) return;
-
-        var targetX = IsChecked == true ? GetThumbMoveDistance() : 0;
-
-        if (animate)
-        {
-            var animation = new DoubleAnimation
-            {
-                To = targetX,
-                Duration = AnimationDuration,
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-            _thumbTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-        }
-        else
-        {
-            _thumbTransform.X = targetX;
-        }
-    }
-
-    private double GetThumbMoveDistance()
-    {
-        // 计算滑块移动距离: TrackWidth - ThumbSize - 左右边距
-        var leftMargin = ThumbMargin.Left;
-        var rightMargin = ThumbMargin.Right;
-        return Math.Max(0, TrackWidth - ThumbSize - leftMargin - rightMargin);
-    }
-
-    private void UpdateControlSize()
-    {
-        // 设置最小尺寸确保开关部分正确显示
-        MinWidth = TrackWidth;
-        MinHeight = Math.Max(TrackHeight, ThumbSize);
-
-        // 不要强制设置Width，让BulletDecorator自动计算
-        // 这样可以包含Content的宽度
-        if (double.IsNaN(Height))
-            Height = Math.Max(TrackHeight, ThumbSize);
-
-        // 注释掉Width设置，让控件自动适应Content
-        // if (double.IsNaN(Width))
-        //     Width = TrackWidth;
-    }
-
-    #endregion Private Methods
-
-    #region Dependency Properties
 
     #region TrackWidth
 
     public static readonly DependencyProperty TrackWidthProperty =
-                DependencyProperty.Register(
-                    nameof(TrackWidth),
-                    typeof(double),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(50d, OnLayoutPropertyChanged));
+        DependencyProperty.Register(
+            nameof(TrackWidth),
+            typeof(double),
+            typeof(SwitchButton),
+            new PropertyMetadata(50d, OnLayoutPropertyChanged));
 
-    /// <summary>
-    /// 获取或设置开关轨道的宽度
-    /// </summary>
+    /// <summary>开关轨道的宽度。</summary>
     public double TrackWidth
     {
         get => (double)GetValue(TrackWidthProperty);
@@ -167,15 +73,13 @@ public class SwitchButton : ToggleButton
     #region TrackHeight
 
     public static readonly DependencyProperty TrackHeightProperty =
-                DependencyProperty.Register(
-                    nameof(TrackHeight),
-                    typeof(double),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(26d, OnLayoutPropertyChanged));
+        DependencyProperty.Register(
+            nameof(TrackHeight),
+            typeof(double),
+            typeof(SwitchButton),
+            new PropertyMetadata(26d, OnLayoutPropertyChanged));
 
-    /// <summary>
-    /// 获取或设置开关轨道的高度
-    /// </summary>
+    /// <summary>开关轨道的高度。</summary>
     public double TrackHeight
     {
         get => (double)GetValue(TrackHeightProperty);
@@ -187,15 +91,13 @@ public class SwitchButton : ToggleButton
     #region ThumbSize
 
     public static readonly DependencyProperty ThumbSizeProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbSize),
-                    typeof(double),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(22d, OnLayoutPropertyChanged));
+        DependencyProperty.Register(
+            nameof(ThumbSize),
+            typeof(double),
+            typeof(SwitchButton),
+            new PropertyMetadata(22d, OnLayoutPropertyChanged));
 
-    /// <summary>
-    /// 获取或设置滑块的尺寸
-    /// </summary>
+    /// <summary>滑块的尺寸（正方形）。</summary>
     public double ThumbSize
     {
         get => (double)GetValue(ThumbSizeProperty);
@@ -207,15 +109,13 @@ public class SwitchButton : ToggleButton
     #region ThumbMargin
 
     public static readonly DependencyProperty ThumbMarginProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbMargin),
-                    typeof(Thickness),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new Thickness(2), OnLayoutPropertyChanged));
+        DependencyProperty.Register(
+            nameof(ThumbMargin),
+            typeof(Thickness),
+            typeof(SwitchButton),
+            new PropertyMetadata(new Thickness(2), OnLayoutPropertyChanged));
 
-    /// <summary>
-    /// 获取或设置滑块与轨道边缘的间距
-    /// </summary>
+    /// <summary>滑块与轨道边缘的间距。</summary>
     public Thickness ThumbMargin
     {
         get => (Thickness)GetValue(ThumbMarginProperty);
@@ -227,15 +127,13 @@ public class SwitchButton : ToggleButton
     #region ThumbVerticalAlignment
 
     public static readonly DependencyProperty ThumbVerticalAlignmentProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbVerticalAlignment),
-                    typeof(VerticalAlignment),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(VerticalAlignment.Center));
+        DependencyProperty.Register(
+            nameof(ThumbVerticalAlignment),
+            typeof(VerticalAlignment),
+            typeof(SwitchButton),
+            new PropertyMetadata(VerticalAlignment.Center));
 
-    /// <summary>
-    /// 获取或设置滑块的垂直对齐方式
-    /// </summary>
+    /// <summary>滑块的垂直对齐方式。</summary>
     public VerticalAlignment ThumbVerticalAlignment
     {
         get => (VerticalAlignment)GetValue(ThumbVerticalAlignmentProperty);
@@ -247,15 +145,13 @@ public class SwitchButton : ToggleButton
     #region ThumbHorizontalAlignment
 
     public static readonly DependencyProperty ThumbHorizontalAlignmentProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbHorizontalAlignment),
-                    typeof(HorizontalAlignment),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(HorizontalAlignment.Left));
+        DependencyProperty.Register(
+            nameof(ThumbHorizontalAlignment),
+            typeof(HorizontalAlignment),
+            typeof(SwitchButton),
+            new PropertyMetadata(HorizontalAlignment.Left));
 
-    /// <summary>
-    /// 获取或设置滑块的水平对齐方式（用于初始位置）
-    /// </summary>
+    /// <summary>滑块的水平对齐方式（用于初始位置）。</summary>
     public HorizontalAlignment ThumbHorizontalAlignment
     {
         get => (HorizontalAlignment)GetValue(ThumbHorizontalAlignmentProperty);
@@ -267,15 +163,13 @@ public class SwitchButton : ToggleButton
     #region TrackCornerRadius
 
     public static readonly DependencyProperty TrackCornerRadiusProperty =
-                DependencyProperty.Register(
-                    nameof(TrackCornerRadius),
-                    typeof(CornerRadius),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new CornerRadius(13)));
+        DependencyProperty.Register(
+            nameof(TrackCornerRadius),
+            typeof(CornerRadius),
+            typeof(SwitchButton),
+            new PropertyMetadata(new CornerRadius(13)));
 
-    /// <summary>
-    /// 获取或设置轨道的圆角半径
-    /// </summary>
+    /// <summary>轨道的圆角半径。</summary>
     public CornerRadius TrackCornerRadius
     {
         get => (CornerRadius)GetValue(TrackCornerRadiusProperty);
@@ -287,15 +181,13 @@ public class SwitchButton : ToggleButton
     #region ThumbCornerRadius
 
     public static readonly DependencyProperty ThumbCornerRadiusProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbCornerRadius),
-                    typeof(CornerRadius),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new CornerRadius(11)));
+        DependencyProperty.Register(
+            nameof(ThumbCornerRadius),
+            typeof(CornerRadius),
+            typeof(SwitchButton),
+            new PropertyMetadata(new CornerRadius(11)));
 
-    /// <summary>
-    /// 获取或设置滑块的圆角半径
-    /// </summary>
+    /// <summary>滑块的圆角半径。</summary>
     public CornerRadius ThumbCornerRadius
     {
         get => (CornerRadius)GetValue(ThumbCornerRadiusProperty);
@@ -307,15 +199,13 @@ public class SwitchButton : ToggleButton
     #region UncheckedBackground
 
     public static readonly DependencyProperty UncheckedBackgroundProperty =
-                DependencyProperty.Register(
-                    nameof(UncheckedBackground),
-                    typeof(Brush),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new SolidColorBrush(Color.FromRgb(204, 204, 204))));
+        DependencyProperty.Register(
+            nameof(UncheckedBackground),
+            typeof(Brush),
+            typeof(SwitchButton),
+            new PropertyMetadata(DefaultUncheckedBackground));
 
-    /// <summary>
-    /// 获取或设置未选中状态下轨道的背景色
-    /// </summary>
+    /// <summary>未选中状态下轨道的背景色。</summary>
     public Brush UncheckedBackground
     {
         get => (Brush)GetValue(UncheckedBackgroundProperty);
@@ -327,15 +217,13 @@ public class SwitchButton : ToggleButton
     #region CheckedBackground
 
     public static readonly DependencyProperty CheckedBackgroundProperty =
-                DependencyProperty.Register(
-                    nameof(CheckedBackground),
-                    typeof(Brush),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new SolidColorBrush(Color.FromRgb(255, 75, 75))));
+        DependencyProperty.Register(
+            nameof(CheckedBackground),
+            typeof(Brush),
+            typeof(SwitchButton),
+            new PropertyMetadata(DefaultCheckedBackground));
 
-    /// <summary>
-    /// 获取或设置选中状态下轨道的背景色
-    /// </summary>
+    /// <summary>选中状态下轨道的背景色。</summary>
     public Brush CheckedBackground
     {
         get => (Brush)GetValue(CheckedBackgroundProperty);
@@ -347,15 +235,13 @@ public class SwitchButton : ToggleButton
     #region ThumbBackground
 
     public static readonly DependencyProperty ThumbBackgroundProperty =
-                DependencyProperty.Register(
-                    nameof(ThumbBackground),
-                    typeof(Brush),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(Brushes.White));
+        DependencyProperty.Register(
+            nameof(ThumbBackground),
+            typeof(Brush),
+            typeof(SwitchButton),
+            new PropertyMetadata(Brushes.White));
 
-    /// <summary>
-    /// 获取或设置滑块的背景色
-    /// </summary>
+    /// <summary>滑块的背景色。</summary>
     public Brush ThumbBackground
     {
         get => (Brush)GetValue(ThumbBackgroundProperty);
@@ -367,14 +253,14 @@ public class SwitchButton : ToggleButton
     #region AnimationDuration
 
     public static readonly DependencyProperty AnimationDurationProperty =
-                DependencyProperty.Register(
-                    nameof(AnimationDuration),
-                    typeof(Duration),
-                    typeof(SwitchButton),
-                    new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(200))));
+        DependencyProperty.Register(
+            nameof(AnimationDuration),
+            typeof(Duration),
+            typeof(SwitchButton),
+            new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(200))));
 
     /// <summary>
-    /// 获取或设置动画持续时间
+    /// 滑块切换动画的持续时间。设为 <see cref="TimeSpan.Zero"/>（XAML <c>0:0:0</c>）等价于立即切换无动画。
     /// </summary>
     public Duration AnimationDuration
     {
@@ -384,5 +270,86 @@ public class SwitchButton : ToggleButton
 
     #endregion AnimationDuration
 
-    #endregion Dependency Properties
+    #region Override Methods
+
+    public override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+
+        _track = GetTemplateChild(PartTrack) as FrameworkElement;
+        _thumb = GetTemplateChild(PartThumb) as FrameworkElement;
+        _thumbTransform = GetTemplateChild(PartThumbTransform) as TranslateTransform;
+
+        UpdateThumbPosition(animate: false);
+    }
+
+    protected override void OnChecked(RoutedEventArgs e)
+    {
+        base.OnChecked(e);
+        UpdateThumbPosition(animate: true);
+    }
+
+    protected override void OnUnchecked(RoutedEventArgs e)
+    {
+        base.OnUnchecked(e);
+        UpdateThumbPosition(animate: true);
+    }
+
+    #endregion Override Methods
+
+    #region Private Methods
+
+    /// <summary>
+    /// 布局相关 DP（TrackWidth / TrackHeight / ThumbSize / ThumbMargin）改变时立即重定位 thumb，
+    /// <b>不带动画</b>——动画只用于 user 交互触发的 IsChecked 切换。
+    /// </summary>
+    private static void OnLayoutPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is SwitchButton switchButton)
+        {
+            switchButton.UpdateThumbPosition(animate: false);
+        }
+    }
+
+    /// <summary>
+    /// 把 thumb 移动到 IsChecked 对应的位置。<paramref name="animate"/>=true 时带 ease-out 动画；
+    /// false 时立即跳转——会先清除已有 animation（否则 active animation 在 effective value 计算里
+    /// 优先级高于 local value，直接 SetValue X 不会生效）。
+    /// </summary>
+    private void UpdateThumbPosition(bool animate)
+    {
+        if (_thumbTransform == null)
+        {
+            return;
+        }
+
+        var targetX = IsChecked == true ? GetThumbMoveDistance() : 0;
+
+        if (animate)
+        {
+            _thumbTransform.BeginAnimation(TranslateTransform.XProperty,
+                new DoubleAnimation
+                {
+                    To = targetX,
+                    Duration = AnimationDuration,
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+                });
+        }
+        else
+        {
+            // 必须先清除 animation，否则 SetValue 无效
+            _thumbTransform.BeginAnimation(TranslateTransform.XProperty, null);
+            _thumbTransform.X = targetX;
+        }
+    }
+
+    /// <summary>滑块移动距离 = 轨道宽度 - 滑块尺寸 - 左右边距。</summary>
+    private double GetThumbMoveDistance()
+    {
+        var leftMargin = ThumbMargin.Left;
+        var rightMargin = ThumbMargin.Right;
+        return Math.Max(0, TrackWidth - ThumbSize - leftMargin - rightMargin);
+    }
+
+    #endregion Private Methods
 }

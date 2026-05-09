@@ -26,10 +26,6 @@ public class LoadingRing : LoadingIndicator
         DependencyProperty.Register(nameof(RingThickness), typeof(double), typeof(LoadingRing),
             new PropertyMetadata(4.0, OnVisualPropertyChanged));
 
-    public static readonly DependencyProperty IsActiveProperty =
-        DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(LoadingRing),
-            new PropertyMetadata(true, OnIsActiveChanged));
-
     public static readonly DependencyProperty RotationSpeedProperty =
         DependencyProperty.Register(nameof(RotationSpeed), typeof(double), typeof(LoadingRing),
             new PropertyMetadata(1.5, OnAnimationPropertyChanged));
@@ -66,15 +62,6 @@ public class LoadingRing : LoadingIndicator
     }
 
     /// <summary>
-    /// 是否激活动画
-    /// </summary>
-    public bool IsActive
-    {
-        get { return (bool)GetValue(IsActiveProperty); }
-        set { SetValue(IsActiveProperty, value); }
-    }
-
-    /// <summary>
     /// 旋转速度（秒/圈）
     /// </summary>
     public double RotationSpeed
@@ -102,10 +89,15 @@ public class LoadingRing : LoadingIndicator
     {
         CreateVisualTree();
 
-        if (IsActive)
+        // 进入 visual tree 时按当前 IsActive 状态启动动画
+        Loaded += (s, e) =>
         {
-            Loaded += (s, e) => StartAnimation();
-        }
+            if (IsActive)
+            {
+                StartAnimation();
+            }
+        };
+        Unloaded += (s, e) => StopAnimation();
     }
 
     private void CreateVisualTree()
@@ -184,12 +176,12 @@ public class LoadingRing : LoadingIndicator
         ring.UpdateVisualProperties();
     }
 
-    private static void OnIsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    protected override void OnIsActiveChanged(bool oldValue, bool newValue)
     {
-        var ring = (LoadingRing)d;
-        if (ring.IsLoaded)
+        base.OnIsActiveChanged(oldValue, newValue);
+        if (IsLoaded)
         {
-            ring.UpdateAnimationState();
+            UpdateAnimationState();
         }
     }
 

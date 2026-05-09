@@ -19,10 +19,6 @@ public class LoadingFlipCube : LoadingIndicator
         DependencyProperty.Register(nameof(CubeColor), typeof(Color), typeof(LoadingFlipCube),
             new PropertyMetadata(Colors.DodgerBlue, OnVisualPropertyChanged));
 
-    public static readonly DependencyProperty IsActiveProperty =
-        DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(LoadingFlipCube),
-            new PropertyMetadata(true, OnIsActiveChanged));
-
     public static readonly DependencyProperty AnimationSpeedProperty =
         DependencyProperty.Register(nameof(AnimationSpeed), typeof(double), typeof(LoadingFlipCube),
             new PropertyMetadata(0.5)); // 默认速度降低到0.5
@@ -38,15 +34,6 @@ public class LoadingFlipCube : LoadingIndicator
     {
         get { return (Color)GetValue(CubeColorProperty); }
         set { SetValue(CubeColorProperty, value); }
-    }
-
-    /// <summary>
-    /// 是否激活动画
-    /// </summary>
-    public bool IsActive
-    {
-        get { return (bool)GetValue(IsActiveProperty); }
-        set { SetValue(IsActiveProperty, value); }
     }
 
     /// <summary>
@@ -279,15 +266,15 @@ public class LoadingFlipCube : LoadingIndicator
         loader.UpdateVisualProperties();
     }
 
-    private static void OnIsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    protected override void OnIsActiveChanged(bool oldValue, bool newValue)
     {
-        var loader = (LoadingFlipCube)d;
-        if (loader.IsLoaded)
+        base.OnIsActiveChanged(oldValue, newValue);
+        if (IsLoaded)
         {
-            if (loader.IsActive)
-                loader.StartAnimation();
+            if (IsActive)
+                StartAnimation();
             else
-                loader.StopAnimation();
+                StopAnimation();
         }
     }
 

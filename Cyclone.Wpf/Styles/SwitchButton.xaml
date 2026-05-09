@@ -6,6 +6,22 @@
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  焦点视觉：仅围绕 track 部分（不含 Content 文字），更精致  -->
+    <Style x:Key="SwitchButton.FocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border
+                        Margin="-3"
+                        BorderBrush="{DynamicResource Background.Highlighted}"
+                        BorderThickness="2"
+                        CornerRadius="13"
+                        SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="SwitchButton.Style.Basic" TargetType="{x:Type ctl:SwitchButton}">
         <Setter Property="TrackWidth" Value="40" />
         <Setter Property="TrackHeight" Value="22" />
@@ -20,6 +36,7 @@
         <Setter Property="ThumbBackground" Value="{DynamicResource Background.Default}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="AnimationDuration" Value="0:0:0.2" />
+        <Setter Property="Padding" Value="5,0,0,0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ctl:SwitchButton}">
@@ -66,7 +83,7 @@
                         <!--  文本内容部分  -->
                         <ContentPresenter
                             Grid.Column="1"
-                            Margin="5,0,0,0"
+                            Margin="{TemplateBinding Padding}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             RecognizesAccessKey="True" />
@@ -77,7 +94,8 @@
                             <Setter TargetName="PART_Track" Property="Background" Value="{Binding CheckedBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
 
-                        <Trigger SourceName="PART_Thumb" Property="IsMouseOver" Value="True">
+                        <!--  hover 整个控件时 thumb 变色——之前用 SourceName=PART_Thumb 时鼠标会"追不上"切换中的 thumb 导致状态闪烁  -->
+                        <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="PART_Thumb" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
 
@@ -93,6 +111,7 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SwitchButton.FocusVisual}" />
     </Style>
 
     <Style

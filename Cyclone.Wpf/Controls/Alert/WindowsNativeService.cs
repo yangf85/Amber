@@ -19,8 +19,11 @@ internal static class WindowsNativeService
     public struct RECT
     {
         public int Left;
+
         public int Top;
+
         public int Right;
+
         public int Bottom;
     }
 
@@ -37,15 +40,20 @@ internal static class WindowsNativeService
     public const int GWL_EXSTYLE = -20;               // 扩展窗口样式
 
     public const int WS_EX_NOACTIVATE = 0x08000000;   // 窗口不激活
+
     public const int WS_EX_TRANSPARENT = 0x00000020;  // 透明窗口（点击穿透）
+
     public const int HWND_TOPMOST = -1;               // 置顶窗口
+
     public const int HWND_NOTOPMOST = -2;             // 取消置顶
 
     // SetWindowPos标志常量
     public const uint SWP_NOSIZE = 0x0001;        // 保持当前大小
 
     public const uint SWP_NOMOVE = 0x0002;        // 保持当前位置
+
     public const uint SWP_NOACTIVATE = 0x0010;    // 不激活窗口
+
     public const uint SWP_SHOWWINDOW = 0x0040;    // 显示窗口
 
     // 窗口消息常量
@@ -57,6 +65,7 @@ internal static class WindowsNativeService
     public const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;  // 窗口位置变化事件
 
     public const uint EVENT_OBJECT_REORDER = 0x8004;         // 窗口Z序变化事件
+
     public const uint WINEVENT_OUTOFCONTEXT = 0x0000;        // 事件钩子标志
 
     // 窗口显示和隐藏事件
@@ -82,6 +91,7 @@ internal static class WindowsNativeService
     private const uint MONITOR_DEFAULTTONULL = 0;
 
     private const uint MONITOR_DEFAULTTOPRIMARY = 1;
+
     private const uint MONITOR_DEFAULTTONEAREST = 2;
 
     #endregion 常量定义
@@ -97,6 +107,17 @@ internal static class WindowsNativeService
     #endregion 委托定义
 
     #region Window API导入
+
+    // GetDpiForMonitor 的 dpiType 参数
+    private const int MDT_EFFECTIVE_DPI = 0;
+
+    // GetDeviceCaps的索引常量
+    private const int LOGPIXELSX = 88;
+
+    private const int LOGPIXELSY = 90;
+
+    // 用于获取工作区的常量
+    private const uint SPI_GETWORKAREA = 0x0030;
 
     /// <summary>
     /// 获取窗口矩形
@@ -191,6 +212,12 @@ internal static class WindowsNativeService
     public static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
 
     /// <summary>
+    /// 获取指定显示器的信息（含工作区物理像素 RECT）
+    /// </summary>
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    /// <summary>
     /// 获取桌面窗口句柄
     /// </summary>
     [DllImport("user32.dll")]
@@ -220,13 +247,20 @@ internal static class WindowsNativeService
     [DllImport("user32.dll")]
     public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
-    // GetDeviceCaps的索引常量
-    private const int LOGPIXELSX = 88;
+    /// <summary>
+    /// 显示器信息结构
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MONITORINFO
+    {
+        public int cbSize;
 
-    private const int LOGPIXELSY = 90;
+        public RECT rcMonitor;   // 物理像素：完整显示区
 
-    // 用于获取工作区的常量
-    private const uint SPI_GETWORKAREA = 0x0030;
+        public RECT rcWork;      // 物理像素：工作区（不含任务栏）
+
+        public uint dwFlags;
+    }
 
     #endregion Window API导入
 
@@ -395,23 +429,31 @@ internal static class WindowsNativeService
     }
 
     /// <summary>
-    /// 获取窗口矩形（转换为WPF Rect）
+    /// 获取窗口矩形（按 hwnd 所在 monitor 的 DPI 转换为 WPF DIPs）
     /// </summary>
     /// <param name="windowHandle">窗口句柄</param>
-    /// <returns>窗口矩形，如果获取失败则返回空值</returns>
+    /// <returns>窗口矩形（DIPs），失败返回 null</returns>
     public static Rect? GetWindowRectAsWpfRect(IntPtr windowHandle)
     {
         try
         {
-            if (IsValidWindow(windowHandle))
+            if (!IsValidWindow(windowHandle))
             {
-                if (GetWindowRect(windowHandle, out RECT rect))
-                {
-                    // 转换为WPF Rect
-                    return ConvertRectToWpfUnit(rect);
-                }
+                return null;
             }
-            return null;
+
+            if (!GetWindowRect(windowHandle, out RECT rect))
+            {
+                return null;
+            }
+
+            // 关键：用 windowHandle 自己所在 monitor 的 DPI，跨屏才能对齐
+            var (sx, sy) = GetDpiScalesForWindow(windowHandle);
+            return new Rect(
+                rect.Left / sx,
+                rect.Top / sy,
+                (rect.Right - rect.Left) / sx,
+                (rect.Bottom - rect.Top) / sy);
         }
         catch (Exception)
         {
@@ -420,9 +462,68 @@ internal static class WindowsNativeService
     }
 
     /// <summary>
-    /// 获取系统工作区域（桌面区域，不包括任务栏）
+    /// 获取指定 hwnd 所在显示器的工作区（DIPs，已按该显示器 DPI 转换）。
+    /// 用于多屏 + 各屏不同缩放下定位通知 / 弹窗。
     /// </summary>
-    /// <returns>工作区域矩形</returns>
+    /// <param name="windowHandle">参考窗口句柄</param>
+    /// <returns>工作区矩形（DIPs）；hwnd 无效则回退到主屏 work area</returns>
+    public static Rect GetWorkAreaForWindow(IntPtr windowHandle)
+    {
+        try
+        {
+            if (IsValidWindow(windowHandle))
+            {
+                IntPtr hMonitor = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
+                if (hMonitor != IntPtr.Zero)
+                {
+                    var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+                    if (GetMonitorInfo(hMonitor, ref info))
+                    {
+                        var (sx, sy) = GetDpiScalesForMonitor(hMonitor);
+                        return new Rect(
+                            info.rcWork.Left / sx,
+                            info.rcWork.Top / sy,
+                            (info.rcWork.Right - info.rcWork.Left) / sx,
+                            (info.rcWork.Bottom - info.rcWork.Top) / sy);
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // 落到下面 fallback
+        }
+
+        return GetSystemWorkArea();
+    }
+
+    /// <summary>
+    /// 获取指定 hwnd 所在 monitor 的 DPI 缩放因子（相对 96 DPI）。
+    /// 例：100% → (1.0, 1.0)；150% → (1.5, 1.5)。
+    /// hwnd 无效或 API 调用失败时回退到主屏 DPI。
+    /// </summary>
+    public static (double scaleX, double scaleY) GetDpiScalesForWindow(IntPtr windowHandle)
+    {
+        if (IsValidWindow(windowHandle))
+        {
+            IntPtr hMonitor = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
+            if (hMonitor != IntPtr.Zero)
+            {
+                return GetDpiScalesForMonitor(hMonitor);
+            }
+        }
+
+        // fallback：主屏 DPI（旧行为）
+        double s = GetSystemDpiScale();
+        return (s, s);
+    }
+
+    /// <summary>
+    /// 获取系统工作区域（桌面区域，不包括任务栏）。
+    /// <para>注意：该方法返回主屏工作区。多屏 + 不同 DPI 场景下，请用
+    /// <see cref="GetWorkAreaForWindow(IntPtr)"/> 取目标 hwnd 所在显示器的工作区。</para>
+    /// </summary>
+    /// <returns>工作区域矩形（DIPs）</returns>
     public static Rect GetSystemWorkArea()
     {
         try
@@ -456,7 +557,9 @@ internal static class WindowsNativeService
     }
 
     /// <summary>
-    /// 将RECT结构转换为WPF Rect（设备无关单位）
+    /// 将 RECT 结构转换为 WPF Rect（设备无关单位）。
+    /// <para>注意：使用 MainWindow / 主屏的单一 DPI 转换，跨屏不同缩放时会偏移。
+    /// 已知 hwnd 时请改用 <see cref="GetWindowRectAsWpfRect(IntPtr)"/>。</para>
     /// </summary>
     /// <param name="rect">原始RECT结构</param>
     /// <returns>转换后的WPF Rect</returns>
@@ -511,6 +614,75 @@ internal static class WindowsNativeService
     }
 
     /// <summary>
+    /// 获取当前 DPI 缩放矩阵（基于 MainWindow 所在显示器或主屏）。
+    /// <para>注意：返回单一 DPI，不区分多屏。已知 hwnd 时请用
+    /// <see cref="GetDpiScalesForWindow(IntPtr)"/>。</para>
+    /// </summary>
+    /// <returns>DPI缩放矩阵</returns>
+    public static Matrix GetDpiScale()
+    {
+        try
+        {
+            // 首先尝试获取WPF的DPI设置
+            if (Application.Current?.MainWindow != null)
+            {
+                var source = PresentationSource.FromVisual(Application.Current.MainWindow);
+                if (source?.CompositionTarget != null)
+                {
+                    return source.CompositionTarget.TransformToDevice;
+                }
+            }
+
+            // 如果无法通过WPF获取，则尝试使用Windows API
+            double dpiScale = GetSystemDpiScale();
+            return new Matrix(dpiScale, 0, 0, dpiScale, 0, 0);
+        }
+        catch (Exception)
+        {
+            // 如果出现任何异常，返回默认值
+            return Matrix.Identity; // 1:1比例
+        }
+    }
+
+    /// <summary>
+    /// 安全执行Windows API调用，捕获可能的异常
+    /// </summary>
+    /// <typeparam name="T">返回值类型</typeparam>
+    /// <param name="action">要执行的API调用</param>
+    /// <param name="defaultValue">发生异常时的默认返回值</param>
+    /// <returns>API调用的结果或默认值</returns>
+    public static T SafeApiCall<T>(Func<T> action, T defaultValue)
+    {
+        try
+        {
+            return action();
+        }
+        catch (Exception)
+        {
+            return defaultValue;
+        }
+    }
+
+    private static (double scaleX, double scaleY) GetDpiScalesForMonitor(IntPtr hMonitor)
+    {
+        try
+        {
+            if (hMonitor != IntPtr.Zero
+                && GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY) == 0)
+            {
+                return (dpiX / DEFAULT_DPI, dpiY / DEFAULT_DPI);
+            }
+        }
+        catch (Exception)
+        {
+            // GetDpiForMonitor 在 Windows 8.1 之前不可用——继续 fallback
+        }
+
+        double s = GetSystemDpiScale();
+        return (s, s);
+    }
+
+    /// <summary>
     /// 通过Windows API获取系统DPI缩放因子
     /// </summary>
     /// <returns>系统DPI缩放因子（相对于96 DPI）</returns>
@@ -557,54 +729,6 @@ internal static class WindowsNativeService
         {
             // 如果出现任何异常，返回默认值
             return 1.0;
-        }
-    }
-
-    /// <summary>
-    /// 获取当前DPI缩放比例
-    /// </summary>
-    /// <returns>DPI缩放矩阵</returns>
-    public static Matrix GetDpiScale()
-    {
-        try
-        {
-            // 首先尝试获取WPF的DPI设置
-            if (Application.Current?.MainWindow != null)
-            {
-                var source = PresentationSource.FromVisual(Application.Current.MainWindow);
-                if (source?.CompositionTarget != null)
-                {
-                    return source.CompositionTarget.TransformToDevice;
-                }
-            }
-
-            // 如果无法通过WPF获取，则尝试使用Windows API
-            double dpiScale = GetSystemDpiScale();
-            return new Matrix(dpiScale, 0, 0, dpiScale, 0, 0);
-        }
-        catch (Exception)
-        {
-            // 如果出现任何异常，返回默认值
-            return Matrix.Identity; // 1:1比例
-        }
-    }
-
-    /// <summary>
-    /// 安全执行Windows API调用，捕获可能的异常
-    /// </summary>
-    /// <typeparam name="T">返回值类型</typeparam>
-    /// <param name="action">要执行的API调用</param>
-    /// <param name="defaultValue">发生异常时的默认返回值</param>
-    /// <returns>API调用的结果或默认值</returns>
-    public static T SafeApiCall<T>(Func<T> action, T defaultValue)
-    {
-        try
-        {
-            return action();
-        }
-        catch (Exception)
-        {
-            return defaultValue;
         }
     }
 

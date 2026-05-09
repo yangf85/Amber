@@ -30,10 +30,6 @@ public class LoadingChase : LoadingIndicator
         DependencyProperty.Register(nameof(DotCount), typeof(int), typeof(LoadingChase),
             new PropertyMetadata(8, OnStructuralPropertyChanged));
 
-    public static readonly DependencyProperty IsActiveProperty =
-        DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(LoadingChase),
-            new PropertyMetadata(true, OnIsActiveChanged));
-
     public static readonly DependencyProperty ChaseSpeedProperty =
         DependencyProperty.Register(nameof(ChaseSpeed), typeof(double), typeof(LoadingChase),
             new PropertyMetadata(1.2, OnAnimationPropertyChanged));
@@ -79,15 +75,6 @@ public class LoadingChase : LoadingIndicator
     }
 
     /// <summary>
-    /// 是否激活动画
-    /// </summary>
-    public bool IsActive
-    {
-        get { return (bool)GetValue(IsActiveProperty); }
-        set { SetValue(IsActiveProperty, value); }
-    }
-
-    /// <summary>
     /// 追逐速度（秒/圈）
     /// </summary>
     public double ChaseSpeed
@@ -115,10 +102,14 @@ public class LoadingChase : LoadingIndicator
     {
         CreateVisualTree();
 
-        if (IsActive)
+        Loaded += (s, e) =>
         {
-            Loaded += (s, e) => StartAnimation();
-        }
+            if (IsActive)
+            {
+                StartAnimation();
+            }
+        };
+        Unloaded += (s, e) => StopAnimation();
     }
 
     private void CreateVisualTree()
@@ -189,12 +180,12 @@ public class LoadingChase : LoadingIndicator
         chase.RecreateVisualTree();
     }
 
-    private static void OnIsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    protected override void OnIsActiveChanged(bool oldValue, bool newValue)
     {
-        var chase = (LoadingChase)d;
-        if (chase.IsLoaded)
+        base.OnIsActiveChanged(oldValue, newValue);
+        if (IsLoaded)
         {
-            chase.UpdateAnimationState();
+            UpdateAnimationState();
         }
     }
 

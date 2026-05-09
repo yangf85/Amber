@@ -1,0 +1,699 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.HighlightTextBlockView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DataContext="{d:DesignInstance Type={x:Type local:HighlightTextBlockViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HintTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="FieldLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+
+        <Style x:Key="ResultBoxStyle" TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+        </Style>
+
+        <!--  主题切换按钮通用样式  -->
+        <Style x:Key="ThemeButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="MinWidth" Value="90" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="RootBorder"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.85" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  Card 5 文件项模板  -->
+        <Style x:Key="FileItemContainerStyle" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border
+                            x:Name="RootBorder"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M3 14h2v-4H3v4zm0 5h2v-4H3v4zm0-10h2V5H3v4zm4 5h14v-4H7v4zm0 5h14v-4H7v4zM7 5v4h14V5H7z"
+                            Fill="White"
+                            Stretch="Uniform" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="HighlightTextBlock" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="文本高亮控件。继承 TextBlock，根据 SourceText + QueriesText 渲染高亮——空格分隔多 token、双引号包裹整体短语、6 种 StringComparison 比较模式、自定义高亮颜色。默认黄底深字（Ctrl+F 风格）。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础多 token 高亮  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础多 token 高亮" Subtitle="QueriesText 空格分隔">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="在输入框中输入查询词（空格分隔多个），下方原文中所有匹配位置会被高亮。试着删字、加字——高亮实时刷新。" />
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="查询词：" />
+                            <TextBox Padding="8,6" Text="{Binding Card1Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <Border Style="{StaticResource ResultBoxStyle}">
+                                <cy:HighlightTextBlock
+                                    FontSize="14"
+                                    LineHeight="22"
+                                    QueriesText="{Binding Card1Query}"
+                                    SourceText="{Binding Card1Source}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 引号 phrase 查询  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="引号 phrase 查询" Subtitle="双引号包裹整体短语">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="对比：&#x000A;• 输 WPF 控件 → 解析为 [WPF, 控件]，分别匹配&#x000A;• 输 &quot;WPF 控件&quot; → 解析为 [WPF 控件]，整体匹配（含中间空格）&#x000A;• 输 a &quot;b c&quot; d → 解析为 [a, b c, d]" />
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="查询词（试 'WPF 控件' 和 &quot;WPF 控件&quot; 对比）：" />
+                            <TextBox Padding="8,6" Text="{Binding Card2Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock
+                                Margin="0,12,0,4"
+                                Style="{StaticResource FieldLabelStyle}"
+                                Text="解析结果（HighlightTextBlock.ParseQueries）：" />
+                            <ItemsControl
+                                Margin="0,0,0,8"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1"
+                                ItemsSource="{Binding Card2Tokens}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Margin="6,4"
+                                            Padding="8,4"
+                                            Background="{DynamicResource Background.Highlighted}">
+                                            <TextBlock
+                                                FontFamily="Consolas"
+                                                FontSize="12"
+                                                Foreground="White"
+                                                Text="{Binding}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Margin="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                            <Border Style="{StaticResource ResultBoxStyle}">
+                                <cy:HighlightTextBlock
+                                    FontSize="14"
+                                    LineHeight="22"
+                                    QueriesText="{Binding Card2Query}"
+                                    SourceText="{Binding Card2Source}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ StringComparison 切换  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="StringComparison 切换" Subtitle="区分大小写 / 文化感知 / 序号比较">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="原文里有大小写混合的 wpf。输 'wpf' 后切换不同模式：OrdinalIgnoreCase / CurrentCultureIgnoreCase 命中所有变体；Ordinal / InvariantCulture 仅命中小写 wpf。" />
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="查询词：" />
+                            <TextBox Padding="8,6" Text="{Binding Card3Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <StackPanel Margin="0,12,0,0">
+                                <RadioButton
+                                    Margin="0,0,0,4"
+                                    Content="OrdinalIgnoreCase（序号 + 忽略大小写）"
+                                    GroupName="cmp"
+                                    IsChecked="{Binding IsCmpOrdinalIgnoreCase, Mode=TwoWay}" />
+                                <RadioButton
+                                    Margin="0,0,0,4"
+                                    Content="Ordinal（序号 + 区分大小写）"
+                                    GroupName="cmp"
+                                    IsChecked="{Binding IsCmpOrdinal, Mode=TwoWay}" />
+                                <RadioButton
+                                    Margin="0,0,0,4"
+                                    Content="CurrentCultureIgnoreCase（默认，文化 + 忽略大小写）"
+                                    GroupName="cmp"
+                                    IsChecked="{Binding IsCmpCurrentCultureIgnoreCase, Mode=TwoWay}" />
+                                <RadioButton
+                                    Content="InvariantCulture（不变文化 + 区分大小写）"
+                                    GroupName="cmp"
+                                    IsChecked="{Binding IsCmpInvariantCulture, Mode=TwoWay}" />
+                            </StackPanel>
+
+                            <Border Style="{StaticResource ResultBoxStyle}">
+                                <cy:HighlightTextBlock
+                                    FontSize="14"
+                                    LineHeight="22"
+                                    QueriesText="{Binding Card3Query}"
+                                    SourceText="{Binding Card3Source}"
+                                    StringComparison="{Binding Card3Comparison}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 颜色主题切换  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="自定义高亮颜色" Subtitle="HighlightBackground / HighlightForeground">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="点按钮切换不同高亮主题。HighlightBackground / HighlightForeground 是两个独立 DP——其中一个设为 null 即可实现&quot;仅背景&quot;或&quot;仅文字&quot;的单色高亮。" />
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="双色高亮（背景 + 文字都改）：" />
+                            <WrapPanel Margin="0,0,0,8">
+                                <Button
+                                    Background="#FFEB3B"
+                                    Command="{Binding ApplyDefaultThemeCommand}"
+                                    Content="默认（黄）"
+                                    Foreground="#212121"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                                <Button
+                                    Background="#42A5F5"
+                                    Command="{Binding ApplyWordThemeCommand}"
+                                    Content="编辑器（蓝）"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                                <Button
+                                    Background="#E53935"
+                                    Command="{Binding ApplyErrorThemeCommand}"
+                                    Content="错误（红）"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                                <Button
+                                    Background="#FFA726"
+                                    Command="{Binding ApplyWarningThemeCommand}"
+                                    Content="警告（橙）"
+                                    Foreground="#212121"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                            </WrapPanel>
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="单色高亮（DP 设为 null 跳过）：" />
+                            <WrapPanel Margin="0,0,0,8">
+                                <Button
+                                    Background="#FFEB3B"
+                                    Command="{Binding ApplyOnlyBgThemeCommand}"
+                                    Content="仅背景（黄底，文字继承）"
+                                    Foreground="#212121"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                                <Button
+                                    Background="Transparent"
+                                    Command="{Binding ApplyOnlyFgThemeCommand}"
+                                    Content="仅文字（红字，无背景）"
+                                    Foreground="#E53935"
+                                    Style="{StaticResource ThemeButtonStyle}" />
+                            </WrapPanel>
+
+                            <Border Style="{StaticResource ResultBoxStyle}">
+                                <cy:HighlightTextBlock
+                                    FontSize="14"
+                                    HighlightBackground="{Binding Card4HighlightBg}"
+                                    HighlightForeground="{Binding Card4HighlightFg}"
+                                    LineHeight="22"
+                                    QueriesText="{Binding Card4Query}"
+                                    SourceText="{Binding Card4Source}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 综合应用：搜索结果列表  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="综合应用 — 搜索结果列表" Subtitle="DataTemplate 内嵌 HighlightTextBlock">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="在 ListBox 的 ItemTemplate 里嵌 HighlightTextBlock，QueriesText 走 ElementName binding 同步全局搜索框——每行的匹配片段实时高亮。这是 IDE 文件搜索 / 命令面板的标准做法。" />
+
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="搜索关键词（试 'Service' / 'Window' / 'Notification'）：" />
+                            <TextBox
+                                Name="Card5SearchBox"
+                                Padding="8,6"
+                                Text="{Binding Card5Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <Border
+                                Margin="0,12,0,0"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <ListBox
+                                    MaxHeight="280"
+                                    BorderThickness="0"
+                                    ItemContainerStyle="{StaticResource FileItemContainerStyle}"
+                                    ItemsSource="{Binding FileList}"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <cy:HighlightTextBlock
+                                                FontFamily="Consolas"
+                                                FontSize="13"
+                                                QueriesText="{Binding Text, ElementName=Card5SearchBox}"
+                                                SourceText="{Binding}" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：API 表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  API 表  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="主要 API">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="成员" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SourceText" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="需要被高亮渲染的原始文本。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="QueriesText" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="查询词。空格分隔多 token，双引号包裹整体短语。例：a &quot;b c&quot; d → [a, b c, d]。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HighlightBackground" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="匹配片段背景。默认 Material Yellow 500（#FFEB3B），跟浏览器 Ctrl+F 风格一致。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HighlightForeground" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="匹配片段前景。默认 Material Grey 900（#212121）。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="StringComparison" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="StringComparison" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="匹配比较模式。默认 CurrentCultureIgnoreCase。替代之前的 IsIgnoreCase bool DP。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ParseQueries(string)" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static IEnumerable&lt;string&gt;" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="把 QueriesText 风格字符串解析为 token 列表（公开为 demo / 调试场景预览解析结果）。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  代码示例 + 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><sys:String xml:space="preserve">&lt;!-- 1. 基础高亮 --&gt;
+&lt;cy:HighlightTextBlock SourceText="{Binding Article}"
+                       QueriesText="{Binding Search}" /&gt;
+
+&lt;!-- 2. 多 token 查询 --&gt;
+&lt;cy:HighlightTextBlock SourceText="{Binding Article}"
+                       QueriesText="WPF 控件 高亮" /&gt;
+
+&lt;!-- 3. 引号 phrase --&gt;
+&lt;cy:HighlightTextBlock SourceText="{Binding Article}"
+                       QueriesText='"WPF 控件库"' /&gt;
+
+&lt;!-- 4. 自定义颜色 --&gt;
+&lt;cy:HighlightTextBlock SourceText="{Binding Article}"
+                       QueriesText="{Binding Search}"
+                       HighlightBackground="#42A5F5"
+                       HighlightForeground="White" /&gt;
+
+&lt;!-- 5. 搜索结果列表（DataTemplate 联动）--&gt;
+&lt;TextBox Name="SearchBox" Text="{Binding Query}" /&gt;
+&lt;ListBox ItemsSource="{Binding Files}"&gt;
+    &lt;ListBox.ItemTemplate&gt;
+        &lt;DataTemplate&gt;
+            &lt;cy:HighlightTextBlock 
+                SourceText="{Binding}"
+                QueriesText="{Binding Text, ElementName=SearchBox}" /&gt;
+        &lt;/DataTemplate&gt;
+    &lt;/ListBox.ItemTemplate&gt;
+&lt;/ListBox&gt;
+
+&lt;!-- 6. 区分大小写 --&gt;
+&lt;cy:HighlightTextBlock SourceText="{Binding Article}"
+                       QueriesText="WPF"
+                       StringComparison="Ordinal" /&gt;</sys:String></TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="区间合并算法" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="多查询词找到的匹配区间可能重叠（如 'abc' + 'bcd' 在 'abcd' 里）——内部 sort + 合并相邻 / 重叠区间，最终切片不会有重复 Run。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="Frozen 默认 Brush" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="默认 Highlight Brush 是 static + Freeze 的，所有实例共享——避免每实例分配两个 Brush 对象。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="不用 Binding" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="高亮 Run 直接 set Brush 而不是 Binding——HighlightBackground 改变时整体 RefreshInlines。运行时几乎不动，trade-off 合理。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="Phrase 解析" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="状态机 + StringBuilder，shell 风格。引号未闭合时容错为开放短语；空引号 &quot;&quot; 不产生 token。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+</UserControl>

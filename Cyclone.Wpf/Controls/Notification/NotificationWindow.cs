@@ -1,17 +1,56 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shell;
 using System.Windows.Threading;
 
 namespace Cyclone.Wpf.Controls;
 
+/// <summary>
+/// 单条通知窗口。提供两种关闭方式：
+/// <see cref="CloseWithAnimation"/>（带滑出动画）和 <see cref="CloseImmediately"/>（立即关）。
+/// </summary>
 internal class NotificationWindow : Window
 {
+    private DispatcherTimer _autoCloseTimer;
+    private double _originalLeft;
+    private double _originalTop;
+
+    /// <summary>正在关闭：0 = 否，1 = 是。Interlocked 操作保证唯一关闭路径。</summary>
+    private int _isClosing;
+
+    public NotificationWindow()
+    {
+        CommandBindings.Add(new CommandBinding(CloseWindowCommand, OnExecuteCloseWindow));
+
+        try
+        {
+            var dict = new ResourceDictionary
+            {
+                Source = new Uri("pack://application:,,,/Cyclone.Wpf;component/Styles/Notification.xaml", UriKind.Absolute),
+            };
+            Resources.MergedDictionaries.Add(dict);
+        }
+        catch
+        {
+            // 资源不存在时不阻塞窗口创建——用户可能没合并这个字典
+        }
+
+        Loaded += OnNotificationLoaded;
+    }
+
     #region DisplayDuration
+
+    public static readonly DependencyProperty DisplayDurationProperty =
+        DependencyProperty.Register(
+            nameof(DisplayDuration),
+            typeof(TimeSpan),
+            typeof(NotificationWindow),
+            new PropertyMetadata(TimeSpan.FromMilliseconds(2400), OnDisplayDurationChanged));
 
     public TimeSpan DisplayDuration
     {
@@ -19,24 +58,21 @@ internal class NotificationWindow : Window
         set => SetValue(DisplayDurationProperty, value);
     }
 
-    public static readonly DependencyProperty DisplayDurationProperty =
-        DependencyProperty.Register(nameof(DisplayDuration), typeof(TimeSpan), typeof(NotificationWindow),
-            new PropertyMetadata(TimeSpan.FromMilliseconds(2400), OnDisplayDurationChanged));
-
     private static void OnDisplayDurationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is NotificationWindow window)
+        if (d is not NotificationWindow w)
         {
-            var newDelay = (TimeSpan)e.NewValue;
+            return;
+        }
 
-            if (newDelay <= TimeSpan.Zero)
-            {
-                window.StopAutoCloseTimer();
-            }
-            else
-            {
-                window.ResetAutoCloseTimer();
-            }
+        var newDelay = (TimeSpan)e.NewValue;
+        if (newDelay <= TimeSpan.Zero)
+        {
+            w.StopAutoCloseTimer();
+        }
+        else
+        {
+            w.ResetAutoCloseTimer();
         }
     }
 
@@ -44,18 +80,29 @@ internal class NotificationWindow : Window
 
     #region IsShowCloseButton
 
+    public static readonly DependencyProperty IsShowCloseButtonProperty =
+        DependencyProperty.Register(
+            nameof(IsShowCloseButton),
+            typeof(bool),
+            typeof(NotificationWindow),
+            new PropertyMetadata(true));
+
     public bool IsShowCloseButton
     {
         get => (bool)GetValue(IsShowCloseButtonProperty);
         set => SetValue(IsShowCloseButtonProperty, value);
     }
 
-    public static readonly DependencyProperty IsShowCloseButtonProperty =
-        DependencyProperty.Register(nameof(IsShowCloseButton), typeof(bool), typeof(NotificationWindow), new PropertyMetadata(true));
-
     #endregion IsShowCloseButton
 
     #region AnimationDirection
+
+    public static readonly DependencyProperty AnimationDirectionProperty =
+        DependencyProperty.Register(
+            nameof(AnimationDirection),
+            typeof(NotificationAnimationDirection),
+            typeof(NotificationWindow),
+            new PropertyMetadata(NotificationAnimationDirection.FromRight));
 
     public NotificationAnimationDirection AnimationDirection
     {
@@ -63,86 +110,142 @@ internal class NotificationWindow : Window
         set => SetValue(AnimationDirectionProperty, value);
     }
 
-    public static readonly DependencyProperty AnimationDirectionProperty =
-        DependencyProperty.Register(nameof(AnimationDirection), typeof(NotificationAnimationDirection), typeof(NotificationWindow),
-            new PropertyMetadata(NotificationAnimationDirection.FromRight));
-
     #endregion AnimationDirection
 
-    #region CloseCommand
+    #region NotificationClicked event
 
-    public static RoutedCommand CloseWindowCommand { get; private set; } =
-        new RoutedCommand("CloseWindow", typeof(NotificationWindow));
+    /// <summary>
+    /// 用户在通知主体上左键点击时触发。点击关闭按钮 / 任何 ButtonBase 子元素不触发。
+    /// 由 <see cref="NotificationHandle"/> 转发到外部 INotificationHandle.Clicked。
+    /// </summary>
+    internal event EventHandler NotificationClicked;
 
-    private void ExecuteCloseWindow(object sender, ExecutedRoutedEventArgs e)
+    #endregion NotificationClicked event
+
+    #region Commands
+
+    /// <summary>
+    /// 关闭窗口的路由命令（带动画）。模板中的关闭按钮 Command 绑定到此。
+    /// </summary>
+    public static readonly RoutedCommand CloseWindowCommand =
+        new RoutedCommand(nameof(CloseWindowCommand), typeof(NotificationWindow));
+
+    private void OnExecuteCloseWindow(object sender, ExecutedRoutedEventArgs e)
     {
-        if (sender is NotificationWindow window)
+        if (sender is NotificationWindow w)
         {
-            window.CloseWithAnimation();
+            w.CloseWithAnimation();
+            e.Handled = true;
         }
     }
 
-    private void CanExecuteCloseWindow(object sender, CanExecuteRoutedEventArgs e)
+    #endregion Commands
+
+    #region Public Close Methods
+
+    /// <summary>
+    /// 带滑出动画的关闭。重复调用幂等。用于：
+    /// 用户主动关（点 X 按钮 / handle.Close()）、自动关闭计时器到期。
+    /// </summary>
+    public void CloseWithAnimation()
     {
-        e.CanExecute = true;
-    }
-
-    #endregion CloseCommand
-
-    private DispatcherTimer _autoCloseTimer;
-    private bool _isClosing = false;
-    private double _originalLeft;
-    private double _originalTop;
-
-    // 用于获取安全的Dispatcher
-    private Dispatcher GetSafeDispatcher()
-    {
-        return Dispatcher ?? (Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
-    }
-
-    public NotificationWindow()
-    {
-        // 注册命令绑定
-        CommandBindings.Add(new CommandBinding(CloseWindowCommand, ExecuteCloseWindow, CanExecuteCloseWindow));
-
-        try
+        if (Interlocked.Exchange(ref _isClosing, 1) != 0)
         {
-            var dict = new ResourceDictionary();
-            dict.Source = new Uri("pack://application:,,,/Cyclone.Wpf;component/Styles/Notification.xaml", UriKind.Absolute);
-            Resources.MergedDictionaries.Add(dict);
-        }
-        catch (Exception ex)
-        {
-            // 在资源加载失败的情况下提供异常处理
-            Console.WriteLine($"Error loading notification resources: {ex.Message}");
-            // 可以在这里添加默认资源或降级处理
+            return;
         }
 
-        // 初始化自动关闭计时器（在Loaded事件中）
-        Loaded += NotificationWindow_Loaded;
-        Unloaded += NotificationWindow_Unloaded;
+        StopAutoCloseTimer();
+        PlayCloseAnimation(() => base.Close());
     }
 
-    private void NotificationWindow_Loaded(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// 立即关闭（无动画）。用于：
+    /// MaxCount 淘汰最老一条、Service.Dispose 关全部。
+    /// 重复调用幂等。
+    /// </summary>
+    public void CloseImmediately()
     {
-        // 初始化计时器
-        if (_autoCloseTimer == null)
+        if (Interlocked.Exchange(ref _isClosing, 1) != 0)
         {
-            _autoCloseTimer = new DispatcherTimer(DispatcherPriority.Normal, GetSafeDispatcher());
-            _autoCloseTimer.Tick += AutoCloseTimer_Tick;
+            return;
         }
 
-        // 保存原始位置用于动画
+        StopAutoCloseTimer();
+        base.Close();
+    }
+
+    #endregion Public Close Methods
+
+    #region Override Methods
+
+    /// <inheritdoc />
+    protected override void OnPreviewMouseLeftButtonUp(MouseButtonEventArgs e)
+    {
+        base.OnPreviewMouseLeftButtonUp(e);
+
+        if (e.Handled)
+        {
+            return;
+        }
+
+        // 排除按钮内部点击：任何 ButtonBase 子元素的点击都不算"通知主体被点"
+        if (e.OriginalSource is DependencyObject src && IsInsideButton(src))
+        {
+            return;
+        }
+
+        NotificationClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(MouseEventArgs e)
+    {
+        base.OnMouseEnter(e);
+        StopAutoCloseTimer();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        if (DisplayDuration > TimeSpan.Zero)
+        {
+            StartAutoCloseTimer();
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        // 用户自定义模板若启用 WindowChrome + SizeToContent 时，强制重新测量
+        if (SizeToContent == SizeToContent.WidthAndHeight && WindowChrome.GetWindowChrome(this) != null)
+        {
+            InvalidateMeasure();
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        CleanupResources();
+    }
+
+    #endregion Override Methods
+
+    #region Private - Animation
+
+    private void OnNotificationLoaded(object sender, RoutedEventArgs e)
+    {
+        // 保留进入动画前的目标位置（已被 Positioner 设置好）
         _originalLeft = Left;
         _originalTop = Top;
 
-        // 根据动画方向设置初始位置
         SetInitialPositionForAnimation();
-
-        // 播放显示动画
         PlayOpenAnimation();
 
-        // 检查是否应该启动自动关闭计时器
         if (DisplayDuration > TimeSpan.Zero)
         {
             StartAutoCloseTimer();
@@ -163,151 +266,89 @@ internal class NotificationWindow : Window
         }
     }
 
-    private void NotificationWindow_Unloaded(object sender, RoutedEventArgs e)
-    {
-        CleanupResources();
-    }
-
-    private void AutoCloseTimer_Tick(object sender, EventArgs e)
-    {
-        // 停止计时器，防止多次触发
-        StopAutoCloseTimer();
-
-        // 调用关闭方法
-        CloseWithAnimation();
-    }
-
     private void PlayOpenAnimation()
     {
-        DoubleAnimation positionAnimation = null;
-        DependencyProperty animatedProperty = null;
-
-        // 根据方向创建适当的动画
-        switch (AnimationDirection)
+        var positionAnim = AnimationDirection switch
         {
-            case NotificationAnimationDirection.FromLeft:
-                positionAnimation = new DoubleAnimation
-                {
-                    From = _originalLeft - ActualWidth,
-                    To = _originalLeft,
-                    Duration = TimeSpan.FromMilliseconds(200),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                animatedProperty = Window.LeftProperty;
-                break;
+            NotificationAnimationDirection.FromLeft => new DoubleAnimation
+            {
+                From = _originalLeft - ActualWidth,
+                To = _originalLeft,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            },
+            _ => new DoubleAnimation
+            {
+                From = _originalLeft + ActualWidth,
+                To = _originalLeft,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            },
+        };
 
-            case NotificationAnimationDirection.FromRight:
-                positionAnimation = new DoubleAnimation
-                {
-                    From = _originalLeft + ActualWidth,
-                    To = _originalLeft,
-                    Duration = TimeSpan.FromMilliseconds(200),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                animatedProperty = Window.LeftProperty;
-                break;
-        }
-
-        // 创建透明度动画
-        DoubleAnimation opacityAnimation = new DoubleAnimation
+        var opacityAnim = new DoubleAnimation
         {
             From = 0.0,
             To = 1.0,
             Duration = TimeSpan.FromMilliseconds(200),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
         };
 
-        // 开始动画
-        if (positionAnimation != null && animatedProperty != null)
-        {
-            BeginAnimation(animatedProperty, positionAnimation);
-        }
-        BeginAnimation(Window.OpacityProperty, opacityAnimation);
+        BeginAnimation(LeftProperty, positionAnim);
+        BeginAnimation(OpacityProperty, opacityAnim);
     }
 
-    private void PlayCloseAnimation(Action completedCallback)
+    private void PlayCloseAnimation(Action onCompleted)
     {
-        if (_isClosing) return;
-        _isClosing = true;
-
-        DoubleAnimation positionAnimation = null;
-        DependencyProperty animatedProperty = null;
-
-        // 根据方向创建适当的动画
-        switch (AnimationDirection)
+        var positionAnim = AnimationDirection switch
         {
-            case NotificationAnimationDirection.FromLeft:
-                positionAnimation = new DoubleAnimation
-                {
-                    From = Left,
-                    To = _originalLeft - ActualWidth,
-                    Duration = TimeSpan.FromMilliseconds(300),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-                };
-                animatedProperty = Window.LeftProperty;
-                break;
+            NotificationAnimationDirection.FromLeft => new DoubleAnimation
+            {
+                From = Left,
+                To = _originalLeft - ActualWidth,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
+            },
+            _ => new DoubleAnimation
+            {
+                From = Left,
+                To = _originalLeft + ActualWidth,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
+            },
+        };
 
-            case NotificationAnimationDirection.FromRight:
-                positionAnimation = new DoubleAnimation
-                {
-                    From = Left,
-                    To = _originalLeft + ActualWidth,
-                    Duration = TimeSpan.FromMilliseconds(300),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-                };
-                animatedProperty = Window.LeftProperty;
-                break;
-        }
-
-        // 创建透明度动画
-        DoubleAnimation opacityAnimation = new DoubleAnimation
+        var opacityAnim = new DoubleAnimation
         {
             From = 1.0,
             To = 0.0,
             Duration = TimeSpan.FromMilliseconds(300),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
         };
 
-        // 设置透明度动画的完成回调，确保窗口关闭在透明度动画完成后
-        opacityAnimation.Completed += (s, e) => completedCallback?.Invoke();
+        opacityAnim.Completed += (_, _) => onCompleted?.Invoke();
 
-        // 开始动画
-        if (positionAnimation != null && animatedProperty != null)
-        {
-            BeginAnimation(animatedProperty, positionAnimation);
-        }
-        BeginAnimation(Window.OpacityProperty, opacityAnimation);
+        BeginAnimation(LeftProperty, positionAnim);
+        BeginAnimation(OpacityProperty, opacityAnim);
     }
 
-    public void CloseWithAnimation()
-    {
-        if (_isClosing) return;
+    #endregion Private - Animation
 
-        // 停止计时器
-        StopAutoCloseTimer();
-
-        PlayCloseAnimation(() =>
-        {
-            base.Close();
-        });
-    }
+    #region Private - Timer
 
     private void StartAutoCloseTimer()
     {
-        // 如果计时器为空，创建一个新的
         if (_autoCloseTimer == null)
         {
-            _autoCloseTimer = new DispatcherTimer(DispatcherPriority.Normal, GetSafeDispatcher());
-            _autoCloseTimer.Tick += AutoCloseTimer_Tick;
+            _autoCloseTimer = new DispatcherTimer(DispatcherPriority.Normal, Dispatcher);
+            _autoCloseTimer.Tick += OnAutoCloseTick;
         }
 
-        // 如果计时器已在运行或鼠标在窗口上，不启动计时器
-        if (_autoCloseTimer.IsEnabled || this.IsMouseOver || DisplayDuration <= TimeSpan.Zero)
+        if (_autoCloseTimer.IsEnabled || IsMouseOver || DisplayDuration <= TimeSpan.Zero)
         {
             return;
         }
 
-        // 设置计时器间隔并启动
         _autoCloseTimer.Interval = DisplayDuration;
         _autoCloseTimer.Start();
     }
@@ -329,63 +370,39 @@ internal class NotificationWindow : Window
         }
     }
 
-    private void CleanupResources()
+    private void OnAutoCloseTick(object sender, EventArgs e)
     {
-        // 停止计时器
         StopAutoCloseTimer();
-
-        // 解除事件订阅
-        if (_autoCloseTimer != null)
-        {
-            _autoCloseTimer.Tick -= AutoCloseTimer_Tick;
-            _autoCloseTimer = null;
-        }
-
-        Loaded -= NotificationWindow_Loaded;
-        Unloaded -= NotificationWindow_Unloaded;
-    }
-
-    #region Override
-
-    /// <summary>
-    /// 窗口初始化时，如果设置了SizeToContent.WidthAndHeight，则重新测量窗口大小以适应内容
-    /// 解决了窗口在Chrome模式下无法自动适应内容的问题
-    /// </summary>
-    /// <param name="e"></param>
-    protected override void OnSourceInitialized(EventArgs e)
-    {
-        base.OnSourceInitialized(e);
-        if (SizeToContent == SizeToContent.WidthAndHeight && WindowChrome.GetWindowChrome(this) != null)
-        {
-            InvalidateMeasure();
-        }
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        CleanupResources();
-    }
-
-    protected override void OnMouseEnter(MouseEventArgs e)
-    {
-        base.OnMouseEnter(e);
-        StopAutoCloseTimer();
-    }
-
-    protected override void OnMouseLeave(MouseEventArgs e)
-    {
-        base.OnMouseLeave(e);
-        if (DisplayDuration > TimeSpan.Zero)
-        {
-            StartAutoCloseTimer();
-        }
-    }
-
-    public new void Close()
-    {
         CloseWithAnimation();
     }
 
-    #endregion Override
+    #endregion Private - Timer
+
+    #region Private - Helpers
+
+    private static bool IsInsideButton(DependencyObject src)
+    {
+        while (src != null)
+        {
+            if (src is ButtonBase)
+            {
+                return true;
+            }
+            src = VisualTreeHelper.GetParent(src) ?? LogicalTreeHelper.GetParent(src);
+        }
+        return false;
+    }
+
+    private void CleanupResources()
+    {
+        StopAutoCloseTimer();
+        if (_autoCloseTimer != null)
+        {
+            _autoCloseTimer.Tick -= OnAutoCloseTick;
+            _autoCloseTimer = null;
+        }
+        Loaded -= OnNotificationLoaded;
+    }
+
+    #endregion Private - Helpers
 }

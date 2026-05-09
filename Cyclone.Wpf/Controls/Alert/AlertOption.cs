@@ -1,65 +1,30 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿namespace Cyclone.Wpf.Controls;
 
-namespace Cyclone.Wpf.Controls;
-
+/// <summary>
+/// AlertService 的配置。
+/// <para>
+/// 注意：mutable POCO，<b>不实现</b> <see cref="System.ComponentModel.INotifyPropertyChanged"/>。
+/// 在调用任何 Show 之前完成所有配置；运行时改值会影响下次 Show。
+/// </para>
+/// <para>
+/// 视觉相关（颜色、字体、按钮高度、Caption 样式、加载动画等）全部由 <c>Styles/Alert.xaml</c>
+/// 主题字典控制，不通过此类配置——这样主题切换时通知会自动响应。
+/// </para>
+/// </summary>
 public class AlertOption
 {
-    public AlertButton ButtonType { get; set; } = AlertButton.Ok;
+    /// <summary>未指定按钮组合时使用的默认值。</summary>
+    public AlertButton DefaultButtonType { get; set; } = AlertButton.Ok;
 
-    public string Title { get; set; } = "Alert";
+    /// <summary>"确定"按钮文本（i18n 用）。</summary>
+    public string OkButtonText { get; set; } = "确定";
 
-    public object Icon { get; set; } = new Path()
-    {
-        Stretch = Stretch.Uniform,
-        Width = 18,
-        Height = 18,
-        HorizontalAlignment = HorizontalAlignment.Center,
-        VerticalAlignment = VerticalAlignment.Center,
-        Fill = new SolidColorBrush(Color.FromArgb(0XFF, 0XFF, 0XFF, 0XFF)),
-        Data = PathGeometry.Parse(@"M853.333333 384V213.333333H170.666667v170.666667h682.666666z m0 85.333333H170.666667v341.333334h682.666666v-341.333334zM128 128h768a42.666667 42.666667 0 0 1 42.666667 42.666667v682.666666a42.666667 42.666667 0 0 1-42.666667 42.666667H128a42.666667 42.666667 0 0 1-42.666667-42.666667V170.666667a42.666667 42.666667 0 0 1 42.666667-42.666667z m85.333333 384h128v213.333333H213.333333v-213.333333z m0-256h85.333334v85.333333H213.333333V256z m170.666667 0h85.333333v85.333333H384V256z")
-    };
+    /// <summary>"取消"按钮文本（i18n 用）。</summary>
+    public string CancelButtonText { get; set; } = "取消";
 
-    public double CaptionHeight { get; set; } = 32d;
-
-    public Brush CaptionBackground { get; set; } = new SolidColorBrush(Color.FromArgb(0XFF, 0X0D, 0X47, 0XA1));
-
-    public Brush TitleForeground { get; set; } = new SolidColorBrush(Color.FromArgb(0XFF, 0XFF, 0XFF, 0XFF));
-
-    public Brush AlertButtonGroupBackground { get; set; } = new SolidColorBrush(Color.FromArgb(0x10, 0x80, 0x80, 0x80));
-
-    public Brush ContentForeground { get; set; } = Brushes.DarkGray;
-
-    public Brush AlertIconForeground { get; set; } = Brushes.DarkGray;
-
-    public double AlertButtonGroupHeight { get; set; } = 56d;
-
-    public string OkButtonText { get; set; } = "Ok";
-
-    public string CancelButtonText { get; set; } = "Cancel";
-
+    /// <summary>是否在 owner 之上显示半透明蒙版（独立 Window 实现）。</summary>
     public bool IsShowMask { get; set; } = true;
 
-    public Brush MaskBrush { get; set; } = new SolidColorBrush(Color.FromArgb(0x80, 0x00, 0x00, 0x00));
-
-    public HorizontalAlignment AlertButtonGroupHorizontalAlignment { get; set; } = HorizontalAlignment.Center;
-
-    public AlertIcon AlertIcon { get; set; }
-
-    #region 加载动画相关属性
-
+    /// <summary>异步验证期间是否显示加载动画。</summary>
     public bool IsShowLoadingOnAsync { get; set; } = true;
-
-    public object LoadingContent { get; set; } = new LoadingRing()
-    {
-        RingSize = 60,
-        RingThickness = 4,
-        RingColor = new SolidColorBrush(Color.FromArgb(0xFF, 0x0D, 0x47, 0xA1)),
-        IsActive = false
-    };
-
-    public Brush LoadingMaskBrush { get; set; } = new SolidColorBrush(Color.FromArgb(0x80, 0x00, 0x00, 0x00));
-
-    #endregion 加载动画相关属性
 }

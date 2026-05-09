@@ -1,211 +1,142 @@
 ﻿using System;
-using System.Diagnostics.SymbolStore;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shell;
 
 namespace Cyclone.Wpf.Controls;
 
+/// <summary>
+/// 警告对话框窗口。视觉样式（颜色、按钮高度、Caption 样式、加载动画等）<b>全部</b>由
+/// <c>Styles/Alert.xaml</c> 主题字典控制——主题切换时自动响应。
+/// <para>
+/// 14 个旧 DP（CaptionBackground / TitleForeground / AlertButtonGroupHeight / ContentForeground 等）
+/// 全部删除，因为它们应该是 Style 资源而不是窗口实例属性。
+/// </para>
+/// </summary>
 public class AlertWindow : Window
 {
-    #region Icon
-
-    public new static readonly DependencyProperty IconProperty =
-        DependencyProperty.Register(nameof(Icon), typeof(object), typeof(AlertWindow), new PropertyMetadata(default(object)));
-
-    public new object Icon
+    static AlertWindow()
     {
-        get => (object)GetValue(IconProperty);
-        set => SetValue(IconProperty, value);
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(AlertWindow),
+            new FrameworkPropertyMetadata(typeof(AlertWindow)));
     }
 
-    #endregion Icon
-
-    #region TitleForeground
-
-    public Brush TitleForeground
+    public AlertWindow()
     {
-        get => (Brush)GetValue(TitleForegroundProperty);
-        set => SetValue(TitleForegroundProperty, value);
+        InitializeCommandBindings();
+
+        // CLR 属性（不是 DP），不能在 Style 里 Setter——构造时设兜底，
+        // AlertService.ConfigureOwnership 会按 owner 情况覆盖（CenterOwner / Manual / CenterScreen）
+        WindowStartupLocation = WindowStartupLocation.CenterScreen;
     }
 
-    public static readonly DependencyProperty TitleForegroundProperty =
-        DependencyProperty.Register(nameof(TitleForeground), typeof(Brush), typeof(AlertWindow), new PropertyMetadata(Brushes.White));
+    #region Level
 
-    #endregion TitleForeground
+    public static readonly DependencyProperty LevelProperty =
+        DependencyProperty.Register(
+            nameof(Level),
+            typeof(AlertIcon),
+            typeof(AlertWindow),
+            new PropertyMetadata(AlertIcon.None));
 
-    #region CaptionBackground
-
-    public Brush CaptionBackground
+    /// <summary>
+    /// 获取或设置图标级别。决定标题栏图标。<see cref="AlertIcon.None"/> 时不显示。
+    /// </summary>
+    public AlertIcon Level
     {
-        get => (Brush)GetValue(CaptionBackgroundProperty);
-        set => SetValue(CaptionBackgroundProperty, value);
+        get => (AlertIcon)GetValue(LevelProperty);
+        set => SetValue(LevelProperty, value);
     }
 
-    public static readonly DependencyProperty CaptionBackgroundProperty =
-        DependencyProperty.Register(nameof(CaptionBackground), typeof(Brush), typeof(AlertWindow), new PropertyMetadata(SystemColors.ActiveCaptionBrush));
+    #endregion Level
 
-    #endregion CaptionBackground
+    #region HeaderIcon
 
-    #region CaptionHeight
+    public static readonly DependencyProperty HeaderIconProperty =
+        DependencyProperty.Register(
+            nameof(HeaderIcon),
+            typeof(object),
+            typeof(AlertWindow),
+            new PropertyMetadata(null));
 
-    public double CaptionHeight
+    /// <summary>
+    /// 获取或设置标题栏左侧的自定义图标内容（任意 UI 对象）。
+    /// 仅当 <see cref="Level"/> 为 <see cref="AlertIcon.None"/> 时生效——否则 Level 派生的图标优先。
+    /// <para>注意：不再 hide 基类的 <c>Window.Icon</c>（任务栏图标），那个保留原语义。</para>
+    /// </summary>
+    public object HeaderIcon
     {
-        get => (double)GetValue(CaptionHeightProperty);
-        set => SetValue(CaptionHeightProperty, value);
+        get => GetValue(HeaderIconProperty);
+        set => SetValue(HeaderIconProperty, value);
     }
 
-    public static readonly DependencyProperty CaptionHeightProperty =
-        DependencyProperty.Register(nameof(CaptionHeight), typeof(double), typeof(AlertWindow), new PropertyMetadata(SystemParameters.CaptionHeight));
-
-    #endregion CaptionHeight
-
-    #region AlertButtonGroupHorizontalAlignment
-
-    public HorizontalAlignment AlertButtonGroupHorizontalAlignment
-    {
-        get => (HorizontalAlignment)GetValue(AlertButtonGroupHorizontalAlignmentProperty);
-        set => SetValue(AlertButtonGroupHorizontalAlignmentProperty, value);
-    }
-
-    public static readonly DependencyProperty AlertButtonGroupHorizontalAlignmentProperty =
-        DependencyProperty.Register(nameof(AlertButtonGroupHorizontalAlignment), typeof(HorizontalAlignment), typeof(AlertWindow), new PropertyMetadata(HorizontalAlignment.Center));
-
-    #endregion AlertButtonGroupHorizontalAlignment
+    #endregion HeaderIcon
 
     #region ButtonType
 
+    public static readonly DependencyProperty ButtonTypeProperty =
+        DependencyProperty.Register(
+            nameof(ButtonType),
+            typeof(AlertButton),
+            typeof(AlertWindow),
+            new PropertyMetadata(AlertButton.Ok));
+
+    /// <summary>获取或设置按钮组合（Ok / OkCancel）。</summary>
     public AlertButton ButtonType
     {
         get => (AlertButton)GetValue(ButtonTypeProperty);
         set => SetValue(ButtonTypeProperty, value);
     }
 
-    public static readonly DependencyProperty ButtonTypeProperty =
-        DependencyProperty.Register(nameof(ButtonType), typeof(AlertButton), typeof(AlertWindow),
-            new PropertyMetadata(AlertButton.Ok));
-
     #endregion ButtonType
 
     #region OkButtonText
 
+    public static readonly DependencyProperty OkButtonTextProperty =
+        DependencyProperty.Register(
+            nameof(OkButtonText),
+            typeof(string),
+            typeof(AlertWindow),
+            new PropertyMetadata("确定"));
+
+    /// <summary>获取或设置"确定"按钮显示文本（i18n 用）。</summary>
     public string OkButtonText
     {
         get => (string)GetValue(OkButtonTextProperty);
         set => SetValue(OkButtonTextProperty, value);
     }
 
-    public static readonly DependencyProperty OkButtonTextProperty =
-        DependencyProperty.Register(nameof(OkButtonText), typeof(string), typeof(AlertWindow),
-            new PropertyMetadata("Ok"));
-
     #endregion OkButtonText
 
     #region CancelButtonText
 
+    public static readonly DependencyProperty CancelButtonTextProperty =
+        DependencyProperty.Register(
+            nameof(CancelButtonText),
+            typeof(string),
+            typeof(AlertWindow),
+            new PropertyMetadata("取消"));
+
+    /// <summary>获取或设置"取消"按钮显示文本（i18n 用）。</summary>
     public string CancelButtonText
     {
         get => (string)GetValue(CancelButtonTextProperty);
         set => SetValue(CancelButtonTextProperty, value);
     }
 
-    public static readonly DependencyProperty CancelButtonTextProperty =
-        DependencyProperty.Register(nameof(CancelButtonText), typeof(string), typeof(AlertWindow),
-            new PropertyMetadata("Cancel"));
-
     #endregion CancelButtonText
 
-    #region AlertButtonGroupBackground
+    #region IsLoading
 
-    public Brush AlertButtonGroupBackground
-    {
-        get => (Brush)GetValue(AlertButtonGroupBackgroundProperty);
-        set => SetValue(AlertButtonGroupBackgroundProperty, value);
-    }
-
-    public static readonly DependencyProperty AlertButtonGroupBackgroundProperty =
-        DependencyProperty.Register(nameof(AlertButtonGroupBackground), typeof(Brush), typeof(AlertWindow), new PropertyMetadata(Brushes.Transparent));
-
-    #endregion AlertButtonGroupBackground
-
-    #region AlertIconForeground
-
-    public Brush AlertIconForeground
-    {
-        get => (Brush)GetValue(AlertIconForegroundProperty);
-        set => SetValue(AlertIconForegroundProperty, value);
-    }
-
-    public static readonly DependencyProperty AlertIconForegroundProperty =
-        DependencyProperty.Register(nameof(AlertIconForeground), typeof(Brush), typeof(AlertWindow), new PropertyMetadata(default(Brush)));
-
-    #endregion AlertIconForeground
-
-    #region AlertButtonGroupHeight
-
-    public double AlertButtonGroupHeight
-    {
-        get => (double)GetValue(AlertButtonGroupHeightProperty);
-        set => SetValue(AlertButtonGroupHeightProperty, value);
-    }
-
-    public static readonly DependencyProperty AlertButtonGroupHeightProperty =
-        DependencyProperty.Register(nameof(AlertButtonGroupHeight), typeof(double), typeof(AlertWindow), new PropertyMetadata(0d));
-
-    #endregion AlertButtonGroupHeight
-
-    #region ContentForeground
-
-    public Brush ContentForeground
-    {
-        get => (Brush)GetValue(ContentForegroundProperty);
-        set => SetValue(ContentForegroundProperty, value);
-    }
-
-    public static readonly DependencyProperty ContentForegroundProperty =
-        DependencyProperty.Register(nameof(ContentForeground), typeof(Brush), typeof(AlertWindow), new PropertyMetadata(default(Brush)));
-
-    #endregion ContentForeground
-
-    #region ValidationCallback
+    public static readonly DependencyProperty IsLoadingProperty =
+        DependencyProperty.Register(
+            nameof(IsLoading),
+            typeof(bool),
+            typeof(AlertWindow),
+            new PropertyMetadata(false));
 
     /// <summary>
-    /// 验证回调函数，用于在确定按钮点击时进行验证
-    /// </summary>
-    public Func<bool> ValidationCallback
-    {
-        get => (Func<bool>)GetValue(ValidationCallbackProperty);
-        set => SetValue(ValidationCallbackProperty, value);
-    }
-
-    public static readonly DependencyProperty ValidationCallbackProperty =
-        DependencyProperty.Register(nameof(ValidationCallback), typeof(Func<bool>), typeof(AlertWindow), new PropertyMetadata(null));
-
-    #endregion ValidationCallback
-
-    #region AsyncValidationCallback
-
-    /// <summary>
-    /// 异步验证回调函数，用于在确定按钮点击时进行异步验证
-    /// </summary>
-    public Func<Task<bool>> AsyncValidationCallback
-    {
-        get => (Func<Task<bool>>)GetValue(AsyncValidationCallbackProperty);
-        set => SetValue(AsyncValidationCallbackProperty, value);
-    }
-
-    public static readonly DependencyProperty AsyncValidationCallbackProperty =
-        DependencyProperty.Register(nameof(AsyncValidationCallback), typeof(Func<Task<bool>>), typeof(AlertWindow), new PropertyMetadata(null));
-
-    #endregion AsyncValidationCallback
-
-    #region Loading相关属性
-
-    /// <summary>
-    /// 是否正在加载
+    /// 是否显示加载覆盖层。异步验证执行期间由 <see cref="HandleOkAsync"/> 自动设置。
     /// </summary>
     public bool IsLoading
     {
@@ -213,236 +144,98 @@ public class AlertWindow : Window
         set => SetValue(IsLoadingProperty, value);
     }
 
-    public static readonly DependencyProperty IsLoadingProperty =
-        DependencyProperty.Register(nameof(IsLoading), typeof(bool), typeof(AlertWindow),
-            new PropertyMetadata(false, OnIsLoadingChanged));
+    #endregion IsLoading
 
-    /// <summary>
-    /// 加载内容
-    /// </summary>
-    public object LoadingContent
+    #region Validation Callbacks (普通 .NET 属性，不是 DP——这些是回调而非数据)
+
+    /// <summary>同步验证回调：返回 false 阻止关闭，窗口保持打开。</summary>
+    public Func<bool> ValidationCallback { get; set; }
+
+    /// <summary>异步验证回调：返回 false 阻止关闭。验证期间 IsLoading=true。</summary>
+    public Func<Task<bool>> AsyncValidationCallback { get; set; }
+
+    #endregion Validation Callbacks (普通 .NET 属性，不是 DP——这些是回调而非数据)
+
+    #region Commands
+
+    /// <summary>"确定"按钮命令——经过验证回调（如有）后设置 DialogResult=true。</summary>
+    public static readonly RoutedCommand OkCommand = new RoutedCommand(nameof(OkCommand), typeof(AlertWindow));
+
+    /// <summary>"取消"按钮命令——直接 DialogResult=false 并关闭。</summary>
+    public static readonly RoutedCommand CancelCommand = new RoutedCommand(nameof(CancelCommand), typeof(AlertWindow));
+
+    /// <summary>"X"关闭按钮命令——DialogResult=null 并关闭。</summary>
+    public static readonly RoutedCommand CloseCommand = new RoutedCommand(nameof(CloseCommand), typeof(AlertWindow));
+
+    private void InitializeCommandBindings()
     {
-        get => GetValue(LoadingContentProperty);
-        set => SetValue(LoadingContentProperty, value);
-    }
-
-    public static readonly DependencyProperty LoadingContentProperty =
-        DependencyProperty.Register(nameof(LoadingContent), typeof(object), typeof(AlertWindow),
-            new PropertyMetadata(null));
-
-    /// <summary>
-    /// 加载遮罩背景
-    /// </summary>
-    public Brush LoadingMaskBrush
-    {
-        get => (Brush)GetValue(LoadingMaskBrushProperty);
-        set => SetValue(LoadingMaskBrushProperty, value);
-    }
-
-    public static readonly DependencyProperty LoadingMaskBrushProperty =
-        DependencyProperty.Register(nameof(LoadingMaskBrush), typeof(Brush), typeof(AlertWindow),
-            new PropertyMetadata(new SolidColorBrush(Color.FromArgb(0x80, 0x00, 0x00, 0x00))));
-
-    /// <summary>
-    /// 是否在异步验证时显示加载动画
-    /// </summary>
-    public bool IsShowLoadingOnAsync
-    {
-        get => (bool)GetValue(IsShowLoadingOnAsyncProperty);
-        set => SetValue(IsShowLoadingOnAsyncProperty, value);
-    }
-
-    public static readonly DependencyProperty IsShowLoadingOnAsyncProperty =
-        DependencyProperty.Register(nameof(IsShowLoadingOnAsync), typeof(bool), typeof(AlertWindow),
-            new PropertyMetadata(true));
-
-    #endregion Loading相关属性
-
-    #region Command
-
-    private void InitializeCommand()
-    {
-        // OK 命令处理 - 修改为异步处理
-        CommandBindings.Add(new CommandBinding(OkCommand, async (sender, e) =>
-        {
-            await HandleOkCommandAsync();
-        }));
-
-        CommandBindings.Add(new CommandBinding(CancelCommand, (sender, e) =>
+        CommandBindings.Add(new CommandBinding(OkCommand, async (_, _) => await HandleOkAsync()));
+        CommandBindings.Add(new CommandBinding(CancelCommand, (_, _) =>
         {
             DialogResult = false;
             Close();
         }));
-
-        CommandBindings.Add(new CommandBinding(CloseCommand, (sender, e) =>
+        CommandBindings.Add(new CommandBinding(CloseCommand, (_, _) =>
         {
             DialogResult = null;
             Close();
         }));
     }
 
-    /// <summary>
-    /// 处理OK命令的异步方法
-    /// </summary>
-    private async Task HandleOkCommandAsync()
+    private async Task HandleOkAsync()
     {
-        // 如果有异步验证回调，优先使用
+        // 异步验证优先
         if (AsyncValidationCallback != null)
         {
             try
             {
-                // 如果启用了加载动画，显示加载状态
-                if (IsShowLoadingOnAsync)
+                IsLoading = true;
+                bool ok = await AsyncValidationCallback();
+                if (ok)
                 {
-                    IsLoading = true;
-                }
-
-                // 执行异步验证
-                bool validationResult = await AsyncValidationCallback();
-
-                if (validationResult)
-                {
-                    // 验证通过，正常关闭
                     DialogResult = true;
                     Close();
                 }
                 else
                 {
-                    // 验证失败，恢复窗口状态，保持打开
                     IsLoading = false;
-                    System.Diagnostics.Debug.WriteLine("异步验证失败，对话框保持打开");
                 }
             }
             catch (Exception ex)
             {
-                // 验证过程中出现异常
-                System.Diagnostics.Debug.WriteLine($"异步验证过程中出现异常: {ex.Message}");
-
-                // 恢复窗口状态
+                System.Diagnostics.Debug.WriteLine($"[AlertWindow] 异步验证抛出异常：{ex.Message}");
                 IsLoading = false;
-
-                // 可以选择是否关闭窗口，这里选择保持打开
-                // DialogResult = false;
-                // Close();
             }
+            return;
         }
-        // 如果有同步验证回调
-        else if (ValidationCallback != null)
+
+        // 同步验证
+        if (ValidationCallback != null)
         {
             try
             {
-                bool validationResult = ValidationCallback();
-
-                if (validationResult)
+                bool ok = ValidationCallback();
+                if (ok)
                 {
-                    // 验证通过，正常关闭
                     DialogResult = true;
                     Close();
                 }
-                else
-                {
-                    // 验证失败，窗口保持打开
-                    System.Diagnostics.Debug.WriteLine("验证失败，对话框保持打开");
-                }
+
+                // 验证 false：保持打开，无需操作
             }
             catch (Exception ex)
             {
-                // 验证过程中出现异常，记录并关闭
-                System.Diagnostics.Debug.WriteLine($"验证过程中出现异常: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AlertWindow] 同步验证抛出异常：{ex.Message}");
                 DialogResult = false;
                 Close();
             }
+            return;
         }
-        else
-        {
-            // 没有验证回调，直接关闭
-            DialogResult = true;
-            Close();
-        }
+
+        // 无验证：直接关
+        DialogResult = true;
+        Close();
     }
 
-    /// <summary>
-    /// 当IsLoading属性改变时的处理
-    /// </summary>
-    private static void OnIsLoadingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is AlertWindow window)
-        {
-            bool isLoading = (bool)e.NewValue;
-
-            // 如果LoadingContent实现了ILoadingIndicator接口，控制其动画状态
-            if (window.LoadingContent is ILoadingIndicator loadingIndicator)
-            {
-                loadingIndicator.IsActive = isLoading;
-            }
-        }
-    }
-
-    public static RoutedCommand OkCommand { get; private set; } = new RoutedCommand("Ok", typeof(AlertWindow));
-    public static RoutedCommand CancelCommand { get; private set; } = new RoutedCommand("Cancel", typeof(AlertWindow));
-    public static RoutedCommand CloseCommand { get; private set; } = new RoutedCommand("Close", typeof(AlertWindow));
-
-    #endregion Command
-
-    #region Override
-
-    /// <summary>
-    /// 窗口初始化时，如果设置了SizeToContent.WidthAndHeight，则重新测量窗口大小以适应内容
-    /// 解决了窗口在Chrome模式下无法自动适应内容的问题
-    /// </summary>
-    /// <param name="e"></param>
-    protected override void OnSourceInitialized(EventArgs e)
-    {
-        base.OnSourceInitialized(e);
-        if (SizeToContent == SizeToContent.WidthAndHeight && WindowChrome.GetWindowChrome(this) != null)
-        {
-            InvalidateMeasure();
-        }
-    }
-
-    #endregion Override
-
-    public AlertWindow()
-    {
-        InitializeCommand();
-
-        try
-        {
-            // 尝试加载资源字典
-            var dict = new ResourceDictionary();
-            dict.Source = new Uri("pack://application:,,,/Cyclone.Wpf;component/Styles/Alert.xaml", UriKind.Absolute);
-            Resources.MergedDictionaries.Add(dict);
-        }
-        catch (Exception ex)
-        {
-            // 记录异常但继续初始化窗口
-            System.Diagnostics.Debug.WriteLine($"加载Alert样式资源时出错: {ex.Message}");
-
-            // 可以在这里添加基本样式作为备用
-            ApplyFallbackStyles();
-        }
-
-        WindowStartupLocation = WindowStartupLocation.CenterScreen;
-    }
-
-    /// <summary>
-    /// 在无法加载资源字典时应用基本样式
-    /// </summary>
-    private void ApplyFallbackStyles()
-    {
-        try
-        {
-            // 创建基本样式作为备用
-            // 这些是基本设置，确保窗口在没有样式文件时仍然可见
-            Background = Brushes.White;
-            BorderBrush = Brushes.DarkGray;
-            BorderThickness = new Thickness(1);
-
-            // 其他基本样式设置...
-        }
-        catch (Exception)
-        {
-            // 忽略应用备用样式时的异常
-        }
-    }
+    #endregion Commands
 }

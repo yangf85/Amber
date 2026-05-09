@@ -26,7 +26,6 @@
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="RootGrid" Property="IsMouseOver" Value="True">
                             <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Close}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Icon.Foreground.Invert}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="RootGrid" Property="Opacity" Value="0.5" />

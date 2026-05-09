@@ -20,6 +20,7 @@ public static class ThemeManager
     public static Theme CurrentTheme
     {
         get => _currentTheme;
+
         set
         {
             if (_currentTheme == value) return;
@@ -43,6 +44,8 @@ public static class ThemeManager
         _themes.Add(theme);
     }
 
+    public static event EventHandler ThemeChanged;
+
     static ThemeManager()
     {
         // 注册默认主题
@@ -51,6 +54,4 @@ public static class ThemeManager
         RegisterTheme(new DarkTheme());
         CurrentTheme = AvailableThemes[0];
     }
-
-    public static event EventHandler ThemeChanged;
 }

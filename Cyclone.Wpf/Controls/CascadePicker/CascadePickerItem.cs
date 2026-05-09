@@ -14,6 +14,16 @@ public class CascadePickerItem : HeaderedItemsControl
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(CascadePickerItem),
             new FrameworkPropertyMetadata(typeof(CascadePickerItem)));
+
+        // 注意：只读 DependencyProperty 的两个字段必须在 cctor 体里显式按顺序赋值，
+        // 不能依赖 inline initializer 的文本序——某些 WPF 初始化时机下会触发 NRE。
+        IsPressedPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsPressed),
+            typeof(bool),
+            typeof(CascadePickerItem),
+            new PropertyMetadata(false));
+
+        IsPressedProperty = IsPressedPropertyKey.DependencyProperty;
     }
 
     #region IsHighlighted
@@ -64,17 +74,12 @@ public class CascadePickerItem : HeaderedItemsControl
 
     #region IsPressed
 
-    private static readonly DependencyPropertyKey IsPressedPropertyKey =
-        DependencyProperty.RegisterReadOnly(
-            nameof(IsPressed),
-            typeof(bool),
-            typeof(CascadePickerItem),
-            new PropertyMetadata(false));
-
     /// <summary>
     /// 定义是否处于按下状态的只读依赖属性。
     /// </summary>
-    public static readonly DependencyProperty IsPressedProperty = IsPressedPropertyKey.DependencyProperty;
+    public static readonly DependencyProperty IsPressedProperty;
+
+    private static readonly DependencyPropertyKey IsPressedPropertyKey;
 
     /// <summary>
     /// 获取该项是否处于鼠标按下状态。
@@ -113,6 +118,18 @@ public class CascadePickerItem : HeaderedItemsControl
 
     /// <inheritdoc />
     protected override DependencyObject GetContainerForItemOverride() => new CascadePickerItem();
+
+    /// <inheritdoc />
+    protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+    {
+        base.PrepareContainerForItemOverride(element, item);
+
+        // 找到顶层 CascadePicker 走统一的容器装配（NodeMemberPath / ChildrenMemberPath / ItemTemplate 等）
+        if (element is CascadePickerItem container)
+        {
+            FindRootPicker()?.PrepareCascadeContainer(container, item);
+        }
+    }
 
     /// <inheritdoc />
     protected override void OnMouseEnter(MouseEventArgs e)
@@ -192,6 +209,23 @@ public class CascadePickerItem : HeaderedItemsControl
             }
             return false;
         }
+    }
+
+    /// <summary>
+    /// 沿 ItemsControl 链向上找到顶层 CascadePicker。
+    /// </summary>
+    private CascadePicker FindRootPicker()
+    {
+        DependencyObject current = this;
+        while (current != null)
+        {
+            if (current is CascadePicker root)
+            {
+                return root;
+            }
+            current = ItemsControl.ItemsControlFromItemContainer(current);
+        }
+        return null;
     }
 
     #endregion Private Methods
