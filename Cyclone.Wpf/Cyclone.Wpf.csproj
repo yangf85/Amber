@@ -69,7 +69,7 @@
     <None Remove="Resources\**" />
     <Page Remove="Resources\**" />
   </ItemGroup>
-
+	
   <ItemGroup>
     <Compile Remove="Controls\ColorPicker\ColorBrightSlider.cs" />
     <Compile Remove="Controls\ColorPicker\ColorHueSlider.cs" />
@@ -81,6 +81,14 @@
   <ItemGroup>
     <Page Remove="Styles\NormalLoading.xaml" />
   </ItemGroup>
+	
+
+  <ItemGroup>
+    <Folder Include="Themes\ThemeManagement\" />
+  </ItemGroup>
+	
+	
+	
 
 
 	<!-- 生成前自动删除旧包 -->

@@ -3,9 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls"
     xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Themes/BasicTheme.xaml" />
-    </ResourceDictionary.MergedDictionaries>
 
     <!--  ================================================================  -->
     <!--  共享：6 种 Level 图标 Geometry（Material Design 24x24 viewBox）  -->
@@ -368,5 +365,4 @@
     </Style>
 
     <Style BasedOn="{StaticResource AlertWindow.Style.Basic}" TargetType="{x:Type ctl:AlertWindow}" />
-
 </ResourceDictionary>

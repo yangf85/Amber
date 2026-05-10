@@ -33,7 +33,7 @@ public partial class MainViewModel : ObservableObject
             "NumberBox" => new NumberBoxView(),
             "Input" => new InputView(),
             "Menu" => new MenuView(),
-            "TreeView" => new TreeControlView(),
+            "TreeView" => new TreeViewView(),
             "CascadePicker" => new CascadePickerView(),
             "LoadingBox" => new LoadingBoxView(),
             "DataGrid" => new DataGridView(),
@@ -72,6 +72,7 @@ public partial class MainViewModel : ObservableObject
             "MultiComboBox" => new MultiComboBoxView(),
             "PopupBox" => new PopupBoxView(),
             "HighlightTextBlock" => new HighlightTextBlockView(),
+            "HyperlinkButton" => new HyperlinkButtonView(),
 
             "Test" => new TestView(),
             _ => null,
@@ -105,6 +106,11 @@ public partial class SideMenuViewModel : ObservableObject
                  new SideMenuItemViewModel
                 {
                     Header="SwitchButton",
+                    Icon= "\xe605",
+                },
+                 new SideMenuItemViewModel
+                {
+                    Header="HyperlinkButton",
                     Icon= "\xe605",
                 },
                    new SideMenuItemViewModel

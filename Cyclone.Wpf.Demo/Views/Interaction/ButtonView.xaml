@@ -48,13 +48,5 @@
                 <CheckBox Content="Four" />
             </cy:SpacingUniformGrid>
         </HeaderedContentControl>
-        <HeaderedContentControl Header="HyperlinkButton">
-            <cy:SpacingUniformGrid HorizontalSpacing="5" Rows="1">
-                <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />
-                <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />
-                <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />
-                <cy:HyperlinkButton DisplayText="百度" NavigateUri="http://www.baidu.com" />
-            </cy:SpacingUniformGrid>
-        </HeaderedContentControl>
     </cy:SpacingStackPanel>
 </UserControl>

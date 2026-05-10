@@ -28,20 +28,17 @@
             Height="{Binding Path=CaptionHeight, RelativeSource={RelativeSource AncestorType=cy:AdvancedWindow}}"
             HorizontalAlignment="Right"
             BorderThickness="0"
-            Label="SwitchTheme"
+            Label="切换主题"
             WindowChrome.IsHitTestVisibleInChrome="True">
+            <!--  CommandParameter 显式 hardcode 主题 Name —— 跟 Content 显示文本解耦  -->
             <cy:SplitButtonItem
                 Command="{Binding SwitchThemeCommand}"
-                CommandParameter="{Binding Path=Content, RelativeSource={RelativeSource Mode=Self}}"
-                Content="Basic" />
+                CommandParameter="BasicTheme"
+                Content="基础（亮色）" />
             <cy:SplitButtonItem
                 Command="{Binding SwitchThemeCommand}"
-                CommandParameter="{Binding Path=Content, RelativeSource={RelativeSource Mode=Self}}"
-                Content="Light" />
-            <cy:SplitButtonItem
-                Command="{Binding SwitchThemeCommand}"
-                CommandParameter="{Binding Path=Content, RelativeSource={RelativeSource Mode=Self}}"
-                Content="Dark" />
+                CommandParameter="DarkTheme"
+                Content="暗色" />
         </cy:SplitButton>
     </cy:AdvancedWindow.FunctionalZone>
     <Grid>
