@@ -1,39 +1,102 @@
-﻿<ResourceDictionary
+﻿<!--
+    ============================================================================
+    WinUI 3 风格 ListBox 样式 (v3 — 无圆角 + 整行高亮 + 左竖条指示器)
+
+    破坏性变更说明（vs 旧版本）：
+        - 视觉风格全面改版，与 TreeView 视觉对齐：
+            · 左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
+            · Hover 整行浅底（Background.Hover），文字色保持不变（不再反色）
+            · 选中整行浅底 + 左竖条强调，文字色保持默认（不再反色）
+            · 失焦选中：指示器弱化为 Highlighted, 行底透明
+        - 无圆角（与项目规约对齐）
+        - ListBoxItem 内部行结构：
+            · 列 ① 选中竖条指示器（6px）
+            · 列 ② SharedSize 全选 CheckBox 列（Auto）
+            · 列 ③ 内容区（*）
+            · RootBorder 横向 Stretch — hover/选中色横向占满整行
+        - 移除 Foreground.Hover / Foreground.Selected 反色逻辑
+
+    保留功能：
+        - hp:ListBoxHelper.IsSelectAllEnabled — 启用全选 CheckBox 列
+        - hp:ListBoxHelper.IsSelectedAll — 全选/取消全选状态绑定
+        - SharedSizeGroup="ListBoxItem" — CheckBox 列对齐
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
     xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  ListBoxItem 样式 (WinUI 3 风格 · 整行高亮 · 无圆角)             -->
+    <!--  ============================================================  -->
     <Style x:Key="ListBoxItem.Style.Default" TargetType="ListBoxItem">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
+                    <!--
+                        RootBorder 横向 Stretch——hover/选中背景占满整行
+                        高度由 Height (TemplateBinding) 控制
+                    -->
                     <Border
                         x:Name="RootBorder"
                         Height="{TemplateBinding Height}"
+                        HorizontalAlignment="Stretch"
                         Background="{TemplateBinding Background}"
-                        SnapsToDevicePixels="True">
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <!--  ① 选中竖条指示器  -->
+                                <ColumnDefinition Width="6" />
+                                <!--  ② 全选 CheckBox 列（SharedSize 跨多个 ListBoxItem 对齐）  -->
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ListBoxItem" />
+                                <!--  ③ 内容区  -->
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+
+                            <!--  选中指示器  -->
+                            <Border
+                                x:Name="SelectionBar"
+                                Grid.Column="0"
+                                Width="3"
+                                Height="16"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Selected}"
+                                Opacity="0">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="SelectionBarScale" ScaleY="0.4" />
+                                </Border.RenderTransform>
+                                <Border.RenderTransformOrigin>
+                                    <Point X="0.5" Y="0.5" />
+                                </Border.RenderTransformOrigin>
+                            </Border>
+
+                            <!--  全选 CheckBox（仅 IsSelectAllEnabled=True 时显示）  -->
                             <CheckBox
                                 x:Name="SelectedCheckBox"
-                                Grid.Column="0"
+                                Grid.Column="1"
+                                Margin="4,0,4,0"
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
                                 IsChecked="{Binding Path=IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}"
                                 Visibility="{Binding Path=(hp:ListBoxHelper.IsSelectAllEnabled), Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
+
+                            <!--  内容  -->
                             <ContentPresenter
-                                Grid.Column="1"
+                                Grid.Column="2"
+                                Margin="4,0,8,0"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                 Content="{TemplateBinding Content}"
@@ -41,14 +104,77 @@
                                 ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
                         </Grid>
                     </Border>
+
                     <ControlTemplate.Triggers>
+
+                        <!--  Hover 态（未选中）——整行浅底  -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsSelected" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </MultiTrigger>
+
+                        <!--  选中态（active）——整行浅底 + 左竖条淡入  -->
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource Background.Selected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Selected}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase Amplitude="0.3" EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.10" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.4"
+                                            Duration="0:0:0.10" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Hover}" />
+
+                        <!--  选中 + 失焦（Selector.IsSelectionActive=False）：指示器弱化 + 行底透明  -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="True" />
+                                <Condition Property="Selector.IsSelectionActive" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="SelectionBar" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                        </MultiTrigger>
+
+                        <!--  禁用态  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -58,6 +184,9 @@
 
     <Style BasedOn="{StaticResource ListBoxItem.Style.Default}" TargetType="ListBoxItem" />
 
+    <!--  ============================================================  -->
+    <!--  ListBox 样式                                                   -->
+    <!--  ============================================================  -->
     <Style
         x:Key="ListBox.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
@@ -66,32 +195,44 @@
         <Setter Property="ItemContainerStyle" Value="{StaticResource ListBoxItem.Style.Default}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="Padding" Value="0" />
+        <!--  全选 CheckBox 列对齐 — 必须开启 SharedSize 否则 SharedSizeGroup 不生效  -->
+        <Setter Property="Grid.IsSharedSizeScope" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBox">
                     <Border
                         x:Name="Root"
+                        Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <CheckBox
-                                    x:Name="SelectAllCheckBox"
-                                    Grid.Row="0"
-                                    HorizontalAlignment="Left"
-                                    Content="选择全部"
-                                    IsChecked="{Binding Path=(hp:ListBoxHelper.IsSelectedAll), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}"
-                                    Visibility="{Binding Path=(hp:ListBoxHelper.IsSelectAllEnabled), Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
-                                <ItemsPresenter
-                                    Grid.Row="1"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                            </Grid>
-                        </ScrollViewer>
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <!--  全选 CheckBox（仅 IsSelectAllEnabled 时显示）  -->
+                                <RowDefinition Height="Auto" />
+                                <!--  列表内容  -->
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <CheckBox
+                                x:Name="SelectAllCheckBox"
+                                Grid.Row="0"
+                                Margin="8,6"
+                                HorizontalAlignment="Left"
+                                Content="选择全部"
+                                IsChecked="{Binding Path=(hp:ListBoxHelper.IsSelectedAll), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}"
+                                Visibility="{Binding Path=(hp:ListBoxHelper.IsSelectAllEnabled), Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
+
+                            <ScrollViewer
+                                Grid.Row="1"
+                                Padding="{TemplateBinding Padding}"
+                                Focusable="False"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </ScrollViewer>
+                        </Grid>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

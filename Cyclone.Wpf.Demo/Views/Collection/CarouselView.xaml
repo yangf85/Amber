@@ -36,6 +36,13 @@
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
 
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
         <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="{DynamicResource Background.Header}" />
             <Setter Property="BorderThickness" Value="0" />
@@ -76,31 +83,33 @@
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
 
-        <!--  Carousel item 渲染模板（图片 + 叠加文字）  -->
-        <DataTemplate x:Key="ImageItemTemplate" DataType="{x:Type local:ImageViewModel}">
+        <!--  Carousel Item 模板——图片 + 渐变遮罩 + 标题副标题  -->
+        <DataTemplate x:Key="CarouselItemTemplate" DataType="{x:Type local:ImageViewModel}">
             <Grid>
                 <Image Source="{Binding ImagePath}" Stretch="UniformToFill" />
-                <Border
-                    Padding="16,12"
-                    VerticalAlignment="Bottom"
-                    Background="#88000000">
-                    <StackPanel>
-                        <TextBlock
-                            FontSize="18"
-                            FontWeight="Bold"
-                            Foreground="White"
-                            Text="{Binding MainTitle}" />
-                        <TextBlock
-                            Margin="0,4,0,0"
-                            FontSize="12"
-                            Foreground="#DDFFFFFF"
-                            Text="{Binding SubTitle}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
+                <Border Height="100" VerticalAlignment="Bottom">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="#00000000" />
+                            <GradientStop Offset="1" Color="#CC000000" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                 </Border>
+                <StackPanel Margin="24,0,24,20" VerticalAlignment="Bottom">
+                    <TextBlock
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Foreground="White"
+                        Text="{Binding MainTitle}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="#E6FFFFFF"
+                        Text="{Binding SubTitle}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
             </Grid>
         </DataTemplate>
-
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
@@ -119,13 +128,18 @@
                         Height="56"
                         Background="{DynamicResource Background.Info}">
                         <Grid>
+                            <!--  幻灯片图标：方框 + 内部三条横线  -->
                             <Path
                                 Width="32"
                                 Height="32"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Data="M3,7 L7,7 L7,17 L3,17 Z M9,5 L15,5 L15,19 L9,19 Z M17,7 L21,7 L21,17 L17,17 Z"
-                                Fill="White" />
+                                Data="M3,5 L21,5 L21,17 L3,17 Z M7,9 L17,9 M7,13 L13,13"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeLineJoin="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
                         </Grid>
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -151,7 +165,7 @@
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="基于 ListBox 的图片/卡片轮播控件——继承 Selection 系统，支持自动播放、循环跳转、Slide 切换动画、Wrap 动画、自定义功能栏与导航栏。" />
+                            Text="轮播图——继承自 ListBox，平滑 slide 动画 + 自动播放 + 左右导航按钮 + 指示器。支持循环播放（IsRepeatPlayback）和 wrap 倒带动画（IsWrapAnimated）。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -170,7 +184,7 @@
                     <!--  ① 基础用法  -->
                     <cy:Card Margin="0,0,0,20">
                         <cy:Card.Header>
-                            <cy:CardHeader Subtitle="ItemsSource / ItemTemplate" Title="基础用法">
+                            <cy:CardHeader Title="基础用法" Subtitle="ItemsSource + 左右导航 + 指示器">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
                                         <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
@@ -181,29 +195,22 @@
 
                         <StackPanel>
                             <TextBlock
-                                Margin="0,0,0,12"
+                                Margin="0,0,0,16"
                                 FontSize="13"
                                 Foreground="{DynamicResource Foreground.Caption}"
-                                Text="最简轮播——绑定 ItemsSource，提供 ItemTemplate 渲染每一项。默认带左右导航按钮和底部圆点指示器，循环播放（IsRepeatPlayback 默认开）。"
-                                TextWrapping="Wrap" />
+                                Text="点击左右箭头切换，或点底部圆点指示器跳转。相邻切换播放 200ms slide 动画。" />
 
                             <cy:Carousel
-                                Height="300"
-                                ItemTemplate="{StaticResource ImageItemTemplate}"
+                                Height="320"
+                                ItemTemplate="{StaticResource CarouselItemTemplate}"
                                 ItemsSource="{Binding BasicSample}" />
-
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="点击两侧箭头切换，或点击底部圆点跳转。" />
                         </StackPanel>
                     </cy:Card>
 
                     <!--  ② 自动播放  -->
-                    <cy:Card>
+                    <cy:Card Margin="0,0,0,20">
                         <cy:Card.Header>
-                            <cy:CardHeader Subtitle="AutoPlay / AutoPlayInterval" Title="自动播放">
+                            <cy:CardHeader Title="自动播放" Subtitle="AutoPlay + AutoPlayInterval">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
                                         <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
@@ -217,35 +224,27 @@
                                 Margin="0,0,0,12"
                                 FontSize="13"
                                 Foreground="{DynamicResource Foreground.Caption}"
-                                Text="设 AutoPlay=True 启动定时器，AutoPlayInterval 控制切换间隔（默认 3 秒）。Items 数 ≤ 1 时定时器自动停止。"
-                                TextWrapping="Wrap" />
+                                Text="AutoPlay=true + AutoPlayInterval=2s——每 2 秒自动滑到下一张。Items.Count ≤ 1 时 timer 自动停止，Unloaded 时也会停。" />
 
                             <cy:Carousel
-                                Height="300"
-                                AutoPlay="{Binding IsChecked, ElementName=AutoPlayToggle, Mode=OneWay}"
+                                Height="280"
+                                AutoPlay="True"
                                 AutoPlayInterval="0:0:2"
-                                ItemTemplate="{StaticResource ImageItemTemplate}"
+                                ItemTemplate="{StaticResource CarouselItemTemplate}"
                                 ItemsSource="{Binding AutoPlaySample}" />
 
-                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
-                                <ToggleButton
-                                    x:Name="AutoPlayToggle"
-                                    Padding="14,4"
-                                    Content="▶ 自动播放（间隔 2s）"
-                                    IsChecked="False" />
-                            </StackPanel>
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="提示：手动点导航按钮或指示器不会暂停 timer——如需(hover 暂停)行为请在外部 trigger 控制 AutoPlay 属性。" />
                         </StackPanel>
                     </cy:Card>
 
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ③ 循环 + Wrap 动画  -->
-                    <cy:Card Margin="0,0,0,20">
+                    <!--  ③ Wrap 倒带动画  -->
+                    <cy:Card>
                         <cy:Card.Header>
-                            <cy:CardHeader Subtitle="IsRepeatPlayback / IsWrapAnimated" Title="循环播放与 Wrap 动画">
+                            <cy:CardHeader Title="Wrap 倒带动画" Subtitle="IsRepeatPlayback + IsWrapAnimated">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
                                         <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
@@ -259,45 +258,64 @@
                                 Margin="0,0,0,12"
                                 FontSize="13"
                                 Foreground="{DynamicResource Foreground.Caption}"
-                                Text="IsRepeatPlayback：到末尾后跳回开头。IsWrapAnimated：循环 wrap 跳转是否播放动画——开启时整个内容 slide 滚回起点（倒带视觉），关闭时直接定位（默认）。点 Next 到第 4 张再点一次，对比两种行为。"
-                                TextWrapping="Wrap" />
+                                Text="IsWrapAnimated=true——末项→首项（或反向）时播放跨多项的 slide，视觉上是(倒带)效果。默认 false 时硬切定位。仅当 IsRepeatPlayback=true 时生效。" />
 
                             <cy:Carousel
-                                Height="300"
-                                AutoPlay="{Binding IsChecked, ElementName=AutoPlayToggle3, Mode=OneWay}"
-                                AutoPlayInterval="0:0:2"
-                                IsRepeatPlayback="{Binding IsChecked, ElementName=RepeatToggle, Mode=OneWay}"
-                                IsWrapAnimated="{Binding IsChecked, ElementName=WrapAnimToggle, Mode=OneWay}"
-                                ItemTemplate="{StaticResource ImageItemTemplate}"
+                                Height="280"
+                                AnimationDuration="0:0:0.6"
+                                IsRepeatPlayback="True"
+                                IsWrapAnimated="True"
+                                ItemTemplate="{StaticResource CarouselItemTemplate}"
                                 ItemsSource="{Binding WrapSample}" />
 
-                            <WrapPanel Margin="0,12,0,0">
-                                <ToggleButton
-                                    x:Name="AutoPlayToggle3"
-                                    Margin="0,0,8,4"
-                                    Padding="12,4"
-                                    Content="▶ 自动播放"
-                                    IsChecked="False" />
-                                <ToggleButton
-                                    x:Name="RepeatToggle"
-                                    Margin="0,0,8,4"
-                                    Padding="12,4"
-                                    Content="循环播放"
-                                    IsChecked="True" />
-                                <ToggleButton
-                                    x:Name="WrapAnimToggle"
-                                    Margin="0,0,0,4"
-                                    Padding="12,4"
-                                    Content="Wrap 动画"
-                                    IsChecked="False" />
-                            </WrapPanel>
+                            <Border
+                                Margin="0,16,0,0"
+                                Padding="12,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="12"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="动画规则速查" />
+                                    <UniformGrid Margin="0,8,0,0" Columns="1">
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="相邻切换" />
+                                            <Run Text="——播放标准 slide 动画（一个 item 宽度）" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="跨多项跳转（点指示器）" />
+                                            <Run Text="——直接定位，无动画" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="Wrap（首↔尾）" />
+                                            <Run Text="——IsWrapAnimated=true 时倒带动画，否则硬切" />
+                                        </TextBlock>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </cy:Card>
+                </StackPanel>
 
-                    <!--  ④ 自定义功能栏 / 导航栏  -->
-                    <cy:Card>
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ MVVM 双向绑定  -->
+                    <cy:Card Margin="0,0,0,20">
                         <cy:Card.Header>
-                            <cy:CardHeader Subtitle="FunctionBar / NavigationBar" Title="自定义功能栏与导航栏">
+                            <cy:CardHeader Title="MVVM 双向绑定" Subtitle="SelectedIndex / SelectedItem TwoWay">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
                                         <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
@@ -307,99 +325,201 @@
                         </cy:Card.Header>
 
                         <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="FunctionBar 渲染在右上角（适合分享/全屏等操作按钮）。NavigationBar 渲染在底部，可放计数器、提示文字或自定义指示。"
-                                TextWrapping="Wrap" />
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="外部按钮控制 + SelectedIndex 实时反映" />
 
                             <cy:Carousel
-                                x:Name="ShowcaseCarousel"
-                                Height="300"
-                                AutoPlay="{Binding IsChecked, ElementName=AutoPlayToggle4, Mode=OneWay}"
-                                AutoPlayInterval="0:0:2"
-                                ItemTemplate="{StaticResource ImageItemTemplate}"
-                                ItemsSource="{Binding ShowcaseSample}">
-                                <cy:Carousel.FunctionBar>
-                                    <Border
-                                        Margin="0,16,16,0"
-                                        Padding="12,6"
-                                        Background="#88000000"
-                                        CornerRadius="14">
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            FontSize="13"
-                                            Foreground="White">
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="{}{0} / {1}">
-                                                    <Binding ElementName="ShowcaseCarousel" Path="SelectedIndex" />
-                                                    <Binding ElementName="ShowcaseCarousel" Path="Items.Count" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </Border>
-                                </cy:Carousel.FunctionBar>
-                                <cy:Carousel.NavigationBar>
-                                    <Border
-                                        Margin="0,0,0,50"
-                                        Padding="14,6"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Bottom"
-                                        Background="#88000000"
-                                        CornerRadius="14">
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="White"
-                                            Text="← 左右键 / 点击两侧按钮切换 →" />
-                                    </Border>
-                                </cy:Carousel.NavigationBar>
-                            </cy:Carousel>
+                                x:Name="MvvmCarousel"
+                                Height="240"
+                                ItemTemplate="{StaticResource CarouselItemTemplate}"
+                                ItemsSource="{Binding ShowcaseSample}" />
 
-                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
-                                <ToggleButton
-                                    x:Name="AutoPlayToggle4"
-                                    Padding="14,4"
-                                    Content="▶ 自动播放"
-                                    IsChecked="False" />
-                                <TextBlock
-                                    Margin="14,0,0,0"
-                                    VerticalAlignment="Center"
-                                    FontSize="11"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="开启后右上角计数器实时更新" />
-                            </StackPanel>
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <Button
+                                        Padding="14,6"
+                                        Command="{x:Static cy:Carousel.PrevCommand}"
+                                        CommandTarget="{Binding ElementName=MvvmCarousel}"
+                                        Content="◀  Prev" />
+                                    <Button
+                                        Margin="8,0,0,0"
+                                        Padding="14,6"
+                                        Command="{x:Static cy:Carousel.NextCommand}"
+                                        CommandTarget="{Binding ElementName=MvvmCarousel}"
+                                        Content="Next  ▶" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SelectedIndex:" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding SelectedIndex, ElementName=MvvmCarousel, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="MainTitle:" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding SelectedItem.MainTitle, ElementName=MvvmCarousel, Mode=OneWay, FallbackValue=-}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="外部 Button 通过 Carousel.PrevCommand / NextCommand 静态 RoutedCommand 控制——CommandTarget 指向具体 Carousel 实例。" />
                         </StackPanel>
                     </cy:Card>
 
+                    <!--  ⑤ 常见使用场景  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <UniformGrid Columns="2" Rows="2">
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,3 L21,3 L21,21 L3,21 Z M3,16 L9,10 L13,14 L17,9 L21,13"
+                                        Stroke="{DynamicResource Foreground.Warning}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="首页 Banner" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="AutoPlay=true、3~5s 间隔、IsRepeatPlayback=true。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M5,3 L19,3 L19,21 L5,21 Z M9,7 L15,7 M9,11 L15,11 M9,15 L13,15"
+                                        Stroke="{DynamicResource Foreground.Link}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="产品介绍" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="AutoPlay=false——用户主导节奏，搭配指示器跳转。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M2,7 L22,7 L20,17 L4,17 Z M9,11 L15,11"
+                                        Stroke="{DynamicResource Foreground.Success}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="图片画廊" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="IsWrapAnimated=true 倒带动画，AnimationDuration 调慢观感更佳。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,4 L20,4 L20,20 L4,20 Z M4,4 L20,20 M20,4 L4,20"
+                                        Stroke="#8B5CF6"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="新手引导" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="IsRepeatPlayback=false——走完最后一页 Next 自动禁用。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+                        </UniformGrid>
+                    </cy:Card>
                 </StackPanel>
             </Grid>
 
-            <!--  ============ 底部 ============  -->
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
             <Grid Grid.Row="2" Margin="0,20,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--  ⑤ 依赖属性表  -->
+                <!--  ⑥ 主要属性  -->
                 <cy:Card Grid.Row="0" Margin="0,0,0,20">
                     <cy:Card.Header>
-                        <cy:CardHeader Title="依赖属性">
+                        <cy:CardHeader Title="Carousel 主要属性">
                             <cy:CardHeader.Icon>
                                 <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
                                 </Border>
                             </cy:CardHeader.Icon>
                         </cy:CardHeader>
                     </cy:Card.Header>
 
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="0,1,0,0">
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="240" />
-                                <ColumnDefinition Width="160" />
-                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -412,20 +532,21 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <!--  表头  -->
                             <Border
                                 Grid.Row="0"
-                                Grid.ColumnSpan="4"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="0,0,0,1" />
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+
                             <TextBlock
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableHeaderStyle}"
-                                Text="名称" />
+                                Text="属性 / 命令" />
                             <TextBlock
                                 Grid.Row="0"
                                 Grid.Column="1"
@@ -435,64 +556,52 @@
                                 Grid.Row="0"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableHeaderStyle}"
-                                Text="默认" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableHeaderStyle}"
                                 Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
 
-                            <!--  IsEnableAnimation  -->
                             <TextBlock
                                 Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemsSource" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IEnumerable" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="数据源（继承自 ItemsControl）。多个 Carousel 共享同一集合时会通过 default ICollectionView 同步选中——demo 里每个 sample 都用独立 ObservableCollection 实例。" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SelectedIndex / SelectedItem" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="int / object (TwoWay)" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="当前显示项的索引 / 对象（继承自 Selector）。改变时触发 slide 动画或直接定位。" />
+
+                            <TextBlock
+                                Grid.Row="3"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableNameStyle}"
                                 Text="IsEnableAnimation" />
                             <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="bool" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="true" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="是否启用切换动画。关闭时所有切换都直接定位。" />
-
-                            <!--  IsRepeatPlayback  -->
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="IsRepeatPlayback" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="bool" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="true" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="是否循环播放（末尾→开头 / 开头→末尾）。" />
-
-                            <!--  IsWrapAnimated  -->
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="IsWrapAnimated" />
-                            <TextBlock
                                 Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource PropTableTypeStyle}"
@@ -501,14 +610,8 @@
                                 Grid.Row="3"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="false" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="循环 wrap 跳转是否播放动画。需要 IsRepeatPlayback + IsEnableAnimation 都为 true 才生效。" />
+                                Text="是否启用切换动画。默认 true。设为 false 时所有切换都是硬切。" />
 
-                            <!--  AnimationDuration  -->
                             <TextBlock
                                 Grid.Row="4"
                                 Grid.Column="0"
@@ -523,19 +626,13 @@
                                 Grid.Row="4"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="200ms" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="切换动画时长。" />
+                                Text="切换动画时长。默认 200ms。SineEase EaseInOut。" />
 
-                            <!--  AutoPlay  -->
                             <TextBlock
                                 Grid.Row="5"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableNameStyle}"
-                                Text="AutoPlay" />
+                                Text="IsRepeatPlayback" />
                             <TextBlock
                                 Grid.Row="5"
                                 Grid.Column="1"
@@ -545,83 +642,108 @@
                                 Grid.Row="5"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="false" />
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="是否自动轮播。" />
+                                Text="是否循环播放——到末尾后跳回开头。默认 true。设为 false 时 Prev/Next 命令在两端会自动 Disable。" />
 
-                            <!--  AutoPlayInterval  -->
                             <TextBlock
                                 Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="IsWrapAnimated" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="循环 wrap 跳转（首↔尾）是否播放动画。默认 false 直接定位。true 时播放跨多项的 slide 倒带动画。仅 IsRepeatPlayback + IsEnableAnimation 都 true 时生效。" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="AutoPlay" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="是否自动播放。默认 false。Items.Count ≤ 1 时 timer 自动停止，Unloaded 时也会停。" />
+
+                            <TextBlock
+                                Grid.Row="8"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableNameStyle}"
                                 Text="AutoPlayInterval" />
                             <TextBlock
-                                Grid.Row="6"
+                                Grid.Row="8"
                                 Grid.Column="1"
                                 Style="{StaticResource PropTableTypeStyle}"
                                 Text="TimeSpan" />
                             <TextBlock
-                                Grid.Row="6"
+                                Grid.Row="8"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="3s" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="自动轮播间隔。Items.Count ≤ 1 时定时器自动停。" />
+                                Text="自动播放间隔。默认 3s。运行时改变会重启 timer 让新值立即生效。" />
 
-                            <!--  FunctionBar  -->
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="9"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableNameStyle}"
                                 Text="FunctionBar" />
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="9"
                                 Grid.Column="1"
                                 Style="{StaticResource PropTableTypeStyle}"
                                 Text="object" />
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="9"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="null" />
-                            <TextBlock
-                                Grid.Row="7"
-                                Grid.Column="3"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="右上角自定义内容（任意 UIElement）。常用作分享、全屏等操作按钮。" />
+                                Text="模板上 PART_FunctionBar 区域的内容，用于注入操作按钮（收藏 / 分享等）。" />
 
-                            <!--  NavigationBar  -->
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="10"
                                 Grid.Column="0"
                                 Style="{StaticResource PropTableNameStyle}"
                                 Text="NavigationBar" />
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="10"
                                 Grid.Column="1"
                                 Style="{StaticResource PropTableTypeStyle}"
                                 Text="object" />
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="10"
                                 Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="null" />
+                                Text="模板上 PART_NavigationBar 区域的内容，可替换默认指示器。变化时对称 Remove/Add 到 logical tree。" />
+
                             <TextBlock
-                                Grid.Row="8"
-                                Grid.Column="3"
+                                Grid.Row="11"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="PrevCommand / NextCommand" />
+                            <TextBlock
+                                Grid.Row="11"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="static RoutedCommand" />
+                            <TextBlock
+                                Grid.Row="11"
+                                Grid.Column="2"
                                 Style="{StaticResource PropTableCellStyle}"
-                                Text="底部自定义内容（任意 UIElement）。需用 Margin 跟内置指示器错开。" />
+                                Text="上一项 / 下一项命令。CanExecute 自动按 IsRepeatPlayback 和 SelectedIndex 计算。外部按钮通过 CommandTarget 绑定。" />
                         </Grid>
                     </Border>
                 </cy:Card>
 
-                <!--  ⑥ XAML 示例 + ⑦ 设计要点  -->
+                <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -634,43 +756,43 @@
                             <cy:CardHeader Title="XAML 示例">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
                                     </Border>
                                 </cy:CardHeader.Icon>
                             </cy:CardHeader>
                         </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><![CDATA[<!-- 基础 -->
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 基础 -->
 <cy:Carousel
+    Height="320"
     ItemsSource="{Binding Images}"
-    ItemTemplate="{StaticResource ImageItemTemplate}" />
+    ItemTemplate="{StaticResource CarouselItemTemplate}" />
 
 <!-- 自动播放 -->
 <cy:Carousel
     AutoPlay="True"
     AutoPlayInterval="0:0:3"
-    ItemsSource="{Binding Images}" />
+    ItemsSource="{Binding Images}"
+    ItemTemplate="{StaticResource CarouselItemTemplate}" />
 
-<!-- 循环 + Wrap 动画 -->
+<!-- Wrap 倒带动画 -->
 <cy:Carousel
     IsRepeatPlayback="True"
     IsWrapAnimated="True"
-    ItemsSource="{Binding Images}" />
+    AnimationDuration="0:0:0.6"
+    ItemsSource="{Binding Images}"
+    ItemTemplate="{StaticResource CarouselItemTemplate}" />
 
-<!-- FunctionBar + NavigationBar -->
-<cy:Carousel x:Name="MyCarousel" ItemsSource="{Binding Images}">
-    <cy:Carousel.FunctionBar>
-        <Border Background="#88000000" CornerRadius="14" Padding="12,6">
-            <TextBlock Foreground="White">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{0} / {1}">
-                        <Binding ElementName="MyCarousel" Path="SelectedIndex" />
-                        <Binding ElementName="MyCarousel" Path="Items.Count" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-        </Border>
-    </cy:Carousel.FunctionBar>
-</cy:Carousel>]]></TextBox>
+<!-- 外部按钮 -->
+<cy:Carousel x:Name="MyCarousel"
+             ItemsSource="{Binding Images}" />
+<Button Content="Prev"
+        Command="{x:Static cy:Carousel.PrevCommand}"
+        CommandTarget="{Binding ElementName=MyCarousel}" />
+<Button Content="Next"
+        Command="{x:Static cy:Carousel.NextCommand}"
+        CommandTarget="{Binding ElementName=MyCarousel}" />]]>
+                        </TextBox>
                     </cy:Card>
 
                     <cy:Card Grid.Column="2">
@@ -678,7 +800,7 @@
                             <cy:CardHeader Title="设计要点">
                                 <cy:CardHeader.Icon>
                                     <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
                                     </Border>
                                 </cy:CardHeader.Icon>
                             </cy:CardHeader>
@@ -691,12 +813,12 @@
                                     FontSize="13"
                                     FontWeight="Medium"
                                     Foreground="{DynamicResource Foreground.Link}"
-                                    Text="继承 ListBox" />
+                                    Text="独立集合实例" />
                                 <TextBlock
                                     Margin="0,4,0,0"
                                     FontSize="12"
                                     Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="SelectedIndex / SelectedItem / ItemsSource / SelectionChanged 全部沿用 WPF 原生 API"
+                                    Text="共享集合会让多个 Carousel 通过 default CollectionView CurrentItem 同步选中——每个用独立实例。"
                                     TextWrapping="Wrap" />
                             </StackPanel>
 
@@ -706,12 +828,12 @@
                                     FontSize="13"
                                     FontWeight="Medium"
                                     Foreground="{DynamicResource Foreground.Link}"
-                                    Text="ScrollViewer 动画" />
+                                    Text="动画隔离" />
                                 <TextBlock
                                     Margin="0,4,0,0"
                                     FontSize="12"
                                     Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="DoubleAnimation 操作 ScrollViewer.HorizontalOffset。CanContentScroll=False 关闭逻辑滚动"
+                                    Text="相邻才有 slide 动画。跨多项跳转直接定位。Wrap 由 IsWrapAnimated 决定走哪条路径。"
                                     TextWrapping="Wrap" />
                             </StackPanel>
 
@@ -721,27 +843,12 @@
                                     FontSize="13"
                                     FontWeight="Medium"
                                     Foreground="{DynamicResource Foreground.Link}"
-                                    Text="相邻 vs Wrap" />
+                                    Text="冒泡拦截" />
                                 <TextBlock
                                     Margin="0,4,0,0"
                                     FontSize="12"
                                     Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="相邻切换始终有动画；wrap 默认无动画，IsWrapAnimated=true 才启用"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="Items 监听" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="集合变化时 AutoPlay 状态、命令 CanExecute、指示器自动刷新"
+                                    Text="内部 RequestBringIntoView 不冒泡——避免外层 ScrollViewer 自动跳到 Carousel 位置。"
                                     TextWrapping="Wrap" />
                             </StackPanel>
 
@@ -751,20 +858,18 @@
                                     FontSize="13"
                                     FontWeight="Medium"
                                     Foreground="{DynamicResource Foreground.Link}"
-                                    Text="BringIntoView 屏蔽" />
+                                    Text="资源回收" />
                                 <TextBlock
                                     Margin="0,4,0,0"
                                     FontSize="12"
                                     Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="拦截 RequestBringIntoView 路由事件，避免外层 ScrollViewer 跟随跳跃"
+                                    Text="Unloaded 时停止 timer + storyboard，解绑所有事件——避免 detached visual 上动画继续 tick。"
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>
                     </cy:Card>
                 </Grid>
-
             </Grid>
-
         </Grid>
     </ScrollViewer>
 </UserControl>

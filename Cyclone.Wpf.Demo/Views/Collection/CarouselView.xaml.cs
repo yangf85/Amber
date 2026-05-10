@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 
@@ -9,6 +9,7 @@ public partial class CarouselView : UserControl
     public CarouselView()
     {
         InitializeComponent();
+        DataContext = new CarouselViewModel();
     }
 }
 
@@ -35,7 +36,7 @@ public partial class CarouselViewModel : ObservableValidator
             new ImageViewModel
             {
                 MainTitle = "Reflections of Tranquility",
-                SubTitle = "Nature’s Mirror Reflecting the Beauty of the Surroundings",
+                SubTitle = "Nature's Mirror Reflecting the Beauty of the Surroundings",
                 ImagePath = "/Assets/carousel2.jpeg",
             },
             new ImageViewModel

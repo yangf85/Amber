@@ -1,61 +1,113 @@
 ﻿<!--
     ============================================================================
-    破坏性变更说明（vs 旧版本）：
-        - 子节点 ItemsPresenter 增加 Margin="15,0,0,0"——深嵌套时层级清晰，
-          但子节点视觉位置左移；如果有外部代码依赖原始无缩进布局，需要适配
-        - PART_Header → PartHeader（项目规约 PartXxx PascalCase）；
-          自定义模板时 x:Name 用新值
-        - IsSelected=True 现在同时改 Foreground——确保对比度
-        - VirtualizingPanel.IsVirtualizing trigger 已删除（与 CanContentScroll=False 矛盾）
+    WinUI 3 风格 TreeView 样式 (v3 — 无圆角 + 整行高亮)
+
+    破坏性变更说明（vs v2）：
+    - 移除所有 CornerRadius（项目"无圆角风格"规约）
+    - 选中 / hover 背景横向占满整行：
+    · 关键改动：ItemsPresenter 不再用 Margin 缩进
+    · 改为每个 TreeViewItem 在自己的内容容器上用 Level × 24px 设置左 Margin
+    · RootBorder 横向 Stretch，从 TreeView 最左渲染到最右
+    · hover/选中色覆盖整行，不再被父项 Margin 切掉
+    - 缩进风格：Chevron 跟随内容一起缩进（VS Code / Notion 同款）
+    而不是 Chevron 固定列、只缩 Header——后者深嵌套时 Chevron 列被挤窄
+    - 新增依赖：
+    · Cyclone.Wpf.Helpers.TreeViewItemHelper.Level（只读附加属性）
+    · Cyclone.Wpf.Helpers.TreeViewItemHelper.AutoLevel（附加属性，setter 自动挂 Loaded 事件）
+    · Cyclone.Wpf.Converters.LevelToIndentConverter（IMultiValueConverter）
+    · TreeViewItem 样式中 Setter Property="hp:TreeViewItemHelper.AutoLevel" Value="True" 启用
+    - 缩进单位：TreeViewItem.UnitIndent 资源 key（默认 24，可主题级别覆盖）
+
+    破坏性变更说明（vs 最早 Win10 版本）：
+    - WinUI 3 视觉风格：左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
+    - 展开器从 Win10 三角折线 → Chevron ▶/▼，90° 旋转动画
+    - 子树展开/折叠动画（Opacity + ScaleY）
+    - 失焦选中色用 Background.Highlighted（Background.Focused 资源未在主题中）
     ============================================================================
 -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
+    xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!--  展开/折叠 ToggleButton 样式（三角箭头）  -->
+    <!--  缩进单位（每深一层左 Margin 增加多少 px），主题级别可覆盖  -->
+    <sys:Double x:Key="TreeViewItem.UnitIndent">24</sys:Double>
+
+    <!--  Chevron 展开器：▶ → ▼，90° 旋转动画  -->
     <Style x:Key="ExpandCollapseToggleStyle" TargetType="ToggleButton">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Width" Value="16" />
         <Setter Property="Height" Value="16" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border
                         Width="16"
                         Height="16"
-                        Padding="5"
                         Background="Transparent"
                         SnapsToDevicePixels="True"
                         UseLayoutRounding="True">
                         <Path
-                            x:Name="ExpandPath"
-                            Data="M0,0 L0,6 L6,0 z"
-                            Fill="Transparent"
-                            Stroke="{DynamicResource Foreground.Default}">
+                            x:Name="ChevronPath"
+                            Width="8"
+                            Height="8"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M2,1 L6,4 L2,7"
+                            RenderTransformOrigin="0.5,0.5"
+                            Stroke="{DynamicResource Foreground.Caption}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.4">
                             <Path.RenderTransform>
-                                <RotateTransform
-                                    Angle="135"
-                                    CenterX="3"
-                                    CenterY="3" />
+                                <RotateTransform x:Name="ChevronRotate" Angle="0" />
                             </Path.RenderTransform>
                         </Path>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="ExpandPath" Property="RenderTransform">
-                                <Setter.Value>
-                                    <RotateTransform
-                                        Angle="180"
-                                        CenterX="3"
-                                        CenterY="3" />
-                                </Setter.Value>
-                            </Setter>
-                            <Setter TargetName="ExpandPath" Property="Fill" Value="{DynamicResource Foreground.Default}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ChevronRotate"
+                                            Storyboard.TargetProperty="Angle"
+                                            To="90"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ChevronRotate"
+                                            Storyboard.TargetProperty="Angle"
+                                            To="0"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="ChevronPath" Property="Stroke" Value="{DynamicResource Foreground.Default}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ChevronPath" Property="Stroke" Value="{DynamicResource Foreground.Hover}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -63,19 +115,31 @@
         </Setter>
     </Style>
 
-    <!--  TreeViewItem 样式  -->
+    <!--  ============================================================  -->
+    <!--  TreeViewItem 样式 (WinUI 3 风格 · 整行高亮 · 无圆角)  -->
+    <!--  ============================================================  -->
     <Style BasedOn="{StaticResource Control.Style.Basic}" TargetType="TreeViewItem">
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+
+        <!--  自动计算 Level 写入附加属性（setter 内部挂 Loaded 事件）  -->
+        <Setter Property="hp:TreeViewItemHelper.AutoLevel" Value="True" />
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TreeViewItem">
                     <StackPanel>
+                        <!--
+                            ===== 行容器 =====
+                            撑满整个 TreeView 宽度——hover/选中背景横向占满
+                            缩进通过内部 InnerContent.Margin 实现（Level × UnitIndent）
+                        -->
                         <Border
                             x:Name="RootBorder"
-                            Height="{DynamicResource Height.Horizontal.Control}"
-                            Padding="{TemplateBinding Padding}"
+                            MinHeight="32"
+                            HorizontalAlignment="Stretch"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
@@ -83,33 +147,161 @@
                             UseLayoutRounding="True">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="15" />
-                                    <ColumnDefinition />
+                                    <!--  ① 选中竖条指示器（固定 6px，永远贴左边）  -->
+                                    <ColumnDefinition Width="6" />
+                                    <!--  ② 内容区——Chevron + Header 一起缩进  -->
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <ToggleButton
-                                    x:Name="Expander"
-                                    ClickMode="Press"
-                                    IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
-                                    Style="{StaticResource ExpandCollapseToggleStyle}" />
-                                <ContentPresenter
-                                    x:Name="PartHeader"
-                                    Grid.Column="1"
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    ContentSource="Header" />
+
+                                <!--  选中指示器  -->
+                                <Border
+                                    x:Name="SelectionBar"
+                                    Grid.Column="0"
+                                    Width="3"
+                                    Height="16"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource Background.Selected}"
+                                    Opacity="0">
+                                    <Border.RenderTransform>
+                                        <ScaleTransform x:Name="SelectionBarScale" ScaleY="0.4" />
+                                    </Border.RenderTransform>
+                                    <Border.RenderTransformOrigin>
+                                        <Point X="0.5" Y="0.5" />
+                                    </Border.RenderTransformOrigin>
+                                </Border>
+
+                                <!--
+                                    内容容器——左 Margin = Level × UnitIndent
+                                    RootBorder 仍然占满整行 → hover/选中横向占满
+                                    Chevron 跟随内容一起缩进 → 视觉上层级缩进自然
+                                -->
+                                <Grid x:Name="InnerContent" Grid.Column="1">
+                                    <Grid.Margin>
+                                        <MultiBinding Converter="{x:Static conv:LevelToIndentConverter.Instance}">
+                                            <Binding Path="(hp:TreeViewItemHelper.Level)" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Source="{StaticResource TreeViewItem.UnitIndent}" />
+                                        </MultiBinding>
+                                    </Grid.Margin>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  Chevron 展开器  -->
+                                    <ToggleButton
+                                        x:Name="Expander"
+                                        Grid.Column="0"
+                                        ClickMode="Press"
+                                        IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Style="{StaticResource ExpandCollapseToggleStyle}" />
+
+                                    <!--  Header  -->
+                                    <ContentPresenter
+                                        x:Name="PartHeader"
+                                        Grid.Column="1"
+                                        Margin="4,0,8,0"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="Center"
+                                        ContentSource="Header" />
+                                </Grid>
                             </Grid>
                         </Border>
-                        <!--  子节点容器——左侧 Margin 让子树相对父项缩进，深嵌套时层级清晰  -->
-                        <ItemsPresenter x:Name="ItemsHost" Margin="15,0,0,0" />
+
+                        <!--
+                            ===== 子节点容器 =====
+                            没有 Margin！缩进完全由子 TreeViewItem 自己内部 InnerContent 处理。
+                        -->
+                        <ItemsPresenter
+                            x:Name="ItemsHost"
+                            Margin="0"
+                            Opacity="1"
+                            RenderTransformOrigin="0,0">
+                            <ItemsPresenter.RenderTransform>
+                                <ScaleTransform x:Name="ItemsHostScale" ScaleY="1" />
+                            </ItemsPresenter.RenderTransform>
+                        </ItemsPresenter>
                     </StackPanel>
+
                     <ControlTemplate.Triggers>
+
+                        <!--  ===== 展开 / 折叠动画 =====  -->
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames
+                                            Storyboard.TargetName="ItemsHost"
+                                            Storyboard.TargetProperty="Visibility"
+                                            Duration="0:0:0">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ItemsHost"
+                                            Storyboard.TargetProperty="Opacity"
+                                            From="0"
+                                            To="1"
+                                            Duration="0:0:0.20">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ItemsHostScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            From="0.95"
+                                            To="1"
+                                            Duration="0:0:0.20">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ItemsHost"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseIn" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ItemsHostScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.95"
+                                            Duration="0:0:0.12">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseIn" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ObjectAnimationUsingKeyFrames
+                                            Storyboard.TargetName="ItemsHost"
+                                            Storyboard.TargetProperty="Visibility"
+                                            Duration="0:0:0.12">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.12" Value="{x:Static Visibility.Collapsed}" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <!--  初始未展开兜底  -->
                         <Trigger Property="IsExpanded" Value="False">
                             <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed" />
                         </Trigger>
+
+                        <!--  无子节点时隐藏 Chevron（保留占位）  -->
                         <Trigger Property="HasItems" Value="False">
                             <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
                         </Trigger>
 
-                        <!--  鼠标 hover（未选中）  -->
+                        <!--  Hover 态（未选中）——整行变色  -->
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition SourceName="RootBorder" Property="IsMouseOver" Value="True" />
@@ -118,26 +310,66 @@
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </MultiTrigger>
 
-                        <!--  选中（active）——同时切换 Background + Foreground 保证对比度  -->
+                        <!--  选中态（active）——整行变色 + 指示器淡入  -->
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase Amplitude="0.3" EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.10" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.4"
+                                            Duration="0:0:0.10" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
 
-                        <!--
-                            选中 + TreeView 失焦：
-                            原版用 Background.Focused（资源不存在），改用 Background.Highlighted 弱化。
-                            如果主题需要更专门的"失焦选中色"，建议在 BasicTheme/DarkTheme 中
-                            添加 Background.Focused 资源 key 然后改回 DynamicResource Background.Focused。
-                        -->
+                        <!--  选中 + 失焦：指示器弱化 + 行底透明  -->
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsSelected" Value="True" />
                                 <Condition Property="IsSelectionActive" Value="False" />
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Highlighted}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+                            <Setter TargetName="SelectionBar" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
                         </MultiTrigger>
+
+                        <!--  禁用态  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -153,6 +385,7 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="ScrollViewer.PanningMode" Value="Both" />
         <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
@@ -175,16 +408,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <!--
-            原版有两处 VirtualizingPanel.IsVirtualizing="True" 时切换 ItemsPanel 到
-            VirtualizingStackPanel 的 trigger——已删除：
-            外层 ScrollViewer.CanContentScroll=False 时 VirtualizingStackPanel 不生效，
-            两个配置自相矛盾。
-            
-            如果将来确实需要虚拟化（数据量极大、TreeViewItem 渲染开销高），把
-            CanContentScroll 改成 True 并恢复 trigger——代价是失去像素级平滑滚动。
-            一般 TreeView 虚拟化收益不大，多数项目选择不虚拟化。
-        -->
     </Style>
 
     <Style BasedOn="{StaticResource TreeView.Style.Basic}" TargetType="TreeView" />

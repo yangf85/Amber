@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Cyclone.Wpf.Demo.Helper;
 using System;
@@ -6,17 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Demo.Views
 {
@@ -37,14 +28,29 @@ namespace Cyclone.Wpf.Demo.Views
         private readonly ObservableCollection<FakerData> _originalData;
         private ICollectionView _filteredData;
 
-        // 基础ListBox数据
+        // ===== 基础 ListBox 数据（节①）=====
         [ObservableProperty]
         public partial ObservableCollection<FakerData> BasicData { get; set; }
 
         [ObservableProperty]
         public partial FakerData? SelectedBasicPerson { get; set; }
 
-        // 高级ListBox的过滤和排序属性
+        // ===== SelectionMode 演示（节②）=====
+        public ObservableCollection<string> Fruits { get; }
+
+        // ===== IsSelectAllEnabled 演示（节③）=====
+        public ObservableCollection<string> Permissions { get; }
+
+        [ObservableProperty]
+        public partial bool IsSelectAllEnabled { get; set; } = true;
+
+        // ===== 数据模板演示（节④）=====
+        public ObservableCollection<FakerData> TemplateSample { get; }
+
+        [ObservableProperty]
+        public partial FakerData? SelectedTemplatePerson { get; set; }
+
+        // ===== 高级 ListBox 的过滤、排序、分组（Tab 2）=====
         [ObservableProperty]
         public partial string SearchText { get; set; } = string.Empty;
 
@@ -69,11 +75,12 @@ namespace Cyclone.Wpf.Demo.Views
         [ObservableProperty]
         public partial string StatusText { get; set; } = string.Empty;
 
-        // 选项集合
         public ObservableCollection<string> AgeRanges { get; }
 
         public ObservableCollection<string> SortOptions { get; }
+
         public ObservableCollection<string> GroupOptions { get; }
+
         public ObservableCollection<string> StatusFilters { get; }
 
         public ICollectionView FilteredData
@@ -84,29 +91,37 @@ namespace Cyclone.Wpf.Demo.Views
 
         public ListBoxViewModel()
         {
-            // 生成测试数据
+            // 大数据集（高级 tab 用）
             var testData = FakerDataHelper.GenerateFakerDataCollection(50);
 
-            // 基础ListBox数据
-            BasicData = new ObservableCollection<FakerData>(testData);
+            BasicData = new ObservableCollection<FakerData>(testData.Take(8));
+            TemplateSample = new ObservableCollection<FakerData>(testData.Take(6));
 
-            // 高级ListBox数据
+            // 章节用小数据集
+            Fruits = new ObservableCollection<string>
+            {
+                "苹果", "香蕉", "橙子", "葡萄", "西瓜", "草莓", "蓝莓", "芒果",
+            };
+
+            Permissions = new ObservableCollection<string>
+            {
+                "读取文件", "写入文件", "删除文件", "执行程序", "网络访问", "系统设置", "用户管理", "审计日志",
+            };
+
+            // 高级 tab 数据
             _originalData = new ObservableCollection<FakerData>(testData);
 
-            // 初始化选项
             AgeRanges = new ObservableCollection<string> { "全部", "0-18", "19-30", "31-45", "46-60", "60+" };
             SortOptions = new ObservableCollection<string> { "姓名", "年龄", "城市", "邮箱", "状态" };
             GroupOptions = new ObservableCollection<string> { "无", "城市", "国家", "状态" };
             StatusFilters = new ObservableCollection<string> { "全部", "激活", "未激活", "待激活" };
 
-            // 设置高级ListBox的数据视图
             FilteredData = CollectionViewSource.GetDefaultView(_originalData);
             FilteredData.Filter = FilterItems;
 
             UpdateStatusText();
         }
 
-        // 属性变化时重新应用过滤和排序
         partial void OnSearchTextChanged(string value) => ApplyFiltersAndSort();
 
         partial void OnSelectedAgeRangeChanged(string value) => ApplyFiltersAndSort();
@@ -132,14 +147,11 @@ namespace Cyclone.Wpf.Demo.Views
 
         private void ApplyFiltersAndSort()
         {
-            // 刷新过滤
             FilteredData.Refresh();
 
-            // 清除现有排序和分组
             FilteredData.SortDescriptions.Clear();
             FilteredData.GroupDescriptions.Clear();
 
-            // 应用排序
             var sortProperty = SelectedSortOption switch
             {
                 "姓名" => nameof(FakerData.FirstName),
@@ -153,7 +165,6 @@ namespace Cyclone.Wpf.Demo.Views
             var sortDirection = IsDescending ? ListSortDirection.Descending : ListSortDirection.Ascending;
             FilteredData.SortDescriptions.Add(new SortDescription(sortProperty, sortDirection));
 
-            // 应用分组
             if (SelectedGroupOption != "无")
             {
                 var groupProperty = SelectedGroupOption switch
@@ -176,9 +187,10 @@ namespace Cyclone.Wpf.Demo.Views
         private bool FilterItems(object item)
         {
             if (item is not FakerData person)
+            {
                 return false;
+            }
 
-            // 搜索文本过滤
             if (!string.IsNullOrEmpty(SearchText))
             {
                 var searchLower = SearchText.ToLower();
@@ -192,7 +204,6 @@ namespace Cyclone.Wpf.Demo.Views
                 }
             }
 
-            // 年龄范围过滤
             if (SelectedAgeRange != "全部")
             {
                 var ageInRange = SelectedAgeRange switch
@@ -206,10 +217,11 @@ namespace Cyclone.Wpf.Demo.Views
                 };
 
                 if (!ageInRange)
+                {
                     return false;
+                }
             }
 
-            // 状态过滤
             if (SelectedStatusFilter != "全部")
             {
                 var statusMatch = SelectedStatusFilter switch
@@ -221,7 +233,9 @@ namespace Cyclone.Wpf.Demo.Views
                 };
 
                 if (!statusMatch)
+                {
                     return false;
+                }
             }
 
             return true;
