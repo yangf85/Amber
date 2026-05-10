@@ -1,7 +1,7 @@
 ﻿<!--
     ============================================================================
     WinUI 3 风格 TreeView 样式 (v3 — 无圆角 + 整行高亮)
-
+    
     破坏性变更说明（vs v2）：
     - 移除所有 CornerRadius（项目"无圆角风格"规约）
     - 选中 / hover 背景横向占满整行：
@@ -17,7 +17,7 @@
     · Cyclone.Wpf.Converters.LevelToIndentConverter（IMultiValueConverter）
     · TreeViewItem 样式中 Setter Property="hp:TreeViewItemHelper.AutoLevel" Value="True" 启用
     - 缩进单位：TreeViewItem.UnitIndent 资源 key（默认 24，可主题级别覆盖）
-
+    
     破坏性变更说明（vs 最早 Win10 版本）：
     - WinUI 3 视觉风格：左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
     - 展开器从 Win10 三角折线 → Chevron ▶/▼，90° 旋转动画

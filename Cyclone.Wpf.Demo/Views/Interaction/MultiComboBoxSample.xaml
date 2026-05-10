@@ -1,0 +1,865 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.MultiComboBoxSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:MultiComboBoxViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+
+        <!--  Product / Recipient 显示模板  -->
+        <DataTemplate x:Key="ProductTemplate" DataType="{x:Type local:Product}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                <Border
+                    Margin="8,0,0,0"
+                    Padding="6,1"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Background.Header}">
+                    <TextBlock
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="{Binding Category}" />
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M4,7 H20 M4,12 H14 M4,17 H10 M16,12 L19,15 L22,12"
+                            Stroke="White"
+                            StrokeStartLineCap="Round"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="2" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="MultiComboBox" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="下拉式多选控件——继承自 ListBox，复用全套多选交互（鼠标点击切换、Space 键、方向键、Ctrl+A 全选），并暴露可双向绑定的 SelectedItemsBindable 集合便于 MVVM。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="简单字符串列表 + 水印">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="点击下拉箭头展开列表，鼠标点击或 Space 键切换选中状态。已选中的项以 chip 形式显示在控件内，每个 chip 上的 × 按钮可单独移除该项。" />
+                            <cy:MultiComboBox
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                ItemsSource="{Binding Cities}"
+                                SelectedItemsBindable="{Binding SelectedCities}"
+                                Watermark="选择城市..." />
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}">
+                                <Run Text="已选数量：" />
+                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedCities.Count, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② DisplayMemberPath + 自定义 chip 视觉  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="数据对象 / 自定义 chip 视觉" Subtitle="DisplayMemberPath 取字段 / SelectionChipTemplate 自定义 chip 外观">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="DisplayMemberPath（chip 显示数据对象的指定字段）" />
+                                <cy:MultiComboBox
+                                    Width="320"
+                                    HorizontalAlignment="Left"
+                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding Products}"
+                                    SelectedItemsBindable="{Binding SelectedProducts}"
+                                    Watermark="选择产品..." />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="SelectionChipTemplate（自定义 chip 视觉——pill 形状）" />
+                                <cy:MultiComboBox
+                                    Width="320"
+                                    HorizontalAlignment="Left"
+                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding Products}"
+                                    Watermark="选择产品...">
+                                    <cy:MultiComboBox.SelectionChipTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Margin="2"
+                                                Padding="10,3,4,3"
+                                                Background="{DynamicResource Background.Highlighted}"
+                                                CornerRadius="999">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontSize="12"
+                                                        Foreground="White"
+                                                        Text="{Binding Name}" />
+                                                    <Button
+                                                        Width="16"
+                                                        Height="16"
+                                                        Margin="6,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Command="{x:Static cy:MultiComboBox.RemoveItemCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="×"
+                                                        Foreground="White" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </cy:MultiComboBox.SelectionChipTemplate>
+                                </cy:MultiComboBox>
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="自定义 chip 视觉时，需在模板中包含一个绑定 RemoveItemCommand 的按钮以实现单项删除——CommandParameter 传 {Binding} 即可。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 全选 + 自定义文本  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="全选 / 自定义文本">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="IsSelectAllVisible=True 在下拉顶部显示全选 CheckBox（三态）。SelectAllText 自定义全选文字。" />
+
+                            <cy:MultiComboBox
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                IsSelectAllVisible="True"
+                                ItemsSource="{Binding Permissions}"
+                                SelectAllText="授予所有权限"
+                                SelectedItemsBindable="{Binding SelectedPermissions}"
+                                Watermark="选择权限..." />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ MVVM 双向绑定  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="MVVM 双向绑定" Subtitle="ViewModel 改集合 / UI 改选中——双向同步">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择收件人" />
+                                    <cy:MultiComboBox
+                                        DisplayMemberPath="Name"
+                                        IsSelectAllVisible="True"
+                                        ItemsSource="{Binding Recipients}"
+                                        SelectedItemsBindable="{Binding SelectedRecipients}"
+                                        Watermark="收件人..." />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="ViewModel 视图（实时同步）" />
+                                    <Border
+                                        Padding="12"
+                                        Background="{DynamicResource Background.Header}"
+                                        BorderBrush="{DynamicResource Border.Default}"
+                                        BorderThickness="1">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text="已选 " />
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    FontWeight="Bold"
+                                                    Foreground="{DynamicResource Foreground.Link}"
+                                                    Text="{Binding SelectedRecipients.Count, Mode=OneWay}" />
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text=" 项" />
+                                            </StackPanel>
+                                            <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding SelectedRecipients}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock
+                                                            Margin="0,2,0,2"
+                                                            FontFamily="Consolas"
+                                                            FontSize="12"
+                                                            Foreground="{DynamicResource Foreground.Default}">
+                                                            <Run Text="• " />
+                                                            <Run Text="{Binding Name, Mode=OneWay}" />
+                                                            <Run Foreground="{DynamicResource Foreground.Caption}" Text=" - " />
+                                                            <Run Foreground="{DynamicResource Foreground.Caption}" Text="{Binding Email, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ⑤ 常见使用场景  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <UniformGrid Columns="2" Rows="2">
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,4 L11,4 L20,13 L13,20 L4,11 Z M7,7 L7.5,7"
+                                        Stroke="{DynamicResource Foreground.Link}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.8" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="标签筛选" />
+                                    <cy:MultiComboBox
+                                        Margin="0,4,0,8"
+                                        ItemsSource="{Binding Tags}"
+                                        SelectedItemsBindable="{Binding SelectedTags}"
+                                        Watermark="选择标签..." />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="文章列表、博客分类、产品筛选"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M5,11 L11,5 L19,5 L19,13 L13,19 Z M9,9 L9.5,9"
+                                        Stroke="{DynamicResource Foreground.Success}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.8" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="权限多选" />
+                                    <cy:MultiComboBox
+                                        Margin="0,4,0,8"
+                                        IsSelectAllVisible="True"
+                                        ItemsSource="{Binding Permissions}"
+                                        Watermark="授权..." />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="角色配置、ACL 编辑、操作授权"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,7 L21,7 L21,17 L3,17 Z M3,7 L12,13 L21,7"
+                                        Stroke="{DynamicResource Foreground.Warning}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.8" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="多收件人" />
+                                    <cy:MultiComboBox
+                                        Margin="0,4,0,8"
+                                        DisplayMemberPath="Name"
+                                        ItemsSource="{Binding Recipients}"
+                                        Watermark="收件人..." />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="邮件、消息、通知收件人列表"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,5 H21 M6,12 H18 M9,19 H15"
+                                        Stroke="#8B5CF6"
+                                        StrokeStartLineCap="Round"
+                                        StrokeEndLineCap="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="范围过滤" />
+                                    <cy:MultiComboBox
+                                        Margin="0,4,0,8"
+                                        ItemsSource="{Binding PriceRanges}"
+                                        SelectedItemsBindable="{Binding SelectedRanges}"
+                                        Watermark="价格范围..." />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="价格区间、时间窗、数据分组"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+                        </UniformGrid>
+                    </cy:Card>
+
+                    <!--  ⑥ 主要属性  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="MultiComboBox 主要属性">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="2*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Background="{DynamicResource Background.Header}" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="属性" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="类型" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableHeaderStyle}"
+                                    Text="说明" />
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="1"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource Border.Default}" />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="ItemsSource" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="IEnumerable" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="数据源（基类成员）" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="SelectedItemsBindable" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="IList" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="可绑定的选中项集合（双向同步）。建议绑定 ObservableCollection。" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="DisplayMemberPath" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="string" />
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="数据对象上要显示的属性名（基类成员）" />
+
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="SelectionChipTemplate" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="DataTemplate" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="顶部 chip 的视觉模板。null 时使用内置默认 chip（边框+文本+×）。" />
+
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="Watermark" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="string" />
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="无选中项时显示的占位文字" />
+
+                                <TextBlock
+                                    Grid.Row="6"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="IsSelectAllVisible" />
+                                <TextBlock
+                                    Grid.Row="6"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="bool" />
+                                <TextBlock
+                                    Grid.Row="6"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="下拉顶部是否显示全选 CheckBox。默认 false。" />
+
+                                <TextBlock
+                                    Grid.Row="7"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="MaxDropDownHeight" />
+                                <TextBlock
+                                    Grid.Row="7"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="double" />
+                                <TextBlock
+                                    Grid.Row="7"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="下拉面板最大高度。默认 200。" />
+
+                                <TextBlock
+                                    Grid.Row="8"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="HasSelectedItems" />
+                                <TextBlock
+                                    Grid.Row="8"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="bool (只读)" />
+                                <TextBlock
+                                    Grid.Row="8"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="只读。是否有任何选中项。" />
+
+                                <TextBlock
+                                    Grid.Row="9"
+                                    Grid.Column="0"
+                                    Style="{StaticResource PropTableNameStyle}"
+                                    Text="RemoveItemCommand" />
+                                <TextBlock
+                                    Grid.Row="9"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PropTableTypeStyle}"
+                                    Text="RoutedCommand" />
+                                <TextBlock
+                                    Grid.Row="9"
+                                    Grid.Column="2"
+                                    Style="{StaticResource PropTableCellStyle}"
+                                    Text="移除单个选中项的命令。CommandParameter = 数据项。chip 上的 × 按钮通过此命令实现取消选中，自定义 chip 模板时可复用。" />
+                            </Grid>
+                        </Border>
+                    </cy:Card>
+
+                    <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+
+                        <cy:Card Grid.Column="0">
+                            <cy:Card.Header>
+                                <cy:CardHeader Title="XAML 示例">
+                                    <cy:CardHeader.Icon>
+                                        <Border Style="{StaticResource SectionNumberStyle}">
+                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                        </Border>
+                                    </cy:CardHeader.Icon>
+                                </cy:CardHeader>
+                            </cy:Card.Header>
+                            <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                                <![CDATA[<cy:MultiComboBox
+    ItemsSource="{Binding Cities}"
+    SelectedItemsBindable="{Binding SelectedCities}"
+    Watermark="选择城市..." />
+
+<!-- 数据对象 + DisplayMemberPath -->
+<cy:MultiComboBox
+    ItemsSource="{Binding Products}"
+    SelectedItemsBindable="{Binding Selected}"
+    DisplayMemberPath="Name" />
+
+<!-- 自定义 chip 视觉（保留 × 删除按钮） -->
+<cy:MultiComboBox
+    ItemsSource="{Binding Tags}"
+    SelectedItemsBindable="{Binding SelectedTags}">
+    <cy:MultiComboBox.SelectionChipTemplate>
+        <DataTemplate>
+            <Border Background="LightBlue" CornerRadius="999" Padding="8,2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding}" />
+                    <Button Content="×" Margin="6,0,0,0"
+                            Command="{x:Static cy:MultiComboBox.RemoveItemCommand}"
+                            CommandParameter="{Binding}" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </cy:MultiComboBox.SelectionChipTemplate>
+</cy:MultiComboBox>]]>
+                            </TextBox>
+                        </cy:Card>
+
+                        <cy:Card Grid.Column="2">
+                            <cy:Card.Header>
+                                <cy:CardHeader Title="设计要点">
+                                    <cy:CardHeader.Icon>
+                                        <Border Style="{StaticResource SectionNumberStyle}">
+                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                        </Border>
+                                    </cy:CardHeader.Icon>
+                                </cy:CardHeader>
+                            </cy:Card.Header>
+
+                            <StackPanel>
+                                <StackPanel Margin="0,0,0,12">
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="继承 ListBox" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="复用 SelectionMode、键盘导航、Ctrl+A 等全套交互"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,12">
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="可绑定集合" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="SelectedItemsBindable 双向同步，绕过 ListBox.SelectedItems 不可绑定的限制"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="键盘交互" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="Alt+↓ 打开 / Esc 关闭 / Space 切换 / 方向键移动"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
+                        </cy:Card>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部 Tip ============  -->
+            <Border
+                Grid.Row="2"
+                Margin="0,20,0,0"
+                Padding="16,12"
+                Background="{DynamicResource Background.Info}"
+                BorderBrush="{DynamicResource Border.Info}"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource Background.Highlighted}"
+                        CornerRadius="999">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="13"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="i" />
+                    </Border>
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Foreground="White">
+                        <Run Text="本控件继承自 ListBox——所有内置的多选交互（鼠标点击、Space、方向键、Ctrl+A）都能直接工作。SelectedItemsBindable 是为了绕过 WPF 原生 ListBox.SelectedItems 不可双向绑定的限制而设计的镜像 DP。" />
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -5,159 +5,506 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace Cyclone.Wpf.Helpers;
 
+/// <summary>
+/// DataGrid 自动生成列特性。标在 ViewModel 的属性上，配合
+/// hp:DataGridHelper.IsAutoGenerate=True 自动生成 DataGridColumn。
+/// </summary>
 [AttributeUsage(AttributeTargets.Property)]
-public class DataGridPropertyAttribute : Attribute
+public sealed class DataGridPropertyAttribute : Attribute
 {
-    // 列标题
+    /// <summary>列标题。null 时用属性名。</summary>
     public string Header { get; set; }
 
-    // 列宽度
-    public DataGridLength Width { get; set; } = DataGridLength.Auto;
+    /// <summary>
+    /// 列宽。CLR 特性参数不允许 DataGridLength 类型——用 double 加约定特殊值表达：
+    ///   ·  0  (默认) → DataGridLength.Auto
+    ///   ·  正数      → DataGridLength.Pixel(value) 固定像素宽
+    ///   · -1         → DataGridLength.Star (即 1*)
+    ///   · -2         → DataGridLength.SizeToCells
+    ///   · -3         → DataGridLength.SizeToHeader
+    /// 实际 DataGridLength 通过 GetWidthAsDataGridLength() 转换。
+    /// </summary>
+    public double Width { get; set; } = 0;
 
-    // 显示顺序，数字越小越靠前
+    /// <summary>显示顺序——数字越小越靠前。</summary>
     public int Index { get; set; } = int.MaxValue;
 
-    // 格式化字符串
+    /// <summary>格式化字符串（StringFormat）。</summary>
     public string StringFormat { get; set; }
 
-    // 是否只读
-    public bool IsReadOnly { get; set; } = false;
+    /// <summary>是否只读。属性本身不可写时强制只读。</summary>
+    public bool IsReadOnly { get; set; }
 
-    // 模板资源路径
-    public string DataTemplatePath { get; set; }
-
-    // 模板资源key
+    /// <summary>DataTemplate 的资源 key——优先于 DataTemplatePath。</summary>
     public string DataTemplateKey { get; set; }
 
-    // 构造函数
+    /// <summary>DataTemplate 所在资源字典 URI——次优先级。</summary>
+    public string DataTemplatePath { get; set; }
+
+    /// <summary>
+    /// 把 Width 双精度值按约定转成 DataGridLength。
+    /// </summary>
+    internal DataGridLength GetWidthAsDataGridLength()
+    {
+        if (Width > 0)
+        {
+            return new DataGridLength(Width);
+        }
+
+        return Width switch
+        {
+            -1 => new DataGridLength(1, DataGridLengthUnitType.Star),
+            -2 => DataGridLength.SizeToCells,
+            -3 => DataGridLength.SizeToHeader,
+            _ => DataGridLength.Auto,
+        };
+    }
+
     public DataGridPropertyAttribute(string header = null)
     {
         Header = header;
     }
 }
 
-public class DataGridHelper
+/// <summary>
+/// DataGrid 辅助附加属性。
+///
+/// 提供四个附加属性：
+///   1. SelectedItems            (IList)   — 双向绑定多选项到 ViewModel
+///   2. IsAutoGenerate           (bool)    — 启用基于 [DataGridProperty] 特性的自动列生成
+///   3. TextColumnEditingStyle   (Style)   — 给所有 DataGridTextColumn 统一应用编辑样式
+///   4. DataGridPropertyAttribute          — 标在 ViewModel 属性上配合 IsAutoGenerate 用
+///
+/// 设计要点：
+///   · SelectedItems 用 OneWay 语义（VM 端 getter-only 属性即可），靠 INPC 实现真双向
+///   · 重入抑制 + 增量更新（用 e.AddedItems/RemovedItems 而非全量 Clear/Add）
+///   · IsAutoGenerate 监听 ItemsSource 变化用 DependencyPropertyDescriptor，
+///     必须在控件 Unloaded 时解绑——否则内存泄漏
+///   · TextColumnEditingStyle 的 CollectionChanged 订阅用具名 handler，避免 lambda 无法解绑
+/// </summary>
+public static class DataGridHelper
 {
-    #region SelectedItems
+    #region SelectedItems — 双向同步多选项
 
-    public static readonly DependencyProperty SelectedItemsProperty =
-        DependencyProperty.RegisterAttached("SelectedItems", typeof(IList), typeof(DataGridHelper),
-                    new FrameworkPropertyMetadata(default(IList), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedItemChanged));
+    public static readonly DependencyProperty SelectedItemsProperty;
 
-    public static IList GetSelectedItems(DataGrid obj) => (IList)obj.GetValue(SelectedItemsProperty);
+    public static IList GetSelectedItems(DependencyObject obj) =>
+        (IList)obj.GetValue(SelectedItemsProperty);
 
-    public static void SetSelectedItems(DataGrid obj, IList value) => obj.SetValue(SelectedItemsProperty, value);
+    public static void SetSelectedItems(DependencyObject obj, IList value) =>
+        obj.SetValue(SelectedItemsProperty, value);
 
-    private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    #endregion SelectedItems — 双向同步多选项
+
+    #region IsAutoGenerate — 基于特性自动生成列
+
+    public static readonly DependencyProperty IsAutoGenerateProperty;
+
+    public static bool GetIsAutoGenerate(DependencyObject obj) =>
+        (bool)obj.GetValue(IsAutoGenerateProperty);
+
+    public static void SetIsAutoGenerate(DependencyObject obj, bool value) =>
+        obj.SetValue(IsAutoGenerateProperty, value);
+
+    #endregion IsAutoGenerate — 基于特性自动生成列
+
+    #region TextColumnEditingStyle — 文本列统一编辑样式
+
+    public static readonly DependencyProperty TextColumnEditingStyleProperty;
+
+    public static Style GetTextColumnEditingStyle(DependencyObject obj) =>
+        (Style)obj.GetValue(TextColumnEditingStyleProperty);
+
+    public static void SetTextColumnEditingStyle(DependencyObject obj, Style value) =>
+        obj.SetValue(TextColumnEditingStyleProperty, value);
+
+    #endregion TextColumnEditingStyle — 文本列统一编辑样式
+
+    #region 内部状态 — 重入抑制 + 订阅追踪
+
+    private static readonly DependencyProperty IsUpdatingProperty =
+        DependencyProperty.RegisterAttached(
+            "IsUpdating",
+            typeof(bool),
+            typeof(DataGridHelper),
+            new PropertyMetadata(false));
+
+    /// <summary>
+    /// 当前订阅在 SelectedItems IList 上的 NotifyCollectionChanged 委托——闭包 capture 了 DataGrid 引用。
+    /// </summary>
+    private static readonly DependencyProperty CollectionChangedHandlerProperty =
+        DependencyProperty.RegisterAttached(
+            "CollectionChangedHandler",
+            typeof(NotifyCollectionChangedEventHandler),
+            typeof(DataGridHelper),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// TextColumnEditingStyle 模式下监听 Columns 变化的具名 handler——存附加属性供解绑。
+    /// </summary>
+    private static readonly DependencyProperty ColumnsCollectionChangedHandlerProperty =
+        DependencyProperty.RegisterAttached(
+            "ColumnsCollectionChangedHandler",
+            typeof(NotifyCollectionChangedEventHandler),
+            typeof(DataGridHelper),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// IsAutoGenerate 模式下监听 ItemsSource 变化的 EventHandler——存附加属性供解绑。
+    /// </summary>
+    private static readonly DependencyProperty ItemsSourceChangedHandlerProperty =
+        DependencyProperty.RegisterAttached(
+            "ItemsSourceChangedHandler",
+            typeof(EventHandler),
+            typeof(DataGridHelper),
+            new PropertyMetadata(null));
+
+    private static bool GetIsUpdating(DependencyObject obj) =>
+        (bool)obj.GetValue(IsUpdatingProperty);
+
+    private static void SetIsUpdating(DependencyObject obj, bool value) =>
+        obj.SetValue(IsUpdatingProperty, value);
+
+    #endregion 内部状态 — 重入抑制 + 订阅追踪
+
+    #region 静态构造 — 集中注册 DP
+
+    static DataGridHelper()
     {
-        if (d is DataGrid dataGrid)
+        SelectedItemsProperty = DependencyProperty.RegisterAttached(
+            "SelectedItems",
+            typeof(IList),
+            typeof(DataGridHelper),
+            new PropertyMetadata(null, OnSelectedItemsChanged));
+
+        IsAutoGenerateProperty = DependencyProperty.RegisterAttached(
+            "IsAutoGenerate",
+            typeof(bool),
+            typeof(DataGridHelper),
+            new PropertyMetadata(false, OnIsAutoGenerateChanged));
+
+        TextColumnEditingStyleProperty = DependencyProperty.RegisterAttached(
+            "TextColumnEditingStyle",
+            typeof(Style),
+            typeof(DataGridHelper),
+            new PropertyMetadata(null, OnTextColumnEditingStyleChanged));
+    }
+
+    #endregion 静态构造 — 集中注册 DP
+
+    #region SelectedItems 双向同步
+
+    private static void OnSelectedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not DataGrid dataGrid)
         {
-            dataGrid.SelectionChanged -= DataGrid_SelectionChanged;
-            dataGrid.SelectionChanged += DataGrid_SelectionChanged;
+            return;
+        }
+
+        // 1) 解绑旧 INPC
+        var oldHandler = dataGrid.GetValue(CollectionChangedHandlerProperty) as NotifyCollectionChangedEventHandler;
+        if (oldHandler != null && e.OldValue is INotifyCollectionChanged oldInpc)
+        {
+            oldInpc.CollectionChanged -= oldHandler;
+        }
+        dataGrid.SetValue(CollectionChangedHandlerProperty, null);
+
+        // 2) 确保 DataGrid.SelectionChanged 已订阅
+        if (e.NewValue != null)
+        {
+            dataGrid.SelectionChanged -= OnDataGridSelectionChanged;
+            dataGrid.SelectionChanged += OnDataGridSelectionChanged;
+        }
+        else
+        {
+            dataGrid.SelectionChanged -= OnDataGridSelectionChanged;
+            return;
+        }
+
+        // 3) 绑定新 IList 的 INPC（如果实现了）——闭包 capture DataGrid
+        if (e.NewValue is INotifyCollectionChanged newInpc)
+        {
+            NotifyCollectionChangedEventHandler handler = (sender, args) =>
+                OnExternalCollectionChanged(dataGrid, args);
+            newInpc.CollectionChanged += handler;
+            dataGrid.SetValue(CollectionChangedHandlerProperty, handler);
+        }
+
+        // 4) 初始同步
+        if (e.NewValue is IList newList && newList.Count > 0)
+        {
+            SyncDataGridFromExternalList(dataGrid, newList);
+        }
+        else if (e.NewValue is IList emptyList)
+        {
+            SyncExternalListFromDataGrid(dataGrid, emptyList);
         }
     }
 
-    private static void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private static void OnDataGridSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (sender is DataGrid dataGrid)
+        if (sender is not DataGrid dataGrid)
         {
-            var selectedItems = GetSelectedItems(dataGrid);
-            if (selectedItems == null || dataGrid.SelectedItems == null) { return; }
-            selectedItems.Clear();
-            foreach (var item in dataGrid.SelectedItems)
+            return;
+        }
+
+        if (GetIsUpdating(dataGrid))
+        {
+            return;
+        }
+
+        var externalList = GetSelectedItems(dataGrid);
+        if (externalList == null)
+        {
+            return;
+        }
+
+        SetIsUpdating(dataGrid, true);
+        try
+        {
+            // 增量更新——比 Clear + AddAll 高效，且不会发出 Reset 通知
+            foreach (var item in e.RemovedItems)
             {
-                selectedItems.Add(item);
+                externalList.Remove(item);
+            }
+            foreach (var item in e.AddedItems)
+            {
+                if (!externalList.Contains(item))
+                {
+                    externalList.Add(item);
+                }
             }
         }
+        finally
+        {
+            SetIsUpdating(dataGrid, false);
+        }
     }
 
-    #endregion SelectedItems
+    private static void OnExternalCollectionChanged(DataGrid dataGrid, NotifyCollectionChangedEventArgs e)
+    {
+        if (GetIsUpdating(dataGrid))
+        {
+            return;
+        }
+
+        SetIsUpdating(dataGrid, true);
+        try
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                    {
+                        foreach (var item in e.NewItems)
+                        {
+                            if (!dataGrid.SelectedItems.Contains(item))
+                            {
+                                dataGrid.SelectedItems.Add(item);
+                            }
+                        }
+                    }
+                    break;
+
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems != null)
+                    {
+                        foreach (var item in e.OldItems)
+                        {
+                            dataGrid.SelectedItems.Remove(item);
+                        }
+                    }
+                    break;
+
+                case NotifyCollectionChangedAction.Reset:
+                    dataGrid.SelectedItems.Clear();
+                    break;
+
+                case NotifyCollectionChangedAction.Replace:
+                    if (e.OldItems != null)
+                    {
+                        foreach (var item in e.OldItems)
+                        {
+                            dataGrid.SelectedItems.Remove(item);
+                        }
+                    }
+                    if (e.NewItems != null)
+                    {
+                        foreach (var item in e.NewItems)
+                        {
+                            if (!dataGrid.SelectedItems.Contains(item))
+                            {
+                                dataGrid.SelectedItems.Add(item);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        finally
+        {
+            SetIsUpdating(dataGrid, false);
+        }
+    }
+
+    private static void SyncDataGridFromExternalList(DataGrid dataGrid, IList externalList)
+    {
+        if (GetIsUpdating(dataGrid))
+        {
+            return;
+        }
+
+        SetIsUpdating(dataGrid, true);
+        try
+        {
+            dataGrid.SelectedItems.Clear();
+            foreach (var item in externalList)
+            {
+                dataGrid.SelectedItems.Add(item);
+            }
+        }
+        finally
+        {
+            SetIsUpdating(dataGrid, false);
+        }
+    }
+
+    private static void SyncExternalListFromDataGrid(DataGrid dataGrid, IList externalList)
+    {
+        if (GetIsUpdating(dataGrid))
+        {
+            return;
+        }
+
+        SetIsUpdating(dataGrid, true);
+        try
+        {
+            externalList.Clear();
+            foreach (var item in dataGrid.SelectedItems)
+            {
+                externalList.Add(item);
+            }
+        }
+        finally
+        {
+            SetIsUpdating(dataGrid, false);
+        }
+    }
+
+    #endregion SelectedItems 双向同步
 
     #region IsAutoGenerate
 
-    public static readonly DependencyProperty IsAutoGenerateProperty =
-                DependencyProperty.RegisterAttached("IsAutoGenerate", typeof(bool), typeof(DataGridHelper),
-                    new PropertyMetadata(false, OnIsAutoGenerateChanged));
-
-    public static bool GetIsAutoGenerate(DependencyObject obj) => (bool)obj.GetValue(IsAutoGenerateProperty);
-
-    public static void SetIsAutoGenerate(DependencyObject obj, bool value) => obj.SetValue(IsAutoGenerateProperty, value);
-
     private static void OnIsAutoGenerateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is DataGrid dataGrid && e.NewValue is bool isAutoGenerate)
+        if (d is not DataGrid dataGrid)
         {
-            if (isAutoGenerate)
+            return;
+        }
+
+        // 解绑旧的 ItemsSource 监听
+        var oldHandler = dataGrid.GetValue(ItemsSourceChangedHandlerProperty) as EventHandler;
+        if (oldHandler != null)
+        {
+            var dpd = DependencyPropertyDescriptor.FromProperty(
+                ItemsControl.ItemsSourceProperty, typeof(DataGrid));
+            dpd.RemoveValueChanged(dataGrid, oldHandler);
+            dataGrid.SetValue(ItemsSourceChangedHandlerProperty, null);
+        }
+
+        if ((bool)e.NewValue)
+        {
+            // 启用：立即生成一次
+            DataGridColumnManager.GenerateColumns(dataGrid);
+
+            // 监听后续 ItemsSource 变化重新生成——用具名 handler 存附加属性
+            EventHandler newHandler = (sender, args) =>
             {
-                // 使用 DataGridColumnManager 来处理列自动生成
-                DataGridColumnManager.GenerateColumns(dataGrid);
+                if (GetIsAutoGenerate(dataGrid))
+                {
+                    DataGridColumnManager.GenerateColumns(dataGrid);
+                }
+            };
+            var dpd = DependencyPropertyDescriptor.FromProperty(
+                ItemsControl.ItemsSourceProperty, typeof(DataGrid));
+            dpd.AddValueChanged(dataGrid, newHandler);
+            dataGrid.SetValue(ItemsSourceChangedHandlerProperty, newHandler);
 
-                // 监听 ItemsSource 属性变化
-                var dpd = DependencyPropertyDescriptor.FromProperty(
-                    ItemsControl.ItemsSourceProperty, typeof(DataGrid));
-
-                // 移除已存在的事件处理器（如果有）
-                dpd.RemoveValueChanged(dataGrid, DataGrid_ItemsSourceChanged);
-
-                // 添加新的事件处理器
-                dpd.AddValueChanged(dataGrid, DataGrid_ItemsSourceChanged);
-            }
-            else
-            {
-                // 如果关闭自动生成，移除事件处理器
-                var dpd = DependencyPropertyDescriptor.FromProperty(
-                    ItemsControl.ItemsSourceProperty, typeof(DataGrid));
-                dpd.RemoveValueChanged(dataGrid, DataGrid_ItemsSourceChanged);
-            }
+            // 关键：DataGrid Unloaded 时解绑——避免 DependencyPropertyDescriptor 静态字典持有强引用泄漏
+            dataGrid.Unloaded += OnDataGridUnloaded;
+        }
+        else
+        {
+            dataGrid.Unloaded -= OnDataGridUnloaded;
         }
     }
 
-    private static void DataGrid_ItemsSourceChanged(object sender, EventArgs e)
+    private static void OnDataGridUnloaded(object sender, RoutedEventArgs e)
     {
-        if (sender is DataGrid dataGrid && GetIsAutoGenerate(dataGrid))
+        if (sender is not DataGrid dataGrid)
         {
-            // 如果数据源改变并且自动生成已启用，重新生成列
-            DataGridColumnManager.GenerateColumns(dataGrid);
+            return;
         }
+
+        // 解绑 ItemsSource 监听
+        var handler = dataGrid.GetValue(ItemsSourceChangedHandlerProperty) as EventHandler;
+        if (handler != null)
+        {
+            var dpd = DependencyPropertyDescriptor.FromProperty(
+                ItemsControl.ItemsSourceProperty, typeof(DataGrid));
+            dpd.RemoveValueChanged(dataGrid, handler);
+            dataGrid.SetValue(ItemsSourceChangedHandlerProperty, null);
+        }
+
+        // 解绑 Columns 监听（来自 TextColumnEditingStyle）
+        var columnsHandler = dataGrid.GetValue(ColumnsCollectionChangedHandlerProperty) as NotifyCollectionChangedEventHandler;
+        if (columnsHandler != null)
+        {
+            ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged -= columnsHandler;
+            dataGrid.SetValue(ColumnsCollectionChangedHandlerProperty, null);
+        }
+
+        dataGrid.Unloaded -= OnDataGridUnloaded;
     }
 
     #endregion IsAutoGenerate
 
     #region TextColumnEditingStyle
 
-    public static readonly DependencyProperty TextColumnEditingStyleProperty =
-        DependencyProperty.RegisterAttached(
-            "TextColumnEditingStyle",
-            typeof(Style),
-            typeof(DataGridHelper),
-            new PropertyMetadata(null, OnTextColumnEditingStyleChanged));
-
-    public static Style GetTextColumnEditingStyle(DependencyObject obj)
-            => (Style)obj.GetValue(TextColumnEditingStyleProperty);
-
-    public static void SetTextColumnEditingStyle(DependencyObject obj, Style value)
-        => obj.SetValue(TextColumnEditingStyleProperty, value);
-
     private static void OnTextColumnEditingStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not DataGrid dataGrid) return;
+        if (d is not DataGrid dataGrid)
+        {
+            return;
+        }
+
+        // 解绑旧的 Columns 监听——具名 handler 才能正确 -=
+        var oldHandler = dataGrid.GetValue(ColumnsCollectionChangedHandlerProperty) as NotifyCollectionChangedEventHandler;
+        if (oldHandler != null)
+        {
+            ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged -= oldHandler;
+            dataGrid.SetValue(ColumnsCollectionChangedHandlerProperty, null);
+        }
 
         if (e.NewValue is Style)
         {
-            // 对已有的列立即应用
+            // 立即应用一次
             ApplyEditingStyle(dataGrid);
 
-            // 监听后续添加的列
-            ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged
-                += (_, _) => ApplyEditingStyle(dataGrid);
+            // 监听 Columns 变化——闭包 capture dataGrid，handler 实例存附加属性供解绑
+            NotifyCollectionChangedEventHandler newHandler = (sender, args) => ApplyEditingStyle(dataGrid);
+            ((INotifyCollectionChanged)dataGrid.Columns).CollectionChanged += newHandler;
+            dataGrid.SetValue(ColumnsCollectionChangedHandlerProperty, newHandler);
+
+            // Unloaded 时解绑（如果 IsAutoGenerate 没挂上）
+            dataGrid.Unloaded -= OnDataGridUnloaded;
+            dataGrid.Unloaded += OnDataGridUnloaded;
         }
     }
 
@@ -180,74 +527,44 @@ public class DataGridHelper
 
     #endregion TextColumnEditingStyle
 
-    #region 内部列管理类
+    #region 内部列管理
 
-    /// <summary>
-    /// 内部私有类，用于管理DataGrid列的生成
-    /// </summary>
     private static class DataGridColumnManager
     {
-        /// <summary>
-        /// 生成DataGrid列
-        /// </summary>
-        public static void GenerateColumns(DataGrid dataGrid)
-        {
-            // 清空原有列
-            dataGrid.Columns.Clear();
-
-            // 获取数据源类型
-            Type itemType = GetItemSourceType(dataGrid);
-            if (itemType == null)
-                return;
-
-            // 获取所有带有 DataGridColumnAttribute 特性的属性
-            var properties = GetPropertiesWithDataGridColumnAttribute(itemType);
-
-            // 按 Index 排序并创建列
-            foreach (var property in properties.OrderBy(p => p.Attribute.Index))
-            {
-                var column = CreateColumn(property.PropertyInfo, property.Attribute);
-                dataGrid.Columns.Add(column);
-            }
-        }
-
         private static Type GetItemSourceType(DataGrid dataGrid)
         {
-            if (dataGrid.ItemsSource == null)
+            if (dataGrid.ItemsSource is not IEnumerable enumerable)
+            {
                 return null;
+            }
 
-            // 尝试从 ItemsSource 获取元素类型
-            var enumerable = dataGrid.ItemsSource as IEnumerable;
-            if (enumerable == null)
-                return null;
-
-            // 尝试获取第一个元素来确定类型
+            // 优先取第一个非 null 元素的运行时类型——支持继承场景
             foreach (var item in enumerable)
             {
                 if (item != null)
+                {
                     return item.GetType();
-
+                }
                 break;
             }
 
-            // 如果集合为空，尝试从集合类型获取元素类型
-            Type collectionType = dataGrid.ItemsSource.GetType();
-
-            // 检查是否为泛型集合
+            // 集合空时退回到泛型参数
+            var collectionType = dataGrid.ItemsSource.GetType();
             if (collectionType.IsGenericType)
             {
-                Type[] genericArgs = collectionType.GetGenericArguments();
+                var genericArgs = collectionType.GetGenericArguments();
                 if (genericArgs.Length > 0)
+                {
                     return genericArgs[0];
+                }
             }
 
             return null;
         }
 
-        private static List<(PropertyInfo PropertyInfo, DataGridPropertyAttribute Attribute)> GetPropertiesWithDataGridColumnAttribute(Type type)
+        private static List<(PropertyInfo PropertyInfo, DataGridPropertyAttribute Attribute)> GetPropertiesWithAttribute(Type type)
         {
             var result = new List<(PropertyInfo, DataGridPropertyAttribute)>();
-
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var property in properties)
             {
@@ -257,125 +574,108 @@ public class DataGridHelper
                     result.Add((property, attribute));
                 }
             }
-
             return result;
         }
 
         private static DataGridColumn CreateColumn(PropertyInfo property, DataGridPropertyAttribute attribute)
         {
-            // 默认创建文本列
-            DataGridTextColumn column = new DataGridTextColumn();
-
-            // 设置绑定
-            Binding binding = new Binding(property.Name);
-
-            // 设置格式化字符串
-            if (!string.IsNullOrEmpty(attribute.StringFormat))
-            {
-                binding.StringFormat = attribute.StringFormat;
-            }
-
-            column.Binding = binding;
-
-            // 设置标题
-            column.Header = attribute.Header ?? property.Name;
-
-            // 设置宽度
-            column.Width = attribute.Width;
-
-            // 设置只读状态
-            // 如果属性本身不可写或者特性设置为只读，则列为只读
-            bool isPropertyReadOnly = !property.CanWrite;
-            column.IsReadOnly = isPropertyReadOnly || attribute.IsReadOnly;
-
-            // TODO: 实现自定义模板的支持
-            // 如果指定了模板，需要创建 DataGridTemplateColumn
+            // 模板列优先
             if (!string.IsNullOrEmpty(attribute.DataTemplateKey) || !string.IsNullOrEmpty(attribute.DataTemplatePath))
             {
                 return CreateTemplateColumn(property, attribute);
             }
 
-            return column;
+            // 默认文本列
+            var binding = new Binding(property.Name);
+            if (!string.IsNullOrEmpty(attribute.StringFormat))
+            {
+                binding.StringFormat = attribute.StringFormat;
+            }
+
+            return new DataGridTextColumn
+            {
+                Header = attribute.Header ?? property.Name,
+                Width = attribute.GetWidthAsDataGridLength(),
+                IsReadOnly = !property.CanWrite || attribute.IsReadOnly,
+                Binding = binding,
+            };
         }
 
         private static DataGridColumn CreateTemplateColumn(PropertyInfo property, DataGridPropertyAttribute attribute)
         {
-            // 检查属性是否可写
-            bool isPropertyReadOnly = !property.CanWrite;
-
-            // 创建模板列
             var templateColumn = new DataGridTemplateColumn
             {
                 Header = attribute.Header ?? property.Name,
-                Width = attribute.Width,
-                IsReadOnly = isPropertyReadOnly || attribute.IsReadOnly
+                Width = attribute.GetWidthAsDataGridLength(),
+                IsReadOnly = !property.CanWrite || attribute.IsReadOnly,
             };
 
-            // 创建单元格模板 (CellTemplate)
+            DataTemplate template = null;
+
             if (!string.IsNullOrEmpty(attribute.DataTemplateKey))
             {
-                // 通过 Key 获取资源模板
-                if (Application.Current.Resources.Contains(attribute.DataTemplateKey))
+                if (Application.Current?.Resources?.Contains(attribute.DataTemplateKey) == true)
                 {
-                    var template = Application.Current.Resources[attribute.DataTemplateKey] as DataTemplate;
-                    if (template != null)
-                    {
-                        templateColumn.CellTemplate = template;
-                    }
+                    template = Application.Current.Resources[attribute.DataTemplateKey] as DataTemplate;
                 }
             }
             else if (!string.IsNullOrEmpty(attribute.DataTemplatePath))
             {
-                // 尝试通过路径加载资源字典并获取模板
                 try
                 {
                     var resourceDictionary = new ResourceDictionary
                     {
                         Source = new Uri(attribute.DataTemplatePath, UriKind.RelativeOrAbsolute)
                     };
-
-                    // 查找第一个 DataTemplate 资源
                     foreach (var key in resourceDictionary.Keys)
                     {
-                        if (resourceDictionary[key] is DataTemplate template)
+                        if (resourceDictionary[key] is DataTemplate dt)
                         {
-                            templateColumn.CellTemplate = template;
+                            template = dt;
                             break;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    // 记录异常，但不中断程序执行
-                    System.Diagnostics.Debug.WriteLine($"加载数据模板失败: {attribute.DataTemplatePath}, 错误: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DataGridHelper] 加载数据模板失败: {attribute.DataTemplatePath}, 错误: {ex.Message}");
                 }
             }
 
-            // 绑定属性值
-            if (templateColumn.CellTemplate == null)
+            if (template == null)
             {
-                // 如果找不到模板，创建一个默认的绑定
-                var factory = new FrameworkElementFactory(typeof(TextBlock));
-                var binding = new Binding(property.Name);
-
-                if (!string.IsNullOrEmpty(attribute.StringFormat))
-                {
-                    binding.StringFormat = attribute.StringFormat;
-                }
-
-                factory.SetBinding(TextBlock.TextProperty, binding);
-
-                var template = new DataTemplate
-                {
-                    VisualTree = factory
-                };
-
-                templateColumn.CellTemplate = template;
+                // 找不到模板——日志警告，不再静默 fallback 到无意义的 TextBlock
+                System.Diagnostics.Debug.WriteLine(
+                    $"[DataGridHelper] 属性 {property.Name} 指定了模板 (Key={attribute.DataTemplateKey}, Path={attribute.DataTemplatePath}) 但未找到。请检查资源是否注册或路径是否正确。");
+                return null;
             }
 
+            templateColumn.CellTemplate = template;
             return templateColumn;
+        }
+
+        public static void GenerateColumns(DataGrid dataGrid)
+        {
+            dataGrid.Columns.Clear();
+
+            var itemType = GetItemSourceType(dataGrid);
+            if (itemType == null)
+            {
+                return;
+            }
+
+            var properties = GetPropertiesWithAttribute(itemType);
+            foreach (var (propertyInfo, attribute) in properties.OrderBy(p => p.Attribute.Index))
+            {
+                var column = CreateColumn(propertyInfo, attribute);
+                if (column != null)
+                {
+                    dataGrid.Columns.Add(column);
+                }
+            }
         }
     }
 
-    #endregion 内部列管理类
+    #endregion 内部列管理
 }

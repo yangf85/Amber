@@ -263,6 +263,7 @@
                                                 <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Multiple（单击切换）" />
                                                 <ListBox
                                                     Height="220"
+                                                    hp:ListBoxHelper.SelectedItems="{Binding SelectedFruits}"
                                                     ItemsSource="{Binding Fruits}"
                                                     SelectionMode="Multiple" />
                                             </StackPanel>
@@ -276,11 +277,91 @@
                                             </StackPanel>
                                         </Grid>
 
+                                        <!--  Multiple 列实时选中显示 — 通过 hp:ListBoxHelper.SelectedItems 双向绑定  -->
+                                        <Border
+                                            Margin="0,16,0,0"
+                                            Padding="14,12"
+                                            Background="{DynamicResource Background.Header}"
+                                            BorderBrush="{DynamicResource Border.Default}"
+                                            BorderThickness="1">
+                                            <StackPanel>
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock
+                                                        Grid.Column="0"
+                                                        FontSize="12"
+                                                        FontWeight="Medium"
+                                                        Foreground="{DynamicResource Foreground.Default}"
+                                                        Text="Multiple 列实时选中：" />
+                                                    <TextBlock Grid.Column="2" Style="{StaticResource ValueLabelStyle}">
+                                                        <Run Text="共 " />
+                                                        <Run
+                                                            FontWeight="Bold"
+                                                            Foreground="{DynamicResource Foreground.Link}"
+                                                            Text="{Binding SelectedFruits.Count, Mode=OneWay, FallbackValue=0}" />
+                                                        <Run Text=" 项" />
+                                                    </TextBlock>
+                                                </Grid>
+
+                                                <ItemsControl ItemsSource="{Binding SelectedFruits}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border
+                                                                Margin="0,2,6,2"
+                                                                Padding="10,4"
+                                                                Background="{DynamicResource Background.Info}">
+                                                                <TextBlock
+                                                                    FontSize="12"
+                                                                    FontWeight="Medium"
+                                                                    Foreground="White"
+                                                                    Text="{Binding}" />
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <!--  空状态提示 — DataTrigger 控制可见性  -->
+                                                <TextBlock
+                                                    FontSize="11"
+                                                    FontStyle="Italic"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text="（点击中间列选择水果，这里会实时同步）">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedFruits.Count}" Value="0">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+
                                         <TextBlock
                                             Margin="0,12,0,0"
                                             FontSize="11"
                                             Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="键盘：↑/↓ 移动焦点，Space 切换选中（Multiple/Extended），Ctrl+A 全选（Extended）。" />
+                                            Text="键盘：↑/↓ 移动焦点，Space 切换选中（Multiple/Extended），Ctrl+A 全选（Extended）。"
+                                            TextWrapping="Wrap" />
+
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="实现方式：hp:ListBoxHelper.SelectedItems=&quot;{Binding SelectedFruits}&quot; — 本库附加属性双向同步，纯 MVVM，无需 code-behind。要求 ViewModel 集合类型实现 INotifyCollectionChanged（推荐 ObservableCollection）。"
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
                                 </cy:Card>
                             </StackPanel>
@@ -446,6 +527,7 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
                                     <Border
@@ -553,7 +635,7 @@
                                         Grid.Row="5"
                                         Grid.Column="2"
                                         Style="{StaticResource PropTableCellStyle}"
-                                        Text="多选模式所有选中项。注意：DP 没有 setter，不能直接 TwoWay 绑——MVVM 时常用 behavior 或 ItemContainerStyle 上的 IsSelected 双向绑定到模型属性。" />
+                                        Text="多选模式所有选中项。原生 DP 没有 setter，不能直接 TwoWay 绑——MVVM 时用本库 hp:ListBoxHelper.SelectedItems 附加属性桥接。" />
 
                                     <TextBlock
                                         Grid.Row="6"
@@ -617,7 +699,23 @@
                                         Grid.Row="9"
                                         Grid.Column="2"
                                         Style="{StaticResource PropTableCellStyle}"
-                                        Text="全选状态绑定。三态：true=全选 / false=全不选 / null=部分选中。" />
+                                        Text="全选状态绑定。三态：true=全选 / false=全不选 / null=部分选中。直接绑 CheckBox.IsChecked 自动支持 indeterminate 视觉。" />
+
+                                    <TextBlock
+                                        Grid.Row="10"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="hp:ListBoxHelper.SelectedItems" />
+                                    <TextBlock
+                                        Grid.Row="10"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="IList (TwoWay)" />
+                                    <TextBlock
+                                        Grid.Row="10"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="本库扩展：双向绑定多选项到 ViewModel。要求集合实现 INotifyCollectionChanged（推荐 ObservableCollection&lt;T&gt;）——helper 监听 CollectionChanged 实现 ViewModel ↔ ListBox 真双向同步。" />
                                 </Grid>
                             </Border>
                         </cy:Card>
@@ -652,14 +750,22 @@
     SelectionMode="Multiple"
     ItemsSource="{Binding Items}" />
 
-<!-- 3. 全选 CheckBox（本库扩展） -->
+<!-- 3. 多选双向绑定（本库扩展，纯 MVVM） -->
+<ListBox
+    SelectionMode="Multiple"
+    ItemsSource="{Binding Items}"
+    hp:ListBoxHelper.SelectedItems="{Binding SelectedItems}" />
+<!-- ViewModel.SelectedItems 必须是 ObservableCollection<T> -->
+
+<!-- 4. 全选 CheckBox（本库扩展） -->
 <ListBox
     SelectionMode="Multiple"
     hp:ListBoxHelper.IsSelectAllEnabled="True"
     hp:ListBoxHelper.IsSelectedAll="{Binding IsAll, Mode=TwoWay}"
     ItemsSource="{Binding Items}" />
+<!-- IsAll 类型为 bool? 支持三态：true/false/null(半选) -->
 
-<!-- 4. 自定义模板 -->
+<!-- 5. 自定义模板 -->
 <ListBox HorizontalContentAlignment="Stretch"
          ItemsSource="{Binding People}">
     <ListBox.ItemTemplate>
@@ -669,7 +775,7 @@
     </ListBox.ItemTemplate>
 </ListBox>
 
-<!-- 5. 过滤 / 排序 / 分组（绑定 ICollectionView） -->
+<!-- 6. 过滤 / 排序 / 分组（绑定 ICollectionView） -->
 <ListBox ItemsSource="{Binding FilteredView}">
     <ListBox.GroupStyle>
         <GroupStyle>

@@ -1,0 +1,1036 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.ListViewView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:ListViewDemoViewModel}"
+    d:DesignHeight="2800"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M3,5 L21,5 L21,9 L3,9 Z M3,9 L3,19 L21,19 L21,9 M9,9 L9,19 M15,9 L15,19"
+                            Stroke="White"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.8" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="ListView" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 原生控件 · 主题样式" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="表格视图——继承自 ListBox，通过 View=GridView 提供多列表格布局（Excel/Explorer 风格）。本库提供 WinUI 3 风格主题样式，列头单独样式化（hover/按下交互），ListViewItem 整行高亮 + 左 3px 竖条选中指示器，与 ListBox/TreeView 视觉对齐。脱了 View 时自动退化为普通列表模式。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① GridView 基础表格  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="GridView 基础表格" Subtitle="DisplayMemberBinding + 多列布局">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="ListView.View = GridView 提供 Excel 风格多列布局。GridViewColumn.DisplayMemberBinding 直接绑定数据属性——最简单的列定义方式。" />
+
+                            <ListView
+                                Height="280"
+                                ItemsSource="{Binding BasicData}"
+                                SelectedItem="{Binding SelectedBasicPerson}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn
+                                            Width="160"
+                                            DisplayMemberBinding="{Binding FullName}"
+                                            Header="姓名" />
+                                        <GridViewColumn
+                                            Width="200"
+                                            DisplayMemberBinding="{Binding Email}"
+                                            Header="邮箱" />
+                                        <GridViewColumn
+                                            Width="120"
+                                            DisplayMemberBinding="{Binding City}"
+                                            Header="城市" />
+                                        <GridViewColumn
+                                            Width="60"
+                                            DisplayMemberBinding="{Binding Age}"
+                                            Header="年龄" />
+                                        <GridViewColumn
+                                            Width="80"
+                                            DisplayMemberBinding="{Binding Status}"
+                                            Header="状态" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="12,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="12"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="当前选中：" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="FullName = " />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding SelectedBasicPerson.FullName, Mode=OneWay, FallbackValue=（无）}" />
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② CellTemplate 自定义列  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="CellTemplate" Subtitle="自定义单元格内容">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="GridViewColumn.CellTemplate 自定义渲染——头像、状态标、按钮、图标。和 DisplayMemberBinding 互斥（同时设时优先用 CellTemplate）。" />
+
+                            <ListView Height="320" ItemsSource="{Binding TemplateData}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Width="220" Header="用户">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Border
+                                                            Width="32"
+                                                            Height="32"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource Background.Info}">
+                                                            <TextBlock
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                FontSize="13"
+                                                                FontWeight="Bold"
+                                                                Foreground="White"
+                                                                Text="{Binding FirstName}" />
+                                                        </Border>
+                                                        <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock
+                                                                FontSize="13"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding FullName}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                                Text="{Binding Email}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+
+                                        <GridViewColumn Width="140" Header="地址">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock
+                                                            FontSize="12"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource Foreground.Link}"
+                                                            Text="{Binding City}" />
+                                                        <TextBlock
+                                                            Margin="0,2,0,0"
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource Foreground.Caption}"
+                                                            Text="{Binding Country}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+
+                                        <GridViewColumn Width="80" Header="状态">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border
+                                                        Padding="8,3"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="{DynamicResource Background.Success}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                                        <Setter Property="Background" Value="{DynamicResource Background.Error}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                                        <Setter Property="Background" Value="{DynamicResource Background.Warning}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock
+                                                            FontSize="10"
+                                                            FontWeight="Bold"
+                                                            Foreground="White"
+                                                            Text="{Binding Status}" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 列宽演示  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="列宽控制" Subtitle="固定 / Auto / 拖动调整">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Width=数值 固定列宽 / Width=Auto 按内容自适应 / 列头右边缘可拖动调宽。鼠标移到列头分隔线上变 size 光标。" />
+
+                            <ListView Height="220" ItemsSource="{Binding ColumnWidthData}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn
+                                            Width="Auto"
+                                            DisplayMemberBinding="{Binding FirstName}"
+                                            Header="名（Auto）" />
+                                        <GridViewColumn
+                                            Width="Auto"
+                                            DisplayMemberBinding="{Binding LastName}"
+                                            Header="姓（Auto）" />
+                                        <GridViewColumn
+                                            Width="200"
+                                            DisplayMemberBinding="{Binding Email}"
+                                            Header="邮箱（200）" />
+                                        <GridViewColumn
+                                            Width="150"
+                                            DisplayMemberBinding="{Binding Country}"
+                                            Header="国家（可拖动）" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="试试拖动(邮箱)和(国家)列头之间的分隔线——本主题样式提供 6px 不可见拖动手柄。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 列头排序  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="列头排序" Subtitle="点击列头切换升降序">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="WPF 原生 ListView 没有内置列头排序——靠 GridView.ColumnHeader.Click 路由事件 + ICollectionView.SortDescriptions 实现。点击同一列头切换升降序，点击新列重置为升序。" />
+
+                            <ListView
+                                Height="320"
+                                GridViewColumnHeader.Click="OnSortHeaderClick"
+                                ItemsSource="{Binding SortableView}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn
+                                            Width="140"
+                                            DisplayMemberBinding="{Binding FullName}"
+                                            Header="姓名" />
+                                        <GridViewColumn
+                                            Width="180"
+                                            DisplayMemberBinding="{Binding Email}"
+                                            Header="邮箱" />
+                                        <GridViewColumn
+                                            Width="60"
+                                            DisplayMemberBinding="{Binding Age}"
+                                            Header="年龄" />
+                                        <GridViewColumn
+                                            Width="80"
+                                            DisplayMemberBinding="{Binding Status}"
+                                            Header="状态" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="12,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Text="当前排序：" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding CurrentSortLabel, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 无 GridView（fancy 列表模式）  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="脱了 View 的 ListView" Subtitle="退化为 fancy 列表（ItemTemplate 模式）">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="不设 View 时 ListView 退化为普通列表——和 ListBox 几乎等价，但保留 ListView 命名。本主题样式专门修复了硬编码 GridViewRowPresenter 的 bug，普通模式下 ItemTemplate 也能正常渲染。" />
+
+                            <ListView
+                                Height="280"
+                                ItemsSource="{Binding PlainListData}"
+                                SelectedItem="{Binding SelectedPlainPerson}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border
+                                                Grid.Column="0"
+                                                Width="36"
+                                                Height="36"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource Background.Info}">
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="14"
+                                                    FontWeight="Bold"
+                                                    Foreground="White"
+                                                    Text="{Binding FirstName}" />
+                                            </Border>
+
+                                            <StackPanel
+                                                Grid.Column="1"
+                                                Margin="12,0,0,0"
+                                                VerticalAlignment="Center">
+                                                <TextBlock
+                                                    FontSize="13"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource Foreground.Default}"
+                                                    Text="{Binding FullName}" />
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    FontSize="11"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text="{Binding Email}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+
+                                            <Border
+                                                Grid.Column="2"
+                                                Padding="8,3"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource Background.Header}"
+                                                BorderBrush="{DynamicResource Border.Default}"
+                                                BorderThickness="1">
+                                                <TextBlock
+                                                    FontFamily="Consolas"
+                                                    FontSize="11"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text="{Binding Status}" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="什么时候用 ListView 而不是 ListBox？(1) 同一控件可能切换 GridView / 普通模式；(2) 团队习惯用 ListView 命名；(3) 需要 GridView 列头交互。否则用 ListBox 更轻量。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑥ 常见使用场景  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <UniformGrid Columns="2" Rows="2">
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M2,4 L8,4 L9,5 L18,5 L18,16 L2,16 Z M2,8 L18,8"
+                                        Stroke="{DynamicResource Foreground.Info}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="文件管理器" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="GridView 列：文件名 / 大小 / 修改日期 / 类型——支持列头排序。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M2,5 L18,5 L18,15 L2,15 Z M2,5 L10,11 L18,5"
+                                        Stroke="{DynamicResource Foreground.Warning}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="邮件 / 消息列表" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="脱了 View 用 ItemTemplate——发件人 + 主题 + 时间堆叠布局。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,3 L17,3 L17,17 L3,17 Z M3,8 L17,8 M3,12 L17,12 M8,8 L8,17 M13,8 L13,17"
+                                        Stroke="{DynamicResource Foreground.Success}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="数据网格" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="只读数据展示——比 DataGrid 轻量。需要单元格编辑时仍选 DataGrid。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,5 L9,5 L9,9 L3,9 Z M3,11 L9,11 L9,17 L3,17 Z M11,5 L17,5 L17,17 L11,17 Z"
+                                        Stroke="#8B5CF6"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="1.5" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="Master-Detail" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="左侧 GridView 列出条目 + 右侧详情面板——SelectedItem 驱动详情。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+                        </UniformGrid>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑦ 属性 / 行为表  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="ListView / GridView 主要属性 / 行为">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="名称" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型 / 来源" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="View" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="ViewBase" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="视图模式。最常用 GridView（多列表格）。null 时退化为普通列表（按 ItemTemplate 渲染）。可自定义 ViewBase 实现卡片视图等。" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemsSource" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IEnumerable" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="数据源（继承自 ItemsControl）。绑 ICollectionView 时支持过滤 / 排序 / 分组。" />
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="GridView.Columns" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="GridViewColumnCollection" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="列定义集合。每列至少一个 Header + （DisplayMemberBinding 或 CellTemplate 二选一）。" />
+
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="GridViewColumn.DisplayMemberBinding" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="BindingBase" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="简单文本列——直接绑定数据属性。等价于 CellTemplate 里只放一个 TextBlock。优先级低于 CellTemplate。" />
+
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="GridViewColumn.CellTemplate" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="DataTemplate" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="自定义单元格内容——头像 / 状态标 / 按钮。和 DisplayMemberBinding 互斥（同时设时优先 CellTemplate）。" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="GridViewColumn.Width" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="double" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="列宽。数值=固定 / Double.NaN（XAML 写 Auto）=按内容自适应。注意：GridView 不支持星号宽度。" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="GridViewColumnHeader.Click" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="列头点击。WPF 列头排序需自己实现——监听此事件 + 改 ICollectionView.SortDescriptions。本 demo 章节④ 演示标准做法。" />
+
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SelectedItem / SelectionMode" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object / SelectionMode" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="继承自 ListBox/Selector。Single（默认）/ Multiple / Extended——和 ListBox 完全一致。" />
+
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ListViewItem.Template (本库)" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="样式行为" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="本库样式用 ContentPresenter 而非硬编码 GridViewRowPresenter——View=GridView 时 WPF 自动替换，View=null 时按 ItemTemplate 渲染。两种用法都能 work。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  ⑧ XAML 示例 + ⑨ 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 1. GridView 基础 -->
+<ListView ItemsSource="{Binding People}">
+    <ListView.View>
+        <GridView>
+            <GridViewColumn Width="160" Header="姓名"
+                DisplayMemberBinding="{Binding FullName}" />
+            <GridViewColumn Width="200" Header="邮箱"
+                DisplayMemberBinding="{Binding Email}" />
+        </GridView>
+    </ListView.View>
+</ListView>
+
+<!-- 2. CellTemplate 自定义列 -->
+<GridViewColumn Width="220" Header="用户">
+    <GridViewColumn.CellTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <Border Width="32" Height="32" Background="..." />
+                <TextBlock Text="{Binding FullName}" />
+            </StackPanel>
+        </DataTemplate>
+    </GridViewColumn.CellTemplate>
+</GridViewColumn>
+
+<!-- 3. 列头排序（code-behind） -->
+<ListView ItemsSource="{Binding View}"
+          GridViewColumnHeader.Click="OnSortHeaderClick" />
+
+private void OnSortHeaderClick(object sender, RoutedEventArgs e)
+{
+    var header = e.OriginalSource as GridViewColumnHeader;
+    var binding = header.Column.DisplayMemberBinding as Binding;
+    var path = binding.Path.Path;
+    view.SortDescriptions.Clear();
+    view.SortDescriptions.Add(new SortDescription(path,
+        ListSortDirection.Ascending));
+}
+
+<!-- 4. 脱了 View 用作 fancy 列表 -->
+<ListView ItemsSource="{Binding Messages}">
+    <ListView.ItemTemplate>
+        <DataTemplate>...</DataTemplate>
+    </ListView.ItemTemplate>
+</ListView>]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="ListView vs ListBox" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="只在需要 GridView 表格列布局时选 ListView——其他场景 ListBox 更轻量。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="DisplayMemberBinding 优先" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="简单文本列别用 CellTemplate——DisplayMemberBinding 更高效（不创建 DataTemplate 实例）。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="GridView 不支持星号列宽" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="想要(自动占满剩余空间)——用 SharedSizeGroup 或 code-behind 监听 SizeChanged。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="列头排序自己实现" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="WPF 没内置——监听 GridViewColumnHeader.Click 改 ICollectionView.SortDescriptions。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="不要换成 DataGrid" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="只读数据展示用 ListView 足够——DataGrid 自带编辑/选择/复制等大量功能，包袱重。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

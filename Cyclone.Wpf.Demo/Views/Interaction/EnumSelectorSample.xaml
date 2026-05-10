@@ -1,0 +1,866 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.EnumSelectorSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:EnumSelectorDemoViewModel}}"
+    d:DesignHeight="2000"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  ============ 章节编号小圆圈 ============  -->
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!--  ============ 演示项标题（每个 NumberBox 上方那条小标题） ============  -->
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="DemoItemSubtitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <!--  ============ 属性表的列样式 ============  -->
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+
+        <!--  ============ 代码块样式 ============  -->
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}"
+                        CornerRadius="0">
+                        <Grid
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Ellipse
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Width="10"
+                                Height="10"
+                                Margin="2"
+                                Fill="{DynamicResource Foreground.Link}" />
+                            <Ellipse
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Width="10"
+                                Height="10"
+                                Margin="2"
+                                Stroke="{DynamicResource Foreground.Link}"
+                                StrokeThickness="2" />
+                            <Ellipse
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Width="10"
+                                Height="10"
+                                Margin="2"
+                                Stroke="{DynamicResource Foreground.Link}"
+                                StrokeThickness="2" />
+                            <Ellipse
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Width="10"
+                                Height="10"
+                                Margin="2"
+                                Fill="{DynamicResource Foreground.Link}" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="EnumSelector" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}"
+                                CornerRadius="0">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="基于枚举类型的单选 / 多选选择器。普通枚举默认渲染为 RadioButton（单选），Flags 枚举默认渲染为 CheckBox（多选）。支持 [Description] 别名显示、布局行列控制、Auto / 强制模式切换。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <StackPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="200" />
+                                </Grid.ColumnDefinitions>
+
+                                <cy:EnumSelector
+                                    x:Name="BasicEnumSelector"
+                                    Grid.Column="0"
+                                    Columns="2"
+                                    EnumType="{x:Type local:UserRole}"
+                                    SelectedEnum="{Binding UserRole, Mode=TwoWay}" />
+
+                                <Border
+                                    Grid.Column="1"
+                                    Margin="20,0,0,0"
+                                    Padding="14,10"
+                                    Background="{DynamicResource Background.Header}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="100"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="EnumType:" />
+                                            <TextBlock
+                                                FontFamily="Consolas"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Default}"
+                                                Text="UserRole" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="100"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="HasFlags:" />
+                                            <TextBlock
+                                                FontFamily="Consolas"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Default}"
+                                                Text="{Binding HasFlags, ElementName=BasicEnumSelector}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="100"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="SelectedEnum:" />
+                                            <TextBlock
+                                                FontFamily="Consolas"
+                                                FontSize="12"
+                                                FontWeight="Bold"
+                                                Foreground="{DynamicResource Foreground.Link}"
+                                                Text="{Binding UserRole}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 其他样式示例  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="其他样式示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="普通枚举（自动识别为 RadioButton 单选）" />
+                                <cy:EnumSelector
+                                    Columns="4"
+                                    EnumType="{x:Type local:Priority}"
+                                    SelectedEnum="{Binding Priority, Mode=TwoWay}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding Priority, StringFormat='SelectedEnum = {0}'}" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Flags 枚举（自动识别为 CheckBox 多选）" />
+                                <cy:EnumSelector
+                                    Columns="3"
+                                    EnumType="{x:Type local:FilePermissions}"
+                                    SelectedEnum="{Binding FilePermissions, Mode=TwoWay}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding FilePermissions, StringFormat='SelectedEnum = {0}'}" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="原始名称 vs 别名（IsUseAlias 切换）" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border
+                                        Grid.Column="0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource Background.Header}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                Margin="0,0,0,4"
+                                                FontSize="11"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="IsUseAlias = False" />
+                                            <cy:EnumSelector
+                                                Columns="2"
+                                                EnumType="{x:Type local:UserRole}"
+                                                IsUseAlias="False"
+                                                SelectedEnum="{Binding UserRoleForAliasDemo, Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border
+                                        Grid.Column="2"
+                                        Padding="10,8"
+                                        Background="{DynamicResource Background.Header}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                Margin="0,0,0,4"
+                                                FontSize="11"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="IsUseAlias = True（默认）" />
+                                            <cy:EnumSelector
+                                                Columns="2"
+                                                EnumType="{x:Type local:UserRole}"
+                                                IsUseAlias="True"
+                                                SelectedEnum="{Binding UserRoleForAliasDemo, Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="强制 CheckBox 模式（非 Flags 枚举仍为单选语义）" />
+                                <cy:EnumSelector
+                                    Columns="4"
+                                    DisplayMode="CheckBox"
+                                    EnumType="{x:Type local:Priority}"
+                                    SelectedEnum="{Binding PriorityCheckboxStyle, Mode=TwoWay}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="非 Flags 枚举即使强制 CheckBox 视觉，行为仍为单选——避免合并出无效枚举值。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="布局：Rows = 2, Columns = 4" />
+                                <cy:EnumSelector
+                                    Columns="4"
+                                    EnumType="{x:Type local:WorkDays}"
+                                    Rows="2"
+                                    SelectedEnum="{Binding WorkDays, Mode=TwoWay}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding WorkDays, StringFormat='SelectedEnum = {0}'}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 常见使用场景  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <StackPanel>
+
+                            <UniformGrid Columns="4" Rows="1">
+                                <UniformGrid.Resources>
+                                    <Style TargetType="{x:Type cy:Card}">
+                                        <Setter Property="Margin" Value="6,0" />
+                                    </Style>
+                                </UniformGrid.Resources>
+
+                                <cy:Card>
+                                    <StackPanel>
+                                        <Path
+                                            Width="22"
+                                            Height="22"
+                                            HorizontalAlignment="Left"
+                                            Data="M5,5 L9,5 L9,9 L5,9 Z M5,15 L9,15 L9,19 L5,19 Z M13,5 H19 M13,7 H17 M13,15 H19 M13,17 H17"
+                                            Stroke="{DynamicResource Foreground.Link}"
+                                            StrokeEndLineCap="Round"
+                                            StrokeStartLineCap="Round"
+                                            StrokeThickness="1.5" />
+                                        <TextBlock
+                                            Margin="0,10,0,0"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="状态选择" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="订单状态、用户角色、审批结果等单选枚举字段"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </cy:Card>
+                                <cy:Card>
+                                    <StackPanel>
+                                        <Path
+                                            Width="22"
+                                            Height="22"
+                                            HorizontalAlignment="Left"
+                                            Data="M3,5 H21 M3,12 H21 M3,19 H21 M5,5 v3 M11,12 v3 M17,19 v-3"
+                                            Stroke="{DynamicResource Foreground.Success}"
+                                            StrokeEndLineCap="Round"
+                                            StrokeStartLineCap="Round"
+                                            StrokeThickness="1.8" />
+                                        <TextBlock
+                                            Margin="0,10,0,0"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="权限配置" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="文件读写执行、API 范围等 Flags 多选权限"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </cy:Card>
+                                <cy:Card>
+                                    <StackPanel>
+                                        <Path
+                                            Width="22"
+                                            Height="22"
+                                            HorizontalAlignment="Left"
+                                            Data="M5,8 H19 M5,12 H19 M5,16 H14 M9,4 V20"
+                                            Stroke="{DynamicResource Foreground.Warning}"
+                                            StrokeEndLineCap="Round"
+                                            StrokeStartLineCap="Round"
+                                            StrokeThickness="1.8" />
+                                        <TextBlock
+                                            Margin="0,10,0,0"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="筛选条件" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="日志级别、消息类型等多选筛选"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </cy:Card>
+                                <cy:Card>
+                                    <StackPanel>
+                                        <Path
+                                            Width="22"
+                                            Height="22"
+                                            HorizontalAlignment="Left"
+                                            Data="M12,3 L4,7 V12 C4,16 8,20 12,21 C16,20 20,16 20,12 V7 Z"
+                                            Stroke="#8B5CF6"
+                                            StrokeLineJoin="Round"
+                                            StrokeThickness="1.8" />
+                                        <TextBlock
+                                            Margin="0,10,0,0"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="偏好设置" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="主题模式、语言、通知偏好等单选设置项"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </cy:Card>
+                            </UniformGrid>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 主要属性  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="主要属性">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <StackPanel>
+
+                            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Border
+                                        Grid.Row="0"
+                                        Grid.ColumnSpan="4"
+                                        Background="{DynamicResource Background.Header}" />
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableHeaderStyle}"
+                                        Text="属性" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableHeaderStyle}"
+                                        Text="类型" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableHeaderStyle}"
+                                        Text="默认值" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableHeaderStyle}"
+                                        Text="说明" />
+
+                                    <Border
+                                        Grid.Row="0"
+                                        Grid.ColumnSpan="4"
+                                        Height="1"
+                                        VerticalAlignment="Bottom"
+                                        Background="{DynamicResource Border.Default}" />
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="EnumType" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="Type" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="null" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="要展示的枚举类型" />
+
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="SelectedEnum" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="Enum" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="null" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="当前选中值，支持双向绑定" />
+
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="DisplayMode" />
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="enum" />
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="Auto" />
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="Auto / RadioButton / CheckBox" />
+
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="IsUseAlias" />
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="bool" />
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="True" />
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="是否使用 [Description] 别名作为显示文本" />
+
+                                    <TextBlock
+                                        Grid.Row="5"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="Rows" />
+                                    <TextBlock
+                                        Grid.Row="5"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="int" />
+                                    <TextBlock
+                                        Grid.Row="5"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="0" />
+                                    <TextBlock
+                                        Grid.Row="5"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="UniformGrid 行数（0 = 自动）" />
+
+                                    <TextBlock
+                                        Grid.Row="6"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="Columns" />
+                                    <TextBlock
+                                        Grid.Row="6"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="int" />
+                                    <TextBlock
+                                        Grid.Row="6"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="0" />
+                                    <TextBlock
+                                        Grid.Row="6"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="UniformGrid 列数（0 = 自动）" />
+
+                                    <TextBlock
+                                        Grid.Row="7"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="HasFlags" />
+                                    <TextBlock
+                                        Grid.Row="7"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="bool" />
+                                    <TextBlock
+                                        Grid.Row="7"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="—" />
+                                    <TextBlock
+                                        Grid.Row="7"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="只读。EnumType 是否标记 [Flags]" />
+
+                                    <TextBlock
+                                        Grid.Row="8"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PropTableNameStyle}"
+                                        Text="EffectiveDisplayMode" />
+                                    <TextBlock
+                                        Grid.Row="8"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="enum" />
+                                    <TextBlock
+                                        Grid.Row="8"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PropTableTypeStyle}"
+                                        Text="—" />
+                                    <TextBlock
+                                        Grid.Row="8"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PropTableCellStyle}"
+                                        Text="只读。Auto 解析后的实际渲染模式" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ XAML 示例 + ⑥ 技术要点  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+
+                        <cy:Card Grid.Column="0">
+                            <cy:Card.Header>
+                                <cy:CardHeader Title="XAML 示例">
+                                    <cy:CardHeader.Icon>
+                                        <Border Style="{StaticResource SectionNumberStyle}">
+                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                        </Border>
+                                    </cy:CardHeader.Icon>
+                                </cy:CardHeader>
+                            </cy:Card.Header>
+                            <StackPanel>
+                                <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                                    <![CDATA[<cy:EnumSelector
+    EnumType="{x:Type local:FilePermissions}"
+    SelectedEnum="{Binding Permissions, Mode=TwoWay}"
+    DisplayMode="Auto"
+    IsUseAlias="True"
+    Columns="3" />]]>
+                                </TextBox>
+                            </StackPanel>
+                        </cy:Card>
+
+                        <cy:Card Grid.Column="2">
+                            <cy:Card.Header>
+                                <cy:CardHeader Title="技术要点">
+                                    <cy:CardHeader.Icon>
+                                        <Border Style="{StaticResource SectionNumberStyle}">
+                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                        </Border>
+                                    </cy:CardHeader.Icon>
+                                </cy:CardHeader>
+                            </cy:Card.Header>
+                            <StackPanel>
+
+                                <StackPanel Margin="0,0,0,12">
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="[Description]" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="为枚举值添加 DescriptionAttribute 即可作为别名显示。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="[Flags]" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="为枚举类型添加 FlagsAttribute 后，控件自动启用按位多选语义。"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
+                        </cy:Card>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部 Tip ============  -->
+            <Border
+                Grid.Row="2"
+                Margin="0,20,0,0"
+                Padding="16,12"
+                Background="{DynamicResource Background.Info}"
+                BorderBrush="{DynamicResource Border.Info}"
+                BorderThickness="1"
+                CornerRadius="0">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource Background.Highlighted}"
+                        CornerRadius="999">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="13"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="i" />
+                    </Border>
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Default}">
+                        <Run Text="EnumSelector 内部使用 ulong 处理位运算，支持 byte / short / int / long / ulong 等所有合法的枚举底层类型。Flags 枚举的复合值（如" />
+                        <Run
+                            FontFamily="Consolas"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="ReadWrite = Read | Write" />
+                        <Run Text="）会被自动识别为子位的并集。" />
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

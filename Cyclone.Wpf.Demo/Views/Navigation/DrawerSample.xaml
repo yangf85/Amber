@@ -1,0 +1,844 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.DrawerSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:DrawerViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+        </Style>
+
+        <!--  抽屉演示用的"主内容区"占位样式  -->
+        <Style x:Key="DrawerHostStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+
+        <Style x:Key="DrawerInnerTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="DrawerInnerTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M4,5 L9,5 L9,19 L4,19 Z M11,5 L20,5 L20,19 L11,19 Z M6,12 L7,12"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="Drawer" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="抽屉控件——从容器边缘滑入滑出的面板。支持四方向（Left/Right/Top/Bottom）、平移动画、遮罩层 + 点击关闭、ESC 关闭、键盘焦点循环、路由命令、Opening/Opened/Closing/Closed 路由事件。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="IsOpen / DrawerContent">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="将 IsOpen 双向绑定到 ViewModel 即可控制开关。点击遮罩层或按 ESC 默认即可关闭。" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    Grid.Column="0"
+                                    Padding="16,6"
+                                    Command="{x:Static cy:Drawer.OpenCommand}"
+                                    CommandTarget="{Binding ElementName=BasicDrawer}"
+                                    Content="打开抽屉" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource ValueLabelStyle}">
+                                    <Run Text="IsOpen =" />
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding IsBasicDrawerOpen, Mode=OneWay}" />
+                                </TextBlock>
+                            </Grid>
+
+                            <Border Height="240" Style="{StaticResource DrawerHostStyle}">
+                                <cy:Drawer
+                                    x:Name="BasicDrawer"
+                                    DrawerWidth="280"
+                                    IsOpen="{Binding IsBasicDrawerOpen, Mode=TwoWay}">
+                                    <cy:Drawer.DrawerContent>
+                                        <StackPanel Margin="20">
+                                            <TextBlock Style="{StaticResource DrawerInnerTitleStyle}" Text="侧边面板" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="这是抽屉内容（DrawerContent）。它位于 Drawer 主内容上层，通过遮罩层与下方内容隔离。" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="试试：" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="• 点击右侧灰色遮罩区域关闭" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="• 按 ESC 键关闭" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="• Tab 在抽屉内循环不会跑出去" />
+                                        </StackPanel>
+                                    </cy:Drawer.DrawerContent>
+
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Container}"
+                                            Text="主内容区域（Drawer.Content）" />
+                                    </Grid>
+                                </cy:Drawer>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 四方向 Placement  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="四方向 Placement" Subtitle="Left / Right / Top / Bottom">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="点击不同方向的按钮，抽屉从对应边缘滑入。Left/Right 受 DrawerWidth 控制，Top/Bottom 受 DrawerHeight 控制。" />
+
+                            <UniformGrid Margin="0,0,0,12" Columns="4">
+                                <Button
+                                    Margin="0,0,6,0"
+                                    Padding="0,8"
+                                    Click="OnPlacementButtonClick"
+                                    Content="← 左侧"
+                                    Tag="{x:Static cy:DrawerPlacement.Left}" />
+                                <Button
+                                    Margin="6,0,6,0"
+                                    Padding="0,8"
+                                    Click="OnPlacementButtonClick"
+                                    Content="右侧 →"
+                                    Tag="{x:Static cy:DrawerPlacement.Right}" />
+                                <Button
+                                    Margin="6,0,6,0"
+                                    Padding="0,8"
+                                    Click="OnPlacementButtonClick"
+                                    Content="↑ 顶部"
+                                    Tag="{x:Static cy:DrawerPlacement.Top}" />
+                                <Button
+                                    Margin="6,0,0,0"
+                                    Padding="0,8"
+                                    Click="OnPlacementButtonClick"
+                                    Content="底部 ↓"
+                                    Tag="{x:Static cy:DrawerPlacement.Bottom}" />
+                            </UniformGrid>
+
+                            <TextBlock
+                                Margin="0,0,0,8"
+                                Style="{StaticResource ValueLabelStyle}">
+                                <Run Text="当前 Placement =" />
+                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CurrentPlacement, Mode=OneWay}" />
+                            </TextBlock>
+
+                            <Border Height="280" Style="{StaticResource DrawerHostStyle}">
+                                <cy:Drawer
+                                    x:Name="PlacementDrawer"
+                                    DrawerHeight="180"
+                                    DrawerWidth="260"
+                                    IsOpen="{Binding IsPlacementDrawerOpen, Mode=TwoWay}"
+                                    Placement="{Binding CurrentPlacement}">
+                                    <cy:Drawer.DrawerContent>
+                                        <StackPanel Margin="20">
+                                            <TextBlock Style="{StaticResource DrawerInnerTitleStyle}" Text="方向感知" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="Placement 改变后，下次打开会从新方向滑入。" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}">
+                                                <Run Text="当前：" />
+                                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CurrentPlacement, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </cy:Drawer.DrawerContent>
+
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Container}"
+                                            Text="点击上方按钮选择方向并打开" />
+                                    </Grid>
+                                </cy:Drawer>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 路由命令  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="路由命令" Subtitle="OpenCommand / CloseCommand / ToggleCommand">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="使用 RoutedCommand 直接触发，无需 ViewModel 命令。CanExecute 自动随 IsOpen 变化（Open 在已打开时禁用、Close 在已关闭时禁用）。" />
+
+                            <UniformGrid Margin="0,0,0,12" Columns="3">
+                                <Button
+                                    Margin="0,0,6,0"
+                                    Padding="0,8"
+                                    Command="{x:Static cy:Drawer.OpenCommand}"
+                                    CommandTarget="{Binding ElementName=CommandDrawer}"
+                                    Content="Open" />
+                                <Button
+                                    Margin="6,0,6,0"
+                                    Padding="0,8"
+                                    Command="{x:Static cy:Drawer.CloseCommand}"
+                                    CommandTarget="{Binding ElementName=CommandDrawer}"
+                                    Content="Close" />
+                                <Button
+                                    Margin="6,0,0,0"
+                                    Padding="0,8"
+                                    Command="{x:Static cy:Drawer.ToggleCommand}"
+                                    CommandTarget="{Binding ElementName=CommandDrawer}"
+                                    Content="Toggle" />
+                            </UniformGrid>
+
+                            <Border Height="220" Style="{StaticResource DrawerHostStyle}">
+                                <cy:Drawer
+                                    x:Name="CommandDrawer"
+                                    DrawerWidth="240"
+                                    IsOpen="{Binding IsCommandDrawerOpen, Mode=TwoWay}"
+                                    Placement="Right">
+                                    <cy:Drawer.DrawerContent>
+                                        <StackPanel Margin="20">
+                                            <TextBlock Style="{StaticResource DrawerInnerTitleStyle}" Text="命令驱动" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="Open 已禁用、Toggle 仍可用——CanExecute 自动同步 IsOpen 状态。" />
+                                        </StackPanel>
+                                    </cy:Drawer.DrawerContent>
+
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Container}"
+                                            Text="观察按钮的禁用状态" />
+                                    </Grid>
+                                </cy:Drawer>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ MVVM + 路由事件  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="MVVM + 路由事件" Subtitle="Opening / Opened / Closing / Closed">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="四个路由事件覆盖完整生命周期：Opening/Closing 在动画开始时触发，Opened/Closed 在动画完成时触发。下方计数会随每次开关递增。" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    Grid.Column="0"
+                                    Padding="16,6"
+                                    Command="{x:Static cy:Drawer.ToggleCommand}"
+                                    CommandTarget="{Binding ElementName=EventDrawer}"
+                                    Content="Toggle" />
+                                <UniformGrid
+                                    Grid.Column="1"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Columns="4">
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="Opening:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding OpeningCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="Opened:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Success}" Text="{Binding OpenedCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="Closing:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding ClosingCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="Closed:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Success}" Text="{Binding ClosedCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                </UniformGrid>
+                            </Grid>
+
+                            <Border Height="240" Style="{StaticResource DrawerHostStyle}">
+                                <cy:Drawer
+                                    x:Name="EventDrawer"
+                                    Closed="OnDrawerClosed"
+                                    Closing="OnDrawerClosing"
+                                    DrawerWidth="260"
+                                    IsOpen="{Binding IsEventDrawerOpen, Mode=TwoWay}"
+                                    Opened="OnDrawerOpened"
+                                    Opening="OnDrawerOpening">
+                                    <cy:Drawer.DrawerContent>
+                                        <StackPanel Margin="20">
+                                            <TextBlock Style="{StaticResource DrawerInnerTitleStyle}" Text="事件追踪" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="每次打开会触发 Opening → Opened，每次关闭会触发 Closing → Closed。" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="动画期间触发的是 -ing 事件，动画完成时触发的是 -ed 事件。" />
+                                        </StackPanel>
+                                    </cy:Drawer.DrawerContent>
+
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Container}"
+                                            Text="开关几次观察计数" />
+                                    </Grid>
+                                </cy:Drawer>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 配置开关  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="配置开关" Subtitle="CloseOnOverlayClick / CloseOnEscape / FocusOnOpen">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="三个开关运行时切换都立即生效。比如把 CloseOnOverlayClick 关掉，再点击遮罩就不再关闭。" />
+
+                            <Border
+                                Margin="0,0,0,12"
+                                Padding="14,12"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="点击遮罩关闭（CloseOnOverlayClick）" />
+                                        <cy:SwitchButton
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding CloseOnOverlayClickEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="ESC 键关闭（CloseOnEscape）" />
+                                        <cy:SwitchButton
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding CloseOnEscapeEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="打开后自动聚焦（FocusOnOpen）" />
+                                        <cy:SwitchButton
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding FocusOnOpenEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Button
+                                Margin="0,0,0,12"
+                                Padding="16,6"
+                                HorizontalAlignment="Left"
+                                Command="{x:Static cy:Drawer.OpenCommand}"
+                                CommandTarget="{Binding ElementName=ConfigDrawer}"
+                                Content="打开抽屉验证" />
+
+                            <Border Height="240" Style="{StaticResource DrawerHostStyle}">
+                                <cy:Drawer
+                                    x:Name="ConfigDrawer"
+                                    CloseOnEscape="{Binding CloseOnEscapeEnabled}"
+                                    CloseOnOverlayClick="{Binding CloseOnOverlayClickEnabled}"
+                                    DrawerWidth="280"
+                                    FocusOnOpen="{Binding FocusOnOpenEnabled}"
+                                    IsOpen="{Binding IsConfigDrawerOpen, Mode=TwoWay}">
+                                    <cy:Drawer.DrawerContent>
+                                        <StackPanel Margin="20">
+                                            <TextBlock Style="{StaticResource DrawerInnerTitleStyle}" Text="试试这些组合" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="• 关掉 CloseOnOverlayClick → 点击遮罩无效，只能从抽屉内部关闭" />
+                                            <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="• 关掉 FocusOnOpen → 焦点不会自动进入抽屉，ESC 也就不会被抽屉接管" />
+                                            <Button
+                                                Margin="0,8,0,0"
+                                                HorizontalAlignment="Left"
+                                                Command="{x:Static cy:Drawer.CloseCommand}"
+                                                CommandTarget="{Binding ElementName=ConfigDrawer}"
+                                                Content="从内部关闭" />
+                                        </StackPanel>
+                                    </cy:Drawer.DrawerContent>
+
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource Foreground.Container}"
+                                            Text="切换上方开关后再开关抽屉" />
+                                    </Grid>
+                                </cy:Drawer>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑥ 主要属性  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="Drawer 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 命令 / 事件" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsOpen" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (TwoWay)" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉是否打开。默认 false。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DrawerContent" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉面板内容（滑入的部分）。Drawer.Content 是被覆盖的主内容。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Placement" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DrawerPlacement" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="滑入方向：Left / Right / Top / Bottom。默认 Left。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DrawerWidth / DrawerHeight" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉尺寸。Left/Right 用 Width（默认 300），Top/Bottom 用 Height（NaN 时回退 300）。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AnimationDuration" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Duration" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="打开 / 关闭动画时长。默认 300ms。同时控制遮罩淡入淡出。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseOnOverlayClick" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="点击遮罩层是否关闭。默认 true。运行时切换立即生效。" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseOnEscape / FocusOnOpen" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool / bool" />
+                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="ESC 关闭 / 打开后自动聚焦到抽屉首个可聚焦元素。默认均为 true。" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="OpenCommand / CloseCommand / ToggleCommand" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
+                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="路由命令。CanExecute 自动随 IsOpen 同步。通过 CommandTarget 指向 Drawer 实例。" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Opening / Opened / Closing / Closed" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
+                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="生命周期路由事件，Bubble 策略。-ing 在动画开始时触发，-ed 在动画完成时触发。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 基础：IsOpen 双向绑定 -->
+<Border Height="320">
+    <cy:Drawer x:Name="MyDrawer"
+               IsOpen="{Binding IsOpen, Mode=TwoWay}"
+               DrawerWidth="320">
+        <cy:Drawer.DrawerContent>
+            <StackPanel Margin="20">
+                <TextBlock Text="设置" FontSize="18" />
+                <!-- ... 抽屉内容 ... -->
+            </StackPanel>
+        </cy:Drawer.DrawerContent>
+        <!-- 主内容（被遮罩覆盖） -->
+        <Grid>...</Grid>
+    </cy:Drawer>
+</Border>
+
+<!-- 路由命令触发，无需 VM 命令 -->
+<Button Content="打开"
+        Command="{x:Static cy:Drawer.OpenCommand}"
+        CommandTarget="{Binding ElementName=MyDrawer}" />
+
+<!-- 从右侧滑入 + 自定义动画时长 -->
+<cy:Drawer Placement="Right"
+           DrawerWidth="400"
+           AnimationDuration="0:0:0.45" />
+
+<!-- 监听生命周期事件 -->
+<cy:Drawer Opening="OnDrawerOpening"
+           Opened="OnDrawerOpened"
+           Closing="OnDrawerClosing"
+           Closed="OnDrawerClosed" />
+
+<!-- 关闭遮罩点击与 ESC 关闭（强制用户主动关闭） -->
+<cy:Drawer CloseOnOverlayClick="False"
+           CloseOnEscape="False" />]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="相对父容器滑动" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="抽屉的滑动范围由直接父容器的尺寸决定，遮罩也只覆盖父容器。一般用 Drawer 包裹整页内容。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="尺寸用属性值" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="关闭位置由 DrawerWidth/DrawerHeight 计算，不依赖 ActualWidth/ActualHeight，首次打开不会偏移。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="焦点循环" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="抽屉是 FocusScope，Tab/方向键在内部循环，不会跑到被遮罩的下层内容。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="Transform 不破坏" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="平移变换合并到 TransformGroup，模板已有的 RenderTransform 不会被覆盖。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

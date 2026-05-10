@@ -1,0 +1,742 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.FluidTabSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:FluidTabViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+        </Style>
+
+        <!--  Tab 内容内部用的展示样式  -->
+        <Style x:Key="DemoSectionTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="DemoSectionSubtitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+
+        <Style x:Key="DemoSectionBodyStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="22" />
+        </Style>
+
+        <!--  MVVM demo：Header 模板  -->
+        <DataTemplate x:Key="MvvmHeaderTemplate" DataType="{x:Type local:TabSection}">
+            <StackPanel>
+                <TextBlock
+                    FontSize="13"
+                    FontWeight="Medium"
+                    Foreground="{DynamicResource Foreground.Default}"
+                    Text="{Binding Title}" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Container}"
+                    Text="{Binding Subtitle}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!--  MVVM demo：内容模板  -->
+        <DataTemplate x:Key="MvvmContentTemplate" DataType="{x:Type local:TabSection}">
+            <StackPanel Margin="24,20">
+                <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="{Binding Title}" />
+                <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="{Binding Subtitle}" />
+                <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="{Binding Body}" />
+
+                <Border
+                    Margin="0,16,0,0"
+                    Padding="14,12"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="占位内容（用于增加高度，触发滚动）" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="{Binding Body}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="{Binding Body}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M3,4 L8,4 L8,20 L3,20 Z M11,5 L21,5 M11,9 L21,9 M11,13 L17,13 M11,17 L21,17"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="FluidTabControl" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="流式 Tab 控件——左/右侧标签列表 + 一侧的内容长滚动面板。点击标签平滑滚动到对应内容、滚动内容反向同步选中标签。支持 Icon、键盘导航（↑↓ Home End）、平滑指示器动画、滚动锚点对齐与 MVVM 数据绑定。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="直接嵌套 FluidTabItem，含 Icon / Header / Content">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="点击左侧标签滚动到对应内容；用滚轮/触控板滚动内容，左侧选中会跟着切换。先点一下 Tab 进入内容区，再用 ↑↓ 方向键试试键盘导航。" />
+
+                            <Border
+                                Height="380"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:FluidTabControl>
+                                    <cy:FluidTabItem Header="通用" Icon="●">
+                                        <StackPanel Margin="24,20">
+                                            <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="通用设置" />
+                                            <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="启动、语言、自动更新" />
+                                            <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="调整应用启动行为、默认语言、自动更新策略与备份频率。这些选项立即生效，部分需要重启。每次修改都会写入本地配置并同步到云端。这段文字让内容足够长，便于触发滚动。" />
+                                        </StackPanel>
+                                    </cy:FluidTabItem>
+                                    <cy:FluidTabItem Header="外观" Icon="◐">
+                                        <StackPanel Margin="24,20">
+                                            <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="外观" />
+                                            <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="主题、字体、配色与界面密度" />
+                                            <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="自定义主题（浅色 / 深色 / 跟随系统），调整字体与字号、配色方案和界面密度。视觉变化会立即应用到所有窗口。一些主题需要重启才能完全生效。" />
+                                        </StackPanel>
+                                    </cy:FluidTabItem>
+                                    <cy:FluidTabItem Header="账户" Icon="◆">
+                                        <StackPanel Margin="24,20">
+                                            <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="账户" />
+                                            <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="登录、关联第三方账号、订阅" />
+                                            <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="管理登录账户、关联 GitHub / 微信 / 钉钉 / Microsoft 等第三方平台，查看与续订订阅。同一账户在多设备登录时自动同步偏好。" />
+                                        </StackPanel>
+                                    </cy:FluidTabItem>
+                                    <cy:FluidTabItem Header="通知" Icon="★">
+                                        <StackPanel Margin="24,20">
+                                            <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="通知" />
+                                            <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="桌面通知、声音、勿扰时段" />
+                                            <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="控制哪些事件弹出桌面通知、是否伴随声音；设置勿扰时段，系统在该时段内仅累计而不弹出。" />
+                                        </StackPanel>
+                                    </cy:FluidTabItem>
+                                    <cy:FluidTabItem Header="关于" Icon="■">
+                                        <StackPanel Margin="24,20">
+                                            <TextBlock Style="{StaticResource DemoSectionTitleStyle}" Text="关于" />
+                                            <TextBlock Style="{StaticResource DemoSectionSubtitleStyle}" Text="版本、许可证、致谢" />
+                                            <TextBlock Style="{StaticResource DemoSectionBodyStyle}" Text="查看应用版本号、构建信息、开源许可证、第三方组件致谢。问题反馈链接附在底部。" />
+                                        </StackPanel>
+                                    </cy:FluidTabItem>
+                                </cy:FluidTabControl>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② Placement 切换  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="Placement 切换" Subtitle="标签列在 Left 还是 Right">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="切换标签列位置。指示器会随之自动靠到 Tab 项的另一侧。" />
+
+                            <UniformGrid Margin="0,0,0,12" Columns="2">
+                                <RadioButton
+                                    Margin="0,0,8,0"
+                                    Checked="OnPlacementChecked"
+                                    Content="Left（左侧标签）"
+                                    GroupName="Placement"
+                                    IsChecked="True"
+                                    Tag="{x:Static cy:FluidTabPlacement.Left}" />
+                                <RadioButton
+                                    Margin="8,0,0,0"
+                                    Checked="OnPlacementChecked"
+                                    Content="Right（右侧标签）"
+                                    GroupName="Placement"
+                                    Tag="{x:Static cy:FluidTabPlacement.Right}" />
+                            </UniformGrid>
+
+                            <Border
+                                Height="320"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:FluidTabControl
+                                    FluidTabPlacement="{Binding CurrentPlacement, Mode=TwoWay}"
+                                    ItemHeaderMemberPath="Title"
+                                    ItemTemplate="{StaticResource MvvmContentTemplate}"
+                                    ItemsSource="{Binding Sections}" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ SnapAlignment  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="SnapAlignment" Subtitle="滚动反查(当前项)的锚点位置">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="Top：视口顶部所在的内容算当前项（适合长文档）。Center：视口中心所在的内容算当前项（适合卡片式）。" />
+
+                            <UniformGrid Margin="0,0,0,12" Columns="2">
+                                <RadioButton
+                                    Margin="0,0,8,0"
+                                    Checked="OnSnapChecked"
+                                    Content="Top（顶部锚点）"
+                                    GroupName="Snap"
+                                    IsChecked="True"
+                                    Tag="{x:Static cy:FluidTabSnapAlignment.Top}" />
+                                <RadioButton
+                                    Margin="8,0,0,0"
+                                    Checked="OnSnapChecked"
+                                    Content="Center（中心锚点）"
+                                    GroupName="Snap"
+                                    Tag="{x:Static cy:FluidTabSnapAlignment.Center}" />
+                            </UniformGrid>
+
+                            <Border
+                                Height="320"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:FluidTabControl
+                                    AnimationDuration="0:0:0.6"
+                                    ItemHeaderMemberPath="Title"
+                                    ItemTemplate="{StaticResource MvvmContentTemplate}"
+                                    ItemsSource="{Binding Sections}"
+                                    SnapAlignment="{Binding CurrentSnap, Mode=TwoWay}" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ MVVM 数据驱动  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="MVVM 数据驱动" Subtitle="ItemsSource + ItemHeaderTemplate + ItemTemplate">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="数据集合驱动 8 个分类。Header 用自定义模板（标题 + 副标题双行），Content 用另一个模板。SelectedItem 双向绑定。" />
+
+                            <Border
+                                Height="380"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:FluidTabControl
+                                    ItemHeaderTemplate="{StaticResource MvvmHeaderTemplate}"
+                                    ItemTemplate="{StaticResource MvvmContentTemplate}"
+                                    ItemsSource="{Binding Sections}"
+                                    SelectedItem="{Binding SelectedSection, Mode=TwoWay}" />
+                            </Border>
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="14,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Text="SelectedItem.Title =" />
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedSection.Title, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 键盘导航 + SelectedIndex  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="键盘导航 + SelectedIndex" Subtitle="↑/↓ 切换、Home/End 跳两端">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Container}"
+                                Text="先点一下控件让它获得焦点，再按方向键。SelectedIndex 双向绑定到 ViewModel，下方实时显示。" />
+
+                            <Border
+                                Height="320"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:FluidTabControl
+                                    ItemHeaderMemberPath="Title"
+                                    ItemTemplate="{StaticResource MvvmContentTemplate}"
+                                    ItemsSource="{Binding Sections}"
+                                    SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}" />
+                            </Border>
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="14,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <UniformGrid Columns="3">
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="↑/↓" Foreground="{DynamicResource Foreground.Link}" />
+                                        <Run Text=" 切换 Tab" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="Home/End" Foreground="{DynamicResource Foreground.Link}" />
+                                        <Run Text=" 跳两端" />
+                                    </TextBlock>
+                                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SelectedIndex =" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedIndex, Mode=OneWay}" />
+                                    </TextBlock>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑥ 主要属性  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="FluidTabControl 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 命令" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemsSource / Items" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEnumerable" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据源；继承自 ItemsControl。可直接添加 FluidTabItem 子项，或绑定数据集合。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedItem / SelectedIndex" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / int (TwoWay)" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前选中项；切换会平滑滚动到对应内容。继承自 Selector。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="FluidTabPlacement" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="FluidTabPlacement" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="标签列位置：Left（默认）/ Right。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemHeaderTemplate / ItemHeaderTemplateSelector" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate / Selector" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="应用到所有 Tab 标头的统一模板（不影响内容区）。容器自身 HeaderTemplate 优先。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemHeaderMemberPath" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据项中作为 Header 显示的属性路径，类似 DisplayMemberPath。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemTemplate / ItemTemplateSelector" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate / Selector" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="内容区每个项的模板。继承自 ItemsControl。" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemHeaderHorizontalAlignment" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="HorizontalAlignment" />
+                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="标签项内 Header 的水平对齐。默认 Left。" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AnimationDuration" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Duration" />
+                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="选中切换的滚动动画时长。默认 450ms。零值表示瞬时跳转。" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="EasingFunction" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEasingFunction" />
+                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="滚动动画的缓动函数。默认 QuadraticEase EaseInOut。" />
+
+                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SnapAlignment" />
+                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="FluidTabSnapAlignment" />
+                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="滚动反查当前项的锚点：Top（视口顶部，默认）/ Center（视口中心）。" />
+
+                            <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="FluidTabItem.Icon / IconTemplate" />
+                            <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / DataTemplate" />
+                            <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="单个 Tab 项的图标内容与模板。Icon 为空时不占位。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 直接嵌套：每项 Header + Icon + Content -->
+<cy:FluidTabControl>
+    <cy:FluidTabItem Header="通用" Icon="●">
+        <local:GeneralView />
+    </cy:FluidTabItem>
+    <cy:FluidTabItem Header="账户" Icon="◆">
+        <local:AccountView />
+    </cy:FluidTabItem>
+</cy:FluidTabControl>
+
+<!-- MVVM 数据驱动：双模板 -->
+<cy:FluidTabControl
+    ItemsSource="{Binding Sections}"
+    SelectedItem="{Binding Current, Mode=TwoWay}"
+    ItemHeaderTemplate="{StaticResource HeaderTpl}"
+    ItemTemplate="{StaticResource ContentTpl}" />
+
+<!-- 用 MemberPath 简化 Header 显示 -->
+<cy:FluidTabControl
+    ItemsSource="{Binding Sections}"
+    ItemHeaderMemberPath="Title"
+    ItemTemplate="{StaticResource ContentTpl}" />
+
+<!-- 自定义动画 + 中心锚点 -->
+<cy:FluidTabControl
+    AnimationDuration="0:0:0.6"
+    SnapAlignment="Center"
+    ItemsSource="{Binding Sections}">
+    <cy:FluidTabControl.EasingFunction>
+        <CubicEase EasingMode="EaseInOut" />
+    </cy:FluidTabControl.EasingFunction>
+</cy:FluidTabControl>
+
+<!-- 标签列在右侧 -->
+<cy:FluidTabControl FluidTabPlacement="Right" ... />]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="Header / Content 解耦" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="FluidTabItem 自身只渲染 Header；Content 由控件在内容滚动区独立渲染，避免单个 UIElement 被多父级持有。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="增量同步" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="Items 集合按 Add/Remove/Replace/Move/Reset 增量更新内容面板，不全量重建。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="双向同步无窗口期" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="选中 → 滚动、滚动 → 选中。Storyboard 存活期 + 双标志保护，无中间态被错误识别。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="标准扩展点" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="ItemHeaderTemplate / ItemHeaderMemberPath 替代反射读取数据字段，对齐 WPF 习惯。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

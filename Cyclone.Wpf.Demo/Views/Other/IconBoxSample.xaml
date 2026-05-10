@@ -1,0 +1,251 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.IconBoxSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  字体图标资源  -->
+        <FontFamily x:Key="IconFont">iconfont</FontFamily>
+
+        <!--  路径几何图形  -->
+        <Geometry x:Key="ButtonGeometry">M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z</Geometry>
+        <Geometry x:Key="SettingsGeometry">M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z</Geometry>
+        <Geometry x:Key="HomeGeometry">M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z</Geometry>
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <local:IconBoxViewModel />
+    </UserControl.DataContext>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <!--  标题  -->
+            <TextBlock
+                Margin="0,0,0,20"
+                HorizontalAlignment="Center"
+                FontSize="24"
+                FontWeight="Bold"
+                Text="IconBox 控件使用示例" />
+
+            <!--  字体图标示例  -->
+            <GroupBox
+                Margin="0,10"
+                Padding="15"
+                Header="字体图标示例 (Content 为 string)">
+                <ItemsControl ItemsSource="{Binding FontIcons}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="20,10" Orientation="Horizontal">
+                                <cy:IconBox
+                                    Content="{Binding Code}"
+                                    FontFamily="{DynamicResource IconFont}"
+                                    FontSize="24"
+                                    Foreground="{Binding Color}" />
+                                <TextBlock
+                                    Margin="8,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
+                                    Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </GroupBox>
+
+            <!--  路径图标示例  -->
+            <GroupBox
+                Margin="0,10"
+                Padding="15"
+                Header="路径图标示例 (Content 为 Geometry)">
+                <ItemsControl ItemsSource="{Binding PathIcons}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="20,10" Orientation="Horizontal">
+                                <cy:IconBox
+                                    Width="24"
+                                    Height="24"
+                                    Content="{Binding Geometry}" />
+                                <TextBlock
+                                    Margin="8,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
+                                    Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </GroupBox>
+
+            <!--  网络图片示例  -->
+            <GroupBox
+                Margin="0,10"
+                Padding="15"
+                Header="网络图片示例 (Content 为 ImageSource)">
+                <ItemsControl ItemsSource="{Binding NetworkImages}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="20,10" Orientation="Horizontal">
+                                <cy:IconBox
+                                    Width="32"
+                                    Height="32"
+                                    Content="{Binding Image}" />
+                                <TextBlock
+                                    Margin="8,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
+                                    Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </GroupBox>
+
+            <!--  数据绑定示例  -->
+            <GroupBox
+                Margin="0,10"
+                Padding="15"
+                Header="动态绑定示例">
+                <StackPanel>
+                    <StackPanel Margin="10" Orientation="Horizontal">
+                        <TextBlock
+                            Width="120"
+                            VerticalAlignment="Center"
+                            Text="当前字体图标: " />
+                        <cy:IconBox
+                            Content="{Binding CurrentFontIcon}"
+                            FontFamily="{StaticResource IconFont}"
+                            FontSize="32"
+                            Foreground="Purple" />
+                        <TextBlock
+                            Margin="10,0"
+                            VerticalAlignment="Center"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            Text="{Binding CurrentFontIcon}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="10" Orientation="Horizontal">
+                        <TextBlock
+                            Width="120"
+                            VerticalAlignment="Center"
+                            Text="当前路径图标: " />
+                        <cy:IconBox
+                            Width="32"
+                            Height="32"
+                            Content="{Binding CurrentGeometry}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="10" Orientation="Horizontal">
+                        <TextBlock
+                            Width="120"
+                            VerticalAlignment="Center"
+                            Text="当前网络图片: " />
+                        <cy:IconBox
+                            Width="32"
+                            Height="32"
+                            Content="{Binding CurrentImage}" />
+                        <TextBlock
+                            Margin="10,0"
+                            VerticalAlignment="Center"
+                            Text="{Binding CurrentImageName}" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!--  实际应用示例  -->
+            <GroupBox
+                Margin="0,10"
+                Padding="15"
+                Header="实际应用示例">
+                <StackPanel>
+                    <!--  工具栏  -->
+                    <Border
+                        Margin="5"
+                        Padding="10"
+                        BorderBrush="LightGray"
+                        BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,5"
+                                FontWeight="Bold"
+                                Text="工具栏:" />
+                            <ItemsControl ItemsSource="{Binding ToolbarItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button>
+                                            <StackPanel Orientation="Horizontal">
+                                                <cy:IconBox
+                                                    Content="{Binding Icon}"
+                                                    FontFamily="{DynamicResource IconFont}"
+                                                    FontSize="16"
+                                                    Foreground="Black" />
+                                                <TextBlock Margin="5,0,0,0" Text="{Binding Text}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!--  导航菜单  -->
+                    <Border
+                        Margin="5"
+                        Padding="10"
+                        BorderBrush="LightGray"
+                        BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,5"
+                                FontWeight="Bold"
+                                Text="导航菜单:" />
+                            <ItemsControl ItemsSource="{Binding MenuItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                            <StackPanel Orientation="Horizontal">
+                                                <cy:IconBox
+                                                    Width="18"
+                                                    Height="18"
+                                                    Content="{Binding Geometry}" />
+                                                <TextBlock Margin="10,0,0,0" Text="{Binding Text}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -135,7 +135,7 @@
     <SolidColorBrush x:Key="Link.Hover" Color="{StaticResource BlueDarken4}" />
     <SolidColorBrush x:Key="Tick.Primary" Color="{StaticResource BlueLighten3}" />
     <SolidColorBrush x:Key="Tick.Secondary" Color="{StaticResource BlueLighten2}" />
-    <SolidColorBrush x:Key="Alternation.Dark" Color="{StaticResource GrayLighten4}" />
+    <SolidColorBrush x:Key="Alternation.Dark" Color="{StaticResource GrayLighten5}" />
     <SolidColorBrush x:Key="Alternation.Light" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="Alternation.Invert" Color="{StaticResource GrayDarken1}" />
 

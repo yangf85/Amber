@@ -1,0 +1,673 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.CascadePickerSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:CascadePickerViewModel}}"
+    d:DesignHeight="2200"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+        </Style>
+
+        <Style x:Key="HintTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M3,7 L8,7 L11,10 L21,10 L21,18 L3,18 Z M11,10 L11,7 L9,7"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeLineJoin="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="CascadePicker" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="级联选择器——多级联动选择（如省/市/区）。三种绑定方式：SelectedItem 对象引用、SelectedValue + SelectedValuePath 按 ID（推荐）、SelectedPath 字符串路径。支持 ItemsSource 数据驱动、ChildrenMemberPath 配置子集合、键盘导航（↑↓→← Enter Esc）。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法（直接嵌套）  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="直接嵌套 CascadePickerItem">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="鼠标悬停展开下一级；点叶子节点确认选择。也可以用键盘：↓ 打开 / 上下方向键移动 / → 进入子级 / ← 折叠或回到上级 / Enter 选中 / Esc 关闭。" />
+
+                            <cy:CascadePicker
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                Watermark="请选择地区">
+                                <cy:CascadePickerItem Header="广东省">
+                                    <cy:CascadePickerItem Header="深圳市">
+                                        <cy:CascadePickerItem Header="南山区" />
+                                        <cy:CascadePickerItem Header="福田区" />
+                                        <cy:CascadePickerItem Header="罗湖区" />
+                                    </cy:CascadePickerItem>
+                                    <cy:CascadePickerItem Header="广州市">
+                                        <cy:CascadePickerItem Header="天河区" />
+                                        <cy:CascadePickerItem Header="越秀区" />
+                                    </cy:CascadePickerItem>
+                                </cy:CascadePickerItem>
+                                <cy:CascadePickerItem Header="北京市">
+                                    <cy:CascadePickerItem Header="朝阳区" />
+                                    <cy:CascadePickerItem Header="海淀区" />
+                                    <cy:CascadePickerItem Header="西城区" />
+                                </cy:CascadePickerItem>
+                            </cy:CascadePicker>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 数据驱动 + SelectedItem  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="数据驱动 + SelectedItem" Subtitle="ItemsSource / NodeMemberPath / ChildrenMemberPath">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="用对象集合驱动。NodeMemberPath 告诉控件每级显示哪个字段，ChildrenMemberPath 告诉控件子集合在哪里。SelectedItem 双向绑定到当前选中的 Region 对象。" />
+
+                            <cy:CascadePicker
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                ChildrenMemberPath="Children"
+                                ItemsSource="{Binding Regions}"
+                                NodeMemberPath="Name"
+                                SelectedItem="{Binding SelectedRegion, Mode=TwoWay}"
+                                Watermark="选择行政区" />
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="14,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SelectedRegion.Name =" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedRegion.Name, Mode=OneWay, FallbackValue=（未选择）}" />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,4,0,0" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SelectedRegion.Id =" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedRegion.Id, Mode=OneWay, FallbackValue=-}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ SelectedValue 按 ID 双向绑定  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="按 ID 双向绑定（推荐）" Subtitle="SelectedValue + SelectedValuePath">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="VM 持有 ID 字符串而不是对象引用——更利于 MVVM、序列化与配置存档。控件内部 O(1) 索引 ID → item，无歧义。" />
+
+                            <cy:CascadePicker
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                ChildrenMemberPath="Children"
+                                ItemsSource="{Binding Regions}"
+                                NodeMemberPath="Name"
+                                SelectedValue="{Binding SelectedRegionId, Mode=TwoWay}"
+                                SelectedValuePath="Id"
+                                Watermark="按 ID 绑定" />
+
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border
+                                    Grid.Column="0"
+                                    Padding="14,10"
+                                    Background="{DynamicResource Background.Header}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1">
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SelectedRegionId =" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedRegionId, Mode=OneWay, FallbackValue=（null）}" />
+                                    </TextBlock>
+                                </Border>
+                                <UniformGrid
+                                    Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    Columns="3">
+                                    <Button
+                                        Margin="0,0,4,0"
+                                        Padding="8,4"
+                                        Command="{Binding DataContext.SetIdCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="440305"
+                                        Content="南山" />
+                                    <Button
+                                        Margin="4,0,4,0"
+                                        Padding="8,4"
+                                        Command="{Binding DataContext.SetIdCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="110105"
+                                        Content="朝阳" />
+                                    <Button
+                                        Margin="4,0,0,0"
+                                        Padding="8,4"
+                                        Command="{Binding DataContext.SetIdCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="330106"
+                                        Content="西湖" />
+                                </UniformGrid>
+                            </Grid>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ SelectedPath + IsShowFullPath  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="路径显示与字符串绑定" Subtitle="IsShowFullPath / Separator / SelectedPath">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="IsShowFullPath=true 显示完整路径（含分隔符）；SelectedPath 暴露/接收当前路径字符串，路径在树中唯一时支持双向。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="完整路径 + 自定义分隔符 ' › '" />
+                            <cy:CascadePicker
+                                Width="380"
+                                HorizontalAlignment="Left"
+                                ChildrenMemberPath="Children"
+                                IsShowFullPath="True"
+                                ItemsSource="{Binding Regions}"
+                                NodeMemberPath="Name"
+                                SelectedPath="{Binding SelectedRegionPath, Mode=TwoWay}"
+                                Separator=" › "
+                                Watermark="路径双向绑定" />
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="14,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Text="SelectedRegionPath =" />
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedRegionPath, Mode=OneWay, FallbackValue=（null）}" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 状态：Watermark / IsReadOnly / Clear  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="状态与命令" Subtitle="Watermark / IsReadOnly / ClearCommand">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="Watermark 在无值时显示。文本框右侧的清除按钮 / Delete 键 触发 ClearCommand。切换 IsReadOnly 体验只读状态。" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    FontSize="13"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="开启只读（IsReadOnly）" />
+                                <cy:SwitchButton
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    IsChecked="{Binding IsReadOnlyEnabled, Mode=TwoWay}" />
+                            </Grid>
+
+                            <cy:CascadePicker
+                                Width="320"
+                                HorizontalAlignment="Left"
+                                ChildrenMemberPath="Children"
+                                IsReadOnly="{Binding IsReadOnlyEnabled}"
+                                ItemsSource="{Binding Regions}"
+                                NodeMemberPath="Name"
+                                Watermark="点击或按 ↓ 打开" />
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                Style="{StaticResource HintTextStyle}"
+                                Text="试试：" />
+                            <UniformGrid Columns="3">
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Foreground="{DynamicResource Foreground.Link}" Text="Delete" />
+                                    <Run Text=" 清空" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Foreground="{DynamicResource Foreground.Link}" Text="↓" />
+                                    <Run Text=" 打开下拉" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Foreground="{DynamicResource Foreground.Link}" Text="Esc" />
+                                    <Run Text=" 关闭" />
+                                </TextBlock>
+                            </UniformGrid>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑥ 主要属性  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="CascadePicker 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 命令 / 事件" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemsSource / Items" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEnumerable" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据源；继承自 ItemsControl。可直接嵌套 CascadePickerItem，也可绑定数据集合。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="NodeMemberPath" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据项中作为节点显示文本的属性路径，类似 DisplayMemberPath。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ChildrenMemberPath" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="子集合所在的属性路径（如 'Children'）。设置后控件能递归索引整棵树并自动给容器装配 ItemsSource。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedItem" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object (TwoWay)" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前选中数据项的对象引用。最通用的绑定方式。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedValue / SelectedValuePath" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / string" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="按 ID 双向绑定（推荐）。SelectedValuePath 指定 ID 字段，SelectedValue 是该字段的值，O(1) 反查无歧义。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedPath" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string (TwoWay)" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="字符串路径双向绑定（best-effort）。要求树中路径唯一，否则只命中首个并触发 trace 警告。" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Text" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string (TwoWay)" />
+                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="文本框中显示的文本，受 IsShowFullPath 影响。" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsShowFullPath / Separator" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool / string" />
+                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否显示完整路径 / 路径分隔符（默认 '/'）。" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsOpened / IsReadOnly / Watermark" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool / bool / string" />
+                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="下拉打开状态 / 只读模式 / 占位文本。" />
+
+                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaxDropDownHeight" />
+                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
+                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="第一级下拉的最大高度，超出则滚动。默认 300。" />
+
+                            <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ClearCommand" />
+                            <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
+                            <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="清空选中项与文本，默认绑定 Delete 键。" />
+
+                            <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedChanged / OpenedChanged" />
+                            <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
+                            <TextBlock Grid.Row="12" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="选中项 / 下拉打开关闭状态变化时触发。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 直接嵌套 -->
+<cy:CascadePicker Watermark="请选择地区">
+    <cy:CascadePickerItem Header="广东省">
+        <cy:CascadePickerItem Header="深圳市">
+            <cy:CascadePickerItem Header="南山区" />
+            <cy:CascadePickerItem Header="福田区" />
+        </cy:CascadePickerItem>
+    </cy:CascadePickerItem>
+</cy:CascadePicker>
+
+<!-- 数据驱动 + 对象引用绑定 -->
+<cy:CascadePicker
+    ItemsSource="{Binding Regions}"
+    NodeMemberPath="Name"
+    ChildrenMemberPath="Children"
+    SelectedItem="{Binding CurrentRegion, Mode=TwoWay}" />
+
+<!-- 推荐：按 ID 双向绑定 -->
+<cy:CascadePicker
+    ItemsSource="{Binding Regions}"
+    NodeMemberPath="Name"
+    ChildrenMemberPath="Children"
+    SelectedValuePath="Id"
+    SelectedValue="{Binding CurrentRegionId, Mode=TwoWay}" />
+
+<!-- 路径字符串双向（要求路径唯一） -->
+<cy:CascadePicker
+    ItemsSource="{Binding Regions}"
+    NodeMemberPath="Name"
+    ChildrenMemberPath="Children"
+    Separator=" › "
+    IsShowFullPath="True"
+    SelectedPath="{Binding CurrentPath, Mode=TwoWay}" />]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="索引一次性构建" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="ItemsSource 设值时递归遍历一次，按 item / value / path 三张索引表存好祖先链与完整路径，之后所有同步走 O(1) 字典。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="引用相等比较" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="item 字典 key 用 ReferenceComparer，避免数据 model 重写 Equals 后字典 key 错误冲突。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="时序兼容" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="VM 在 ItemsSource 就绪前设的 SelectedValue / SelectedPath 会被暂存，OnItemsChanged 后自动重试解析。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="字符串路径限制" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="同名兄弟节点 / 节点文本含分隔符时路径不唯一，反查仅命中首个并打 trace 警告。这种情况优先用 SelectedValue。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

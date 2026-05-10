@@ -38,6 +38,12 @@ namespace Cyclone.Wpf.Demo.Views
         // ===== SelectionMode 演示（节②）=====
         public ObservableCollection<string> Fruits { get; }
 
+        /// <summary>
+        /// Multiple 列表的实时选中——通过 hp:ListBoxHelper.SelectedItems 附加属性双向绑定。
+        /// 必须是 ObservableCollection 才能被 helper 监听 INotifyCollectionChanged 实现真双向。
+        /// </summary>
+        public ObservableCollection<string> SelectedFruits { get; } = new();
+
         // ===== IsSelectAllEnabled 演示（节③）=====
         public ObservableCollection<string> Permissions { get; }
 
@@ -87,39 +93,6 @@ namespace Cyclone.Wpf.Demo.Views
         {
             get => _filteredData;
             private set => SetProperty(ref _filteredData, value);
-        }
-
-        public ListBoxViewModel()
-        {
-            // 大数据集（高级 tab 用）
-            var testData = FakerDataHelper.GenerateFakerDataCollection(50);
-
-            BasicData = new ObservableCollection<FakerData>(testData.Take(8));
-            TemplateSample = new ObservableCollection<FakerData>(testData.Take(6));
-
-            // 章节用小数据集
-            Fruits = new ObservableCollection<string>
-            {
-                "苹果", "香蕉", "橙子", "葡萄", "西瓜", "草莓", "蓝莓", "芒果",
-            };
-
-            Permissions = new ObservableCollection<string>
-            {
-                "读取文件", "写入文件", "删除文件", "执行程序", "网络访问", "系统设置", "用户管理", "审计日志",
-            };
-
-            // 高级 tab 数据
-            _originalData = new ObservableCollection<FakerData>(testData);
-
-            AgeRanges = new ObservableCollection<string> { "全部", "0-18", "19-30", "31-45", "46-60", "60+" };
-            SortOptions = new ObservableCollection<string> { "姓名", "年龄", "城市", "邮箱", "状态" };
-            GroupOptions = new ObservableCollection<string> { "无", "城市", "国家", "状态" };
-            StatusFilters = new ObservableCollection<string> { "全部", "激活", "未激活", "待激活" };
-
-            FilteredData = CollectionViewSource.GetDefaultView(_originalData);
-            FilteredData.Filter = FilterItems;
-
-            UpdateStatusText();
         }
 
         partial void OnSearchTextChanged(string value) => ApplyFiltersAndSort();
@@ -252,6 +225,39 @@ namespace Cyclone.Wpf.Demo.Views
                     ? $"显示 {totalCount} 项"
                     : $"显示 {filteredCount} / {totalCount} 项";
             }
+        }
+
+        public ListBoxViewModel()
+        {
+            // 大数据集（高级 tab 用）
+            var testData = FakerDataHelper.GenerateFakerDataCollection(50);
+
+            BasicData = new ObservableCollection<FakerData>(testData.Take(8));
+            TemplateSample = new ObservableCollection<FakerData>(testData.Take(6));
+
+            // 章节用小数据集
+            Fruits = new ObservableCollection<string>
+            {
+                "苹果", "香蕉", "橙子", "葡萄", "西瓜", "草莓", "蓝莓", "芒果",
+            };
+
+            Permissions = new ObservableCollection<string>
+            {
+                "读取文件", "写入文件", "删除文件", "执行程序", "网络访问", "系统设置", "用户管理", "审计日志",
+            };
+
+            // 高级 tab 数据
+            _originalData = new ObservableCollection<FakerData>(testData);
+
+            AgeRanges = new ObservableCollection<string> { "全部", "0-18", "19-30", "31-45", "46-60", "60+" };
+            SortOptions = new ObservableCollection<string> { "姓名", "年龄", "城市", "邮箱", "状态" };
+            GroupOptions = new ObservableCollection<string> { "无", "城市", "国家", "状态" };
+            StatusFilters = new ObservableCollection<string> { "全部", "激活", "未激活", "待激活" };
+
+            FilteredData = CollectionViewSource.GetDefaultView(_originalData);
+            FilteredData.Filter = FilterItems;
+
+            UpdateStatusText();
         }
     }
 

@@ -1,87 +1,97 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using System.Windows.Media;
 
-namespace Cyclone.Wpf.Demo.Views;
-
-public partial class TabControlView : UserControl
+namespace Cyclone.Wpf.Demo.Views
 {
-    public TabControlView()
+    public partial class TabControlView : UserControl
     {
-        InitializeComponent();
-        DataContext = new TabControlViewModel();
-    }
-}
-
-/// <summary>
-/// TabItem 的 ViewModel
-/// </summary>
-public partial class TabItemViewModel : ObservableObject
-{
-    [ObservableProperty]
-    public partial string Header { get; set; }
-
-    [ObservableProperty]
-    public partial string Title { get; set; }
-
-    [ObservableProperty]
-    public partial string Description { get; set; }
-
-    [ObservableProperty]
-    public partial Brush IconColor { get; set; }
-}
-
-/// <summary>
-/// 主 ViewModel
-/// </summary>
-public partial class TabControlViewModel : ObservableObject
-{
-    [ObservableProperty]
-    public partial ObservableCollection<TabItemViewModel> TabItems { get; set; }
-
-    [ObservableProperty]
-    public partial TabItemViewModel? SelectedTab { get; set; }
-
-    private void InitializeTabItems()
-    {
-        TabItems = new ObservableCollection<TabItemViewModel>
+        public TabControlView()
         {
-            new TabItemViewModel
-            {
-                Header = "用户列表",
-                Title = "用户管理系统",
-                Description = "这里显示所有注册用户的信息，包括基本资料和联系方式。",
-                IconColor = new SolidColorBrush(Colors.Blue)
-            },
-            new TabItemViewModel
-            {
-                Header = "数据统计",
-                Title = "数据分析面板",
-                Description = "展示系统中的各项数据统计和分析结果。",
-                IconColor = new SolidColorBrush(Colors.Green)
-            },
-            new TabItemViewModel
-            {
-                Header = "系统设置",
-                Title = "系统配置中心",
-                Description = "管理系统的各项配置参数和选项。",
-                IconColor = new SolidColorBrush(Colors.Orange)
-            },
-            new TabItemViewModel
-            {
-                Header = "日志记录",
-                Title = "操作日志查看",
-                Description = "查看系统操作日志和用户活动记录。",
-                IconColor = new SolidColorBrush(Colors.Red)
-            }
-        };
-
-        SelectedTab = TabItems[0];
+            InitializeComponent();
+            DataContext = new TabControlViewModel();
+        }
     }
 
-    public TabControlViewModel()
+    public partial class TabControlViewModel : ObservableObject
     {
-        InitializeTabItems();
+        private int _newTabSeed = 1;
+
+        // ===== 章节④ MVVM 数据绑定 + ⑤ 动态增删 共享 =====
+        public ObservableCollection<DocumentTab> Documents { get; }
+
+        [ObservableProperty]
+        public partial DocumentTab? SelectedDocument { get; set; }
+
+        public TabControlViewModel()
+        {
+            Documents = new ObservableCollection<DocumentTab>
+            {
+                new DocumentTab { Title = "README.md", Icon = "📄", Body = "项目说明文档——介绍 Cyclone.Wpf 控件库的核心特性和使用方式。", Modified = false },
+                new DocumentTab { Title = "Program.cs", Icon = "💻", Body = "应用程序入口——StartupUri 指向 MainWindow.xaml。", Modified = true },
+                new DocumentTab { Title = "App.config", Icon = "⚙️", Body = "应用配置文件——主题切换、语言设置等。", Modified = false },
+            };
+
+            SelectedDocument = Documents.Count > 0 ? Documents[0] : null;
+        }
+
+        [RelayCommand]
+        private void AddDocument()
+        {
+            _newTabSeed++;
+            var doc = new DocumentTab
+            {
+                Title = $"Untitled{_newTabSeed}.txt",
+                Icon = "📝",
+                Body = $"这是第 {_newTabSeed} 份新建文档——开始编辑吧。",
+                Modified = true,
+            };
+            Documents.Add(doc);
+            SelectedDocument = doc;
+        }
+
+        [RelayCommand]
+        private void CloseDocument(DocumentTab doc)
+        {
+            if (doc == null)
+            {
+                return;
+            }
+
+            // 删除前找好下一个要选中的——避免选中态丢失后 ContentTemplate 闪空白
+            var index = Documents.IndexOf(doc);
+            Documents.Remove(doc);
+
+            if (Documents.Count == 0)
+            {
+                SelectedDocument = null;
+            }
+            else if (SelectedDocument == doc)
+            {
+                // 优先选下一项；如果删的是最后一项就选前一项
+                var nextIndex = index < Documents.Count ? index : Documents.Count - 1;
+                SelectedDocument = Documents[nextIndex];
+            }
+        }
+    }
+
+    /// <summary>
+    /// 文档标签页模型——演示 ItemsSource 数据绑定 + Closable tab。
+    /// </summary>
+    public partial class DocumentTab : ObservableObject
+    {
+        [ObservableProperty]
+        public partial string Title { get; set; }
+
+        [ObservableProperty]
+        public partial string Icon { get; set; }
+
+        [ObservableProperty]
+        public partial string Body { get; set; }
+
+        /// <summary>是否有未保存的修改——header 上显示小圆点提示。</summary>
+        [ObservableProperty]
+        public partial bool Modified { get; set; }
     }
 }

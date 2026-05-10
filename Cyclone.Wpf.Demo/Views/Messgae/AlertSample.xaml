@@ -1,0 +1,648 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.AlertSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DataContext="{d:DesignInstance Type={x:Type local:AlertViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HintTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+        </Style>
+
+        <!--  Level 按钮基础样式：每种级别用对应的主题色  -->
+        <Style x:Key="LevelButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="RootBorder"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.85" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.7" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M11.07 12.85c.77-1.39 2.25-2.21 3.11-3.44.91-1.29.4-3.7-2.18-3.7-1.69 0-2.52 1.28-2.87 2.34L6.54 6.96C7.25 4.83 9.18 3 11.99 3c2.35 0 3.96 1.07 4.78 2.41.7 1.15 1.11 3.3.03 4.9-1.2 1.77-2.35 2.31-2.97 3.45-.25.46-.35.76-.35 2.24h-2.91c-.01-.78-.13-2.05.5-3.15zM14 20c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"
+                            Fill="White"
+                            Stretch="Uniform" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="AlertService" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 服务" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Container}"
+                            Text="模态对话框服务。单例 Instance、6 种内置 Level、Ok / OkCancel 按钮组合、半透明蒙版、PerMonitor DPI 居中。Show 同步阻塞返回 AlertResult，支持同步 / 异步验证回调（验证失败保持打开），异步期间显示加载动画。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 6 种 Level 按钮  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="6 种内置级别 + 确认" Subtitle="service.Information / Success / ... / Confirm">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="点击按钮触发对应级别的弹窗。前 5 个是单 OK 按钮的提示型（Ok），最后一个 Confirm 是 OkCancel 双按钮的确认型（用 Question 图标 + OkCancel 按钮）。" />
+                            <WrapPanel>
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Foreground.Container}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="None"
+                                    Content="Message"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Background.Info}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="Information"
+                                    Content="Information"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Background.Success}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="Success"
+                                    Content="Success"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Background.Warning}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="Warning"
+                                    Content="Warning"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Background.Error}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="Error"
+                                    Content="Error"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                                <Button
+                                    Margin="0,0,8,8"
+                                    Background="{DynamicResource Background.Highlighted}"
+                                    Command="{Binding ShowLevelCommand}"
+                                    CommandParameter="Question"
+                                    Content="Confirm"
+                                    Style="{StaticResource LevelButtonStyle}" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 同步验证  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="同步验证 — 输入校验" Subtitle="Show(content, Func&lt;bool&gt; validation, title)">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="弹出带 TextBox 的对话框，点 OK 时调用同步 validation 回调。回调返回 false 时窗口保持打开，用户可以重新输入再次确认。试着不填名字直接点 OK——窗口不会关。" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Padding="14,8"
+                                Background="{DynamicResource Background.Info}"
+                                Command="{Binding ShowSyncValidationCommand}"
+                                Content="启动同步验证对话框"
+                                Style="{StaticResource LevelButtonStyle}" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 异步验证  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="异步验证 — 服务端校验 + Loading" Subtitle="ShowAsync(content, Func&lt;Task&lt;bool&gt;&gt;, title)">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="模拟用户名查重场景：点 OK 后异步验证（2 秒延迟），期间显示半透明 Loading 转圈覆盖层。验证失败（输 'admin'）时窗口保持打开。这是 Alert 跟一般 MessageBox 最大的区别。" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Padding="14,8"
+                                Background="{DynamicResource Background.Info}"
+                                Command="{Binding ShowAsyncValidationCommand}"
+                                Content="启动异步验证对话框"
+                                Style="{StaticResource LevelButtonStyle}" />
+                        </StackPanel>
+                    </cy:Card>
+
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 自定义 UI Content  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="自定义内容" Subtitle="service.Show(任意 UIElement)">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="Show 接受任意 object —— AlertMessage 是默认 6 级别消息，但也可以塞 Border / UserControl / 自定义控件。下面这条是 code-behind 动态构造的&quot;升级提示卡片&quot;，演示完全自定义内容的能力。" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Padding="14,8"
+                                Background="{DynamicResource Background.Highlighted}"
+                                Command="{Binding ShowCustomContentCommand}"
+                                Content="显示自定义对话框"
+                                Style="{StaticResource LevelButtonStyle}" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 配置  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="配置" Subtitle="AlertOption">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="改完即时生效到下次 Show。Mask 控制蒙版显示；OkButtonText / CancelButtonText 用于 i18n（试着改成 &quot;Yes&quot; / &quot;No&quot; 然后再点 Confirm）。" />
+
+                            <CheckBox
+                                Margin="0,0,0,8"
+                                Content="显示半透明蒙版（IsShowMask）"
+                                IsChecked="{Binding IsShowMask, Mode=TwoWay}" />
+
+                            <CheckBox
+                                Margin="0,0,0,12"
+                                Content="异步验证时显示加载动画（IsShowLoadingOnAsync）"
+                                IsChecked="{Binding IsShowLoadingOnAsync, Mode=TwoWay}" />
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource ValueLabelStyle}"
+                                    Text="OkButtonText" />
+                                <TextBox
+                                    Grid.Column="1"
+                                    Padding="6,4"
+                                    Text="{Binding OkButtonText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource ValueLabelStyle}"
+                                    Text="CancelButtonText" />
+                                <TextBox
+                                    Grid.Column="1"
+                                    Padding="6,4"
+                                    Text="{Binding CancelButtonText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑥ 上次结果  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="最近一次结果" Subtitle="AlertResult 三态">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource HintTextStyle}" Text="Show 返回 AlertResult.Ok / Cancel / Closed 三态——分别对应&quot;点 OK&quot; / &quot;点 Cancel&quot; / &quot;点 X 或 Esc&quot;。" />
+                            <Border
+                                Padding="16,14"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{Binding LastResultColor, Mode=OneWay}"
+                                BorderThickness="0,0,0,3">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="14"
+                                    FontWeight="Medium"
+                                    Foreground="{Binding LastResultColor, Mode=OneWay}"
+                                    Text="{Binding LastResultText, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：API 表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  API 表  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="主要 API">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="成员" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="返回 / 类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Instance" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static AlertService" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="单例入口。也可手动 new 多个实例（不同配置 / 多 owner）。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SetOwner(window | hwnd | ForegroundWindow)" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="设置 alert 的 owner——alert 在 owner 中心显示，蒙版只盖住 owner。多次调用先解绑旧 owner 事件，无内存泄漏。owner.Closed 时关闭活动 alert 但不 Dispose 单例。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Show(content, title)" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="AlertResult" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="基础 Show。按钮组合用 Option.DefaultButtonType。同步阻塞——返回时窗口已关闭。content 为 null 抛 ArgumentNullException。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Show(content, AlertButton, title)" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="AlertResult" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="带显式按钮组合。AlertButton.Ok / OkCancel。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Show(content, Func&lt;bool&gt; validation, title)" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="AlertResult" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="带同步验证。点 OK 时调用 validation——返回 true 才允许关闭，false 时窗口保持打开供用户重试。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ShowAsync(content, Func&lt;Task&lt;bool&gt;&gt;, title)" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Task&lt;AlertResult&gt;" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="带异步验证。验证期间 IsLoading=true，显示半透明加载覆盖层（受 IsShowLoadingOnAsync 控制）。" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Information / Success / Warning / Error / Confirm / Message" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="扩展方法" />
+                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="便捷封装。前 5 个用 Ok 按钮，Confirm 用 OkCancel + Question 图标。无副作用——不再修改 Option.ButtonType。" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AlertResult" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
+                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三态：Ok（点确定）/ Cancel（点取消）/ Closed（点 X / Esc / 系统关闭）。替代之前的 bool? 三态写法，语义更明确。" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Dispose()" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="立即关闭活动 alert + mask + 解绑 owner 事件。不自动 ResetInstance——单例语义独立于 Dispose。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  代码示例 + 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="C# 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><sys:String xml:space="preserve">// 启动时绑定主窗口
+AlertService.Instance.SetOwner(mainWindow);
+
+// 5 种简单提示（Ok 按钮）
+AlertService.Instance.Information("操作完成");
+AlertService.Instance.Warning("即将删除 12 条记录");
+AlertService.Instance.Error("无法连接服务器");
+
+// 确认（OkCancel 按钮 + Question 图标）
+var r = AlertService.Instance.Confirm("确定要删除？");
+if (r == AlertResult.Ok) DoDelete();
+
+// 同步验证：点 OK 时校验，false 时保持打开
+var input = new TextBox();
+var content = BuildLayout("姓名", input);
+var result = AlertService.Instance.Show(
+    content,
+    () => !string.IsNullOrWhiteSpace(input.Text),
+    "请输入姓名");
+
+// 异步验证：服务端校验，期间显示 Loading
+var asyncResult = await AlertService.Instance.ShowAsync(
+    content,
+    async () => await ValidateUsername(input.Text),
+    "用户名查重");
+
+// 自定义 UI 内容
+var card = new MyCustomDialogCard();
+var customResult = AlertService.Instance.Show(card, AlertButton.OkCancel, "确认升级");
+
+// 配置（i18n 等）
+AlertService.Instance.Option.OkButtonText = "OK";
+AlertService.Instance.Option.CancelButtonText = "Cancel";
+AlertService.Instance.Option.IsShowMask = false;</sys:String></TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="AlertResult 三态" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="替代之前的 bool? 写法。Ok / Cancel / Closed 三个值，语义自明，switch 时编译器会提醒覆盖完整。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="验证保持打开" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="同步 / 异步验证返回 false 时窗口保持打开——不需要弹窗自己处理&quot;再次确认&quot;循环，整个交互在一个 Show 调用内完成。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="主题驱动样式" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="所有视觉（颜色、按钮、Caption）走 Alert.xaml 主题字典，主题切换自动响应；Option 只配置行为字段（按钮文本、是否蒙版）。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="无副作用扩展方法" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Container}"
+                                    Text="Information / Confirm 等不再修改 Option.ButtonType（这是旧版 bug 工厂）。每次 Show 显式传按钮组合，调用顺序无关。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+</UserControl>

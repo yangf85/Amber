@@ -104,7 +104,7 @@
                         <Trigger Property="HasItems" Value="False">
                             <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
                         </Trigger>
-                        <Trigger Property="IsActived" Value="True">
+                        <Trigger Property="IsActive" Value="True">
                             <Setter TargetName="HeaderRoot" Property="Background" Value="{DynamicResource Background.Active}" />
                             <Setter TargetName="HeaderRoot" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Invert}" />
                             <Setter TargetName="IconContainer" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Invert}" />

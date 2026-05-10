@@ -1,0 +1,936 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.TreeViewSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:TreeViewViewModel}}"
+    d:DesignHeight="2600"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+
+        <!--  ================ TreeView ItemContainer 选中态绑定 ================  -->
+        <!--
+            把 TreeViewItem 的 IsExpanded / IsSelected 双向绑到数据节点的同名属性。
+            这样程序化展开（②③ 的 ExpandAll / CollapseAll）和选中（④ SelectedNode 显示）才能真正生效。
+            不写这个 Style 的话，数据上改 IsExpanded = true 不会反映到 UI 上。
+        -->
+        <Style x:Key="BoundTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+        </Style>
+
+        <!--  ================ 文件树模板 ================  -->
+        <HierarchicalDataTemplate DataType="{x:Type local:FileNode}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+                <!--  文件夹图标  -->
+                <Path
+                    Width="16"
+                    Height="16"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Data="M2,5 L9,5 L11,7 L20,7 L20,18 L2,18 Z"
+                    Fill="{DynamicResource Background.Info}"
+                    Stretch="Uniform"
+                    Stroke="{DynamicResource Border.Default}"
+                    StrokeLineJoin="Round"
+                    StrokeThickness="1">
+                    <Path.Style>
+                        <Style TargetType="{x:Type Path}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFolder}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                <!--  文件图标  -->
+                <Path
+                    Width="14"
+                    Height="16"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Data="M3,2 L13,2 L17,6 L17,20 L3,20 Z M13,2 L13,6 L17,6"
+                    Fill="{DynamicResource Background.Container}"
+                    Stretch="Uniform"
+                    Stroke="{DynamicResource Foreground.Caption}"
+                    StrokeLineJoin="Round"
+                    StrokeThickness="1">
+                    <Path.Style>
+                        <Style TargetType="{x:Type Path}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFolder}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                <TextBlock
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="{Binding SizeText}" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+        <!--  ================ 部门树模板 ================  -->
+        <HierarchicalDataTemplate DataType="{x:Type local:DepartmentNode}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+                <!--  部门图标——多人  -->
+                <Path
+                    Width="16"
+                    Height="16"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Data="M7,4 A2,2 0 1,1 7,8 A2,2 0 0,1 7,4 M17,4 A2,2 0 1,1 17,8 A2,2 0 0,1 17,4 M3,16 A4,4 0 0,1 11,16 V18 H3 Z M13,16 A4,4 0 0,1 21,16 V18 H13 Z"
+                    Fill="{DynamicResource Background.Highlighted}"
+                    Stretch="Uniform" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Medium"
+                    Text="{Binding Name}" />
+                <Border
+                    Margin="10,0,0,0"
+                    Padding="6,2"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Background.Header}">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="10"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="{Binding MemberCount, StringFormat={}{0} 人}" />
+                </Border>
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+        <!--  ================ 员工模板 ================  -->
+        <HierarchicalDataTemplate DataType="{x:Type local:EmployeeNode}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+                <!--  单人图标  -->
+                <Path
+                    Width="16"
+                    Height="16"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Data="M12,4 A3,3 0 1,1 12,10 A3,3 0 0,1 12,4 M5,18 A7,5 0 0,1 19,18 V20 H5 Z"
+                    Fill="{DynamicResource Foreground.Caption}"
+                    Stretch="Uniform" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                <TextBlock
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="{Binding Title}" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <!--  树形图标：根 + 两个分支 + 四个叶  -->
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M12,3 L12,9 M6,9 L18,9 M6,9 L6,15 M18,9 L18,15 M3,15 L9,15 M15,15 L21,15"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeLineJoin="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="TreeView" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="树形展示——原生 TreeView/TreeViewItem 配 Cyclone Basic 主题。三角箭头展开 + 缩进式层级 + 选中态切换。本控件无新增依赖属性，能力完全来自原生 TreeView。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法——XAML 静态 TreeViewItem  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="XAML 静态 TreeViewItem">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="最简形态——直接在 XAML 里嵌套 TreeViewItem。点三角箭头展开折叠，HasItems=False 时箭头自动隐藏。" />
+
+                            <TreeView Height="280">
+                                <TreeViewItem Header="解决方案 'Cyclone'" IsExpanded="True">
+                                    <TreeViewItem Header="Cyclone.Wpf" IsExpanded="True">
+                                        <TreeViewItem Header="Carousel.cs" />
+                                        <TreeViewItem Header="RangeSlider.cs" />
+                                        <TreeViewItem Header="TreeView.xaml" />
+                                    </TreeViewItem>
+                                    <TreeViewItem Header="Cyclone.Wpf.Demo">
+                                        <TreeViewItem Header="App.xaml" />
+                                        <TreeViewItem Header="MainWindow.xaml" />
+                                    </TreeViewItem>
+                                </TreeViewItem>
+                            </TreeView>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② HierarchicalDataTemplate——文件树  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="HierarchicalDataTemplate" Subtitle="数据驱动 + 文件夹/文件异构图标">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="ItemsSource + HierarchicalDataTemplate (DataType=FileNode)。同模板内通过 IsFolder DataTrigger 切图标——文件夹/文件用不同 Path。" />
+
+                            <TreeView
+                                Height="320"
+                                ItemContainerStyle="{StaticResource BoundTreeViewItemStyle}"
+                                ItemsSource="{Binding FileTree}" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 程序化展开/折叠  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="程序化展开 / 折叠" Subtitle="ItemContainerStyle 把 IsExpanded 双向绑到数据">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="部门组织树。点按钮一键全展开 / 全折叠——命令递归改数据节点的 IsExpanded，UI 通过 ItemContainerStyle 自动响应。" />
+
+                            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                                <Button
+                                    Padding="14,6"
+                                    Command="{Binding ExpandAllCommand}"
+                                    Content="全部展开" />
+                                <Button
+                                    Margin="8,0,0,0"
+                                    Padding="14,6"
+                                    Command="{Binding CollapseAllCommand}"
+                                    Content="全部折叠" />
+                            </StackPanel>
+
+                            <TreeView
+                                Height="300"
+                                ItemContainerStyle="{StaticResource BoundTreeViewItemStyle}"
+                                ItemsSource="{Binding OrgTree}" />
+
+                            <Border
+                                Margin="0,16,0,0"
+                                Padding="12,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="12"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="多类型节点分发" />
+                                    <UniformGrid Margin="0,8,0,0" Columns="1">
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="DepartmentNode" />
+                                            <Run Text=" → 多人图标 + 成员数 badge" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="EmployeeNode" />
+                                            <Run Text=" → 单人图标 + 职级" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            FontFamily="Consolas"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <Run Foreground="{DynamicResource Foreground.Link}" Text="HierarchicalDataTemplate.DataType" />
+                                            <Run Text=" 自动按运行时类型选模板" />
+                                        </TextBlock>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ MVVM 选中绑定  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="MVVM 选中绑定" Subtitle="ElementName=Tree.SelectedItem 单向读 + IsSelected 双向写">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="原生 TreeView 的 SelectedItem 是只读 DP——单向读用 ElementName 绑就够了。需要程序化设置选中时再用 ItemContainerStyle 把数据节点的 IsSelected 双向绑回去。" />
+
+                            <Grid Height="280">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="200" />
+                                </Grid.ColumnDefinitions>
+
+                                <TreeView
+                                    x:Name="DetailTree"
+                                    Grid.Column="0"
+                                    ItemContainerStyle="{StaticResource BoundTreeViewItemStyle}"
+                                    ItemsSource="{Binding OrgTree}" />
+
+                                <Border
+                                    Grid.Column="2"
+                                    Padding="14"
+                                    Background="{DynamicResource Background.Header}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="11"
+                                            FontWeight="Medium"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="选中节点详情" />
+                                        <TextBlock
+                                            Margin="0,12,0,0"
+                                            FontSize="13"
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Default}"
+                                            Text="{Binding ElementName=DetailTree, Path=SelectedItem.Name, FallbackValue=未选中, TargetNullValue=未选中}"
+                                            TextWrapping="Wrap" />
+
+                                        <!--  按节点类型分发不同详情字段  -->
+                                        <ContentControl Margin="0,12,0,0" Content="{Binding ElementName=DetailTree, Path=SelectedItem}">
+                                            <ContentControl.Resources>
+                                                <DataTemplate DataType="{x:Type local:DepartmentNode}">
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource Foreground.Caption}"
+                                                            Text="类型：部门" />
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            FontFamily="Consolas"
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource Foreground.Link}">
+                                                            <Run Text="成员：" />
+                                                            <Run Text="{Binding MemberCount, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                                <DataTemplate DataType="{x:Type local:EmployeeNode}">
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource Foreground.Caption}"
+                                                            Text="类型：员工" />
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            FontFamily="Consolas"
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource Foreground.Link}">
+                                                            <Run Text="职级：" />
+                                                            <Run Text="{Binding Title, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ContentControl.Resources>
+                                        </ContentControl>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="详情面板用 ContentControl + DataType 模板——按节点类型自动切字段，不用一堆 Visibility 切换。" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 失焦态视觉  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="失焦态视觉" Subtitle="IsSelectionActive=False 时弱化高亮">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="样式区分了(激活选中)和(失焦选中)——前者深背景 + 反色文字（Background.Selected / Foreground.Invert），后者弱化为 Background.Highlighted。点左侧选中节点后再点右侧任意位置，对比两个 TreeView 的选中态。" />
+
+                            <Grid Height="240">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="TreeView A——点这边选中" />
+                                    <TreeView ItemContainerStyle="{StaticResource BoundTreeViewItemStyle}" ItemsSource="{Binding FocusedTree}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="TreeView B——焦点过来时观察 A" />
+                                    <TreeView ItemContainerStyle="{StaticResource BoundTreeViewItemStyle}" ItemsSource="{Binding UnfocusedTree}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="原版用 Background.Focused（资源不存在），样式注释里改用 Background.Highlighted——主题需要更专门的失焦色时在 BasicTheme 里补 key。" />
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  ⑥ 主要属性  -->
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="TreeView / TreeViewItem 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 事件" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemsSource" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IEnumerable" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="顶层数据源（ItemsControl 继承）。子节点通过 HierarchicalDataTemplate.ItemsSource 提供。" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SelectedItem" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object (只读)" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="当前选中节点。⚠ 只读 DP，不能直接 TwoWay 绑——MVVM 里改用 ItemContainerStyle 把每节点的 IsSelected 绑到数据。" />
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SelectedValue / SelectedValuePath" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object / string" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="按路径取选中节点字段（如 SelectedValuePath=Id）。SelectedValue 同样只读。" />
+
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SelectedItemChanged" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="选中改变时触发。MVVM 场景用行为或 ItemContainerStyle 替代直接订阅。" />
+
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemContainerStyle" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="Style" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="为每个 TreeViewItem 应用的样式——通常用来把 IsExpanded / IsSelected 双向绑到数据。" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TreeViewItem.IsExpanded" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="节点展开状态。HasItems=False 时 expander 自动隐藏。" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TreeViewItem.IsSelected" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="节点选中状态。设为 true 时同时切 Background.Selected + Foreground.Invert。" />
+
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TreeViewItem.IsSelectionActive" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool (只读)" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="TreeView 是否拥有焦点。失焦时和 IsSelected=True 组合切到 Background.Highlighted 弱化高亮。" />
+
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TreeView.Style.Basic" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="x:Key" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="显式样式 key（也注册成 TargetType=TreeView 默认）。需要扩展时 BasedOn 这个 key 即可。" />
+
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ScrollViewer.CanContentScroll" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool (False)" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="模板里固定 false——换得像素级平滑滚动，代价是不能虚拟化。需虚拟化时改 true 并切 ItemsPanel 到 VirtualizingStackPanel。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <!--  ⑦ XAML 示例 + ⑧ 设计要点  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 静态 -->
+<TreeView>
+    <TreeViewItem Header="Root" IsExpanded="True">
+        <TreeViewItem Header="Child A" />
+        <TreeViewItem Header="Child B" />
+    </TreeViewItem>
+</TreeView>
+
+<!-- HierarchicalDataTemplate -->
+<TreeView ItemsSource="{Binding Roots}">
+    <TreeView.Resources>
+        <HierarchicalDataTemplate
+            DataType="{x:Type local:FileNode}"
+            ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+                <Path ... />
+                <TextBlock Text="{Binding Name}" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+    </TreeView.Resources>
+</TreeView>
+
+<!-- 双向绑定 IsExpanded / IsSelected（MVVM 关键） -->
+<Style x:Key="BoundItemStyle" TargetType="TreeViewItem">
+    <Setter Property="IsExpanded"
+            Value="{Binding IsExpanded, Mode=TwoWay}" />
+    <Setter Property="IsSelected"
+            Value="{Binding IsSelected, Mode=TwoWay}" />
+</Style>
+
+<TreeView ItemContainerStyle="{StaticResource BoundItemStyle}"
+          ItemsSource="{Binding Roots}" />
+
+<!-- 多类型分发——按 DataType 自动选模板 -->
+<HierarchicalDataTemplate DataType="{x:Type local:DepartmentNode}"
+                          ItemsSource="{Binding Children}"> ... </HierarchicalDataTemplate>
+<HierarchicalDataTemplate DataType="{x:Type local:EmployeeNode}"
+                          ItemsSource="{Binding Children}"> ... </HierarchicalDataTemplate>]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="SelectedItem 只读" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="原生 TreeView SelectedItem 是只读 DP——MVVM 里别想 TwoWay 绑。改用 ItemContainerStyle 绑 IsSelected。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="缩进 = 15px" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="子节点 ItemsPresenter Margin=15,0,0,0——深嵌套时层级清晰。深度极大时考虑减小或自定义模板。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="失焦弱化" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="IsSelected + IsSelectionActive=False 走 Background.Highlighted，需更专门的失焦色就在主题里加 Background.Focused 资源。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="不虚拟化" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="CanContentScroll=False 换平滑滚动——大多 TreeView 数据量收益不显著。万级节点再考虑切回虚拟化。"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

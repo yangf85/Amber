@@ -267,8 +267,10 @@
         <Setter Property="BorderThickness" Value="1" />
         <!--  ItemContainerStyle 默认值——user 可通过设 TransferBox.ItemContainerStyle 覆盖  -->
         <Setter Property="ItemContainerStyle" Value="{StaticResource TransferBox.ListBoxItemStyle}" />
-        <!--  ItemsPanel 默认值——必须设，否则 TemplateBinding 写 null 给 ListBox.ItemsPanel 会让 items 不渲染。
-              用 StackPanel 而不是 VirtualizingStackPanel，因为 ListBoxItem 模板里用了 SharedSizeGroup（跟虚拟化不兼容）  -->
+        <!--
+            ItemsPanel 默认值——必须设，否则 TemplateBinding 写 null 给 ListBox.ItemsPanel 会让 items 不渲染。
+            用 StackPanel 而不是 VirtualizingStackPanel，因为 ListBoxItem 模板里用了 SharedSizeGroup（跟虚拟化不兼容）
+        -->
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>

@@ -1,26 +1,48 @@
 ﻿using Cyclone.Wpf.Helpers;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Cyclone.Wpf.Controls;
 
 [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(SideMenuItem))]
 public class SideMenuItem : HeaderedItemsControl
 {
-    static SideMenuItem()
+    private SideMenu _root;
+
+    private bool _isMousePressed;
+
+    private void OnSideMenuItemLoaded(object sender, RoutedEventArgs e)
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(SideMenuItem), new FrameworkPropertyMetadata(typeof(SideMenuItem)));
+        // OnApplyTemplate 时 visual tree 可能未完成——Loaded 时一定完成
+        if (_root == null)
+        {
+            _root = VisualTreeHelperExtension.TryFindVisualParent<SideMenu>(this);
+            if (_root != null)
+            {
+                UpdateIndent(_root.Indent);
+            }
+        }
     }
 
-    private SideMenu _root;
-    private int _level = 0;
+    static SideMenuItem()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(SideMenuItem),
+            new FrameworkPropertyMetadata(typeof(SideMenuItem)));
+    }
+
+    public SideMenuItem()
+    {
+        Loaded += OnSideMenuItemLoaded;
+        Focusable = true;
+    }
 
     #region RowHeight
+
+    public static readonly DependencyProperty RowHeightProperty =
+        DependencyProperty.Register(nameof(RowHeight), typeof(double), typeof(SideMenuItem),
+            new PropertyMetadata(32d));
 
     public double RowHeight
     {
@@ -28,44 +50,52 @@ public class SideMenuItem : HeaderedItemsControl
         set => SetValue(RowHeightProperty, value);
     }
 
-    public static readonly DependencyProperty RowHeightProperty =
-        DependencyProperty.Register(nameof(RowHeight), typeof(double), typeof(SideMenuItem), new PropertyMetadata(32d));
-
     #endregion RowHeight
 
-    #region Level
+    #region Level — 附加只读 DP
 
-    // Level属性，表示菜单项的层级
-    public int Level
-    {
-        get => _level;
-        internal set
-        {
-            if (_level != value)
-            {
-                _level = value;
-                UpdateIndent();
-            }
-        }
-    }
+    /// <summary>
+    /// 菜单层级——0 为顶级。改为附加 DP 让子菜单可监听变化、可在 trigger 里使用。
+    /// </summary>
+    private static readonly DependencyPropertyKey LevelPropertyKey =
+        DependencyProperty.RegisterAttachedReadOnly(
+            "Level",
+            typeof(int),
+            typeof(SideMenuItem),
+            new PropertyMetadata(0));
 
-    #endregion Level
+    public static readonly DependencyProperty LevelProperty = LevelPropertyKey.DependencyProperty;
+
+    public int Level => GetLevel(this);
+
+    internal static void SetLevel(DependencyObject obj, int value) =>
+        obj.SetValue(LevelPropertyKey, value);
+
+    public static int GetLevel(DependencyObject obj) => (int)obj.GetValue(LevelProperty);
+
+    #endregion Level — 附加只读 DP
 
     #region Indent
+
+    private static readonly DependencyPropertyKey IndentPropertyKey =
+        DependencyProperty.RegisterReadOnly(nameof(Indent), typeof(double), typeof(SideMenuItem),
+            new PropertyMetadata(0d));
+
+    public static readonly DependencyProperty IndentProperty = IndentPropertyKey.DependencyProperty;
 
     public double Indent
     {
         get => (double)GetValue(IndentProperty);
-        private set => SetValue(IndentProperty, value);
+        private set => SetValue(IndentPropertyKey, value);
     }
-
-    public static readonly DependencyProperty IndentProperty =
-        DependencyProperty.Register(nameof(Indent), typeof(double), typeof(SideMenuItem),
-        new PropertyMetadata(0d));
 
     #endregion Indent
 
     #region IsExpanded
+
+    public static readonly DependencyProperty IsExpandedProperty =
+        DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(SideMenuItem),
+            new PropertyMetadata(false));
 
     public bool IsExpanded
     {
@@ -73,43 +103,38 @@ public class SideMenuItem : HeaderedItemsControl
         set => SetValue(IsExpandedProperty, value);
     }
 
-    public static readonly DependencyProperty IsExpandedProperty =
-        DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(SideMenuItem), new PropertyMetadata(default(bool)));
-
     #endregion IsExpanded
 
-    #region IsActived
+    #region IsActive — 重命名自 IsActived
 
-    private static readonly DependencyPropertyKey IsActivedPropertyKey =
+    private static readonly DependencyPropertyKey IsActivePropertyKey =
         DependencyProperty.RegisterReadOnly(
-            nameof(IsActived),
+            nameof(IsActive),
             typeof(bool),
             typeof(SideMenuItem),
             new PropertyMetadata(false));
 
-    public static readonly DependencyProperty IsActivedProperty = IsActivedPropertyKey.DependencyProperty;
+    public static readonly DependencyProperty IsActiveProperty = IsActivePropertyKey.DependencyProperty;
 
-    public bool IsActived
-    {
-        get => (bool)GetValue(IsActivedProperty);
-    }
+    public bool IsActive => (bool)GetValue(IsActiveProperty);
 
-    #endregion IsActived
+    #endregion IsActive — 重命名自 IsActived
 
-    #region Icon
+    #region Icon / IconTemplate
+
+    public static readonly DependencyProperty IconProperty =
+        DependencyProperty.Register(nameof(Icon), typeof(object), typeof(SideMenuItem),
+            new PropertyMetadata(null));
+
+    public static readonly DependencyProperty IconTemplateProperty =
+        DependencyProperty.Register(nameof(IconTemplate), typeof(DataTemplate), typeof(SideMenuItem),
+            new PropertyMetadata(null));
 
     public object Icon
     {
-        get => (object)GetValue(IconProperty);
+        get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }
-
-    public static readonly DependencyProperty IconProperty =
-        DependencyProperty.Register(nameof(Icon), typeof(object), typeof(SideMenuItem), new PropertyMetadata(default(object)));
-
-    #endregion Icon
-
-    #region IconTemplate
 
     public DataTemplate IconTemplate
     {
@@ -117,128 +142,142 @@ public class SideMenuItem : HeaderedItemsControl
         set => SetValue(IconTemplateProperty, value);
     }
 
-    public static readonly DependencyProperty IconTemplateProperty =
-        DependencyProperty.Register(nameof(IconTemplate), typeof(DataTemplate), typeof(SideMenuItem), new PropertyMetadata(default(DataTemplate)));
-
-    #endregion IconTemplate
+    #endregion Icon / IconTemplate
 
     #region Override
+
+    protected override DependencyObject GetContainerForItemOverride()
+    {
+        var item = new SideMenuItem();
+        SetLevel(item, Level + 1);
+        if (_root != null)
+        {
+            item.UpdateIndent(_root.Indent);
+        }
+        return item;
+    }
+
+    protected override bool IsItemItsOwnContainerOverride(object item) => item is SideMenuItem;
 
     protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
     {
         base.PrepareContainerForItemOverride(element, item);
 
-        // 设置子项的缩进级别
         if (element is SideMenuItem childItem)
         {
-            // 子菜单项的Level是父菜单项的Level+1
-            childItem.Level = Level + 1;
+            // 子项 Level = 父 Level + 1
+            SetLevel(childItem, Level + 1);
 
-            // 获取SideMenu的缩进大小
             if (_root != null)
             {
                 childItem.UpdateIndent(_root.Indent);
-
-                // 如果根菜单设置了DisplayMemberIcon，也应用到子项
-                if (!string.IsNullOrEmpty(_root.DisplayMemberIcon))
-                {
-                    // 创建绑定到指定属性的Binding
-                    Binding iconBinding = new Binding(_root.DisplayMemberIcon)
-                    {
-                        Source = item,
-                        Mode = BindingMode.OneWay
-                    };
-
-                    // 将绑定应用到SideMenuItem的Icon属性
-                    childItem.SetBinding(IconProperty, iconBinding);
-                }
-
-                // 应用IconTemplate
-                if (_root.DisplayMemberIconTemplate != null)
-                {
-                    childItem.IconTemplate = _root.DisplayMemberIconTemplate;
-                }
+                _root.ApplyIconBinding(childItem, item);
             }
-        }
-    }
-
-    protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
-    {
-        base.OnMouseLeftButtonUp(e);
-
-        // 获取当前点击的 SideMenuItem
-        var source = e.OriginalSource as DependencyObject;
-        var clickedItem = VisualTreeHelperExtension.TryFindVisualParent<SideMenuItem>(source);
-
-        // 如果点击的是当前的 SideMenuItem
-        if (clickedItem == this)
-        {
-            // 切换展开状态
-            SetValue(IsExpandedProperty, !IsExpanded);
-
-            // 处理激活状态
-            var flag = IsActived;
-            if (!flag)
-            {
-                _root?.DeactivateItems();
-                SetValue(IsActivedPropertyKey, !flag);
-            }
-
-            // 通知根菜单项被点击，用于触发命令和事件
-            _root?.OnItemClicked(this);
-        }
-    }
-
-    protected override bool IsItemItsOwnContainerOverride(object item)
-    {
-        return item is SideMenuItem;
-    }
-
-    protected override DependencyObject GetContainerForItemOverride()
-    {
-        var item = new SideMenuItem();
-        // 新创建的子菜单项，Level是当前菜单项的Level+1
-        item.Level = Level + 1;
-
-        // 获取SideMenu的缩进大小
-        if (_root != null)
-        {
-            item.UpdateIndent(_root.Indent);
-        }
-
-        return item;
-    }
-
-    public override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-        _root = VisualTreeHelperExtension.TryFindVisualParent<SideMenu>(this);
-
-        if (_root != null)
-        {
-            UpdateIndent(_root.Indent);
         }
     }
 
     #endregion Override
 
-    internal void SetInactive()
+    #region 点击处理 — 鼠标 capture pattern + 键盘支持
+
+    /// <summary>
+    /// 判断点击的 OriginalSource 是否在当前菜单项的 Header 区域（而不是子菜单的 header）。
+    /// 通过向上找祖先 SideMenuItem——找到的第一个就是事件源最近的 SideMenuItem。
+    /// 等于 this 时才说明点击在当前项。
+    /// </summary>
+    private bool IsClickOnHeader(DependencyObject source)
     {
-        SetValue(IsActivedPropertyKey, false);
+        if (source == null)
+        {
+            return false;
+        }
+
+        var nearestItem = VisualTreeHelperExtension.TryFindVisualParent<SideMenuItem>(source);
+        return nearestItem == this;
     }
+
+    private void HandleClick()
+    {
+        // 切换展开态——HasItems 时才有意义，否则只是激活
+        if (HasItems)
+        {
+            SetValue(IsExpandedProperty, !IsExpanded);
+        }
+
+        // 通知根菜单——根菜单负责管理激活态、触发命令和事件
+        _root?.OnItemClicked(this);
+    }
+
+    /// <summary>
+    /// 按下：开始追踪点击——支持鼠标按下后拖出取消。
+    /// </summary>
+    protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnPreviewMouseLeftButtonDown(e);
+
+        // 关键：只接受 OriginalSource 在当前 SideMenuItem 的 HeaderRoot 上发生的点击
+        // 子菜单项的点击会冒泡上来，要在这里过滤掉——只关心点击当前项 header 区域的情况
+        if (!IsClickOnHeader(e.OriginalSource as DependencyObject))
+        {
+            return;
+        }
+
+        _isMousePressed = true;
+        Focus();
+        e.Handled = true;
+    }
+
+    protected override void OnPreviewMouseLeftButtonUp(MouseButtonEventArgs e)
+    {
+        base.OnPreviewMouseLeftButtonUp(e);
+
+        if (!_isMousePressed)
+        {
+            return;
+        }
+
+        _isMousePressed = false;
+
+        // 鼠标松开时如果还在 header 区域内，才算 Click
+        if (IsClickOnHeader(e.OriginalSource as DependencyObject))
+        {
+            HandleClick();
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        _isMousePressed = false;
+    }
+
+    /// <summary>
+    /// 键盘 Enter / Space 触发 Click（无障碍支持）。
+    /// </summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Enter || e.Key == Key.Space)
+        {
+            HandleClick();
+            e.Handled = true;
+        }
+    }
+
+    #endregion 点击处理 — 鼠标 capture pattern + 键盘支持
+
+    #region 公开 API
+
+    internal void SetActive() => SetValue(IsActivePropertyKey, true);
+
+    internal void SetInactive() => SetValue(IsActivePropertyKey, false);
 
     internal void UpdateIndent(double indentSize)
     {
-        // 根据层级计算缩进，Level为0时没有缩进
-        Indent = (Level > 0) ? Level * indentSize : 0;
+        Indent = Level > 0 ? Level * indentSize : 0;
     }
 
-    // 无参数版本，用于内部调用
-    private void UpdateIndent()
-    {
-        if (_root != null)
-        {
-            UpdateIndent(_root.Indent);
-        }
-    }
+    #endregion 公开 API
 }

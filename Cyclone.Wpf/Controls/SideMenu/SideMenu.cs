@@ -1,30 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Cyclone.Wpf.Controls;
 
 public class SideMenu : ItemsControl
 {
+    /// <summary>
+    /// 当前菜单宽度（用于动画）——不直接污染 Width，让用户能在外层布局里正常使用 SideMenu。
+    /// 模板内的 RootBorder 通过 TemplateBinding 绑定该值。
+    ///
+    /// 注意：理论上应该是只读 DP，但 WPF 只读 DP 的元数据默认 IsAnimationProhibited=true
+    /// 无法走 BeginAnimation——只能改成普通 DP。约定外部不要直接赋值（用 IsCompact 切换驱动）。
+    /// </summary>
+    public static readonly DependencyProperty MenuWidthProperty =
+        DependencyProperty.Register(
+            nameof(MenuWidth),
+            typeof(double),
+            typeof(SideMenu),
+            new PropertyMetadata(150d));
+
+    public double MenuWidth
+    {
+        get => (double)GetValue(MenuWidthProperty);
+        private set => SetValue(MenuWidthProperty, value);
+    }
+
     static SideMenu()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(SideMenu), new FrameworkPropertyMetadata(typeof(SideMenu)));
     }
 
-    // 存储当前实际宽度值，用于动画
-    private double _currentWidth;
-
     #region IsCompact
+
+    public static readonly DependencyProperty IsCompactProperty =
+        DependencyProperty.Register(nameof(IsCompact), typeof(bool), typeof(SideMenu),
+            new PropertyMetadata(false, OnIsCompactChanged));
 
     public bool IsCompact
     {
@@ -32,53 +46,54 @@ public class SideMenu : ItemsControl
         set => SetValue(IsCompactProperty, value);
     }
 
-    public static readonly DependencyProperty IsCompactProperty =
-        DependencyProperty.Register(nameof(IsCompact), typeof(bool), typeof(SideMenu),
-        new PropertyMetadata(false, OnIsCompactChanged));
-
     private static void OnIsCompactChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is SideMenu menu)
         {
-            // 当IsCompact属性改变时，启动动画
             menu.AnimateWidthChange((bool)e.NewValue);
         }
     }
 
-    // 执行宽度变化动画
+    /// <summary>
+    /// 宽度切换动画——通过 SetValue + Storyboard 改 MenuWidth，不污染外层 Width 属性。
+    /// </summary>
     private void AnimateWidthChange(bool isCompact)
     {
-        // 获取目标宽度
-        double targetWidth = isCompact ? CollapseWidth : ExpansionWidth;
+        var targetWidth = isCompact ? CollapseWidth : ExpansionWidth;
+        var currentWidth = MenuWidth;
 
-        // 如果当前宽度为0（初始化状态），直接设置宽度而不使用动画
-        if (_currentWidth == 0)
+        // 模板还没应用 / 首次进入：直接设值不走动画
+        if (!_isInitialized || currentWidth == 0)
         {
-            _currentWidth = targetWidth;
-            this.Width = targetWidth;
+            SetValue(MenuWidthProperty, targetWidth);
             return;
         }
 
-        // 创建动画
-        DoubleAnimation animation = new DoubleAnimation
+        var animation = new DoubleAnimation
         {
-            From = _currentWidth,
+            From = currentWidth,
             To = targetWidth,
             Duration = AnimationDuration,
-            FillBehavior = FillBehavior.HoldEnd,
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            FillBehavior = FillBehavior.Stop, // 关键：动画结束后释放控制权，让 SetValue 设的值生效
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut },
         };
 
-        // 更新当前宽度
-        _currentWidth = targetWidth;
+        animation.Completed += (_, _) =>
+        {
+            // 动画结束后写入 DP 真实值（不依赖 HoldEnd 占着 effective value）
+            SetValue(MenuWidthProperty, targetWidth);
+        };
 
-        // 开始动画
-        this.BeginAnimation(FrameworkElement.WidthProperty, animation);
+        BeginAnimation(MenuWidthProperty, animation);
     }
 
     #endregion IsCompact
 
     #region IsShowOpenButton
+
+    public static readonly DependencyProperty IsShowOpenButtonProperty =
+        DependencyProperty.Register(nameof(IsShowOpenButton), typeof(bool), typeof(SideMenu),
+            new PropertyMetadata(true));
 
     public bool IsShowOpenButton
     {
@@ -86,12 +101,17 @@ public class SideMenu : ItemsControl
         set => SetValue(IsShowOpenButtonProperty, value);
     }
 
-    public static readonly DependencyProperty IsShowOpenButtonProperty =
-        DependencyProperty.Register(nameof(IsShowOpenButton), typeof(bool), typeof(SideMenu), new PropertyMetadata(true));
-
     #endregion IsShowOpenButton
 
-    #region CollapseWidth
+    #region CollapseWidth / ExpansionWidth
+
+    public static readonly DependencyProperty CollapseWidthProperty =
+        DependencyProperty.Register(nameof(CollapseWidth), typeof(double), typeof(SideMenu),
+            new PropertyMetadata(60d, OnWidthSettingsChanged));
+
+    public static readonly DependencyProperty ExpansionWidthProperty =
+        DependencyProperty.Register(nameof(ExpansionWidth), typeof(double), typeof(SideMenu),
+            new PropertyMetadata(150d, OnWidthSettingsChanged));
 
     public double CollapseWidth
     {
@@ -99,51 +119,55 @@ public class SideMenu : ItemsControl
         set => SetValue(CollapseWidthProperty, value);
     }
 
-    public static readonly DependencyProperty CollapseWidthProperty =
-        DependencyProperty.Register(nameof(CollapseWidth), typeof(double), typeof(SideMenu), new PropertyMetadata(60d));
-
-    #endregion CollapseWidth
-
-    #region ExpansionWidth
-
     public double ExpansionWidth
     {
         get => (double)GetValue(ExpansionWidthProperty);
         set => SetValue(ExpansionWidthProperty, value);
     }
 
-    public static readonly DependencyProperty ExpansionWidthProperty =
-        DependencyProperty.Register(nameof(ExpansionWidth), typeof(double), typeof(SideMenu), new PropertyMetadata(150d));
+    /// <summary>
+    /// 用户外部修改 CollapseWidth/ExpansionWidth 时——同步更新当前 MenuWidth。
+    /// </summary>
+    private static void OnWidthSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is SideMenu menu && menu._isInitialized)
+        {
+            var newWidth = menu.IsCompact ? menu.CollapseWidth : menu.ExpansionWidth;
+            menu.SetValue(MenuWidthProperty, newWidth);
+        }
+    }
 
-    #endregion ExpansionWidth
+    #endregion CollapseWidth / ExpansionWidth
 
-    #region Header
+    #region Header / Footer
+
+    public static readonly DependencyProperty HeaderProperty =
+        DependencyProperty.Register(nameof(Header), typeof(object), typeof(SideMenu),
+            new PropertyMetadata(null));
+
+    public static readonly DependencyProperty FooterProperty =
+        DependencyProperty.Register(nameof(Footer), typeof(object), typeof(SideMenu),
+            new PropertyMetadata(null));
 
     public object Header
     {
-        get => (object)GetValue(HeaderProperty);
+        get => GetValue(HeaderProperty);
         set => SetValue(HeaderProperty, value);
     }
 
-    public static readonly DependencyProperty HeaderProperty =
-        DependencyProperty.Register(nameof(Header), typeof(object), typeof(SideMenu), new PropertyMetadata(default(object)));
-
-    #endregion Header
-
-    #region Footer
-
     public object Footer
     {
-        get => (object)GetValue(FooterProperty);
+        get => GetValue(FooterProperty);
         set => SetValue(FooterProperty, value);
     }
 
-    public static readonly DependencyProperty FooterProperty =
-        DependencyProperty.Register(nameof(Footer), typeof(object), typeof(SideMenu), new PropertyMetadata(default(object)));
-
-    #endregion Footer
+    #endregion Header / Footer
 
     #region AnimationDuration
+
+    public static readonly DependencyProperty AnimationDurationProperty =
+        DependencyProperty.Register(nameof(AnimationDuration), typeof(Duration), typeof(SideMenu),
+            new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(250))));
 
     public Duration AnimationDuration
     {
@@ -151,13 +175,13 @@ public class SideMenu : ItemsControl
         set => SetValue(AnimationDurationProperty, value);
     }
 
-    public static readonly DependencyProperty AnimationDurationProperty =
-        DependencyProperty.Register(nameof(AnimationDuration), typeof(Duration), typeof(SideMenu),
-        new PropertyMetadata(new Duration(TimeSpan.FromMilliseconds(250))));
-
     #endregion AnimationDuration
 
     #region Indent
+
+    public static readonly DependencyProperty IndentProperty =
+        DependencyProperty.Register(nameof(Indent), typeof(double), typeof(SideMenu),
+            new PropertyMetadata(12d, OnIndentChanged));
 
     public double Indent
     {
@@ -165,21 +189,25 @@ public class SideMenu : ItemsControl
         set => SetValue(IndentProperty, value);
     }
 
-    public static readonly DependencyProperty IndentProperty =
-        DependencyProperty.Register(nameof(Indent), typeof(double), typeof(SideMenu),
-        new PropertyMetadata(10d, OnIndentChanged));
-
     private static void OnIndentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is SideMenu menu)
         {
-            menu.UpdateChildrenIndent();
+            menu.UpdateChildrenIndentRecursively(menu);
         }
     }
 
     #endregion Indent
 
-    #region DisplayMemberIcon
+    #region DisplayMemberIcon / DisplayMemberIconTemplate
+
+    public static readonly DependencyProperty DisplayMemberIconProperty =
+        DependencyProperty.Register(nameof(DisplayMemberIcon), typeof(string), typeof(SideMenu),
+            new PropertyMetadata(null, OnDisplayMemberIconChanged));
+
+    public static readonly DependencyProperty DisplayMemberIconTemplateProperty =
+        DependencyProperty.Register(nameof(DisplayMemberIconTemplate), typeof(DataTemplate), typeof(SideMenu),
+            new PropertyMetadata(null, OnDisplayMemberIconTemplateChanged));
 
     public string DisplayMemberIcon
     {
@@ -187,43 +215,43 @@ public class SideMenu : ItemsControl
         set => SetValue(DisplayMemberIconProperty, value);
     }
 
-    public static readonly DependencyProperty DisplayMemberIconProperty =
-        DependencyProperty.Register(nameof(DisplayMemberIcon), typeof(string), typeof(SideMenu),
-        new PropertyMetadata(null, OnDisplayMemberIconChanged));
-
-    private static void OnDisplayMemberIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is SideMenu menu)
-        {
-            menu.UpdateChildrenIconBinding();
-        }
-    }
-
-    #endregion DisplayMemberIcon
-
-    #region DisplayMemberIconTemplate
-
     public DataTemplate DisplayMemberIconTemplate
     {
         get => (DataTemplate)GetValue(DisplayMemberIconTemplateProperty);
         set => SetValue(DisplayMemberIconTemplateProperty, value);
     }
 
-    public static readonly DependencyProperty DisplayMemberIconTemplateProperty =
-        DependencyProperty.Register(nameof(DisplayMemberIconTemplate), typeof(DataTemplate), typeof(SideMenu),
-        new PropertyMetadata(null, OnDisplayMemberIconTemplateChanged));
+    private static void OnDisplayMemberIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is SideMenu menu)
+        {
+            menu.UpdateChildrenIconBindingRecursively(menu);
+        }
+    }
 
     private static void OnDisplayMemberIconTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is SideMenu menu)
         {
-            menu.UpdateChildrenIconTemplate();
+            menu.UpdateChildrenIconTemplateRecursively(menu);
         }
     }
 
-    #endregion DisplayMemberIconTemplate
+    #endregion DisplayMemberIcon / DisplayMemberIconTemplate
 
-    #region ItemClick Command
+    #region ItemClick Command + Event
+
+    public static readonly DependencyProperty ItemClickCommandProperty =
+        DependencyProperty.Register(nameof(ItemClickCommand), typeof(ICommand), typeof(SideMenu),
+            new PropertyMetadata(null));
+
+    public static readonly DependencyProperty ItemClickCommandParameterProperty =
+        DependencyProperty.Register(nameof(ItemClickCommandParameter), typeof(object), typeof(SideMenu),
+            new PropertyMetadata(null));
+
+    public static readonly RoutedEvent ItemClickEvent =
+        EventManager.RegisterRoutedEvent(nameof(ItemClick), RoutingStrategy.Bubble,
+            typeof(SideMenuItemClickEventHandler), typeof(SideMenu));
 
     public ICommand ItemClickCommand
     {
@@ -231,46 +259,50 @@ public class SideMenu : ItemsControl
         set => SetValue(ItemClickCommandProperty, value);
     }
 
-    public static readonly DependencyProperty ItemClickCommandProperty =
-        DependencyProperty.Register(nameof(ItemClickCommand), typeof(ICommand), typeof(SideMenu), new PropertyMetadata(null));
-
     public object ItemClickCommandParameter
     {
         get => GetValue(ItemClickCommandParameterProperty);
         set => SetValue(ItemClickCommandParameterProperty, value);
     }
 
-    public static readonly DependencyProperty ItemClickCommandParameterProperty =
-        DependencyProperty.Register(nameof(ItemClickCommandParameter), typeof(object), typeof(SideMenu), new PropertyMetadata(null));
-
-    #endregion ItemClick Command
-
-    #region ItemClick Event
-
-    public static readonly RoutedEvent ItemClickEvent =
-        EventManager.RegisterRoutedEvent(nameof(ItemClick), RoutingStrategy.Bubble, typeof(SideMenuItemClickEventHandler), typeof(SideMenu));
-
     public event SideMenuItemClickEventHandler ItemClick
     {
-        add { AddHandler(ItemClickEvent, value); }
-        remove { RemoveHandler(ItemClickEvent, value); }
+        add => AddHandler(ItemClickEvent, value);
+        remove => RemoveHandler(ItemClickEvent, value);
     }
 
-    #endregion ItemClick Event
+    #endregion ItemClick Command + Event
+
+    #region 初始化标志 + Loaded 时机
+
+    private bool _isInitialized;
+
+    private void OnSideMenuLoaded(object sender, RoutedEventArgs e)
+    {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = true;
+
+        // 初始宽度——MenuWidth 默认值是 150，但可能用户改了 ExpansionWidth/IsCompact，要重算
+        var initialWidth = IsCompact ? CollapseWidth : ExpansionWidth;
+        SetValue(MenuWidthProperty, initialWidth);
+    }
+
+    public SideMenu()
+    {
+        Loaded += OnSideMenuLoaded;
+    }
+
+    #endregion 初始化标志 + Loaded 时机
 
     #region Override
 
-    protected override DependencyObject GetContainerForItemOverride()
-    {
-        var item = new SideMenuItem();
-        item.UpdateIndent(Indent);
-        return item;
-    }
+    protected override DependencyObject GetContainerForItemOverride() => new SideMenuItem();
 
-    protected override bool IsItemItsOwnContainerOverride(object item)
-    {
-        return item is SideMenuItem;
-    }
+    protected override bool IsItemItsOwnContainerOverride(object item) => item is SideMenuItem;
 
     protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
     {
@@ -278,173 +310,175 @@ public class SideMenu : ItemsControl
 
         if (element is SideMenuItem menuItem)
         {
-            // 为顶级菜单项设置Level为0
-            menuItem.Level = 0;
-            menuItem.UpdateIndent(this.Indent);
-
-            // 设置图标绑定和模板
-            SetupIconBinding(menuItem, item);
+            // 顶级菜单 Level=0
+            SideMenuItem.SetLevel(menuItem, 0);
+            menuItem.UpdateIndent(Indent);
+            ApplyIconBinding(menuItem, item);
         }
     }
 
     #endregion Override
 
-    internal void DeactivateItems()
+    #region 激活态管理
+
+    private static void ApplyActivationRecursively(ItemsControl container, System.Collections.Generic.HashSet<SideMenuItem> activeChain)
     {
-        // 从顶层开始递归取消所有子项的激活状态
-        DeactivateItemsRecursively(this);
+        foreach (var item in container.Items)
+        {
+            if (container.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
+            {
+                if (activeChain.Contains(menuItem))
+                {
+                    menuItem.SetActive();
+                }
+                else
+                {
+                    menuItem.SetInactive();
+                }
+
+                if (menuItem.HasItems)
+                {
+                    ApplyActivationRecursively(menuItem, activeChain);
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// 递归取消传入 ItemsControl 内所有子项的激活状态
+    /// 帮 SideMenuItem 找上层 ItemsControl——支持祖先链遍历。
     /// </summary>
-    /// <param name="itemsControl">当前遍历的 ItemsControl</param>
-    private void DeactivateItemsRecursively(ItemsControl itemsControl)
+    internal static ItemsControl ItemsControlFromItemContainer(SideMenuItem item)
     {
-        foreach (var item in itemsControl.Items)
-        {
-            // 获取该项对应的容器
-            if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
-            {
-                // 取消当前菜单项的激活状态
-                menuItem.SetInactive();
+        var parent = ItemsControl.ItemsControlFromItemContainer(item);
+        // 顶层时 parent 是 SideMenu 自身——不算 SideMenuItem，链终止
+        return parent is SideMenuItem ? parent : null;
+    }
 
-                // 如果当前菜单项内还有嵌套的子项，则递归调用
+    /// <summary>
+    /// 当 leaf（叶子）菜单项被点击时调用——激活该项 + 该项的所有祖先链；
+    /// 取消其他分支的激活。
+    /// </summary>
+    internal void ActivateLeaf(SideMenuItem leaf)
+    {
+        // 1) 收集 leaf 的祖先链（包括 leaf 自身）——这些项保持激活
+        var activeChain = new System.Collections.Generic.HashSet<SideMenuItem>();
+        var current = leaf;
+        while (current != null)
+        {
+            activeChain.Add(current);
+            current = ItemsControlFromItemContainer(current) as SideMenuItem;
+        }
+
+        // 2) 遍历整棵树——在 activeChain 里的 SetActive，否则 SetInactive
+        ApplyActivationRecursively(this, activeChain);
+    }
+
+    #endregion 激活态管理
+
+    #region 递归更新工具
+
+    private void UpdateChildrenIndentRecursively(ItemsControl container)
+    {
+        foreach (var item in container.Items)
+        {
+            if (container.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
+            {
+                menuItem.UpdateIndent(Indent);
                 if (menuItem.HasItems)
                 {
-                    DeactivateItemsRecursively(menuItem);
+                    UpdateChildrenIndentRecursively(menuItem);
                 }
             }
         }
     }
 
-    private void UpdateChildrenIndent()
+    private void UpdateChildrenIconBindingRecursively(ItemsControl container)
     {
-        foreach (var item in Items)
+        for (int i = 0; i < container.Items.Count; i++)
         {
-            if (ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
+            var item = container.Items[i];
+            if (container.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
             {
-                menuItem.UpdateIndent(this.Indent);
+                ApplyIconBinding(menuItem, item);
+                if (menuItem.HasItems)
+                {
+                    UpdateChildrenIconBindingRecursively(menuItem);
+                }
             }
         }
     }
 
-    private void UpdateChildrenIconBinding()
+    private void UpdateChildrenIconTemplateRecursively(ItemsControl container)
     {
-        foreach (var item in Items)
+        foreach (var item in container.Items)
         {
-            if (ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
+            if (container.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
             {
-                SetupIconBinding(menuItem, item);
-            }
-        }
-    }
-
-    private void UpdateChildrenIconTemplate()
-    {
-        foreach (var item in Items)
-        {
-            if (ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
-            {
-                // 更新当前菜单项的IconTemplate
                 if (DisplayMemberIconTemplate != null)
                 {
                     menuItem.IconTemplate = DisplayMemberIconTemplate;
                 }
-
-                // 更新子菜单项的IconTemplate
-                UpdateChildIconTemplateRecursively(menuItem);
-            }
-        }
-    }
-
-    private void UpdateChildIconTemplateRecursively(ItemsControl itemsControl)
-    {
-        foreach (var item in itemsControl.Items)
-        {
-            if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is SideMenuItem menuItem)
-            {
-                // 更新当前子菜单项的IconTemplate
-                if (DisplayMemberIconTemplate != null)
-                {
-                    menuItem.IconTemplate = DisplayMemberIconTemplate;
-                }
-
-                // 如果有嵌套的子项，继续递归
                 if (menuItem.HasItems)
                 {
-                    UpdateChildIconTemplateRecursively(menuItem);
+                    UpdateChildrenIconTemplateRecursively(menuItem);
                 }
             }
         }
     }
 
-    private void SetupIconBinding(SideMenuItem menuItem, object dataItem)
+    /// <summary>
+    /// 统一的图标绑定逻辑——SideMenu 和 SideMenuItem 都通过这个方法应用。
+    /// </summary>
+    internal void ApplyIconBinding(SideMenuItem menuItem, object dataItem)
     {
-        // 如果设置了DisplayMemberIcon，则创建绑定
         if (!string.IsNullOrEmpty(DisplayMemberIcon))
         {
-            // 创建绑定到指定属性的Binding
-            Binding iconBinding = new Binding(DisplayMemberIcon)
+            var iconBinding = new Binding(DisplayMemberIcon)
             {
                 Source = dataItem,
-                Mode = BindingMode.OneWay
+                Mode = BindingMode.OneWay,
             };
-
-            // 将绑定应用到SideMenuItem的Icon属性
             menuItem.SetBinding(SideMenuItem.IconProperty, iconBinding);
         }
 
-        // 如果设置了DisplayMemberIconTemplate，应用到menuItem
         if (DisplayMemberIconTemplate != null)
         {
             menuItem.IconTemplate = DisplayMemberIconTemplate;
         }
     }
 
-    public override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
+    #endregion 递归更新工具
 
-        // 初始化宽度
-        _currentWidth = IsCompact ? CollapseWidth : ExpansionWidth;
-        Width = _currentWidth;
-    }
+    #region 点击通知
 
     /// <summary>
-    /// 内部方法，供SideMenuItem调用以触发点击命令
+    /// SideMenuItem 点击时调用——触发激活态变化、路由事件、命令。
     /// </summary>
-    /// <param name="menuItem">被点击的菜单项</param>
-    internal void OnItemClicked(SideMenuItem menuItem)
+    internal void OnItemClicked(SideMenuItem clickedItem)
     {
-        // 触发路由事件
-        SideMenuItemClickEventArgs args = new SideMenuItemClickEventArgs(menuItem);
-        args.RoutedEvent = ItemClickEvent;
+        // 1) 激活该项 + 祖先链
+        ActivateLeaf(clickedItem);
+
+        // 2) 触发路由事件
+        var args = new SideMenuItemClickEventArgs(clickedItem)
+        {
+            RoutedEvent = ItemClickEvent,
+        };
         RaiseEvent(args);
 
-        // 执行命令
-        if (ItemClickCommand != null && ItemClickCommand.CanExecute(null))
+        // 3) 触发命令——参数选择简化为：
+        //    用户显式设了 ItemClickCommandParameter → 用它
+        //    否则用菜单项的 DataContext（数据绑定场景）
+        //    数据驱动更常见，DataContext 直接就是 ViewModel 数据对象
+        if (ItemClickCommand != null)
         {
-            // 优先使用显式设置的命令参数
-            object parameter = ItemClickCommandParameter;
-
-            // 如果没有设置命令参数，则根据情况决定
-            if (parameter == null)
+            var parameter = ItemClickCommandParameter ?? clickedItem.DataContext;
+            if (ItemClickCommand.CanExecute(parameter))
             {
-                // 如果菜单项有数据上下文，使用数据上下文作为参数
-                if (menuItem.DataContext != null && menuItem.DataContext != DataContext)
-                {
-                    parameter = menuItem.DataContext;
-                }
-                // 否则使用菜单项本身作为参数
-                else
-                {
-                    parameter = menuItem;
-                }
+                ItemClickCommand.Execute(parameter);
             }
-
-            // 执行命令，传递参数
-            ItemClickCommand.Execute(parameter);
         }
     }
+
+    #endregion 点击通知
 }

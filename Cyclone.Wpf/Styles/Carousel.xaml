@@ -194,11 +194,11 @@
 
             <!--
                 指示器列表——每项渲染成圆点，跟主 Carousel 的 SelectedIndex 双向绑定。
-                
+
                 ItemsSource 直接绑 Items 而非通过 converter 转成索引列表——ItemContainerStyle 只渲染圆点
                 不显示数据，所以绑什么数据无所谓。这样 Items.CollectionChanged 自动传播，添加/删除项时
                 指示器自动更新。
-                
+
                 Style="{x:Null}"：避免 user app 中的全局 ListBox 隐式样式应用到这个内部指示器。
                 没这一行的话 user 的 <Style TargetType="ListBox"> 会污染指示器样式。
             -->

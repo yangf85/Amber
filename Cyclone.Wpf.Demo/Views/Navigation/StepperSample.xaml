@@ -1,0 +1,73 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.StepperSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DataContext="{d:DesignInstance Type=local:StepperViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources />
+
+    <StackPanel>
+        <GroupBox Padding="10" Header="Normarl">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <cy:Stepper
+                    x:Name="HorizontalStepper"
+                    Margin="0,0,0,20"
+                    HorizontalAlignment="Center"
+                    CurrentIndex="0"
+                    Orientation="Vertical">
+                    <cy:StepperItem Content="步骤1" Description="备注" />
+                    <cy:StepperItem Content="步骤2" Description="备注" />
+                    <cy:StepperItem Content="步骤3" Description="备注" />
+                    <cy:StepperItem Content="步骤4" Description="备注" />
+                </cy:Stepper>
+                <StackPanel
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <Button
+                        Width="100"
+                        Margin="10,0"
+                        Click="PreviousButton_Click"
+                        Content="上一步" />
+                    <Button
+                        Width="100"
+                        Margin="10,0"
+                        Click="NextButton_Click"
+                        Content="下一步" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="DataContext">
+            <StackPanel HorizontalAlignment="Center">
+                <cy:Stepper CurrentIndex="{Binding CurrentStepIndex}" ItemsSource="{Binding StepperItems}">
+                    <cy:Stepper.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding Header}" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource Text.Prompt}"
+                                    Text="{Binding Description}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </cy:Stepper.ItemTemplate>
+                </cy:Stepper>
+                <UniformGrid HorizontalAlignment="Center" Rows="1">
+                    <Button Command="{Binding PreviousCommand}" Content="Previous" />
+                    <Button Command="{Binding NextCommand}" Content="Next" />
+                </UniformGrid>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
+</UserControl>
