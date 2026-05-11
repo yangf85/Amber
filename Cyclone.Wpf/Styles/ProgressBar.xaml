@@ -1,83 +1,115 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    ProgressBar 样式 (WinUI 3 风格 · 无圆角 · 主色填充)
+    
+    设计要点:
+    - 4px 厚 Track,无圆角,符合 Win10 视觉规约
+    - Indicator 用 Background.Selected 主色 (原版用 Background.Dragging 语义错位)
+    - 轨道底色 Background.Inactive,无硬编码黑色叠 Opacity
+    - 文字 (ShowValueText=True 时) 仅在 Indicator 上覆盖反白色,
+      未填充部分文字色用 Foreground.Caption — 双段对比清晰
+    - Vertical 用 LayoutTransform 旋转
+    - IsEnabled=False — Opacity 0.5
+    
+    Indeterminate (无限滚动):
+    - 真正的 TranslateTransform 平移动画 (原版用 RenderTransformOrigin 是错的)
+    - 双段错位移动,模拟 WinUI 3 的"扫描条"效果
+    - 仅 IsIndeterminate=True 时启动 Storyboard,Determinate 时不消耗 CPU
+    
+    删除原 Stripe 样式 — 引用了不存在的 BlueAccent4 token,无法工作。
+    斜纹视觉过时,不属于现代设计语言。
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  ProgressBar 默认样式 (Determinate + Indeterminate 一套)  -->
+    <!--  ============================================================  -->
     <Style
-        x:Key="ProgressBar.Style.Stripe"
+        x:Key="ProgressBar.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type ProgressBar}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Height" Value="6" />
+        <Setter Property="MinWidth" Value="100" />
+        <Setter Property="Background" Value="{DynamicResource Background.Inactive}" />
+        <Setter Property="Foreground" Value="{DynamicResource Background.Selected}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ProgressBar}">
-                    <Grid x:Name="TemplateRoot">
+                    <Grid x:Name="TemplateRoot" SnapsToDevicePixels="True">
+                        <!--  轨道底  -->
                         <Border
+                            x:Name="TrackBackground"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" />
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True" />
+
+                        <!--  Track 占位(WPF 框架要求名为 PART_Track 的元素)  -->
                         <Rectangle x:Name="PART_Track" />
-                        <Border>
-                            <Grid
-                                x:Name="PART_Indicator"
+
+                        <!--
+                            Determinate 进度填充
+                            PART_Indicator 是 WPF 框架要求的名字 — 框架自动根据 Value/Maximum 设置其 Width
+                        -->
+                        <Border
+                            x:Name="PART_Indicator"
+                            HorizontalAlignment="Left"
+                            Background="{TemplateBinding Foreground}"
+                            ClipToBounds="True"
+                            SnapsToDevicePixels="True" />
+
+                        <!--
+                            Indeterminate 扫描条 — 双段错位移动
+                            默认 Collapsed,IsIndeterminate=True 时显示
+                            通过 TranslateTransform 真实平移 (原版用 RenderTransformOrigin 是错的)
+                        -->
+                        <Grid
+                            x:Name="IndeterminateOverlay"
+                            ClipToBounds="True"
+                            Visibility="Collapsed">
+                            <!--  Segment 1 — 前段较短  -->
+                            <Border
+                                x:Name="Segment1"
+                                Width="60"
                                 HorizontalAlignment="Left"
-                                ClipToBounds="True">
-                                <Rectangle x:Name="DeterminateRoot">
-                                    <Rectangle.Fill>
-                                        <LinearGradientBrush MappingMode="Absolute" SpreadMethod="Repeat" EndPoint="20 0">
-                                            <LinearGradientBrush.Transform>
-                                                <TransformGroup>
-                                                    <TranslateTransform x:Name="TransX1" />
-                                                    <SkewTransform AngleX="-30" />
-                                                </TransformGroup>
-                                            </LinearGradientBrush.Transform>
-                                            <GradientStop Offset="0" Color="{DynamicResource BlueAccent4}" />
-                                            <GradientStop Offset="0.5" Color="{DynamicResource BlueAccent2}" />
-                                            <GradientStop Offset="0.5" Color="{DynamicResource White}" />
-                                        </LinearGradientBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                                <Rectangle x:Name="IndeterminateRoot" Visibility="Collapsed">
-                                    <Rectangle.Fill>
-                                        <LinearGradientBrush MappingMode="Absolute" SpreadMethod="Repeat" EndPoint="20 0">
-                                            <LinearGradientBrush.Transform>
-                                                <TransformGroup>
-                                                    <TranslateTransform x:Name="TransX2" />
-                                                    <SkewTransform AngleX="-30" />
-                                                </TransformGroup>
-                                            </LinearGradientBrush.Transform>
-                                            <GradientStop Offset="0" Color="{DynamicResource BlueAccent4}" />
-                                            <GradientStop Offset="0.5" Color="{DynamicResource BlueAccent2}" />
-                                            <GradientStop Offset="0.5" Color="{DynamicResource White}" />
-                                        </LinearGradientBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                            </Grid>
-                        </Border>
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Determinate">
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TransX1" Storyboard.TargetProperty="X">
-                                            <SplineDoubleKeyFrame KeyTime="0" Value="0" />
-                                            <SplineDoubleKeyFrame KeyTime="00:00:.35" Value="20" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="Indeterminate">
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TransX2" Storyboard.TargetProperty="X">
-                                            <SplineDoubleKeyFrame KeyTime="0" Value="0" />
-                                            <SplineDoubleKeyFrame KeyTime="00:00:.35" Value="20" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
+                                Background="{TemplateBinding Foreground}"
+                                RenderTransformOrigin="0,0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="Segment1Translate" X="-60" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <!--  Segment 2 — 后段稍长,跟 Segment1 错位移动  -->
+                            <Border
+                                x:Name="Segment2"
+                                Width="100"
+                                HorizontalAlignment="Left"
+                                Background="{TemplateBinding Foreground}"
+                                Opacity="0.7"
+                                RenderTransformOrigin="0,0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="Segment2Translate" X="-100" />
+                                </Border.RenderTransform>
+                            </Border>
+                        </Grid>
                     </Grid>
+
                     <ControlTemplate.Triggers>
+
+                        <!--
+                            Vertical — LayoutTransform 旋转 -90°,Indicator 从底部向上
+                            注:这里整个 TemplateRoot 旋转,所以 PART_Indicator 自动跟随
+                        -->
                         <Trigger Property="Orientation" Value="Vertical">
                             <Setter TargetName="TemplateRoot" Property="LayoutTransform">
                                 <Setter.Value>
@@ -85,9 +117,53 @@
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
+
+                        <!--  Indeterminate — 切换显示,启动扫描动画  -->
                         <Trigger Property="IsIndeterminate" Value="True">
-                            <Setter TargetName="IndeterminateRoot" Property="Visibility" Value="Visible" />
-                            <Setter TargetName="DeterminateRoot" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="IndeterminateOverlay" Property="Visibility" Value="Visible" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="IndeterminateStoryboard">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!--
+                                            Segment 1 — 从 -60 滚到 4000 (大于任何屏幕宽度,
+                                            ClipToBounds 裁掉超出部分,视觉上等同滚到边缘)。
+                                            注:Storyboard 的 To 不能用 Binding 绑 ActualWidth —— 
+                                            Binding 不能 Freeze 会导致整个 Storyboard 无法跨线程,运行时崩溃。
+                                        -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Segment1Translate"
+                                            Storyboard.TargetProperty="X"
+                                            From="-60"
+                                            To="4000"
+                                            Duration="0:0:2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseInOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <!--  Segment 2 — 延迟 0.5s 启动,2.2s 周期,跟 Segment1 错开  -->
+                                        <DoubleAnimation
+                                            BeginTime="0:0:0.5"
+                                            Storyboard.TargetName="Segment2Translate"
+                                            Storyboard.TargetProperty="X"
+                                            From="-100"
+                                            To="4000"
+                                            Duration="0:0:2.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseInOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="IndeterminateStoryboard" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <!--  Disabled  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -95,82 +171,89 @@
         </Setter>
     </Style>
 
+    <Style BasedOn="{StaticResource ProgressBar.Style.Basic}" TargetType="ProgressBar" />
+
+    <!--  ============================================================  -->
+    <!--  ProgressBar.Style.WithText — 带百分比文字的变体  -->
+    <!--  用法: <ProgressBar Style="{StaticResource ProgressBar.Style.WithText}" />  -->
+    <!--  Height 加大到 18px 给文字留空间  -->
+    <!--  ============================================================  -->
     <Style
-        x:Key="ProgressBar.Style.Basic"
-        BasedOn="{StaticResource Control.Style.Basic}"
+        x:Key="ProgressBar.Style.WithText"
+        BasedOn="{StaticResource ProgressBar.Style.Basic}"
         TargetType="{x:Type ProgressBar}">
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-        <Setter Property="Background" Value="{DynamicResource Background.Dragging}" />
-        <Setter Property="FontSize" Value="15" />
-        <Setter Property="Padding" Value="5,0" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ProgressBar}">
-                    <Grid Background="#00000000">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid Height="{TemplateBinding Height}">
-                            <Border Background="#000000" Opacity="0.05" />
-                            <Border
-                                BorderBrush="#000000"
-                                BorderThickness="1"
-                                Opacity="0.1" />
-                            <Grid Margin="{TemplateBinding BorderThickness}">
-                                <Border x:Name="PART_Track" />
-                                <Grid
-                                    x:Name="PART_Indicator"
-                                    HorizontalAlignment="Left"
-                                    ClipToBounds="True">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition x:Name="Width1" />
-                                        <ColumnDefinition x:Name="Width2" Width="0" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid x:Name="Animation" RenderTransformOrigin="0.5,0.5">
-                                        <Border Background="{TemplateBinding Background}" />
-                                        <Border
-                                            BorderBrush="#000000"
-                                            BorderThickness="1"
-                                            Opacity="0.1" />
-                                    </Grid>
-                                </Grid>
-                                <!--  文本固定居中显示，不随进度移动  -->
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    FontSize="{TemplateBinding FontSize}"
-                                    Foreground="{DynamicResource Foreground.Invert}"
-                                    IsHitTestVisible="False"
-                                    SnapsToDevicePixels="True"
-                                    Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, StringFormat={}{0:F0}%}" />
-                            </Grid>
+                    <Grid x:Name="TemplateRoot" SnapsToDevicePixels="True">
+                        <Border
+                            x:Name="TrackBackground"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True" />
+
+                        <Rectangle x:Name="PART_Track" />
+
+                        <Border
+                            x:Name="PART_Indicator"
+                            HorizontalAlignment="Left"
+                            Background="{TemplateBinding Foreground}"
+                            ClipToBounds="True"
+                            SnapsToDevicePixels="True" />
+
+                        <!--
+                            文字层 — 居中显示百分比,两个 TextBlock 叠加:
+                            底层正常色 (落在未填充区),
+                            顶层反白色 + 用 PART_Indicator 宽度作为 Clip,只在已填充区上显示
+                        -->
+                        <Grid IsHitTestVisible="False">
+                            <!--  底层:未填充区文字色 (主前景色,深色文字)  -->
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="{TemplateBinding FontSize}"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                SnapsToDevicePixels="True"
+                                Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, StringFormat={}{0:F0}%}" />
                         </Grid>
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Determinate" />
-                                <VisualState x:Name="Indeterminate">
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
-                                            <EasingPointKeyFrame KeyTime="0:0:0" Value="0.5,0.5" />
-                                            <EasingPointKeyFrame KeyTime="0:0:1.5" Value="1.95,0.5" />
-                                            <EasingPointKeyFrame KeyTime="0:0:3" Value="0.5,0.5" />
-                                        </PointAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
                     </Grid>
+
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsIndeterminate" Value="True">
-                            <Setter TargetName="Width1" Property="Width" Value="0.25*" />
-                            <Setter TargetName="Width2" Property="Width" Value="0.725*" />
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    <Style BasedOn="{StaticResource ProgressBar.Style.Basic}" TargetType="ProgressBar" />
+
+    <!--  ============================================================  -->
+    <!--  ProgressBar.Style.Success / Warning / Error — 状态色变体  -->
+    <!--  使用:Style="{StaticResource ProgressBar.Style.Success}"  -->
+    <!--  ============================================================  -->
+    <Style
+        x:Key="ProgressBar.Style.Success"
+        BasedOn="{StaticResource ProgressBar.Style.Basic}"
+        TargetType="{x:Type ProgressBar}">
+        <Setter Property="Foreground" Value="{DynamicResource Background.Success}" />
+    </Style>
+
+    <Style
+        x:Key="ProgressBar.Style.Warning"
+        BasedOn="{StaticResource ProgressBar.Style.Basic}"
+        TargetType="{x:Type ProgressBar}">
+        <Setter Property="Foreground" Value="{DynamicResource Background.Warning}" />
+    </Style>
+
+    <Style
+        x:Key="ProgressBar.Style.Error"
+        BasedOn="{StaticResource ProgressBar.Style.Basic}"
+        TargetType="{x:Type ProgressBar}">
+        <Setter Property="Foreground" Value="{DynamicResource Background.Error}" />
+    </Style>
 </ResourceDictionary>

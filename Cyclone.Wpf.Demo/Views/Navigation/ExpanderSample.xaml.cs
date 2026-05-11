@@ -1,27 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// ExpanderView.xaml 的交互逻辑
-/// </summary>
 public partial class ExpanderSample : UserControl
 {
     public ExpanderSample()
     {
         InitializeComponent();
+        DataContext = new ExpanderViewModel();
     }
+}
+
+public partial class ExpanderViewModel : ObservableObject
+{
+    // MVVM 双向绑定演示——按钮可以反向触发展开/折叠
+    [ObservableProperty]
+    public partial bool IsAccountExpanded { get; set; } = true;
+
+    public string AccountExpandedText => IsAccountExpanded ? "已展开" : "已折叠";
+
+    partial void OnIsAccountExpandedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(AccountExpandedText));
+    }
+
+    // 设置项面板演示
+    [ObservableProperty]
+    public partial bool IsNotificationsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsEmailEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsSmsEnabled { get; set; } = false;
+
+    [ObservableProperty]
+    public partial string UserName { get; set; } = "Alice";
+
+    [ObservableProperty]
+    public partial string Email { get; set; } = "alice@example.com";
 }

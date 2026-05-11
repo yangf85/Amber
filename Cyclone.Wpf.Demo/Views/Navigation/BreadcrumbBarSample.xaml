@@ -1,21 +1,875 @@
-﻿<UserControl x:Class="Cyclone.Wpf.Demo.Views.BreadcrumbBarSample"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:cy="https://www.cyclone/wpf"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance Type=local:BreadcrumbBarViewModel}"
-             d:DesignHeight="450"
-             d:DesignWidth="800"
-             mc:Ignorable="d">
-    <Grid>
-        <cy:BreadCrumbBar Margin="20">
-            <cy:BreadCrumbBarItem Content="导航栏1" />
-            <cy:BreadCrumbBarItem Content="导航栏2" />
-            <cy:BreadCrumbBarItem Content="导航栏3" />
-            <cy:BreadCrumbBarItem Content="导航栏4" />
-            <cy:BreadCrumbBarItem Content="导航栏5" />
-        </cy:BreadCrumbBar>
-    </Grid>
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.BreadcrumbBarSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:BreadcrumbBarViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+
+        <!--  Chevron 分隔符模板 — 用于自定义分隔符 demo  -->
+        <DataTemplate x:Key="ChevronIndicatorTemplate">
+            <Path
+                Width="8"
+                Height="12"
+                Margin="6,0"
+                VerticalAlignment="Center"
+                Data="M0,0 L6,6 L0,12"
+                Stretch="None"
+                Stroke="{DynamicResource Foreground.Caption}"
+                StrokeEndLineCap="Round"
+                StrokeLineJoin="Round"
+                StrokeStartLineCap="Round"
+                StrokeThickness="1.5" />
+        </DataTemplate>
+
+        <!--  小图标 Path 样式  -->
+        <Style x:Key="ItemIconPathStyle" TargetType="{x:Type Path}">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="Stroke" Value="{DynamicResource Icon.Foreground.Default}" />
+            <Setter Property="StrokeThickness" Value="1.5" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M3,6 L7,6 M10,6 L14,6 M17,6 L21,6 M5,10 L5,18 M12,10 L12,18 M19,10 L19,18 M3,18 L7,18 M10,18 L14,18 M17,18 L21,18"
+                                Stretch="None"
+                                Stroke="White"
+                                StrokeEndLineCap="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="BreadcrumbBar" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="面包屑导航——显示当前位置的层级路径。WinUI 3 风格,扁平文本 + 分隔符,最后一项自动强调为当前位置。支持自定义分隔符(字符 / 模板)、数据绑定、ItemClicked 路由事件。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础用法  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础用法" Subtitle="文本 + &gt; 分隔符">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="最简形式——只有 Content,默认分隔符是 )。最后一项的分隔符自动隐藏,文字色加深表示 当前位置 。" />
+
+                            <Border
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar>
+                                    <cy:BreadcrumbBarItem Content="Home" />
+                                    <cy:BreadcrumbBarItem Content="Documents" />
+                                    <cy:BreadcrumbBarItem Content="Reports" />
+                                    <cy:BreadcrumbBarItem Content="2026 年度报告" />
+                                </cy:BreadcrumbBar>
+                            </Border>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="提示:鼠标悬停可点击的项时显示手型 Cursor,最后一项(当前位置)是箭头 Cursor。" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 带图标  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="带图标" Subtitle="Icon 属性 — null 时图标列自动隐藏">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="每个 Item 可以单独设 Icon。Icon=null 时图标列彻底不占空间,跟没 Icon 的项视觉一致。" />
+
+                            <Border
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar>
+                                    <cy:BreadcrumbBarItem Content="Home">
+                                        <cy:BreadcrumbBarItem.Icon>
+                                            <Path Data="M3,12 L12,4 L21,12 M5,10 L5,20 L19,20 L19,10" Style="{StaticResource ItemIconPathStyle}" />
+                                        </cy:BreadcrumbBarItem.Icon>
+                                    </cy:BreadcrumbBarItem>
+                                    <cy:BreadcrumbBarItem Content="Documents">
+                                        <cy:BreadcrumbBarItem.Icon>
+                                            <Path Data="M5,4 L13,4 L19,10 L19,20 L5,20 Z M13,4 L13,10 L19,10" Style="{StaticResource ItemIconPathStyle}" />
+                                        </cy:BreadcrumbBarItem.Icon>
+                                    </cy:BreadcrumbBarItem>
+                                    <cy:BreadcrumbBarItem Content="Settings">
+                                        <cy:BreadcrumbBarItem.Icon>
+                                            <Path Data="M12,8 A4,4 0 1,1 8,12 A4,4 0 0,1 12,8 M12,3 L12,5 M12,19 L12,21 M3,12 L5,12 M19,12 L21,12 M5.6,5.6 L7,7 M17,17 L18.4,18.4 M5.6,18.4 L7,17 M17,7 L18.4,5.6" Style="{StaticResource ItemIconPathStyle}" />
+                                        </cy:BreadcrumbBarItem.Icon>
+                                    </cy:BreadcrumbBarItem>
+                                </cy:BreadcrumbBar>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 自定义分隔符  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="自定义分隔符" Subtitle="Indicator 字符 / IndicatorTemplate 模板">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="默认分隔符是 ) ,可以改成任何字符或自定义模板(Path / Image / 任意 UI)。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="路径风格 — / 分隔符" />
+                            <Border
+                                Margin="0,0,0,16"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar>
+                                    <cy:BreadcrumbBarItem Content="api" Indicator="/" />
+                                    <cy:BreadcrumbBarItem Content="v2" Indicator="/" />
+                                    <cy:BreadcrumbBarItem Content="users" Indicator="/" />
+                                    <cy:BreadcrumbBarItem Content="123" />
+                                </cy:BreadcrumbBar>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="箭头风格 — → 字符" />
+                            <Border
+                                Margin="0,0,0,16"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar>
+                                    <cy:BreadcrumbBarItem Content="开始" Indicator="→" />
+                                    <cy:BreadcrumbBarItem Content="进行中" Indicator="→" />
+                                    <cy:BreadcrumbBarItem Content="待审核" Indicator="→" />
+                                    <cy:BreadcrumbBarItem Content="已完成" />
+                                </cy:BreadcrumbBar>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Chevron 风格 — Path 模板" />
+                            <Border
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar>
+                                    <cy:BreadcrumbBarItem Content="项目" IndicatorTemplate="{StaticResource ChevronIndicatorTemplate}" />
+                                    <cy:BreadcrumbBarItem Content="模块" IndicatorTemplate="{StaticResource ChevronIndicatorTemplate}" />
+                                    <cy:BreadcrumbBarItem Content="组件" IndicatorTemplate="{StaticResource ChevronIndicatorTemplate}" />
+                                    <cy:BreadcrumbBarItem Content="详情" />
+                                </cy:BreadcrumbBar>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 数据绑定 + 动态截断导航  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="动态路径" Subtitle="ItemsSource 绑定 + 点击截断">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="ItemsSource 绑定 ObservableCollection(string)。点击任一节点后截断到该节点(模拟文件浏览器跳回上级目录)。" />
+
+                            <Border
+                                Margin="0,0,0,12"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Default}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <cy:BreadcrumbBar ItemClicked="OnBreadcrumbClicked" ItemsSource="{Binding CurrentPath}">
+                                    <cy:BreadcrumbBar.ItemContainerStyle>
+                                        <Style BasedOn="{StaticResource {x:Type cy:BreadcrumbBarItem}}" TargetType="cy:BreadcrumbBarItem">
+                                            <Setter Property="Indicator" Value="/" />
+                                            <!--  点击时调 ViewModel.NavigateToCommand 截断路径  -->
+                                            <EventSetter Event="MouseLeftButtonUp" Handler="OnBreadcrumbClicked" />
+                                        </Style>
+                                    </cy:BreadcrumbBar.ItemContainerStyle>
+                                </cy:BreadcrumbBar>
+                            </Border>
+
+                            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                                <Button
+                                    Padding="14,8"
+                                    Command="{Binding GoDeeperCommand}"
+                                    Content="进入子目录" />
+                                <Button
+                                    Margin="8,0,0,0"
+                                    Padding="14,8"
+                                    Command="{Binding ResetPathCommand}"
+                                    Content="重置路径" />
+                            </StackPanel>
+
+                            <Border
+                                Padding="12,10"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="LastClicked =" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding LastClicked, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,4,0,0" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="路径深度 =" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding CurrentPath.Count, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="点击中间节点(如 alice)→ 后面所有节点被移除。 进入子目录 按钮模拟向下导航,可看到长路径横向滚动。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 常见使用场景  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <UniformGrid Columns="2" Rows="2">
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M3,7 L9,7 L11,9 L21,9 L21,19 L3,19 Z"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Link}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="文件浏览器" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="C: / Users / alice / Documents — 点击节点跳回上级目录"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,4 L20,4 L20,20 L4,20 Z M4,9 L20,9 M9,9 L9,20"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Success}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="管理后台 / 设置" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="系统 &gt; 用户 &gt; 权限 — 多级嵌套配置页"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,4 L20,4 L20,20 L4,20 Z M8,8 L8,16 M12,12 L12,16 M16,10 L16,16"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Warning}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="文档 / 内容站" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="API → v2 → users → 123 — 用 / 分隔符显示 URL 路径"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M5,8 L19,8 M5,12 L19,12 M5,16 L12,16"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Info}"
+                                        StrokeEndLineCap="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="向导 / 流程" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="开始 → 配置 → 完成 — 用 → 分隔符表示前进流程"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+                        </UniformGrid>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="BreadcrumbBar / BreadcrumbBarItem 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 事件" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBar.ItemsSource" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IEnumerable" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="继承自 ListBox。绑定动态路径数据,通常是 ObservableCollection&lt;string&gt; 或 ObservableCollection&lt;PathSegment&gt;。" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBar.ItemClicked" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="用户点击某项时触发。OriginalSource 是被点击的 BreadcrumbBarItem,通过 .Content 获取数据。" />
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.Content" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="项的显示内容,通常是字符串。继承自 ContentControl。" />
+
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.Icon" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="左侧图标,通常是 Path 或 Image。null 时图标列彻底隐藏(不占空间)。" />
+
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.Indicator" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="右侧分隔符内容,默认 &quot;&gt;&quot;。可设为任意字符 (/、→、|) 或对象。最后一项自动隐藏。" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.IndicatorTemplate" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="DataTemplate" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="Indicator 的 DataTemplate,用于完全自定义分隔符渲染(Path 箭头、Image 等)。" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.IsFirst / IsLast" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool (只读)" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="位置元数据。IsLast=true 时分隔符隐藏,文字色加深为 Foreground.Default。由 BreadcrumbBar 自动维护。" />
+
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="BreadcrumbBarItem.IsSelected" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool (TwoWay)" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="继承自 ListBoxItem。点击时设为 true,可通过 BreadcrumbBar.SelectedItem 程序化访问。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 基础 -->
+<cy:BreadcrumbBar>
+    <cy:BreadcrumbBarItem Content="Home" />
+    <cy:BreadcrumbBarItem Content="Documents" />
+    <cy:BreadcrumbBarItem Content="Reports" />
+</cy:BreadcrumbBar>
+
+<!-- 自定义分隔符 (字符) -->
+<cy:BreadcrumbBar>
+    <cy:BreadcrumbBarItem Content="api" Indicator="/" />
+    <cy:BreadcrumbBarItem Content="v2"  Indicator="/" />
+    <cy:BreadcrumbBarItem Content="users" />
+</cy:BreadcrumbBar>
+
+<!-- 自定义分隔符 (Path 模板) -->
+<DataTemplate x:Key="ChevronTemplate">
+    <Path Width="8" Height="12" Margin="6,0"
+          Data="M0,0 L6,6 L0,12"
+          Stretch="None"
+          Stroke="{DynamicResource Foreground.Caption}"
+          StrokeThickness="1.5" />
+</DataTemplate>
+<cy:BreadcrumbBar>
+    <cy:BreadcrumbBarItem
+        Content="项目"
+        IndicatorTemplate="{StaticResource ChevronTemplate}" />
+    <cy:BreadcrumbBarItem Content="详情" />
+</cy:BreadcrumbBar>
+
+<!-- 带图标 -->
+<cy:BreadcrumbBarItem Content="Home">
+    <cy:BreadcrumbBarItem.Icon>
+        <Path Data="..." Style="{StaticResource ItemIconStyle}" />
+    </cy:BreadcrumbBarItem.Icon>
+</cy:BreadcrumbBarItem>
+
+<!-- 数据绑定 + ItemClicked 事件 -->
+<cy:BreadcrumbBar
+    ItemsSource="{Binding CurrentPath}"
+    ItemClicked="OnBreadcrumbClicked" />
+
+void OnBreadcrumbClicked(object sender, RoutedEventArgs e)
+{
+    var item = (BreadcrumbBarItem)e.OriginalSource;
+    var segment = item.Content?.ToString();
+    // 跳转 / 截断逻辑
+}]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="扁平文本风格" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="WinUI 3 标准——文本 + 分隔符,替代过时的梯形/箭头视觉。文字可读、可复制、屏幕阅读器友好"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="末项自动强调" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="IsLast trigger 让最后一项变为 Foreground.Default + Arrow Cursor,清晰传达 当前位置 "
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="可自定义分隔符" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="Indicator + IndicatorTemplate 双 DP,支持字符 / 模板两种自定义层次"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="溢出可滚动" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="横向 ScrollViewer Hidden,长路径不被裁也不显示滚动条"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

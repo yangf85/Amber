@@ -1,15 +1,16 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Cyclone.Wpf.Controls;
 
 public enum StepStatus
 {
     Completed,
+
     Current,
-    Pending
+
+    Pending,
 }
 
 public class StepperItem : ContentControl
@@ -18,157 +19,176 @@ public class StepperItem : ContentControl
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(StepperItem),
             new FrameworkPropertyMetadata(typeof(StepperItem)));
+
+        // 只读 DP 在静态构造函数里显式按序初始化——避免依赖字段声明顺序,
+        // 即使代码整理工具重排字段也不会出现 NRE
+
+        // Status
+        StatusPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(Status),
+            typeof(StepStatus),
+            typeof(StepperItem),
+            new PropertyMetadata(StepStatus.Pending, OnStatusChangedCallback));
+        StatusProperty = StatusPropertyKey.DependencyProperty;
+
+        // IsFirst
+        IsFirstPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsFirst),
+            typeof(bool),
+            typeof(StepperItem),
+            new PropertyMetadata(default(bool)));
+        IsFirstProperty = IsFirstPropertyKey.DependencyProperty;
+
+        // IsLast
+        IsLastPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsLast),
+            typeof(bool),
+            typeof(StepperItem),
+            new PropertyMetadata(default(bool)));
+        IsLastProperty = IsLastPropertyKey.DependencyProperty;
+
+        // Index
+        IndexPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(Index),
+            typeof(int),
+            typeof(StepperItem),
+            new PropertyMetadata(-1));
+        IndexProperty = IndexPropertyKey.DependencyProperty;
     }
 
     #region Description
 
+    public static readonly DependencyProperty DescriptionProperty =
+        DependencyProperty.Register(
+            nameof(Description),
+            typeof(string),
+            typeof(StepperItem),
+            new PropertyMetadata(string.Empty));
+
+    /// <summary>
+    /// 步骤的描述文本(主标题用 Content,辅助说明用 Description)。
+    /// </summary>
     public string Description
     {
         get => (string)GetValue(DescriptionProperty);
         set => SetValue(DescriptionProperty, value);
     }
 
-    public static readonly DependencyProperty DescriptionProperty =
-        DependencyProperty.Register(nameof(Description), typeof(string), typeof(StepperItem),
-            new PropertyMetadata(string.Empty));
-
     #endregion Description
 
-    #region Status
+    #region Status (只读)
 
-    public StepStatus Status
-    {
-        get => (StepStatus)GetValue(StatusProperty);
-        private set => SetValue(StatusPropertyKey, value);
-    }
-
-    private static readonly DependencyPropertyKey StatusPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(Status), typeof(StepStatus), typeof(StepperItem),
-            new PropertyMetadata(StepStatus.Pending, OnStatusChanged));
-
-    public static readonly DependencyProperty StatusProperty = StatusPropertyKey.DependencyProperty;
-
-    private static void OnStatusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is StepperItem item)
-        {
-            item.OnStatusChanged((StepStatus)e.OldValue, (StepStatus)e.NewValue);
-        }
-    }
-
-    protected virtual void OnStatusChanged(StepStatus oldStatus, StepStatus newStatus)
-    {
-        // 状态变化时可以执行自定义逻辑
-        // 这个方法可以被子类重写以添加自定义行为
-
-        // 触发StatusChanged事件
-        StatusChanged?.Invoke(this, new RoutedEventArgs());
-    }
+    public static readonly DependencyProperty StatusProperty;
 
     /// <summary>
-    /// 状态变化事件
+    /// 步骤状态(Pending / Current / Completed),只读 DP——初始化见静态构造函数。
     /// </summary>
-    public event RoutedEventHandler StatusChanged;
+    private static readonly DependencyPropertyKey StatusPropertyKey;
 
     /// <summary>
-    /// 内部方法，根据当前步骤索引更新状态
+    /// 步骤当前状态(Pending / Current / Completed),由父 Stepper 根据 CurrentIndex 自动维护。
+    /// </summary>
+    public StepStatus Status => (StepStatus)GetValue(StatusProperty);
+
+    /// <summary>
+    /// 内部方法,根据当前步骤索引更新自身状态。
     /// </summary>
     internal void UpdateStatus(int currentIndex)
     {
+        StepStatus next;
         if (Index < currentIndex)
-            SetValue(StatusPropertyKey, StepStatus.Completed);
+        {
+            next = StepStatus.Completed;
+        }
         else if (Index == currentIndex)
-            SetValue(StatusPropertyKey, StepStatus.Current);
+        {
+            next = StepStatus.Current;
+        }
         else
-            SetValue(StatusPropertyKey, StepStatus.Pending);
+        {
+            next = StepStatus.Pending;
+        }
+        SetValue(StatusPropertyKey, next);
     }
 
-    #endregion Status
-
-    #region IsLast
-
-    public bool IsLast
+    private static void OnStatusChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        get => (bool)GetValue(IsLastProperty);
-        private set => SetValue(IsLastPropertyKey, value);
+        if (d is StepperItem item)
+        {
+            item.RaiseEvent(new RoutedEventArgs(StatusChangedEvent, item));
+        }
     }
 
-    internal static readonly DependencyPropertyKey IsLastPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(IsLast), typeof(bool), typeof(StepperItem),
-            new PropertyMetadata(default(bool), OnIsLastChanged));
+    #endregion Status (只读)
 
-    public static readonly DependencyProperty IsLastProperty = IsLastPropertyKey.DependencyProperty;
+    #region IsFirst (只读)
 
-    private static void OnIsLastChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        // 不需要特殊处理，连接器可见性由样式控制
-    }
+    public static readonly DependencyProperty IsFirstProperty;
 
     /// <summary>
-    /// 内部方法，设置是否是最后一项
+    /// 是否首项,只读 DP——初始化见静态构造函数。
     /// </summary>
-    internal void SetIsLast(bool value)
-    {
-        SetValue(IsLastPropertyKey, value);
-    }
+    private static readonly DependencyPropertyKey IsFirstPropertyKey;
 
-    #endregion IsLast
+    public bool IsFirst => (bool)GetValue(IsFirstProperty);
 
-    #region IsFirst
-
-    public bool IsFirst
-    {
-        get => (bool)GetValue(IsFirstProperty);
-        private set => SetValue(IsFirstPropertyKey, value);
-    }
-
-    internal static readonly DependencyPropertyKey IsFirstPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(IsFirst), typeof(bool), typeof(StepperItem),
-            new PropertyMetadata(default(bool)));
-
-    public static readonly DependencyProperty IsFirstProperty = IsFirstPropertyKey.DependencyProperty;
-
-    /// <summary>
-    /// 内部方法，设置是否是第一项
-    /// </summary>
     internal void SetIsFirst(bool value)
     {
         SetValue(IsFirstPropertyKey, value);
     }
 
-    #endregion IsFirst
+    #endregion IsFirst (只读)
 
-    #region Index
+    #region IsLast (只读)
+
+    public static readonly DependencyProperty IsLastProperty;
 
     /// <summary>
-    /// 获取该步骤在Stepper中的索引
+    /// 是否末项,只读 DP——初始化见静态构造函数。
     /// </summary>
-    public int Index
+    private static readonly DependencyPropertyKey IsLastPropertyKey;
+
+    public bool IsLast => (bool)GetValue(IsLastProperty);
+
+    internal void SetIsLast(bool value)
     {
-        get => (int)GetValue(IndexProperty);
-        private set => SetValue(IndexPropertyKey, value);
+        SetValue(IsLastPropertyKey, value);
     }
 
-    internal static readonly DependencyPropertyKey IndexPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(Index), typeof(int), typeof(StepperItem),
-            new PropertyMetadata(-1));
+    #endregion IsLast (只读)
 
-    public static readonly DependencyProperty IndexProperty = IndexPropertyKey.DependencyProperty;
+    #region Index (只读)
+
+    public static readonly DependencyProperty IndexProperty;
 
     /// <summary>
-    /// 内部方法，设置项目索引
+    /// 步骤索引,只读 DP——初始化见静态构造函数。
     /// </summary>
+    private static readonly DependencyPropertyKey IndexPropertyKey;
+
+    /// <summary>
+    /// 该步骤在 Stepper 中的索引(0-based)。
+    /// </summary>
+    public int Index => (int)GetValue(IndexProperty);
+
     internal void SetIndex(int value)
     {
         SetValue(IndexPropertyKey, value);
     }
 
-    #endregion Index
+    #endregion Index (只读)
 
     #region CanNavigate
 
+    public static readonly DependencyProperty CanNavigateProperty =
+        DependencyProperty.Register(
+            nameof(CanNavigate),
+            typeof(bool),
+            typeof(StepperItem),
+            new PropertyMetadata(true));
+
     /// <summary>
-    /// 指示是否可以导航到此步骤
+    /// 是否允许点击该步骤跳转。常用于强制用户线性走流程的场景(把未来步骤设为 false)。
     /// </summary>
     public bool CanNavigate
     {
@@ -176,31 +196,67 @@ public class StepperItem : ContentControl
         set => SetValue(CanNavigateProperty, value);
     }
 
-    public static readonly DependencyProperty CanNavigateProperty =
-        DependencyProperty.Register(nameof(CanNavigate), typeof(bool), typeof(StepperItem),
-            new PropertyMetadata(true));
-
     #endregion CanNavigate
 
-    public StepperItem()
-    {
-        // 无需特殊处理连接器可见性，由样式控制
-    }
+    #region StatusChanged Event
+
+    public static readonly RoutedEvent StatusChangedEvent = EventManager.RegisterRoutedEvent(
+        nameof(StatusChanged),
+        RoutingStrategy.Bubble,
+        typeof(RoutedEventHandler),
+        typeof(StepperItem));
 
     /// <summary>
-    /// 导航到此步骤
+    /// Status 发生变化时触发(Pending / Current / Completed 之间切换)。
     /// </summary>
-    /// <returns>导航是否成功</returns>
+    public event RoutedEventHandler StatusChanged
+    {
+        add => AddHandler(StatusChangedEvent, value);
+        remove => RemoveHandler(StatusChangedEvent, value);
+    }
+
+    #endregion StatusChanged Event
+
+    #region Override Methods
+
+    /// <summary>
+    /// 鼠标左键按下——若 CanNavigate=true 则尝试导航到此步骤。
+    /// </summary>
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonDown(e);
+        if (e.Handled)
+        {
+            return;
+        }
+
+        if (NavigateTo())
+        {
+            e.Handled = true;
+        }
+    }
+
+    #endregion Override Methods
+
+    #region Public API
+
+    /// <summary>
+    /// 导航到此步骤——若 CanNavigate=false 或未挂载到 Stepper,返回 false。
+    /// </summary>
     public bool NavigateTo()
     {
-        if (!CanNavigate) return false;
+        if (!CanNavigate)
+        {
+            return false;
+        }
 
-        var parent = ItemsControl.ItemsControlFromItemContainer(this) as Stepper;
-        if (parent != null && Index >= 0)
+        if (ItemsControl.ItemsControlFromItemContainer(this) is Stepper parent && Index >= 0)
         {
             parent.CurrentIndex = Index;
             return true;
         }
         return false;
     }
+
+    #endregion Public API
 }

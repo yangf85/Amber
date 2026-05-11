@@ -1,23 +1,49 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<!--
+    ============================================================================
+    GroupBox 样式 (WinUI / Win10 风格 · 无圆角 · Header 灰底 + 内容白底)
+    
+    视觉:
+    - 整体外边框 1px Border.Default,无圆角
+    - Header 浅灰底 (Background.Header) + Medium 字重标题
+    - Header 和内容区之间一条 1px 分隔线
+    - 内容区背景 Background.Container (默认白)
+    - 默认 Padding 12,8 — 内容不再贴边
+    
+    修复:
+    - 命名:GroupBox.Basic → GroupBox.Style.Basic (跟其他控件三段命名一致)
+    - 删除 Header IsMouseOver 改 GroupBox.Background 的 trigger —— 
+      模板里 GroupBox.Background 完全没被引用,trigger 是 no-op,且 GroupBox 不该有 hover 反馈
+    - HeaderRoot 重命名,避免跟 ContentControl.Header 概念混淆
+    - FontWeight 从 Heavy 改为 Medium
+    - 删除冗余的 TextElement.Foreground (ContentPresenter 自动继承)
+    - 主题资源 token 改用标准命名 (Background.Xxx),不再用 Margin.Left/Font.Header 这种特殊 token
+    ============================================================================
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <Style
-        x:Key="GroupBox.Basic"
+        x:Key="GroupBox.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type GroupBox}">
         <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="VerticalContentAlignment" Value="Top" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
                     <Border
                         x:Name="RootBorder"
+                        Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         SnapsToDevicePixels="True">
@@ -27,34 +53,48 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Grid
-                                x:Name="Header"
+
+                            <!--  Header 区  -->
+                            <Border
+                                x:Name="HeaderRoot"
                                 Grid.Row="0"
                                 Height="{DynamicResource Height.Horizontal.Header}"
-                                Background="{DynamicResource Background.Header}">
+                                Background="{DynamicResource Background.Header}"
+                                SnapsToDevicePixels="True">
                                 <ContentPresenter
-                                    Margin="{DynamicResource Margin.Left}"
+                                    Margin="12,0"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Center"
                                     ContentSource="Header"
-                                    TextElement.FontSize="{DynamicResource Font.Header}"
-                                    TextElement.FontWeight="Heavy" />
-                            </Grid>
+                                    TextElement.FontWeight="Medium" />
+                            </Border>
+
+                            <!--  Header 下方分隔线  -->
                             <Rectangle
                                 Grid.Row="1"
                                 Height="1"
                                 Fill="{TemplateBinding BorderBrush}" />
+
+                            <!--  内容区  -->
                             <ContentPresenter
                                 Grid.Row="2"
                                 Margin="{TemplateBinding Padding}"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                TextElement.Foreground="{DynamicResource Foreground.Default}" />
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                         </Grid>
                     </Border>
+
                     <ControlTemplate.Triggers>
-                        <Trigger SourceName="Header" Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource Background.Hover}" />
+                        <!--  Header 为 null 时隐藏整个 Header 区(包括分隔线)  -->
+                        <Trigger Property="Header" Value="{x:Null}">
+                            <Setter TargetName="HeaderRoot" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <!--  Disabled 整体淡化  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter Property="Opacity" Value="0.7" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -62,5 +102,5 @@
         </Setter>
     </Style>
 
-    <Style BasedOn="{StaticResource GroupBox.Basic}" TargetType="GroupBox" />
+    <Style BasedOn="{StaticResource GroupBox.Style.Basic}" TargetType="GroupBox" />
 </ResourceDictionary>

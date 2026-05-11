@@ -1,81 +1,66 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    TransferBox 样式 (WinUI 3 风格 · 无圆角)
+    
+    核心改动:
+    - 删掉重复实现的 TransferBox.ListBoxItemStyle / TransferBox.ListBoxStyle
+      直接复用 ListBox.xaml 的默认样式——视觉、ScrollViewer、左 3px 竖条 indicator、
+      整行浅底,全部白送
+    - 两侧 ListBox 标准多选(单击 / Ctrl+Click / Shift+Click),无 CheckBox
+    - BorderThickness=0 + Background=Transparent — 避免与外层 Border 重边框
+    
+    修复:
+    - Header 行高用子元素 Border.Height 撑起 (Header 为 null 时不再塌缩,
+      RowDefinition.Height 是 GridLength 不能直接绑 double 主题资源)
+    - Button container 只占 Row 2 — Header 横向连贯,不被 button column 截断
+    - RepeatButton 加 FocusVisualStyle=Null + IsKeyboardFocused 反馈
+    
+    标题字重 Medium + 主题前景色,跟正文区分。
+    
+    注:hp 命名空间已不再使用,可以删除——保留只是以防用户在 ItemsPanel/
+       ItemContainerStyle 等自定义场景里需要。
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls"
-    xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers">
+    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!--  RepeatButton：中间两个箭头按钮  -->
+    <!--  ============================================================  -->
+    <!--  中间 RepeatButton 样式  -->
+    <!--  ============================================================  -->
     <Style x:Key="TransferBox.TransferButtonStyle" TargetType="RepeatButton">
         <Setter Property="MinWidth" Value="{DynamicResource Width.Vertical.Item}" />
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
-                    <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Hover}" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="RootGrid" Property="Background" Value="{DynamicResource Background.Pressed}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Pressed}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="RootGrid" Property="Opacity" Value="0.4" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!--  ListBoxItem 默认样式：左侧 CheckBox + 内容  -->
-    <Style x:Key="TransferBox.ListBoxItemStyle" TargetType="ListBoxItem">
-        <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-        <Setter Property="Padding" Value="8,0" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListBoxItem">
                     <Border
                         x:Name="RootBorder"
-                        Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
-                        SnapsToDevicePixels="True"
-                        UseLayoutRounding="True">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="ListBoxItem" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <CheckBox
-                                x:Name="SelectedCheckBox"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                VerticalContentAlignment="Center"
-                                IsChecked="{Binding Path=IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}" />
-                            <ContentPresenter
-                                Grid.Column="1"
-                                Margin="8,0,0,0"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                        </Grid>
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Hover}" />
                         </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Pressed}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="RootBorder" Property="Opacity" Value="0.4" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -83,47 +68,26 @@
         </Setter>
     </Style>
 
-    <!--  ListBox 默认样式：顶部"全选" + ScrollViewer + 列表项  -->
-    <Style x:Key="TransferBox.ListBoxStyle" TargetType="ListBox">
-        <Setter Property="hp:ListBoxHelper.IsSelectAllEnabled" Value="True" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListBox">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <CheckBox
-                            Grid.Row="0"
-                            Margin="8,6"
-                            Content="全选"
-                            IsChecked="{Binding Path=(hp:ListBoxHelper.IsSelectedAll), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
-                        <!--  ScrollViewer 之前缺失——大量 items 时无法滚动  -->
-                        <ScrollViewer
-                            Grid.Row="1"
-                            Padding="0"
-                            HorizontalScrollBarVisibility="Disabled"
-                            VerticalScrollBarVisibility="Auto">
-                            <ItemsPresenter SnapsToDevicePixels="True" />
-                        </ScrollViewer>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
+    <!--  ============================================================  -->
+    <!--  TransferBox 主模板  -->
+    <!--  ============================================================  -->
     <ControlTemplate x:Key="TransferBox.ControlTemplate.Basic" TargetType="ctl:TransferBox">
         <Border
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
-            BorderThickness="{TemplateBinding BorderThickness}">
+            BorderThickness="{TemplateBinding BorderThickness}"
+            SnapsToDevicePixels="True">
             <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
                 <Grid.RowDefinitions>
-                    <RowDefinition MaxHeight="{DynamicResource Height.Horizontal.Header}" />
+                    <!--
+                        Header 行 — Auto:由子元素 Border 的 Height 决定行高
+                        (RowDefinition.Height 是 GridLength,而主题资源 Height.Horizontal.Header 是 double,
+                         不能直接绑,所以放到 Border 上)
+                    -->
                     <RowDefinition Height="Auto" />
+                    <!--  横向分隔线  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  内容区  -->
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -134,34 +98,42 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!--  Header 背景  -->
-                <Grid
+                <!--
+                    Header 背景 — 跨整个 Header 行,横向连贯
+                    Height 固定到 Height.Horizontal.Header,即使 SourceHeader/TargetHeader 为 null 也不塌缩
+                -->
+                <Border
                     Grid.Row="0"
-                    Grid.Column="0"
                     Grid.ColumnSpan="5"
+                    Height="{DynamicResource Height.Horizontal.Header}"
                     Background="{DynamicResource Background.Header}" />
 
-                <!--  Source / Target 标题  -->
+                <!--  Source / Target 标题 — Medium 字重 + 主题前景色,跟列表项区分  -->
                 <ContentPresenter
                     Grid.Row="0"
                     Grid.Column="0"
                     Margin="12,0"
                     VerticalAlignment="Center"
-                    Content="{TemplateBinding SourceHeader}" />
+                    Content="{TemplateBinding SourceHeader}"
+                    TextElement.FontWeight="Medium"
+                    TextElement.Foreground="{DynamicResource Foreground.Default}" />
                 <ContentPresenter
                     Grid.Row="0"
                     Grid.Column="4"
                     Margin="12,0"
                     VerticalAlignment="Center"
-                    Content="{TemplateBinding TargetHeader}" />
+                    Content="{TemplateBinding TargetHeader}"
+                    TextElement.FontWeight="Medium"
+                    TextElement.Foreground="{DynamicResource Foreground.Default}" />
 
-                <!--  分隔线  -->
+                <!--  横向分隔线 — Header 下方  -->
                 <Rectangle
                     Grid.Row="1"
-                    Grid.Column="0"
                     Grid.ColumnSpan="5"
                     Height="1"
                     Fill="{TemplateBinding BorderBrush}" />
+
+                <!--  竖向分隔线 — 贯穿整个高度,把内容区分成三个 column  -->
                 <Rectangle
                     Grid.Row="0"
                     Grid.RowSpan="3"
@@ -175,23 +147,31 @@
                     Width="1"
                     Fill="{TemplateBinding BorderBrush}" />
 
-                <!--  Source 列表  -->
+                <!--
+                    Source ListBox — 直接用 ListBox 默认样式
+                    Style 不设 → 命中 ListBox.xaml 里的 ListBox.Style.Basic
+                    自动获得:左 3px 竖条 indicator、整行浅底、内置 ScrollViewer、无圆角
+                    标准多选交互(单击 / Ctrl+Click / Shift+Click),无 CheckBox
+                -->
                 <ListBox
                     x:Name="PART_SourceListBox"
                     Grid.Row="2"
                     Grid.Column="0"
+                    Background="Transparent"
+                    BorderThickness="0"
                     DisplayMemberPath="{TemplateBinding SourceDisplayMemberPath}"
                     ItemContainerStyle="{TemplateBinding ItemContainerStyle}"
                     ItemTemplate="{TemplateBinding ItemTemplate}"
                     ItemsPanel="{TemplateBinding ItemsPanel}"
                     ItemsSource="{TemplateBinding SourceItems}"
-                    SelectionMode="Multiple"
-                    Style="{StaticResource TransferBox.ListBoxStyle}" />
+                    SelectionMode="Multiple" />
 
-                <!--  中间箭头按钮区  -->
+                <!--
+                    中间 button container — 只占 Row 2,不再用 RowSpan 覆盖 Header
+                    Header 行的背景由顶部的 Border 跨整个宽度负责,这里只贴 Row 2 的 Container 色
+                -->
                 <Grid
-                    Grid.Row="0"
-                    Grid.RowSpan="3"
+                    Grid.Row="2"
                     Grid.Column="2"
                     Background="{DynamicResource Background.Container}">
                     <Grid.RowDefinitions>
@@ -242,20 +222,28 @@
                     </RepeatButton>
                 </Grid>
 
-                <!--  Target 列表  -->
+                <!--  Target ListBox — 同 Source,默认 ListBox 样式  -->
                 <ListBox
                     x:Name="PART_TargetListBox"
                     Grid.Row="2"
                     Grid.Column="4"
+                    Background="Transparent"
+                    BorderThickness="0"
                     DisplayMemberPath="{TemplateBinding TargetDisplayMemberPath}"
                     ItemContainerStyle="{TemplateBinding ItemContainerStyle}"
                     ItemTemplate="{TemplateBinding ItemTemplate}"
                     ItemsPanel="{TemplateBinding ItemsPanel}"
                     ItemsSource="{TemplateBinding TargetItems}"
-                    SelectionMode="Multiple"
-                    Style="{StaticResource TransferBox.ListBoxStyle}" />
+                    SelectionMode="Multiple" />
             </Grid>
         </Border>
+
+        <ControlTemplate.Triggers>
+            <!--  整体 Disabled — 半透明  -->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
     </ControlTemplate>
 
     <Style
@@ -265,11 +253,16 @@
         <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
-        <!--  ItemContainerStyle 默认值——user 可通过设 TransferBox.ItemContainerStyle 覆盖  -->
-        <Setter Property="ItemContainerStyle" Value="{StaticResource TransferBox.ListBoxItemStyle}" />
         <!--
-            ItemsPanel 默认值——必须设，否则 TemplateBinding 写 null 给 ListBox.ItemsPanel 会让 items 不渲染。
-            用 StackPanel 而不是 VirtualizingStackPanel，因为 ListBoxItem 模板里用了 SharedSizeGroup（跟虚拟化不兼容）
+            ItemContainerStyle 不再默认绑定到自定义样式——保持 null,
+            ListBox 自然走 ListBox.xaml 的 ListBoxItem.Style.Default
+            (左 3px 竖条 + 整行浅底,标准多选,无 CheckBox)。
+            用户仍可显式赋值 TransferBox.ItemContainerStyle 自定义渲染。
+        -->
+        <!--
+            ItemsPanel 默认值——必须设,否则 TemplateBinding 写 null 给 ListBox.ItemsPanel 会让 items 不渲染。
+            ListBoxItem 模板里 SharedSizeGroup 已删除,这里可以换成 VirtualizingStackPanel
+            提升大数据集性能;暂用 StackPanel 保持默认行为不变。
         -->
         <Setter Property="ItemsPanel">
             <Setter.Value>

@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.StepperSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,68 +6,905 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    d:DataContext="{d:DesignInstance Type=local:StepperViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type={x:Type local:StepperViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
     mc:Ignorable="d">
-    <UserControl.Resources />
 
-    <StackPanel>
-        <GroupBox Padding="10" Header="Normarl">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <cy:Stepper
-                    x:Name="HorizontalStepper"
-                    Margin="0,0,0,20"
-                    HorizontalAlignment="Center"
-                    CurrentIndex="0"
-                    Orientation="Vertical">
-                    <cy:StepperItem Content="步骤1" Description="备注" />
-                    <cy:StepperItem Content="步骤2" Description="备注" />
-                    <cy:StepperItem Content="步骤3" Description="备注" />
-                    <cy:StepperItem Content="步骤4" Description="备注" />
-                </cy:Stepper>
-                <StackPanel
-                    Grid.Row="1"
-                    HorizontalAlignment="Center"
-                    Orientation="Horizontal">
-                    <Button
-                        Width="100"
-                        Margin="10,0"
-                        Click="PreviousButton_Click"
-                        Content="上一步" />
-                    <Button
-                        Width="100"
-                        Margin="10,0"
-                        Click="NextButton_Click"
-                        Content="下一步" />
+    <UserControl.Resources>
+
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid>
+                            <Path
+                                Width="32"
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M4,12 L8,12 M12,12 L16,12 M20,12 L20,12 M6,9 A3,3 0 1,1 6,15 A3,3 0 0,1 6,9 M14,9 A3,3 0 1,1 14,15 A3,3 0 0,1 14,9 M21,12 A1,1 0 1,1 19,12 A1,1 0 0,1 21,12"
+                                Stroke="White"
+                                StrokeLineJoin="Round"
+                                StrokeThickness="2" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="Stepper" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="分步骤指示器——三态视觉(Pending / Current / Completed)+ 连接线 + Current 外圈光环。支持水平 / 垂直、双向绑定、点击跳转、动态数据、CanNavigate 控制单步跳转权限。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体两列 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 注册向导(完整工作流)  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="完整工作流" Subtitle="注册向导 · 4 步 · 表单校验 + 上下步骤">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="CurrentIndex 绑定 ViewModel,下一步按钮 IsEnabled 绑 CanGoNext 实现表单校验。当前步骤的标题加粗,完成的步骤显示 ✓ 图标。" />
+
+                            <!--  Stepper 主体  -->
+                            <cy:Stepper Margin="0,8,0,24" CurrentIndex="{Binding RegisterStep, Mode=TwoWay}">
+                                <cy:StepperItem Content="账号" Description="设置用户名和密码" />
+                                <cy:StepperItem Content="邮箱" Description="绑定邮箱用于找回" />
+                                <cy:StepperItem Content="协议" Description="阅读并同意条款" />
+                                <cy:StepperItem Content="完成" Description="注册成功" />
+                            </cy:Stepper>
+
+                            <!--  当前步骤内容(根据 RegisterStep 显示不同表单)  -->
+                            <Border
+                                MinHeight="180"
+                                Padding="20"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <Grid>
+                                    <!--  Step 0 — 账号  -->
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RegisterStep}" Value="0">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <TextBlock
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Text="账号设置" />
+                                        <TextBlock
+                                            Margin="0,4,0,12"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="用户名不少于 1 字符,密码至少 6 位" />
+                                        <TextBlock Style="{StaticResource ValueLabelStyle}" Text="用户名" />
+                                        <TextBox Margin="0,4,0,12" Text="{Binding Account, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBlock Style="{StaticResource ValueLabelStyle}" Text="密码" />
+                                        <TextBox Margin="0,4,0,0" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <!--  Step 1 — 邮箱  -->
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RegisterStep}" Value="1">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <TextBlock
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Text="绑定邮箱" />
+                                        <TextBlock
+                                            Margin="0,4,0,12"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="邮箱用于密码找回和重要通知" />
+                                        <TextBlock Style="{StaticResource ValueLabelStyle}" Text="邮箱地址" />
+                                        <TextBox Margin="0,4,0,0" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <!--  Step 2 — 协议  -->
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RegisterStep}" Value="2">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <TextBlock
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Text="用户协议" />
+                                        <Border
+                                            Height="80"
+                                            Margin="0,8,0,12"
+                                            Padding="12,8"
+                                            Background="{DynamicResource Background.Default}"
+                                            BorderBrush="{DynamicResource Border.Default}"
+                                            BorderThickness="1">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="{DynamicResource Foreground.Caption}"
+                                                Text="本服务条款约定 ... (此处省略示意文本)。继续使用代表你已阅读并同意所有条款,包括服务范围、责任限制、隐私政策、争议解决等。"
+                                                TextWrapping="Wrap" />
+                                        </Border>
+                                        <CheckBox Content="我已阅读并同意《用户协议》和《隐私政策》" IsChecked="{Binding AgreedTerms, Mode=TwoWay}" />
+                                    </StackPanel>
+                                    <!--  Step 3 — 完成  -->
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RegisterStep}" Value="3">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <Border
+                                            Width="56"
+                                            Height="56"
+                                            HorizontalAlignment="Center"
+                                            Background="{DynamicResource Background.Success}"
+                                            CornerRadius="999">
+                                            <Path
+                                                Width="28"
+                                                Height="28"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Data="M5,12 L10,17 L19,8"
+                                                Stretch="None"
+                                                Stroke="White"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                                StrokeStartLineCap="Round"
+                                                StrokeThickness="3" />
+                                        </Border>
+                                        <TextBlock
+                                            Margin="0,16,0,4"
+                                            HorizontalAlignment="Center"
+                                            FontSize="16"
+                                            FontWeight="Medium"
+                                            Text="注册成功!" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource Foreground.Caption}"
+                                            Text="账号已创建,可以开始使用" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!--  控制按钮  -->
+                            <Grid Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    Grid.Column="0"
+                                    Padding="14,8"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ResetCommand}"
+                                    Content="重置" />
+                                <StackPanel
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Padding="14,8"
+                                        Command="{Binding GoPreviousCommand}"
+                                        Content="上一步"
+                                        IsEnabled="{Binding CanGoPrevious}" />
+                                    <Button
+                                        Margin="8,0,0,0"
+                                        Padding="14,8"
+                                        Command="{Binding GoNextCommand}"
+                                        Content="下一步"
+                                        IsEnabled="{Binding CanGoNext}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <UniformGrid Columns="2">
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="RegisterStep =" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding RegisterStep, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="CanGoNext =" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding CanGoNext, Mode=OneWay}" />
+                                    </TextBlock>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 点击跳转 (CanNavigate)  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="点击跳转" Subtitle="CanNavigate 控制单步可点击性">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="StepperItem 默认 CanNavigate=True,点击即跳转。某些场景需要禁止未来步骤被点击,只允许往回跳——把后面项的 CanNavigate 设 False 即可。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="全部可点击 (默认)" />
+                            <cy:Stepper Margin="0,0,0,16">
+                                <cy:StepperItem Content="选择" Description="任意切换" />
+                                <cy:StepperItem Content="确认" Description="任意切换" />
+                                <cy:StepperItem Content="完成" Description="任意切换" />
+                            </cy:Stepper>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="第 2、3 步禁用 (CanNavigate=False)" />
+                            <cy:Stepper>
+                                <cy:StepperItem Content="可点" Description="正常导航" />
+                                <cy:StepperItem
+                                    CanNavigate="False"
+                                    Content="禁用"
+                                    Description="点不动" />
+                                <cy:StepperItem
+                                    CanNavigate="False"
+                                    Content="禁用"
+                                    Description="点不动" />
+                            </cy:Stepper>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="提示:鼠标悬停时禁用项 Cursor 变箭头(默认手型),给用户明确视觉反馈。" />
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ③ 垂直布局 / 订单进度  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="垂直布局" Subtitle="订单进度跟踪示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Orientation=Vertical 让步骤纵向排列,Description 在 Content 下方左对齐。适合订单状态、物流跟踪、长文档章节列表。" />
+
+                            <cy:Stepper
+                                Margin="0,0,0,16"
+                                CurrentIndex="{Binding OrderStep, Mode=TwoWay}"
+                                Orientation="Vertical">
+                                <cy:StepperItem Content="订单已创建" Description="2026-05-08 14:23" />
+                                <cy:StepperItem Content="支付成功" Description="2026-05-08 14:25" />
+                                <cy:StepperItem Content="商品已发货" Description="2026-05-09 09:12 · 顺丰快递" />
+                                <cy:StepperItem Content="运输中" Description="预计 2026-05-11 送达" />
+                                <cy:StepperItem Content="已签收" Description="完成" />
+                            </cy:Stepper>
+
+                            <Button
+                                Padding="14,8"
+                                HorizontalAlignment="Left"
+                                Command="{Binding AdvanceOrderCommand}"
+                                Content="模拟下一步" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ 常见使用场景  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="常见使用场景">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <UniformGrid Columns="2" Rows="2">
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,7 L20,7 L20,17 L4,17 Z M4,7 L12,13 L20,7"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Link}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="注册 / 登录向导" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="账号 → 邮箱 → 协议 → 完成,典型多步表单"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M5,8 L19,8 M5,12 L19,12 M5,16 L13,16"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Success}"
+                                        StrokeEndLineCap="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="订单状态跟踪" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="创建 → 支付 → 发货 → 运输 → 签收,垂直布局更易读"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M4,4 L4,20 L20,20 M8,16 L8,12 M12,16 L12,8 M16,16 L16,4"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Warning}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="任务进度" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="审批流程、待办任务、长任务跟踪——明确显示当前进度位置"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+
+                            <cy:Card Margin="6,6">
+                                <StackPanel>
+                                    <Path
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Data="M12,4 L12,12 L18,8 M6,18 L18,18 M6,14 L18,14"
+                                        Stretch="None"
+                                        Stroke="{DynamicResource Foreground.Info}"
+                                        StrokeLineJoin="Round"
+                                        StrokeThickness="2" />
+                                    <TextBlock
+                                        Margin="0,8,0,4"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="安装向导 / 引导教程" />
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="首次启动引导、安装步骤、新功能介绍——展示进度且允许后退"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </cy:Card>
+                        </UniformGrid>
+                    </cy:Card>
                 </StackPanel>
             </Grid>
-        </GroupBox>
-        <GroupBox Header="DataContext">
-            <StackPanel HorizontalAlignment="Center">
-                <cy:Stepper CurrentIndex="{Binding CurrentStepIndex}" ItemsSource="{Binding StepperItems}">
-                    <cy:Stepper.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
-                                <TextBlock HorizontalAlignment="Center" Text="{Binding Header}" />
+
+            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="Stepper / StepperItem 主要属性">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 方法" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Stepper.CurrentIndex" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="int (TwoWay)" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="当前激活步骤索引(0-based)。变化时触发 StepChanged 路由事件。" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Stepper.Orientation" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="Orientation" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="Horizontal(默认)/ Vertical。StepperItem 的模板会跟着切换。" />
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Stepper.MoveNext / MovePrevious / JumpTo / Reset" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool / void" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="程序化导航 API。Reset 即使 CurrentIndex 已是 0 也强制刷新状态(覆盖 DP 不触发 changed 的边界)。" />
+
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="StepperItem.Content / Description" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object / string" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="主标题用 Content,副标题(辅助说明)用 Description。" />
+
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="StepperItem.Status" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="StepStatus (只读)" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="Pending / Current / Completed,由父 Stepper 根据 CurrentIndex 自动维护。" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="StepperItem.Index / IsFirst / IsLast" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="int / bool / bool (只读)" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="位置元数据。Index+1 在模板里通过 MathConverter.AddOne 转为显示序号。" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="StepperItem.CanNavigate" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="是否允许点击该步骤跳转,默认 true。False 时 Cursor 变箭头,鼠标点击不响应。" />
+
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Stepper.StepChanged / StepperItem.StatusChanged" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="步骤切换路由事件。Args 携带 Current 和 Direction(Forward / Backward)。XAML 可直接订阅。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- 基础水平 Stepper -->
+<cy:Stepper CurrentIndex="{Binding RegisterStep, Mode=TwoWay}">
+    <cy:StepperItem Content="账号" Description="设置用户名和密码" />
+    <cy:StepperItem Content="邮箱" Description="绑定邮箱用于找回" />
+    <cy:StepperItem Content="协议" Description="阅读并同意条款" />
+    <cy:StepperItem Content="完成" Description="注册成功" />
+</cy:Stepper>
+
+<!-- 垂直布局 -->
+<cy:Stepper
+    Orientation="Vertical"
+    CurrentIndex="{Binding OrderStep, Mode=TwoWay}">
+    <cy:StepperItem Content="订单已创建" Description="2026-05-08 14:23" />
+    <cy:StepperItem Content="支付成功"   Description="2026-05-08 14:25" />
+    <cy:StepperItem Content="商品已发货" Description="2026-05-09 09:12 · 顺丰快递" />
+</cy:Stepper>
+
+<!-- 禁止跳转到后面步骤 -->
+<cy:Stepper>
+    <cy:StepperItem Content="可点" />
+    <cy:StepperItem Content="禁用" CanNavigate="False" />
+    <cy:StepperItem Content="禁用" CanNavigate="False" />
+</cy:Stepper>
+
+<!-- 程序化导航 -->
+// MoveNext / MovePrevious / JumpTo / Reset
+stepper.MoveNext();
+stepper.JumpTo(2);
+
+<!-- 订阅事件 -->
+<cy:Stepper StepChanged="OnStepChanged">
+    ...
+</cy:Stepper>
+
+void OnStepChanged(object sender, RoutedEventArgs e)
+{
+    var args = (StepChangedEventArgs)e;
+    Debug.WriteLine($"-> {args.Current} ({args.Direction})");
+}]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
                                 <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource Text.Prompt}"
-                                    Text="{Binding Description}" />
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="三态视觉" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="Pending=outline / Current=实心+光环 / Completed=实心 ✓,色彩状态语义清晰"
+                                    TextWrapping="Wrap" />
                             </StackPanel>
-                        </DataTemplate>
-                    </cy:Stepper.ItemTemplate>
-                </cy:Stepper>
-                <UniformGrid HorizontalAlignment="Center" Rows="1">
-                    <Button Command="{Binding PreviousCommand}" Content="Previous" />
-                    <Button Command="{Binding NextCommand}" Content="Next" />
-                </UniformGrid>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="Current 外圈光环" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="ScaleTransform 0.7→1 + Opacity 0→0.4,BackEase 弹入,WinUI 风格强调"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="细 stroke ✓" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="替换原 1000×1000 锯齿 Path,改用 14×14 stroke 圆角线条,清晰锐利"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="点击导航" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="StepperItem 内置点击跳转 + CanNavigate 权限控制 + Cursor 反馈"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -71,7 +71,7 @@
     <SolidColorBrush x:Key="Foreground.Invert" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="Foreground.Container" Color="{StaticResource GrayDarken3}" />
     <SolidColorBrush x:Key="Foreground.Header" Color="{StaticResource GrayDarken4}" />
-    <SolidColorBrush x:Key="Foreground.Caption" Color="{StaticResource White}" />
+    <SolidColorBrush x:Key="Foreground.Caption" Color="{StaticResource GrayDarken1}" />
     <SolidColorBrush x:Key="Foreground.Mask" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="Foreground.Link" Color="{StaticResource BlueDarken3}" />
     <SolidColorBrush x:Key="Foreground.Placeholder" Color="{StaticResource GrayDefault}" />

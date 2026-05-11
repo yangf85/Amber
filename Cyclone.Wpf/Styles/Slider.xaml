@@ -1,25 +1,129 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<!--
+    ============================================================================
+    Slider 样式 (WinUI 3 风格 · 圆形 Thumb + 主色 Track + 光环反馈)
+    
+    Thumb:
+    - 圆形 18px 直径,白底 + 2px 主色边
+    - Hover — 中心缩小为白色实心(暗示可拖)
+    - IsDragging — 外圈光环弹入 (ScaleX/Y 0.7→1 + Opacity 0→0.3)
+    - IsKeyboardFocused — 外圈光环弹入 (键盘可达性反馈)
+    
+    Track:
+    - 4px 厚度 (原 5px 过粗)
+    - PassedTrack — Background.Selected 主色 (已通过的进度)
+    - UnpassedTrack — Background.Inactive 浅灰 (未通过)
+    - 两端不裁圆角 — 跟 Win10 设计语言一致 (没圆角)
+    
+    垂直版完全对齐水平版逻辑 — 旧版写死颜色 / Inactive 不一致的 bug 已修复。
+    
+    其他:
+    - IsEnabled=False — 整体 Opacity 0.5
+    - TickBar 留 2px Margin 跟 Track 错开
+    - 重命名 BasicVerticalSliderControlTemplate → Slider.ControlTemplate.Basic.Vertical
+    ============================================================================
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  Thumb 样式 (横竖共用)  -->
+    <!--  ============================================================  -->
     <Style x:Key="Slider.ThumbStyle" TargetType="Thumb">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border
-                        x:Name="RootBorder"
-                        Width="20"
-                        Height="20"
-                        Background="{DynamicResource Background.Default}"
-                        BorderBrush="{DynamicResource Border.Default}"
-                        BorderThickness="1" />
+                    <Grid>
+                        <!--  外圈光环 — IsDragging / IsKeyboardFocused 时弹入  -->
+                        <Ellipse
+                            x:Name="FocusRing"
+                            Width="28"
+                            Height="28"
+                            Fill="{DynamicResource Background.Selected}"
+                            Opacity="0"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="FocusRingScale" ScaleX="0.7" ScaleY="0.7" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!--  Thumb 主体 — 圆形,白底主色边  -->
+                        <Ellipse
+                            x:Name="Body"
+                            Width="18"
+                            Height="18"
+                            Fill="{DynamicResource Background.Container}"
+                            Stroke="{DynamicResource Background.Selected}"
+                            StrokeThickness="2" />
+                    </Grid>
+
                     <ControlTemplate.Triggers>
+
+                        <!--  Hover — body 略大,提示可交互  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                            <Setter TargetName="Body" Property="Width" Value="20" />
+                            <Setter TargetName="Body" Property="Height" Value="20" />
                         </Trigger>
+
+                        <!--  IsDragging — 外圈光环弹入  -->
                         <Trigger Property="IsDragging" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Dragging}" />
+                            <Setter TargetName="Body" Property="Fill" Value="{DynamicResource Background.Selected}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.3"
+                                            Duration="0:0:0.15" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -27,17 +131,22 @@
         </Setter>
     </Style>
 
+    <!--  ============================================================  -->
+    <!--  RepeatButton 样式 (横竖共用一套基础模板)  -->
+    <!--  TemplateBinding Background 让外部能控制 Passed/Unpassed 颜色  -->
+    <!--  ============================================================  -->
     <Style x:Key="Slider.HorizontalRepeatButtonStyle" TargetType="RepeatButton">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
                     <Border
-                        x:Name="RootBorder"
-                        Height="5"
+                        Height="4"
                         Background="{TemplateBinding Background}"
-                        BorderThickness="0" />
+                        BorderThickness="0"
+                        SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -46,19 +155,27 @@
     <Style x:Key="Slider.VerticalRepeatButtonStyle" TargetType="RepeatButton">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
+                    <!--
+                        Background 改用 TemplateBinding — 旧版写死 Border.Focused,
+                        导致外部赋的 Background.Selected/Inactive 完全不生效
+                    -->
                     <Border
-                        x:Name="RootBorder"
-                        Width="5"
-                        Background="{DynamicResource Border.Focused}"
-                        BorderThickness="0" />
+                        Width="4"
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="0"
+                        SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
+    <!--  ============================================================  -->
+    <!--  水平 Slider 模板  -->
+    <!--  ============================================================  -->
     <ControlTemplate x:Key="Slider.ControlTemplate.Basic.Horizontal" TargetType="{x:Type Slider}">
         <Grid
             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
@@ -69,17 +186,20 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
             <TickBar
                 x:Name="TopTick"
+                Grid.Row="0"
                 Height="4"
+                Margin="0,0,0,2"
                 Fill="{DynamicResource Tick.Primary}"
                 Placement="Top"
                 Visibility="Collapsed" />
+
             <Track x:Name="PART_Track" Grid.Row="1">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton
-                        x:Name="PassedTrack"
-                        Background="{DynamicResource Border.Active}"
+                        Background="{DynamicResource Background.Selected}"
                         Command="{x:Static Slider.DecreaseLarge}"
                         Style="{StaticResource Slider.HorizontalRepeatButtonStyle}" />
                 </Track.DecreaseRepeatButton>
@@ -88,16 +208,17 @@
                 </Track.Thumb>
                 <Track.IncreaseRepeatButton>
                     <RepeatButton
-                        x:Name="UnpassedTrack"
                         Background="{DynamicResource Background.Inactive}"
                         Command="{x:Static Slider.IncreaseLarge}"
                         Style="{StaticResource Slider.HorizontalRepeatButtonStyle}" />
                 </Track.IncreaseRepeatButton>
             </Track>
+
             <TickBar
                 x:Name="BottomTick"
                 Grid.Row="2"
                 Height="4"
+                Margin="0,2,0,0"
                 Fill="{DynamicResource Tick.Primary}"
                 Placement="Bottom"
                 Visibility="Collapsed" />
@@ -116,43 +237,53 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
-    <ControlTemplate x:Key="BasicVerticalSliderControlTemplate" TargetType="{x:Type Slider}">
-        <Grid HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
+    <!--  ============================================================  -->
+    <!--  垂直 Slider 模板 (跟水平版对齐)  -->
+    <!--  ============================================================  -->
+    <ControlTemplate x:Key="Slider.ControlTemplate.Basic.Vertical" TargetType="{x:Type Slider}">
+        <Grid
+            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+            SnapsToDevicePixels="True"
+            UseLayoutRounding="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" MinWidth="{TemplateBinding MinWidth}" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+
             <TickBar
                 x:Name="TopTick"
+                Grid.Column="0"
                 Width="4"
+                Margin="0,0,2,0"
                 Fill="{DynamicResource Tick.Primary}"
                 Placement="Left"
                 SnapsToDevicePixels="True"
                 Visibility="Collapsed" />
+
             <Track x:Name="PART_Track" Grid.Column="1">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton
-                        x:Name="PassedTrack"
-                        Background="{DynamicResource Background.Pressed}"
+                        Background="{DynamicResource Background.Selected}"
                         Command="{x:Static Slider.DecreaseLarge}"
                         Style="{StaticResource Slider.VerticalRepeatButtonStyle}" />
                 </Track.DecreaseRepeatButton>
                 <Track.Thumb>
-                    <Thumb Style="{StaticResource Slider.ThumbStyle}" />
+                    <Thumb Panel.ZIndex="99" Style="{StaticResource Slider.ThumbStyle}" />
                 </Track.Thumb>
                 <Track.IncreaseRepeatButton>
                     <RepeatButton
-                        x:Name="UnpassedTrack"
-                        Background="{DynamicResource Background.Default}"
+                        Background="{DynamicResource Background.Inactive}"
                         Command="{x:Static Slider.IncreaseLarge}"
                         Style="{StaticResource Slider.VerticalRepeatButtonStyle}" />
                 </Track.IncreaseRepeatButton>
             </Track>
+
             <TickBar
                 x:Name="BottomTick"
                 Grid.Column="2"
                 Width="4"
+                Margin="2,0,0,0"
                 Fill="{DynamicResource Tick.Primary}"
                 Placement="Right"
                 SnapsToDevicePixels="True"
@@ -172,21 +303,31 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <!--  ============================================================  -->
+    <!--  Slider 默认样式  -->
+    <!--  ============================================================  -->
     <Style
         x:Key="Slider.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="Slider">
-
         <Setter Property="AutoToolTipPlacement" Value="TopLeft" />
         <Setter Property="AutoToolTipPrecision" Value="2" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Template" Value="{StaticResource Slider.ControlTemplate.Basic.Horizontal}" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="MinHeight" Value="28" />
             </Trigger>
             <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Template" Value="{StaticResource BasicVerticalSliderControlTemplate}" />
+                <Setter Property="Template" Value="{StaticResource Slider.ControlTemplate.Basic.Vertical}" />
                 <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="MinWidth" Value="28" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
             </Trigger>
         </Style.Triggers>
     </Style>

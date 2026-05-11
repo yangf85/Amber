@@ -1,26 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
+using Cyclone.Wpf.Controls;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// BreadcrumbView.xaml 的交互逻辑
-/// </summary>
 public partial class BreadcrumbBarSample : UserControl
 {
     public BreadcrumbBarSample()
@@ -28,87 +14,77 @@ public partial class BreadcrumbBarSample : UserControl
         InitializeComponent();
         DataContext = new BreadcrumbBarViewModel();
     }
+
+    // ItemClicked 路由事件处理 — 演示如何响应点击
+    private void OnBreadcrumbClicked(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is BreadcrumbBarItem item && DataContext is BreadcrumbBarViewModel vm)
+        {
+            vm.LastClicked = item.Content?.ToString() ?? "(null)";
+        }
+    }
 }
 
 public partial class BreadcrumbBarViewModel : ObservableObject
 {
-    public ObservableCollection<BreadcrumbItemViewModel> NavigationPath { get; }
+    [ObservableProperty]
+    public partial string LastClicked { get; set; } = "(尚未点击)";
 
-    public ICommand NavigateCommand { get; }
+    // 动态路径演示 — 模拟文件浏览器面包屑,点击节点后截断到该节点
+    public ObservableCollection<string> CurrentPath { get; } =
+    [
+        "C:",
+        "Users",
+        "alice",
+        "Documents",
+        "Projects",
+        "Cyclone.Wpf",
+        "Themes",
+    ];
 
-    private void Navigate(BreadcrumbItemViewModel item)
+    [RelayCommand]
+    private void NavigateTo(string segment)
     {
-        // 导航逻辑
-        if (item != null)
+        if (string.IsNullOrEmpty(segment))
         {
-            // 设置当前项
-            foreach (var pathItem in NavigationPath)
-            {
-                pathItem.IsCurrent = (pathItem == item);
-            }
-
-            // 这里可以添加其他导航逻辑
-            // 例如：更新内容区域，加载相关数据等
+            return;
         }
-    }
 
-    public BreadcrumbBarViewModel()
-    {
-        // 创建导航路径
-        NavigationPath = new ObservableCollection<BreadcrumbItemViewModel>
+        // 找到 segment 位置,截断后面所有节点
+        var index = CurrentPath.IndexOf(segment);
+        if (index < 0)
         {
-            new BreadcrumbItemViewModel { Title = "首页", Icon = "\uE80F" },
-            new BreadcrumbItemViewModel
-            {
-                Title = "产品",
-                Icon = "\uE7FC",
-                Children = new ObservableCollection<BreadcrumbItemViewModel>
-                {
-                    new BreadcrumbItemViewModel { Title = "服装" },
-                    new BreadcrumbItemViewModel { Title = "电子产品" },
-                    new BreadcrumbItemViewModel { Title = "家居" }
-                }
-            },
-            new BreadcrumbItemViewModel { Title = "电子产品", Icon = "\uEC4F" },
-            new BreadcrumbItemViewModel { Title = "智能手机", IsCurrent = true, Icon = "\uE8EA" }
-        };
+            return;
+        }
 
-        // 创建导航命令
-        NavigateCommand = new RelayCommand<BreadcrumbItemViewModel>(Navigate);
-    }
-}
+        // 从后往前删——避免修改集合时索引漂移
+        for (var i = CurrentPath.Count - 1; i > index; i--)
+        {
+            CurrentPath.RemoveAt(i);
+        }
 
-public partial class BreadcrumbItemViewModel : ObservableObject
-{
-    private string _title;
-
-    private object _icon;
-
-    private bool _isCurrent;
-
-    private ObservableCollection<BreadcrumbItemViewModel> _children;
-
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
+        LastClicked = segment;
     }
 
-    public object Icon
+    [RelayCommand]
+    private void ResetPath()
     {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
+        CurrentPath.Clear();
+        CurrentPath.Add("C:");
+        CurrentPath.Add("Users");
+        CurrentPath.Add("alice");
+        CurrentPath.Add("Documents");
+        CurrentPath.Add("Projects");
+        CurrentPath.Add("Cyclone.Wpf");
+        CurrentPath.Add("Themes");
+        LastClicked = "(已重置)";
     }
 
-    public bool IsCurrent
+    [RelayCommand]
+    private void GoDeeper()
     {
-        get => _isCurrent;
-        set => SetProperty(ref _isCurrent, value);
-    }
-
-    public ObservableCollection<BreadcrumbItemViewModel> Children
-    {
-        get => _children;
-        set => SetProperty(ref _children, value);
+        // 模拟进入子目录
+        var depth = CurrentPath.Count;
+        CurrentPath.Add($"SubFolder{depth - 6}");
     }
 }

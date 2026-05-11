@@ -113,6 +113,63 @@ public static class ExpanderHelper
 
     #endregion IsAnimating 附加属性
 
+    // 处理 Expander 收缩的事件
+    private static void Expander_Collapsed(object sender, RoutedEventArgs e)
+    {
+        var expander = sender as Expander;
+        if (expander?.Content is FrameworkElement content)
+        {
+            // 如果已经在动画中，忽略此次请求
+            if (GetIsAnimating(content))
+                return;
+
+            // 标记为正在动画
+            SetIsAnimating(content, true);
+
+            // 获取动画时长
+            var duration = GetAnimationDuration(expander);
+
+            // 获取当前高度
+            double currentHeight = content.ActualHeight;
+
+            // 确保我们保存了原始高度
+            double originalHeight = GetOriginalHeight(content);
+            if (double.IsNaN(originalHeight))
+            {
+                originalHeight = currentHeight > 0 ? currentHeight : 100; // 使用默认高度防止错误
+                SetOriginalHeight(content, originalHeight);
+            }
+
+            // 创建并应用高度动画
+            var animation = new DoubleAnimation
+            {
+                From = currentHeight,
+                To = 0,
+                Duration = new Duration(duration),
+                FillBehavior = FillBehavior.HoldEnd
+            };
+
+            animation.Completed += (s, args) =>
+            {
+                // 动画完成后设置状态
+                content.Visibility = Visibility.Collapsed;
+                content.Height = 0;
+
+                // 标记动画已完成
+                SetIsAnimating(content, false);
+
+                // 检查Expander当前状态，如果已展开，立即应用展开效果
+                if (expander.IsExpanded)
+                {
+                    content.Visibility = Visibility.Visible;
+                    content.Height = originalHeight;
+                }
+            };
+
+            content.BeginAnimation(FrameworkElement.HeightProperty, animation);
+        }
+    }
+
     // 处理 Expander 展开的事件
     private static void Expander_Expanded(object sender, RoutedEventArgs e)
     {
@@ -187,6 +244,7 @@ public static class ExpanderHelper
             {
                 // 动画完成后，设置为存储的原始高度
                 content.Height = targetHeight;
+
                 // 标记动画已完成
                 SetIsAnimating(content, false);
 
@@ -195,62 +253,6 @@ public static class ExpanderHelper
                 {
                     content.Visibility = Visibility.Collapsed;
                     content.Height = 0;
-                }
-            };
-
-            content.BeginAnimation(FrameworkElement.HeightProperty, animation);
-        }
-    }
-
-    // 处理 Expander 收缩的事件
-    private static void Expander_Collapsed(object sender, RoutedEventArgs e)
-    {
-        var expander = sender as Expander;
-        if (expander?.Content is FrameworkElement content)
-        {
-            // 如果已经在动画中，忽略此次请求
-            if (GetIsAnimating(content))
-                return;
-
-            // 标记为正在动画
-            SetIsAnimating(content, true);
-
-            // 获取动画时长
-            var duration = GetAnimationDuration(expander);
-
-            // 获取当前高度
-            double currentHeight = content.ActualHeight;
-
-            // 确保我们保存了原始高度
-            double originalHeight = GetOriginalHeight(content);
-            if (double.IsNaN(originalHeight))
-            {
-                originalHeight = currentHeight > 0 ? currentHeight : 100; // 使用默认高度防止错误
-                SetOriginalHeight(content, originalHeight);
-            }
-
-            // 创建并应用高度动画
-            var animation = new DoubleAnimation
-            {
-                From = currentHeight,
-                To = 0,
-                Duration = new Duration(duration),
-                FillBehavior = FillBehavior.HoldEnd
-            };
-
-            animation.Completed += (s, args) =>
-            {
-                // 动画完成后设置状态
-                content.Visibility = Visibility.Collapsed;
-                content.Height = 0;
-                // 标记动画已完成
-                SetIsAnimating(content, false);
-
-                // 检查Expander当前状态，如果已展开，立即应用展开效果
-                if (expander.IsExpanded)
-                {
-                    content.Visibility = Visibility.Visible;
-                    content.Height = originalHeight;
                 }
             };
 

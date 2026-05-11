@@ -1,25 +1,26 @@
-﻿<!--
+<!--
     ============================================================================
-    WinUI 3 风格 ListBox 样式 (v3 — 无圆角 + 整行高亮 + 左竖条指示器)
+    WinUI 3 风格 ListBox 样式 (v4 — 无圆角 + 整行高亮 + 左竖条指示器 + 无行内 CheckBox)
     
-    破坏性变更说明（vs 旧版本）：
-    - 视觉风格全面改版，与 TreeView 视觉对齐：
-    · 左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
-    · Hover 整行浅底（Background.Hover），文字色保持不变（不再反色）
-    · 选中整行浅底 + 左竖条强调，文字色保持默认（不再反色）
-    · 失焦选中：指示器弱化为 Highlighted, 行底透明
-    - 无圆角（与项目规约对齐）
-    - ListBoxItem 内部行结构：
-    · 列 ① 选中竖条指示器（6px）
-    · 列 ② SharedSize 全选 CheckBox 列（Auto）
-    · 列 ③ 内容区（*）
-    · RootBorder 横向 Stretch — hover/选中色横向占满整行
-    - 移除 Foreground.Hover / Foreground.Selected 反色逻辑
+    v4 改动 (vs v3):
+    - 删除 ListBoxItem 模板里的行内 CheckBox 列
+      · 多选改为标准 ListBox 交互(单击 / Ctrl+Click / Shift+Click)
+      · 视觉对齐 WinUI NavigationView,行内更简洁
+    - 顶部"选择全部" CheckBox 保留(通过 hp:ListBoxHelper.IsSelectAllEnabled 启用)
+      · 默认 IsSelectAllEnabled=false,顶部 CheckBox 不显示
+      · 启用后顶部 CheckBox 显示,点击全选/取消全选所有项
+    - 删除 Grid.IsSharedSizeScope (行内 SharedSizeGroup 已删,Scope 不再需要)
     
-    保留功能：
-    - hp:ListBoxHelper.IsSelectAllEnabled — 启用全选 CheckBox 列
-    - hp:ListBoxHelper.IsSelectedAll — 全选/取消全选状态绑定
-    - SharedSizeGroup="ListBoxItem" — CheckBox 列对齐
+    保留功能 (v3 同):
+    - 左 3px 竖条选中指示器 (pill, 仅选中态淡入)
+    - Hover 整行浅底,文字色保持不变
+    - 选中整行浅底 + 左竖条强调,文字色保持默认
+    - 失焦选中:指示器弱化为 Highlighted, 行底透明
+    - 无圆角
+    
+    ListBoxItem 内部行结构 (简化):
+    · 列 ① 选中竖条指示器 (6px)
+    · 列 ② 内容区 (*)
     ============================================================================
 -->
 <ResourceDictionary
@@ -33,7 +34,7 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!--  ============================================================  -->
-    <!--  ListBoxItem 样式 (WinUI 3 风格 · 整行高亮 · 无圆角)  -->
+    <!--  ListBoxItem 样式 (WinUI 3 风格 · 整行高亮 · 无圆角 · 无行内 CheckBox)  -->
     <!--  ============================================================  -->
     <Style x:Key="ListBoxItem.Style.Default" TargetType="ListBoxItem">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
@@ -59,9 +60,7 @@
                             <Grid.ColumnDefinitions>
                                 <!--  ① 选中竖条指示器  -->
                                 <ColumnDefinition Width="6" />
-                                <!--  ② 全选 CheckBox 列（SharedSize 跨多个 ListBoxItem 对齐）  -->
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="ListBoxItem" />
-                                <!--  ③ 内容区  -->
+                                <!--  ② 内容区  -->
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
@@ -83,19 +82,9 @@
                                 </Border.RenderTransformOrigin>
                             </Border>
 
-                            <!--  全选 CheckBox（仅 IsSelectAllEnabled=True 时显示）  -->
-                            <CheckBox
-                                x:Name="SelectedCheckBox"
-                                Grid.Column="1"
-                                Margin="4,0,4,0"
-                                VerticalAlignment="Center"
-                                VerticalContentAlignment="Center"
-                                IsChecked="{Binding Path=IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}"
-                                Visibility="{Binding Path=(hp:ListBoxHelper.IsSelectAllEnabled), Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
-
                             <!--  内容  -->
                             <ContentPresenter
-                                Grid.Column="2"
+                                Grid.Column="1"
                                 Margin="4,0,8,0"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
@@ -196,8 +185,6 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="Padding" Value="0" />
-        <!--  全选 CheckBox 列对齐 — 必须开启 SharedSize 否则 SharedSizeGroup 不生效  -->
-        <Setter Property="Grid.IsSharedSizeScope" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBox">
@@ -209,7 +196,7 @@
                         SnapsToDevicePixels="True">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <!--  全选 CheckBox（仅 IsSelectAllEnabled 时显示）  -->
+                                <!--  顶部"选择全部" CheckBox(仅 IsSelectAllEnabled=true 时显示)  -->
                                 <RowDefinition Height="Auto" />
                                 <!--  列表内容  -->
                                 <RowDefinition Height="*" />

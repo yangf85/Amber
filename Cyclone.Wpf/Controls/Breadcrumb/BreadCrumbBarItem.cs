@@ -1,85 +1,151 @@
-﻿using System;
-using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Cyclone.Wpf.Controls;
 
-public class BreadCrumbBarItem : ListBoxItem
+public class BreadcrumbBarItem : ListBoxItem
 {
-    static BreadCrumbBarItem()
+    static BreadcrumbBarItem()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(BreadCrumbBarItem), new FrameworkPropertyMetadata(typeof(BreadCrumbBarItem)));
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(BreadcrumbBarItem),
+            new FrameworkPropertyMetadata(typeof(BreadcrumbBarItem)));
+
+        // 只读 DP 在静态构造函数里显式按序初始化——避免依赖字段声明顺序,
+        // 即使代码整理工具重排字段也不会出现 NRE
+
+        IsFirstPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsFirst),
+            typeof(bool),
+            typeof(BreadcrumbBarItem),
+            new PropertyMetadata(false));
+        IsFirstProperty = IsFirstPropertyKey.DependencyProperty;
+
+        IsLastPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsLast),
+            typeof(bool),
+            typeof(BreadcrumbBarItem),
+            new PropertyMetadata(false));
+        IsLastProperty = IsLastPropertyKey.DependencyProperty;
     }
 
     #region Icon
 
+    public static readonly DependencyProperty IconProperty =
+        DependencyProperty.Register(
+            nameof(Icon),
+            typeof(object),
+            typeof(BreadcrumbBarItem),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置面包屑项左侧的图标内容。null 时图标列隐藏(不占空间)。
+    /// </summary>
     public object Icon
     {
-        get => (object)GetValue(IconProperty);
+        get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }
-
-    public static readonly DependencyProperty IconProperty =
-        DependencyProperty.Register(nameof(Icon), typeof(object), typeof(BreadCrumbBarItem), new PropertyMetadata(default(object)));
 
     #endregion Icon
 
     #region Indicator
 
+    public static readonly DependencyProperty IndicatorProperty =
+        DependencyProperty.Register(
+            nameof(Indicator),
+            typeof(object),
+            typeof(BreadcrumbBarItem),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置该项右侧的分隔符内容(默认 ">",最后一项不显示)。
+    /// 可设为任何对象,常用值:">" / "/" / "→",或自定义 Path。
+    /// </summary>
     public object Indicator
     {
-        get => (object)GetValue(IndicatorProperty);
+        get => GetValue(IndicatorProperty);
         set => SetValue(IndicatorProperty, value);
     }
-
-    public static readonly DependencyProperty IndicatorProperty =
-        DependencyProperty.Register(nameof(Indicator), typeof(object), typeof(BreadCrumbBarItem), new PropertyMetadata(default(object)));
 
     #endregion Indicator
 
     #region IndicatorTemplate
 
+    public static readonly DependencyProperty IndicatorTemplateProperty =
+        DependencyProperty.Register(
+            nameof(IndicatorTemplate),
+            typeof(DataTemplate),
+            typeof(BreadcrumbBarItem),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置 Indicator 的 DataTemplate。
+    /// </summary>
     public DataTemplate IndicatorTemplate
     {
         get => (DataTemplate)GetValue(IndicatorTemplateProperty);
         set => SetValue(IndicatorTemplateProperty, value);
     }
 
-    public static readonly DependencyProperty IndicatorTemplateProperty =
-        DependencyProperty.Register(nameof(IndicatorTemplate), typeof(DataTemplate), typeof(BreadCrumbBarItem), new PropertyMetadata(default(DataTemplate)));
-
     #endregion IndicatorTemplate
 
-    #region IsFirst
+    #region IsFirst (只读)
 
-    public bool IsFirst
+    /// <summary>
+    /// 是否首项,只读 DP——初始化见静态构造函数。
+    /// </summary>
+    private static readonly DependencyPropertyKey IsFirstPropertyKey;
+
+    public static readonly DependencyProperty IsFirstProperty;
+
+    public bool IsFirst => (bool)GetValue(IsFirstProperty);
+
+    internal void SetIsFirst(bool value)
     {
-        get => (bool)GetValue(IsFirstProperty);
-        internal set => SetValue(IsFirstPropertyKey, value);
+        SetValue(IsFirstPropertyKey, value);
     }
 
-    private static readonly DependencyPropertyKey IsFirstPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(IsFirst), typeof(bool), typeof(BreadCrumbBarItem), new PropertyMetadata(false));
+    #endregion IsFirst (只读)
 
-    public static readonly DependencyProperty IsFirstProperty = IsFirstPropertyKey.DependencyProperty;
+    #region IsLast (只读)
 
-    #endregion IsFirst
+    /// <summary>
+    /// 是否末项,只读 DP——初始化见静态构造函数。
+    /// </summary>
+    private static readonly DependencyPropertyKey IsLastPropertyKey;
 
-    #region IsLast
+    public static readonly DependencyProperty IsLastProperty;
 
-    public bool IsLast
+    public bool IsLast => (bool)GetValue(IsLastProperty);
+
+    internal void SetIsLast(bool value)
     {
-        get => (bool)GetValue(IsLastProperty);
-        internal set => SetValue(IsLastPropertyKey, value);
+        SetValue(IsLastPropertyKey, value);
     }
 
-    private static readonly DependencyPropertyKey IsLastPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(IsLast), typeof(bool), typeof(BreadCrumbBarItem), new PropertyMetadata(false));
+    #endregion IsLast (只读)
 
-    public static readonly DependencyProperty IsLastProperty = IsLastPropertyKey.DependencyProperty;
+    #region Override Methods
 
-    #endregion IsLast
+    /// <summary>
+    /// 鼠标左键按下——选中自身 + 触发父 BreadcrumbBar 的 ItemClicked 事件。
+    /// </summary>
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonDown(e);
+        if (e.Handled)
+        {
+            return;
+        }
+
+        if (ItemsControl.ItemsControlFromItemContainer(this) is BreadcrumbBar bar)
+        {
+            IsSelected = true;
+            bar.RaiseItemClicked(this);
+            e.Handled = true;
+        }
+    }
+
+    #endregion Override Methods
 }

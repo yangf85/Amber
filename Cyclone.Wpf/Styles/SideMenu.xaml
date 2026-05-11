@@ -1,53 +1,73 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    SideMenu 样式 (WinUI 3 风格 · 整行高亮 · 左竖条指示器 · 无圆角)
+    
+    设计要点:
+    - 左 3px 竖条选中指示器 (pill, 仅激活态淡入 + 弹性 ScaleY)
+    - 整行 Hover / Active 浅底——文字色保持不变 (不再反色)
+    - 缩进位置在内容区——左竖条永远停在最左,不受缩进影响
+    - 无圆角 (与项目规约对齐)
+    - 失焦弱化态——指示器降级为 Highlighted
+    - 键盘焦点反馈 (IsKeyboardFocused)
+    - 箭头 RotateTransform 平滑展开/折叠
+    - PART_HeaderRoot 提供给代码侧绑事件——使 Header 内的可交互子控件 (Button、Hyperlink) 不受影响
+    
+    SideMenuItem 模板列结构:
+      ① 选中竖条指示器 (6px 列, 内含 3x16 pill)
+      ② 缩进留白 (绑定 Indent = Level * SideMenu.Indent)
+      ③ Icon (Auto)
+      ④ Header (*)
+      ⑤ 展开箭头 (Auto)
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  Compact 切换按钮 (无圆角方形)  -->
+    <!--  ============================================================  -->
     <Style x:Key="SideMenu.ToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Width" Value="30" />
-        <Setter Property="Height" Value="30" />
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="Panel.ZIndex" Value="99" />
-
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border
                         x:Name="RootBorder"
-                        Padding="3"
                         Background="{DynamicResource Background.Default}"
                         BorderBrush="{DynamicResource Border.Default}"
-                        BorderThickness="1.5"
-                        CornerRadius="60"
+                        BorderThickness="1"
                         SnapsToDevicePixels="True">
-                        <Grid>
-                            <Path
-                                x:Name="Arrow"
-                                Width="16"
-                                Height="16"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Data="M461.994667 512l211.2 211.2-60.330667 60.373333L341.333333 512l271.530667-271.530667 60.330667 60.330667-211.2 211.2z"
-                                Fill="{DynamicResource Icon.Foreground.Default}"
-                                SnapsToDevicePixels="True"
-                                Stretch="Uniform" />
-                        </Grid>
+                        <Path
+                            x:Name="Arrow"
+                            Width="12"
+                            Height="12"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M461.994667 512l211.2 211.2-60.330667 60.373333L341.333333 512l271.530667-271.530667 60.330667 60.330667-211.2 211.2z"
+                            Fill="{DynamicResource Icon.Foreground.Default}"
+                            SnapsToDevicePixels="True"
+                            Stretch="Uniform" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Arrow" Property="Data" Value="M562.005333 512l-211.2-211.2 60.330667-60.288L682.666667 512l-271.530667 271.530667-60.330667-60.373334 211.2-211.2z" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Active}" />
-                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Foreground.Invert}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Pressed}" />
-                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Foreground.Pressed}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -55,77 +75,220 @@
         </Setter>
     </Style>
 
+    <!--  ============================================================  -->
+    <!--  SideMenuItem 样式 (WinUI 3 风格 · 整行高亮 + 左竖条 · 无圆角)  -->
+    <!--  ============================================================  -->
     <Style x:Key="SideMenuItem.Style.Basic" TargetType="ctl:SideMenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ctl:SideMenuItem">
-                    <Border x:Name="RootBorder">
+                    <Border x:Name="RootBorder" SnapsToDevicePixels="True">
                         <StackPanel>
+                            <!--
+                                PART_HeaderRoot——代码侧通过 GetTemplateChild 找到并挂事件,
+                                这样子控件 (Button、Hyperlink) e.Handled=true 后不会冒泡到这里
+                            -->
                             <Grid
-                                x:Name="HeaderRoot"
+                                x:Name="PART_HeaderRoot"
                                 Height="{TemplateBinding RowHeight}"
+                                HorizontalAlignment="Stretch"
                                 Background="{TemplateBinding Background}">
                                 <Grid.ColumnDefinitions>
+                                    <!--  ① 选中竖条指示器 (永远在最左,不受缩进影响)  -->
+                                    <ColumnDefinition Width="6" />
+                                    <!--  ② 缩进留白 (Level * SideMenu.Indent)  -->
                                     <ColumnDefinition Width="{Binding Indent, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <!--  ③ Icon  -->
                                     <ColumnDefinition x:Name="IconColumn" Width="Auto" />
+                                    <!--  ④ Header  -->
                                     <ColumnDefinition x:Name="HeaderColumn" Width="*" />
+                                    <!--  ⑤ 展开箭头  -->
                                     <ColumnDefinition x:Name="ArrowColumn" Width="Auto" />
                                 </Grid.ColumnDefinitions>
+
+                                <!--  选中指示器 (3x16 pill + ScaleY 弹入)  -->
+                                <Border
+                                    x:Name="SelectionBar"
+                                    Grid.Column="0"
+                                    Width="3"
+                                    Height="16"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource Background.Selected}"
+                                    Opacity="0"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <ScaleTransform x:Name="SelectionBarScale" ScaleY="0.4" />
+                                    </Border.RenderTransform>
+                                </Border>
+
+                                <!--  Icon——尺寸由 IconTemplate 自己控制,容器不限制大小  -->
                                 <ContentPresenter
                                     x:Name="IconContainer"
-                                    Grid.Column="1"
+                                    Grid.Column="2"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Content="{TemplateBinding Icon}"
                                     ContentTemplate="{TemplateBinding IconTemplate}" />
+
+                                <!--  Header  -->
                                 <ContentPresenter
                                     x:Name="HeaderContainer"
-                                    Grid.Column="2"
-                                    Margin="5,0,0,0"
+                                    Grid.Column="3"
+                                    Margin="8,0,0,0"
                                     VerticalAlignment="Center"
                                     Content="{TemplateBinding Header}"
                                     ContentTemplate="{TemplateBinding HeaderTemplate}" />
+
+                                <!--  展开/折叠箭头 (RotateTransform 平滑旋转)  -->
                                 <Path
                                     x:Name="Arrow"
-                                    Grid.Column="3"
-                                    Width="12"
-                                    Height="12"
-                                    Margin="0,0,8,0"
+                                    Grid.Column="4"
+                                    Width="10"
+                                    Height="10"
+                                    Margin="0,0,12,0"
                                     VerticalAlignment="Center"
                                     Data="M512 606.29333299L790.698667 341.333333 853.333333 400.853333 512 725.333333l-341.333333-324.48L233.301333 341.333333z"
                                     Fill="{DynamicResource Icon.Foreground.Default}"
+                                    RenderTransformOrigin="0.5,0.5"
                                     Stretch="Uniform"
-                                    StrokeThickness="0" />
+                                    StrokeThickness="0">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="ArrowRotate" Angle="0" />
+                                    </Path.RenderTransform>
+                                </Path>
                             </Grid>
+
+                            <!--  子项容器  -->
                             <ItemsPresenter x:Name="ItemsContainer" Visibility="Collapsed" />
                         </StackPanel>
                     </Border>
+
                     <ControlTemplate.Triggers>
+                        <!--  无子项时隐藏箭头  -->
                         <Trigger Property="HasItems" Value="False">
                             <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
                         </Trigger>
+
+                        <!--  Hover 态 (未激活)——整行浅底,文字色保持不变  -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition SourceName="PART_HeaderRoot" Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsActive" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="PART_HeaderRoot" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </MultiTrigger>
+
+                        <!--  激活态——整行浅底 + 左竖条弹入 (Opacity 淡入 + ScaleY BackEase 弹性)  -->
                         <Trigger Property="IsActive" Value="True">
-                            <Setter TargetName="HeaderRoot" Property="Background" Value="{DynamicResource Background.Active}" />
-                            <Setter TargetName="HeaderRoot" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Invert}" />
-                            <Setter TargetName="IconContainer" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Invert}" />
-                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Foreground.Invert}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase Amplitude="0.3" EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBar"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.10" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="SelectionBarScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.4"
+                                            Duration="0:0:0.10" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="PART_HeaderRoot" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
-                        <Trigger SourceName="HeaderRoot" Property="IsMouseOver" Value="True">
-                            <Setter TargetName="HeaderRoot" Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter TargetName="HeaderRoot" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Hover}" />
-                            <Setter TargetName="IconContainer" Property="TextElement.Foreground" Value="{DynamicResource Foreground.Hover}" />
-                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Foreground.Hover}" />
+
+                        <!--  失焦弱化 (整个 SideMenu 不在键盘焦点范围内)——指示器降级为 Highlighted  -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsActive, RelativeSource={RelativeSource Self}}" Value="True" />
+                                <Condition Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType=ctl:SideMenu}}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="SelectionBar" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                        </MultiDataTrigger>
+
+                        <!--  键盘焦点态——整行浅底 (Tab 导航可见反馈)  -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="PART_HeaderRoot" Property="Background" Value="{DynamicResource Background.Hover}" />
                         </Trigger>
+
+                        <!--  展开态——子项可见 + 箭头旋转 180°  -->
                         <Trigger Property="IsExpanded" Value="True">
-                            <Setter TargetName="Arrow" Property="Data" Value="M512 417.706667L233.301333 682.666667 170.666667 623.146667 512 298.666667l341.333333 324.48L790.698667 682.666667z" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ArrowRotate"
+                                            Storyboard.TargetProperty="Angle"
+                                            To="180"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ArrowRotate"
+                                            Storyboard.TargetProperty="Angle"
+                                            To="0"
+                                            Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                             <Setter TargetName="ItemsContainer" Property="Visibility" Value="Visible" />
                         </Trigger>
+
+                        <!--  紧凑模式——只显示 Icon  -->
                         <DataTrigger Binding="{Binding IsCompact, RelativeSource={RelativeSource AncestorType=ctl:SideMenu}}" Value="True">
                             <Setter TargetName="HeaderContainer" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="IconContainer" Property="HorizontalAlignment" Value="Center" />
-                            <Setter TargetName="IconColumn" Property="Width" Value="Auto" />
                         </DataTrigger>
+
+                        <!--  禁用态  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter TargetName="PART_HeaderRoot" Property="Background" Value="Transparent" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -134,15 +297,19 @@
 
     <Style BasedOn="{StaticResource SideMenuItem.Style.Basic}" TargetType="ctl:SideMenuItem" />
 
+    <!--  ============================================================  -->
+    <!--  SideMenu 样式  -->
+    <!--  ============================================================  -->
     <Style
         x:Key="SideMenu.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="ctl:SideMenu">
-        <Setter Property="Background" Value="{DynamicResource Background.Global}" />
+        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource SideMenuItem.Style.Basic}" />
         <Setter Property="Panel.ZIndex" Value="999" />
+        <Setter Property="Width" Value="{Binding MenuWidth, RelativeSource={RelativeSource Self}}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ctl:SideMenu">
@@ -150,23 +317,38 @@
                         x:Name="RootBorder"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <DockPanel x:Name="HeaderContainer" Grid.Row="0">
-                                <ContentPresenter Grid.Column="0" Content="{TemplateBinding Header}" />
-                            </DockPanel>
 
-                            <ItemsPresenter Grid.Row="1" />
+                            <!--  Header  -->
+                            <ContentPresenter
+                                x:Name="HeaderContainer"
+                                Grid.Row="0"
+                                Content="{TemplateBinding Header}" />
+
+                            <!--  Items——VerticalScrollBarVisibility=Hidden:隐藏滚动条但保留鼠标滚轮 / 触摸滚动  -->
+                            <ScrollViewer
+                                Grid.Row="1"
+                                Focusable="False"
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Hidden">
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </ScrollViewer>
+
+                            <!--  Footer  -->
                             <ContentPresenter Grid.Row="2" Content="{TemplateBinding Footer}" />
+
+                            <!--  Compact 切换按钮 (贴在右边缘外侧)  -->
                             <ToggleButton
                                 x:Name="ToggleCompactButton"
                                 Grid.RowSpan="3"
-                                Margin="0,0,-15,0"
+                                Margin="0,0,-12,0"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 IsChecked="{Binding IsCompact, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"

@@ -104,7 +104,6 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         </Style>
-
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
@@ -193,9 +192,15 @@
                         <Border Style="{StaticResource ResultBoxStyle}">
                             <TextBlock Style="{StaticResource ResultLabelStyle}">
                                 <Run Text="可用：" />
-                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding AvailableLanguages.Count, Mode=OneWay}" />
+                                <Run
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding AvailableLanguages.Count, Mode=OneWay}" />
                                 <Run Text="项；已选：" />
-                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedLanguages.Count, Mode=OneWay}" />
+                                <Run
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding SelectedLanguages.Count, Mode=OneWay}" />
                                 <Run Text="项" />
                             </TextBlock>
                         </Border>
@@ -237,7 +242,10 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Margin="0,2" Style="{StaticResource ResultLabelStyle}">
-                                            <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding Name, Mode=OneWay}" />
+                                            <Run
+                                                FontWeight="Bold"
+                                                Foreground="{DynamicResource Foreground.Link}"
+                                                Text="{Binding Name, Mode=OneWay}" />
                                             <Run Text=" — " />
                                             <Run Text="{Binding Role, Mode=OneWay}" />
                                         </TextBlock>
@@ -332,7 +340,10 @@
                             <StackPanel>
                                 <TextBlock Style="{StaticResource ResultLabelStyle}">
                                     <Run Text="累计移动次数：" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding TotalMoveCount, Mode=OneWay}" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding TotalMoveCount, Mode=OneWay}" />
                                 </TextBlock>
                                 <Border
                                     Margin="0,8,0,0"
@@ -447,7 +458,6 @@
                         </Border>
                     </StackPanel>
                 </cy:Card>
-
             </StackPanel>
 
             <!--  ============ 底部：API 表 + 代码示例 + 设计要点 ============  -->
@@ -516,45 +526,165 @@
                                 VerticalAlignment="Bottom"
                                 Background="{DynamicResource Border.Default}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SourceItems" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IList" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="左列表的数据集合。必须实现 INotifyCollectionChanged（推荐 ObservableCollection&lt;T&gt;）。" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SourceItems" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IList" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="左列表的数据集合。必须实现 INotifyCollectionChanged（推荐 ObservableCollection&lt;T&gt;）。" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TargetItems" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IList" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="右列表的数据集合。同样要求 INotifyCollectionChanged。" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TargetItems" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="IList" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="右列表的数据集合。同样要求 INotifyCollectionChanged。" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SourceHeader" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="左列表标题。可以是字符串或任意 UI 元素。" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SourceHeader" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="左列表标题。可以是字符串或任意 UI 元素。" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TargetHeader" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="右列表标题。" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TargetHeader" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="右列表标题。" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SourceDisplayMemberPath" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="左列表显示文本的属性路径（等价于 ItemsControl.DisplayMemberPath）。" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SourceDisplayMemberPath" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="string" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="左列表显示文本的属性路径（等价于 ItemsControl.DisplayMemberPath）。" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TargetDisplayMemberPath" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="右列表显示文本的属性路径。" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TargetDisplayMemberPath" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="string" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="右列表显示文本的属性路径。" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemTemplate" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="自定义列表项渲染。同时应用于源列表和目标列表。" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemTemplate" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="DataTemplate" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="自定义列表项渲染。同时应用于源列表和目标列表。" />
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemContainerStyle" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="ListBoxItem 样式。default style 已经设了带左侧 CheckBox 的内置样式。" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="ItemContainerStyle" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="Style" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="ListBoxItem 样式。default style 已经设了带左侧 CheckBox 的内置样式。" />
 
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SourceItemsChanged" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="左列表内容变化（移入 / 移出）后触发。冒泡路由。" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="SourceItemsChanged" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="左列表内容变化（移入 / 移出）后触发。冒泡路由。" />
 
-                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TargetItemsChanged" />
-                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
-                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="右列表内容变化后触发。每次移动两个事件都会触发。" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="TargetItemsChanged" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="右列表内容变化后触发。每次移动两个事件都会触发。" />
                         </Grid>
                     </Border>
                 </cy:Card>
@@ -577,7 +707,8 @@
                                 </cy:CardHeader.Icon>
                             </cy:CardHeader>
                         </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><sys:String xml:space="preserve">&lt;!-- 1. 基础（字符串列表）--&gt;
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <sys:String xml:space="preserve">&lt;!-- 1. 基础（字符串列表）--&gt;
 &lt;cy:TransferBox SourceItems="{Binding Available}"
                 TargetItems="{Binding Selected}"
                 SourceHeader="可选"
@@ -611,7 +742,8 @@
 &lt;!-- 5. 程序化触发命令 --&gt;
 &lt;Button Command="{x:Static cy:TransferBox.ToTargetCommand}"
         CommandTarget="{Binding ElementName=MyTransferBox}"
-        Content="移到右侧" /&gt;</sys:String></TextBox>
+        Content="移到右侧" /&gt;</sys:String>
+                        </TextBox>
                     </cy:Card>
 
                     <cy:Card Grid.Column="2">
@@ -688,9 +820,7 @@
                         </StackPanel>
                     </cy:Card>
                 </Grid>
-
             </Grid>
-
         </Grid>
     </ScrollViewer>
 </UserControl>

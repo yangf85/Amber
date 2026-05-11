@@ -1,32 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Cyclone.Wpf.Controls;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// StepperView.xaml 的交互逻辑
-/// </summary>
 public partial class StepperSample : UserControl
 {
-    private void PreviousButton_Click(object sender, RoutedEventArgs e)
-    {
-        HorizontalStepper.MovePrevious();
-    }
-
-    private void NextButton_Click(object sender, RoutedEventArgs e)
-    {
-        //这里只控制垂直Stepper，也可以同时控制两个
-        HorizontalStepper.MoveNext();
-    }
-
     public StepperSample()
     {
         InitializeComponent();
@@ -36,78 +15,77 @@ public partial class StepperSample : UserControl
 
 public partial class StepperViewModel : ObservableObject
 {
-    [ObservableProperty]
-    public partial int CurrentStepIndex { get; set; }
+    // ====== 注册向导主流程 ======
 
     [ObservableProperty]
-    public partial ObservableCollection<StepperItemViewModel> StepperItems { get; set; }
+    public partial int RegisterStep { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial string Account { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string Password { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string Email { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool AgreedTerms { get; set; } = false;
+
+    // 步骤可前进的条件——绑到下一步按钮的 IsEnabled / Command CanExecute
+    public bool CanGoNext => RegisterStep switch
+    {
+        0 => !string.IsNullOrWhiteSpace(Account) && Password.Length >= 6,
+        1 => !string.IsNullOrWhiteSpace(Email) && Email.Contains('@'),
+        2 => AgreedTerms,
+        _ => false,
+    };
+
+    partial void OnRegisterStepChanged(int value) => OnPropertyChanged(nameof(CanGoNext));
+    partial void OnAccountChanged(string value) => OnPropertyChanged(nameof(CanGoNext));
+    partial void OnPasswordChanged(string value) => OnPropertyChanged(nameof(CanGoNext));
+    partial void OnEmailChanged(string value) => OnPropertyChanged(nameof(CanGoNext));
+    partial void OnAgreedTermsChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
 
     [RelayCommand]
-    private void Next()
+    private void GoNext()
     {
-        if (CurrentStepIndex < StepperItems.Count)
+        if (CanGoNext && RegisterStep < 3)
         {
-            CurrentStepIndex++;
+            RegisterStep++;
         }
     }
 
     [RelayCommand]
-    private void Previous()
+    private void GoPrevious()
     {
-        if (CurrentStepIndex > 0)
+        if (RegisterStep > 0)
         {
-            CurrentStepIndex--;
+            RegisterStep--;
         }
     }
 
-    public StepperViewModel()
+    [RelayCommand]
+    private void Reset()
     {
-        // 初始化步骤项集合
-        StepperItems =
-        [
-            new StepperItemViewModel
-            {
-                Header = "需求分析",
-                Description = "收集和分析用户需求",
-            },
-            new StepperItemViewModel
-            {
-                Header = "设计方案",
-                Description = "制定系统设计方案",
-            },
-            new StepperItemViewModel
-            {
-                Header = "编码实现",
-                Description = "实现系统功能",
-            },
-            new StepperItemViewModel
-            {
-                Header = "测试验证",
-                Description = "进行系统测试",
-            },
-            new StepperItemViewModel
-            {
-                Header = "部署上线",
-                Description = "系统部署和上线",
-            }
-        ];
+        RegisterStep = 0;
+        Account = "";
+        Password = "";
+        Email = "";
+        AgreedTerms = false;
     }
-}
 
-/// <summary>
-/// 步骤项视图模型
-/// </summary>
-public partial class StepperItemViewModel : ObservableObject
-{
-    /// <summary>
-    /// 步骤标题
-    /// </summary>
-    [ObservableProperty]
-    private string _header;
+    // ====== 订单进度(垂直) ======
 
-    /// <summary>
-    /// 步骤描述
-    /// </summary>
     [ObservableProperty]
-    private string _description;
+    public partial int OrderStep { get; set; } = 2;
+
+    [RelayCommand]
+    private void AdvanceOrder()
+    {
+        if (OrderStep < 4)
+        {
+            OrderStep++;
+        }
+    }
 }

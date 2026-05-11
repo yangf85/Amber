@@ -14,10 +14,10 @@ namespace Cyclone.Wpf.Demo.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     [ObservableProperty]
-    public partial SideMenuViewModel SideMenu { get; set; } = new SideMenuViewModel();
+    public partial object? CurrentView { get; set; } = new object();
 
     [ObservableProperty]
-    public partial object? CurrentView { get; set; } = new object();
+    public partial SideMenuViewModel SideMenu { get; set; } = new SideMenuViewModel();
 
     [RelayCommand]
     private void SwitchView(object item)
@@ -57,6 +57,8 @@ public partial class MainViewModel : ObservableObject
             "TilePanel" => new TilePanelSample(),
             "TransitionBox" => new TransitionBoxSample(),
             "Form" => new FormSample(),
+            "Slider" => new SliderSample(),
+            "ProgressBar" => new ProgressBarSample(),
             "Expander" => new ExpanderSample(),
             "Carousel" => new CarouselSample(),
             "Drawer" => new DrawerSample(),
@@ -73,7 +75,7 @@ public partial class MainViewModel : ObservableObject
             "PopupBox" => new PopupBoxSample(),
             "HighlightTextBlock" => new HighlightTextBlockSample(),
             "HyperlinkButton" => new HyperlinkButtonSample(),
-
+            "GroupBox" => new GroupBoxSample(),
             "Test" => new TestView(),
             _ => null,
         };
@@ -135,9 +137,15 @@ public partial class SideMenuViewModel : ObservableObject
                 },
                 new SideMenuItemViewModel
                 {
-                    Header="Range",
+                    Header="ProgressBar",
                     Icon= "\xe605",
                 },
+                 new SideMenuItemViewModel
+                {
+                    Header="Slider",
+                    Icon= "\xe605",
+                },
+
                 new SideMenuItemViewModel
                 {
                     Header="RangeSlider",
@@ -282,6 +290,11 @@ public partial class SideMenuViewModel : ObservableObject
                  new SideMenuItemViewModel
                 {
                     Header="PopupBox",
+                    Icon= "\xe8d4",
+                },
+                 new SideMenuItemViewModel
+                {
+                    Header="GroupBox",
                     Icon= "\xe8d4",
                 },
 
