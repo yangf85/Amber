@@ -23,11 +23,15 @@ namespace Cyclone.Wpf.Controls;
 public class SplitButton : ItemsControl
 {
     private const string PART_MainButton = nameof(PART_MainButton);
+
     private const string PART_OpenButton = nameof(PART_OpenButton);
+
     private const string PART_Popup = nameof(PART_Popup);
 
     private ButtonBase _mainButton;
+
     private ToggleButton _openButton;
+
     private Popup _popup;
 
     #region Constructors
@@ -189,8 +193,15 @@ public class SplitButton : ItemsControl
             typeof(RoutedEventHandler),
             typeof(SplitButton));
 
-    public static readonly RoutedEvent ItemClickEvent =
+    public static readonly RoutedEvent ClosedEvent =
         EventManager.RegisterRoutedEvent(
+            nameof(Closed),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(SplitButton));
+
+    public static readonly RoutedEvent ItemClickEvent =
+            EventManager.RegisterRoutedEvent(
             nameof(ItemClick),
             RoutingStrategy.Bubble,
             typeof(RoutedEventHandler),
@@ -203,18 +214,18 @@ public class SplitButton : ItemsControl
             typeof(RoutedEventHandler),
             typeof(SplitButton));
 
-    public static readonly RoutedEvent ClosedEvent =
-        EventManager.RegisterRoutedEvent(
-            nameof(Closed),
-            RoutingStrategy.Bubble,
-            typeof(RoutedEventHandler),
-            typeof(SplitButton));
-
     /// <summary>主按钮被点击时触发。OriginalSource 是 SplitButton 自己。</summary>
     public event RoutedEventHandler Click
     {
         add => AddHandler(ClickEvent, value);
         remove => RemoveHandler(ClickEvent, value);
+    }
+
+    /// <summary>下拉菜单关闭时触发。</summary>
+    public event RoutedEventHandler Closed
+    {
+        add => AddHandler(ClosedEvent, value);
+        remove => RemoveHandler(ClosedEvent, value);
     }
 
     /// <summary>下拉菜单中任一 <see cref="SplitButtonItem"/> 被点击时触发。OriginalSource 是被点击的 item。</summary>
@@ -231,26 +242,9 @@ public class SplitButton : ItemsControl
         remove => RemoveHandler(OpenedEvent, value);
     }
 
-    /// <summary>下拉菜单关闭时触发。</summary>
-    public event RoutedEventHandler Closed
-    {
-        add => AddHandler(ClosedEvent, value);
-        remove => RemoveHandler(ClosedEvent, value);
-    }
-
     #endregion RoutedEvents
 
     #region Override Methods
-
-    protected override DependencyObject GetContainerForItemOverride()
-    {
-        return new SplitButtonItem();
-    }
-
-    protected override bool IsItemItsOwnContainerOverride(object item)
-    {
-        return item is SplitButtonItem;
-    }
 
     public override void OnApplyTemplate()
     {
@@ -270,6 +264,16 @@ public class SplitButton : ItemsControl
         {
             _mainButton.Click += OnMainButtonClick;
         }
+    }
+
+    protected override DependencyObject GetContainerForItemOverride()
+    {
+        return new SplitButtonItem();
+    }
+
+    protected override bool IsItemItsOwnContainerOverride(object item)
+    {
+        return item is SplitButtonItem;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -298,13 +302,6 @@ public class SplitButton : ItemsControl
 
     #region Private Methods
 
-    private void OnMainButtonClick(object sender, RoutedEventArgs e)
-    {
-        // 把主按钮(模板内部)的 Click 重新发为 SplitButton.Click(source = SplitButton 自己)
-        e.Handled = true;
-        RaiseEvent(new RoutedEventArgs(ClickEvent, this));
-    }
-
     /// <summary>
     /// 由 <see cref="SplitButtonItem"/> 在被点击时调用——关闭 popup 并在 SplitButton 上冒泡 <see cref="ItemClick"/>。
     /// </summary>
@@ -312,6 +309,13 @@ public class SplitButton : ItemsControl
     {
         IsOpen = false;
         RaiseEvent(new RoutedEventArgs(ItemClickEvent, item));
+    }
+
+    private void OnMainButtonClick(object sender, RoutedEventArgs e)
+    {
+        // 把主按钮(模板内部)的 Click 重新发为 SplitButton.Click(source = SplitButton 自己)
+        e.Handled = true;
+        RaiseEvent(new RoutedEventArgs(ClickEvent, this));
     }
 
     #endregion Private Methods

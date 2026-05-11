@@ -1,0 +1,240 @@
+<!--
+    ============================================================================
+    ScrollViewer + ScrollBar 样式 (WinUI 3 风格,极简)
+    
+    设计要点:
+    - 无箭头按钮。现代滚动条都没有箭头,
+      用户用滚轮 / 拖动 Thumb / 触摸板
+    - Thumb 4px 默认,鼠标进入 ScrollBar 时扩展到 8px
+    - 轨道默认透明,鼠标进入显示浅灰底
+    - 无圆角(整体跟项目设计语言一致)
+    - 命名三段式: ScrollBar.Style.Basic / ScrollBar.Thumb.Style.Basic
+    
+    修复 (vs 旧版):
+    - 删除 IndicateButtonStyle (箭头按钮) 和 4 个 ArrowXxx Geometry — 130+ 行冗余
+    - 合并 VerticalThumbStyle + HorizontalThumbStyle → 单一 ScrollBar.Thumb.Style.Basic
+    - 合并 ScrollBar.VerticalStyle + HorizontalStyle → 单一 ScrollBar.Style.Basic
+      (Orientation trigger 切换模板,VerticalScrollBar 和 HorizontalScrollBar 用同一 Style)
+    - Paging RepeatButton 用 Border 替代 Rectangle (点击响应可靠)
+    - Corner 用主题 token 替代 SystemColors.ControlBrushKey
+    ============================================================================
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--  ============================================================  -->
+    <!--  Thumb 样式 (横竖共用)  -->
+    <!--  默认 半透明灰,鼠标 hover 浅灰加深,Dragging 主色  -->
+    <!--  ============================================================  -->
+    <Style x:Key="ScrollBar.Thumb.Style.Basic" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <!--
+                        Thumb body 自动拉伸到 Track 注入的尺寸
+                        不要绑 Width/Height — 那是 Track 计算的,绑了会失效
+                    -->
+                    <Border
+                        x:Name="ThumbBody"
+                        Background="{DynamicResource Border.Default}"
+                        SnapsToDevicePixels="True" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ThumbBody" Property="Background" Value="{DynamicResource Foreground.Caption}" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="ThumbBody" Property="Background" Value="{DynamicResource Background.Selected}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  Paging RepeatButton (轨道点击区) 样式  -->
+    <!--  点击空白处翻一页 — Border 透明 + Hit-test 可响应  -->
+    <!--  ============================================================  -->
+    <Style x:Key="ScrollBar.PagingButton.Style.Basic" TargetType="{x:Type RepeatButton}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <!--  Border 透明背景 + 显式 IsHitTestVisible 确保 paging 区域可点击  -->
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  ScrollBar 主样式 (横竖共用,通过 Orientation trigger 切模板)  -->
+    <!--  ============================================================  -->
+    <Style x:Key="ScrollBar.Style.Basic" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False" />
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Width" Value="12" />
+        <Setter Property="MinWidth" Value="12" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <!--  垂直模板  -->
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid x:Name="Root" Background="{TemplateBinding Background}">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Style="{StaticResource ScrollBar.PagingButton.Style.Basic}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Style="{StaticResource ScrollBar.PagingButton.Style.Basic}" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <!--  Thumb 宽度 4px 默认,鼠标进入容器后变 8px  -->
+                                <Thumb
+                                    x:Name="ThumbInstance"
+                                    Width="4"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource ScrollBar.Thumb.Style.Basic}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!--  鼠标进入 ScrollBar — 整体高亮:轨道淡灰底 + Thumb 加粗  -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Header}" />
+                            <Setter TargetName="ThumbInstance" Property="Width" Value="8" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Height" Value="12" />
+                <Setter Property="MinHeight" Value="12" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <!--  水平模板  -->
+                        <ControlTemplate TargetType="{x:Type ScrollBar}">
+                            <Grid x:Name="Root" Background="{TemplateBinding Background}">
+                                <Track x:Name="PART_Track">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Style="{StaticResource ScrollBar.PagingButton.Style.Basic}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Style="{StaticResource ScrollBar.PagingButton.Style.Basic}" />
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb
+                                            x:Name="ThumbInstance"
+                                            Height="4"
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource ScrollBar.Thumb.Style.Basic}" />
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Header}" />
+                                    <Setter TargetName="ThumbInstance" Property="Height" Value="8" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  ScrollBar 隐式样式 — 全局所有 ScrollBar 自动应用  -->
+    <Style BasedOn="{StaticResource ScrollBar.Style.Basic}" TargetType="{x:Type ScrollBar}" />
+
+    <!--  ============================================================  -->
+    <!--  ScrollViewer 主样式  -->
+    <!--  ============================================================  -->
+    <Style
+        x:Key="ScrollViewer.Style.Basic"
+        BasedOn="{StaticResource Control.Style.Basic}"
+        TargetType="{x:Type ScrollViewer}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                    <Grid x:Name="Grid" Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  Corner — 横竖滚动条交叉的小方块,用主题 token 不再用系统色  -->
+                        <Rectangle
+                            x:Name="Corner"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Fill="{DynamicResource Background.Header}" />
+
+                        <!--  内容区  -->
+                        <ScrollContentPresenter
+                            x:Name="PART_ScrollContentPresenter"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="{TemplateBinding Padding}"
+                            CanContentScroll="{TemplateBinding CanContentScroll}"
+                            CanHorizontallyScroll="False"
+                            CanVerticallyScroll="False"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}" />
+
+                        <!--  垂直滚动条  -->
+                        <ScrollBar
+                            x:Name="PART_VerticalScrollBar"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="VerticalScrollBar"
+                            Cursor="Arrow"
+                            Maximum="{TemplateBinding ScrollableHeight}"
+                            Minimum="0"
+                            ViewportSize="{TemplateBinding ViewportHeight}"
+                            Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                            Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                        <!--  水平滚动条  -->
+                        <ScrollBar
+                            x:Name="PART_HorizontalScrollBar"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            AutomationProperties.AutomationId="HorizontalScrollBar"
+                            Cursor="Arrow"
+                            Maximum="{TemplateBinding ScrollableWidth}"
+                            Minimum="0"
+                            Orientation="Horizontal"
+                            ViewportSize="{TemplateBinding ViewportWidth}"
+                            Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                            Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource ScrollViewer.Style.Basic}" TargetType="{x:Type ScrollViewer}" />
+</ResourceDictionary>

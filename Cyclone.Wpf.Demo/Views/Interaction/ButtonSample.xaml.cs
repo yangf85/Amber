@@ -1,31 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Cyclone.Wpf.Controls;
-using Cyclone.Wpf.Demo.Helper;
-using Cyclone.Wpf.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// ButtonView.xaml 的交互逻辑
-/// </summary>
 public partial class ButtonSample : UserControl
 {
     public ButtonSample()
@@ -35,78 +13,38 @@ public partial class ButtonSample : UserControl
     }
 }
 
-public partial class ButtonViewModel : ObservableObject, IRecipient<string>
+public partial class ButtonViewModel : ObservableObject
 {
     [ObservableProperty]
-    public partial SplitButtonViewModel SplitButton { get; set; } = new SplitButtonViewModel();
+    public partial int ClickCount { get; set; } = 0;
 
     [ObservableProperty]
-    public partial RadioButtonGroupEnum RadioButtonGroupEnum { get; set; } = RadioButtonGroupEnum.C;
-
-    [RelayCommand]
-    private void SenderMessage(string message)
-    {
-        WeakReferenceMessenger.Default.Send(message);
-    }
-
-    [RelayCommand]
-    private void ShowSelectedRadioButton()
-    {
-        MessageBox.Show($"{RadioButtonGroupEnum}");
-    }
-
-    public void Receive(string message)
-    {
-        MessageBox.Show(message);
-    }
-
-    public ButtonViewModel()
-    {
-        WeakReferenceMessenger.Default.Register<string>(this);
-    }
-}
-
-public partial class SplitButtonViewModel : ObservableObject
-{
-    [ObservableProperty]
-    public partial ObservableCollection<FakerData> FakerData { get; set; }
+    public partial string LastAction { get; set; } = "(尚未操作)";
 
     [ObservableProperty]
-    public partial int Index { get; set; }
+    public partial bool IsBusy { get; set; }
+
+    public bool CanInteract => !IsBusy;
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanInteract));
 
     [RelayCommand]
-    private void ShowData(FakerData data)
+    private void Execute(string action)
     {
-        if (data != null)
-        {
-            MessageBox.Show($"{data.FirstName} {data.LastName}");
-        }
+        ClickCount++;
+        LastAction = $"[{ClickCount}] {action}";
     }
 
     [RelayCommand]
-    private void Test(object item)
+    private void ToggleBusy()
     {
-        MessageBox.Show($"{item}----{Index}");
+        IsBusy = !IsBusy;
     }
 
-    public SplitButtonViewModel()
+    [RelayCommand]
+    private void ResetCounter()
     {
-        FakerData = new ObservableCollection<FakerData>(FakerDataHelper.GenerateFakerDataCollection(5));
+        ClickCount = 0;
+        LastAction = "(已重置)";
     }
-}
-
-[TypeConverter(typeof(EnumDescriptionTypeConverter))]
-public enum RadioButtonGroupEnum
-{
-    [Description("One")]
-    A,
-
-    [Description("Two")]
-    B,
-
-    [Description("Three")]
-    C,
-
-    [Description("Four")]
-    D
 }

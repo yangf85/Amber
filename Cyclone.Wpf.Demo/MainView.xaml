@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.MainView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -43,12 +43,18 @@
                         Visibility="{Binding IsCompact, ElementName=SideMenu, Converter={x:Static cy:VisibilityConverter.VisibleWhenFalse}}" />
                 </StackPanel>
             </cy:SideMenu.Header>
+
+            <!--
+                Icon 模板 — 使用 emoji 文字图标
+                FontFamily 用 "Segoe UI Emoji" — Windows 系统自带的 emoji 字体,
+                可保证 emoji 字符以彩色字形渲染(不带这个字体会fallback到黑白单色)
+            -->
             <cy:SideMenu.DisplayMemberIconTemplate>
                 <DataTemplate>
                     <TextBlock
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource IconFont}"
-                        FontSize="20"
+                        FontFamily="Segoe UI Emoji"
+                        FontSize="16"
                         Text="{Binding}" />
                 </DataTemplate>
             </cy:SideMenu.DisplayMemberIconTemplate>
@@ -62,6 +68,8 @@
                 <Button
                     BorderThickness="0"
                     Content="⚙"
+                    FontFamily="Segoe UI Emoji"
+                    FontSize="16"
                     Visibility="{Binding IsCompact, ElementName=SideMenu, Converter={x:Static cy:VisibilityConverter.VisibleWhenFalse}}" />
             </cy:SideMenu.Footer>
         </cy:SideMenu>

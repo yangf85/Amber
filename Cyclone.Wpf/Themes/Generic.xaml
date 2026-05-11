@@ -1,81 +1,130 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<!--
+    ============================================================================
+    Cyclone.Wpf — Generic.xaml
+
+    入口资源字典,按"控件职能"分组合并所有控件样式。
+    分组顺序经过编排,保证依赖关系正确:
+    Primitives (被引用) → Buttons → Input → Selection → ...
+
+    若文件结构后续重组为 Group 子目录,只需把每组替换为对应的 _Group.xaml。
+    ============================================================================
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
 
+        <!--  ============================================================  -->
+        <!--  1. Primitives — 被其他控件引用的底层模板/工具控件  -->
+        <!--  必须最先加载;ValidationTemplate 被 TextBox/NumberBox 等引用,  -->
+        <!--  ScrollViewer 被 ComboBox/Popup/ListBox 等引用,IconBox 通用  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ValidationTemplate.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ScrollViewer.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ToolTip.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/IconBox.xaml" />
+
+        <!--  ============================================================  -->
+        <!--  2. Buttons — 按钮族(包括 ToggleButton 派生的 CheckBox/RadioButton)  -->
+        <!--  Button 是基础,其他派生按钮放后面  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Button.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SwitchButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RepeatButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ToggleButton.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SwitchButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/HyperlinkButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SplitButton.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RadioButton.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CheckBox.xaml" />
 
+        <!--  ============================================================  -->
+        <!--  3. Input — 文本/数字输入控件  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TextBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/PasswordBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/NumberBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TextFilterBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/NumberFilterBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ColorPicker.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SectionHeader.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Form.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SettingItem.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/HintBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/EditableTextBlock.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CopyableTextBlock.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RunningBlock.xaml" />
 
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ListBox.xaml" />
+        <!--  ============================================================  -->
+        <!--  4. Selection — 从候选集中选值的控件  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ComboBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/MultiComboBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CascadePicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/EnumSelector.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TransferBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ListView.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/GridView.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/DataGrid.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Carousel.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Card.xaml" />
 
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TabControl.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/FluidTabControl.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Expander.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/GroupBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ScorllViewer.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TransitionBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Drawer.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Stepper.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/BreadcrumbBar.xaml" />
-
+        <!--  ============================================================  -->
+        <!--  5. DateTime — 日期/时间选择  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Calendar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/DatePicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TimePicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/DateRangePicker.xaml" />
 
+        <!--  ============================================================  -->
+        <!--  6. Numeric — 数值/进度可视化  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Slider.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RangeSlider.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RotationEditor.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ProgressBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CircularGauge.xaml" />
 
+        <!--  ============================================================  -->
+        <!--  7. Collections — 集合展示  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ListBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ListView.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/GridView.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/DataGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TreeView.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Carousel.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Pagination.xaml" />
+
+        <!--  ============================================================  -->
+        <!--  8. Navigation — 主导航/流程引导  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TabControl.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/FluidTabControl.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Stepper.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/BreadcrumbBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SideMenu.xaml" />
+
+        <!--  ============================================================  -->
+        <!--  9. Menu — 菜单族  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Menu.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ContextMenu.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SideMenu.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RadialMenu.xaml" />
 
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ComboBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/MultiComboBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CascadePicker.xaml" />
+        <!--  ============================================================  -->
+        <!--  10. Containers — 容器/布局  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/GroupBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Expander.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Card.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SectionHeader.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Form.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/SettingItem.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/TransitionBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Drawer.xaml" />
 
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/EditableTextBlock.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CopyableTextBlock.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/HintBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RunningBlock.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ToolTip.xaml" />
-
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/PopupBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/AdvancedWindow.xaml" />
-
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ValidationTemplate.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/RadioButton.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CheckBox.xaml" />
-
+        <!--  ============================================================  -->
+        <!--  11. Feedback — 状态反馈/弹出提示  -->
+        <!--  ============================================================  -->
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Alert.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Notification.xaml" />
-
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/CircularGauge.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/LoadingBox.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Pagination.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/IconBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/PopupBox.xaml" />
+
+        <!--  ============================================================  -->
+        <!--  12. Window — 窗口框架  -->
+        <!--  ============================================================  -->
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/AdvancedWindow.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

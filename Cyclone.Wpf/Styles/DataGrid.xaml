@@ -30,7 +30,7 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ScorllViewer.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/ScrollViewer.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <!--  ============================================================  -->
@@ -553,7 +553,6 @@
                                             Margin="0,0,-1,0"
                                             Maximum="{TemplateBinding ScrollableHeight}"
                                             Orientation="Vertical"
-                                            Style="{StaticResource ScrollBar.VerticalStyle}"
                                             ViewportSize="{TemplateBinding ViewportHeight}"
                                             Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
                                             Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
@@ -568,7 +567,6 @@
                                                 Margin="0,0,0,-1"
                                                 Maximum="{TemplateBinding ScrollableWidth}"
                                                 Orientation="Horizontal"
-                                                Style="{StaticResource ScrollBar.HorizontalStyle}"
                                                 ViewportSize="{TemplateBinding ViewportWidth}"
                                                 Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
                                                 Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />

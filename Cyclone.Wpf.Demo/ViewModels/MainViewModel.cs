@@ -1,13 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Cyclone.Wpf.Demo.Views;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Cyclone.Wpf.Demo.ViewModels;
 
@@ -22,60 +16,83 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SwitchView(object item)
     {
-        // 处理传入的参数，统一为SideMenuItemViewModel
         if (item is not SideMenuItemViewModel menuItem) { return; }
 
         CurrentView = menuItem.Header switch
         {
+            // Buttons
             "Button" => new ButtonSample(),
             "SwitchButton" => new SwitchButtonSample(),
             "SplitButton" => new SplitButtonSample(),
+            "HyperlinkButton" => new HyperlinkButtonSample(),
+
+            // Input
+            "TextBox" => new TextBoxSample(),
             "NumberBox" => new NumberBoxSample(),
             "Input" => new InputSample(),
-            "Menu" => new MenuSample(),
-            "TreeView" => new TreeViewSample(),
+            "HintBox" => new HintBoxSample(),
+            "HighlightTextBlock" => new HighlightTextBlockSample(),
+            "FilterBox" => new FilterBoxSample(),
+
+            // Selection
+            "ComboBox" => new ComboBoxSample(),
+            "MultiComboBox" => new MultiComboBoxSample(),
             "CascadePicker" => new CascadePickerSample(),
-            "LoadingBox" => new LoadingBoxSample(),
-            "DataGrid" => new DataGridView(),
+            "EnumSelector" => new EnumSelectorSample(),
+            "ColorPicker" => new ColorPickerSample(),
+            "TransferBox" => new TransferBoxSample(),
+
+            // DateTime
             "DateTime" => new DateSample(),
-            "Range" => new RangeSample(),
+
+            // Numeric
+            "Slider" => new SliderSample(),
             "RangeSlider" => new RangeSliderSample(),
+            "Range" => new RangeSample(),
+            "ProgressBar" => new ProgressBarSample(),
+
+            // Collections
+            "ListBox" => new ListBoxView(),
+            "ListView" => new ListViewView(),
+            "DataGrid" => new DataGridView(),
+            "TreeView" => new TreeViewSample(),
+            "Carousel" => new CarouselSample(),
+
+            // Navigation
             "TabControl" => new TabControlView(),
             "FluidTab" => new FluidTabSample(),
-            "ComboBox" => new ComboBoxSample(),
-            "ListView" => new ListViewView(),
-            "ListBox" => new ListBoxView(),
+            "Stepper" => new StepperSample(),
+            "Breadcrumb" => new BreadcrumbBarSample(),
+
+            // Menus
+            "Menu" => new MenuSample(),
+
+            // Containers
+            "GroupBox" => new GroupBoxSample(),
+            "Expander" => new ExpanderSample(),
+            "Card" => new CardSample(),
+            "SectionHeader" => new SectionHeaderSample(),
+            "Form" => new FormSample(),
+            "SettingItem" => new SettingItemSample(),
+            "TransitionBox" => new TransitionBoxSample(),
+            "Drawer" => new DrawerSample(),
+
+            // Feedback
             "Notification" => new NotificationSample(),
             "Alert" => new AlertSample(),
-            "TransferBox" => new TransferBoxSample(),
-            "HintBox" => new HintBoxSample(),
+            "LoadingBox" => new LoadingBoxSample(),
+            "PopupBox" => new PopupBoxSample(),
+
+            // Panels
             "CyclicPanel" => new CyclicPanelSample(),
             "SpacingUniformGrid" => new SpacingUniformGridSample(),
             "SpacingStackPanel" => new SpacingStackPanelSample(),
             "FisheyePanel" => new FisheyePanelSample(),
             "WaterfallPanel" => new WaterfallPanelSample(),
             "TilePanel" => new TilePanelSample(),
-            "TransitionBox" => new TransitionBoxSample(),
-            "Form" => new FormSample(),
-            "Slider" => new SliderSample(),
-            "ProgressBar" => new ProgressBarSample(),
-            "Expander" => new ExpanderSample(),
-            "Carousel" => new CarouselSample(),
-            "Drawer" => new DrawerSample(),
-            "FilterBox" => new FilterBoxSample(),
+
+            // Other
             "IconBox" => new IconBoxSample(),
-            "Stepper" => new StepperSample(),
-            "Breadcrumb" => new BreadcrumbBarSample(),
-            "ColorPicker" => new ColorPickerSample(),
-            "EnumSelector" => new EnumSelectorSample(),
-            "SectionHeader" => new SectionHeaderSample(),
-            "SettingItem" => new SettingItemSample(),
-            "Card" => new CardSample(),
-            "MultiComboBox" => new MultiComboBoxSample(),
-            "PopupBox" => new PopupBoxSample(),
-            "HighlightTextBlock" => new HighlightTextBlockSample(),
-            "HyperlinkButton" => new HyperlinkButtonSample(),
-            "GroupBox" => new GroupBoxSample(),
             "Test" => new TestView(),
             _ => null,
         };
@@ -94,318 +111,181 @@ public partial class SideMenuViewModel : ObservableObject
 
     public SideMenuViewModel()
     {
+        // ① Buttons
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Interaction",
-            Icon = "\xe60f",
+            Header = "Buttons",
+            Icon = "🔘",
             Items =
             [
-                new SideMenuItemViewModel
-                {
-                    Header="Button",
-                    Icon= "\xe605",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="SwitchButton",
-                    Icon= "\xe605",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="HyperlinkButton",
-                    Icon= "\xe605",
-                },
-                   new SideMenuItemViewModel
-                {
-                    Header="SplitButton",
-                    Icon= "\xe605",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Input",
-                    Icon= "\xe603",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="HighlightTextBlock",
-                    Icon= "\xe605",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="NumberBox",
-                    Icon= "\xe603",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="ProgressBar",
-                    Icon= "\xe605",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="Slider",
-                    Icon= "\xe605",
-                },
-
-                new SideMenuItemViewModel
-                {
-                    Header="RangeSlider",
-                    Icon= "\xe605",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="ComboBox",
-                    Icon= "\xe665",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="MultiComboBox",
-                    Icon= "\xe665",
-                },
-
-                new SideMenuItemViewModel
-                {
-                    Header="HintBox",
-                    Icon= "\xe606",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="DateTime",
-                    Icon= "\xe604",
-                },
-
-                  new SideMenuItemViewModel
-                {
-                    Header="EnumSelector",
-                    Icon= "\xe71a",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="FilterBox",
-                    Icon= "\xe74c",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Form",
-                    Icon= "\xe60b",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="SectionHeader",
-                    Icon= "\xe888",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="SettingItem",
-                    Icon= "\xe888",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="ColorPicker",
-                    Icon= "\xe8fb",
-                },
-
+                new SideMenuItemViewModel { Header = "Button",          Icon = "🟦" },
+                new SideMenuItemViewModel { Header = "SwitchButton",    Icon = "🎚" },
+                new SideMenuItemViewModel { Header = "SplitButton",     Icon = "🔀" },
+                new SideMenuItemViewModel { Header = "HyperlinkButton", Icon = "🔗" },
             ]
         });
+
+        // ② Input
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Collection",
-            Icon = "\xe6d5",
+            Header = "Input",
+            Icon = "✏️",
             Items =
             [
-
-                new SideMenuItemViewModel
-                {
-                    Header="ListBox",
-                    Icon= "\xe627",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="ListView",
-                    Icon= "\xe6a6",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="DataGrid",
-                    Icon= "\xe751",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Carousel",
-                    Icon= "\xe6d2",
-                },
-
+                new SideMenuItemViewModel { Header = "TextBox",            Icon = "📝" },
+                new SideMenuItemViewModel { Header = "NumberBox",          Icon = "🔢" },
+                new SideMenuItemViewModel { Header = "Input",              Icon = "⌨️" },
+                new SideMenuItemViewModel { Header = "HintBox",            Icon = "💡" },
+                new SideMenuItemViewModel { Header = "HighlightTextBlock", Icon = "🖍" },
+                new SideMenuItemViewModel { Header = "FilterBox",          Icon = "🔎" },
             ]
         });
+
+        // ③ Selection
+        Items.Add(new SideMenuItemViewModel
+        {
+            Header = "Selection",
+            Icon = "☑️",
+            Items =
+            [
+                new SideMenuItemViewModel { Header = "ComboBox",      Icon = "⬇️" },
+                new SideMenuItemViewModel { Header = "MultiComboBox", Icon = "📋" },
+                new SideMenuItemViewModel { Header = "CascadePicker", Icon = "📂" },
+                new SideMenuItemViewModel { Header = "EnumSelector",  Icon = "🏷" },
+                new SideMenuItemViewModel { Header = "ColorPicker",   Icon = "🎨" },
+                new SideMenuItemViewModel { Header = "TransferBox",   Icon = "🔄" },
+            ]
+        });
+
+        // ④ DateTime
+        Items.Add(new SideMenuItemViewModel
+        {
+            Header = "Date & Time",
+            Icon = "📅",
+            Items =
+            [
+                new SideMenuItemViewModel { Header = "DateTime", Icon = "🕐" },
+            ]
+        });
+
+        // ⑤ Numeric / Progress
+        Items.Add(new SideMenuItemViewModel
+        {
+            Header = "Numeric",
+            Icon = "📊",
+            Items =
+            [
+                new SideMenuItemViewModel { Header = "Slider",      Icon = "🎚" },
+                new SideMenuItemViewModel { Header = "RangeSlider", Icon = "📏" },
+                new SideMenuItemViewModel { Header = "Range",       Icon = "📐" },
+                new SideMenuItemViewModel { Header = "ProgressBar", Icon = "⏳" },
+            ]
+        });
+
+        // ⑥ Collections
+        Items.Add(new SideMenuItemViewModel
+        {
+            Header = "Collections",
+            Icon = "📚",
+            Items =
+            [
+                new SideMenuItemViewModel { Header = "ListBox",  Icon = "📋" },
+                new SideMenuItemViewModel { Header = "ListView", Icon = "📃" },
+                new SideMenuItemViewModel { Header = "DataGrid", Icon = "🗂" },
+                new SideMenuItemViewModel { Header = "TreeView", Icon = "🌳" },
+                new SideMenuItemViewModel { Header = "Carousel", Icon = "🎠" },
+            ]
+        });
+
+        // ⑦ Navigation
         Items.Add(new SideMenuItemViewModel
         {
             Header = "Navigation",
-            Icon = "\xe81a",
+            Icon = "🧭",
             Items =
             [
-                new SideMenuItemViewModel
-                {
-                    Header="TabControl",
-                    Icon= "\xe602",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="FluidTab",
-                    Icon= "\xe609",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="TransitionBox",
-                    Icon= "\xe64a",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="TransferBox",
-                    Icon= "\xe642",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Expander",
-                    Icon= "\xe6dd",
-                },
-                  new SideMenuItemViewModel
-                {
-                    Header="Card",
-                    Icon= "\xe6dd",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Drawer",
-                    Icon= "\xe650",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="Stepper",
-                    Icon= "\xe756",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Breadcrumb",
-                    Icon= "\xe8d4",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="PopupBox",
-                    Icon= "\xe8d4",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="GroupBox",
-                    Icon= "\xe8d4",
-                },
-
+                new SideMenuItemViewModel { Header = "TabControl",  Icon = "🗒" },
+                new SideMenuItemViewModel { Header = "FluidTab",    Icon = "💧" },
+                new SideMenuItemViewModel { Header = "Stepper",     Icon = "👣" },
+                new SideMenuItemViewModel { Header = "Breadcrumb",  Icon = "🍞" },
             ]
         });
 
+        // ⑧ Menu
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Hierarchy",
-            Icon = "\xe817",
+            Header = "Menu",
+            Icon = "🍔",
             Items =
             [
-                new SideMenuItemViewModel
-                {
-                    Header="Menu",
-                    Icon= "\xe633",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="TreeView",
-                    Icon= "\xe970",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="CascadePicker",
-                    Icon= "\xe78a",
-                },
+                new SideMenuItemViewModel { Header = "Menu", Icon = "📑" },
             ]
         });
 
+        // ⑨ Containers
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Message",
-            Icon = "\xe60e",
+            Header = "Containers",
+            Icon = "📦",
             Items =
             [
-                 new SideMenuItemViewModel
-                {
-                    Header="Notification",
-                    Icon= "\xe60e",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="Alert",
-                    Icon= "\xe60e",
-                },
-
+                new SideMenuItemViewModel { Header = "GroupBox",       Icon = "🗃" },
+                new SideMenuItemViewModel { Header = "Expander",       Icon = "🔽" },
+                new SideMenuItemViewModel { Header = "Card",           Icon = "🃏" },
+                new SideMenuItemViewModel { Header = "SectionHeader",  Icon = "📌" },
+                new SideMenuItemViewModel { Header = "Form",           Icon = "📋" },
+                new SideMenuItemViewModel { Header = "SettingItem",    Icon = "⚙️" },
+                new SideMenuItemViewModel { Header = "TransitionBox",  Icon = "🎬" },
+                new SideMenuItemViewModel { Header = "Drawer",         Icon = "🗄" },
             ]
         });
+
+        // ⑩ Feedback
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Panel",
-            Icon = "\xe614",
+            Header = "Feedback",
+            Icon = "💬",
             Items =
             [
-                new SideMenuItemViewModel
-                {
-                    Header="CyclicPanel",
-                    Icon= "\xe863",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="SpacingUniformGrid",
-                    Icon= "\xe608",
-                },
-                new SideMenuItemViewModel
-                {
-                    Header="SpacingStackPanel",
-                    Icon= "\xe668",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="FisheyePanel",
-                    Icon= "\xe60a",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="WaterfallPanel",
-                    Icon= "\xe607",
-                },
-                 new SideMenuItemViewModel
-                {
-                    Header="TilePanel",
-                    Icon= "\xe62b",
-                },
-
+                new SideMenuItemViewModel { Header = "Notification", Icon = "🔔" },
+                new SideMenuItemViewModel { Header = "Alert",        Icon = "⚠️" },
+                new SideMenuItemViewModel { Header = "LoadingBox",   Icon = "⏱" },
+                new SideMenuItemViewModel { Header = "PopupBox",     Icon = "💭" },
             ]
         });
+
+        // ⑪ Panels
+        Items.Add(new SideMenuItemViewModel
+        {
+            Header = "Panels",
+            Icon = "🧱",
+            Items =
+            [
+                new SideMenuItemViewModel { Header = "CyclicPanel",        Icon = "🔁" },
+                new SideMenuItemViewModel { Header = "SpacingUniformGrid", Icon = "🔲" },
+                new SideMenuItemViewModel { Header = "SpacingStackPanel",  Icon = "🧮" },
+                new SideMenuItemViewModel { Header = "FisheyePanel",       Icon = "🐟" },
+                new SideMenuItemViewModel { Header = "WaterfallPanel",     Icon = "🌊" },
+                new SideMenuItemViewModel { Header = "TilePanel",          Icon = "🀄" },
+            ]
+        });
+
+        // ⑫ Other
         Items.Add(new SideMenuItemViewModel
         {
             Header = "Other",
-            Icon = "\xe61a",
+            Icon = "✨",
             Items =
             [
-                new SideMenuItemViewModel
-                {
-                    Header = "LoadingBox",
-                    Icon = "\xe891",
-                },
-
-               new SideMenuItemViewModel
-               {
-                   Header="IconBox",
-                   Icon = "\xe617",
-               }
+                new SideMenuItemViewModel { Header = "IconBox", Icon = "🎯" },
             ]
         });
+
+        // 顶层 Test 项(无子项)
         Items.Add(new SideMenuItemViewModel
         {
             Header = "Test",
-            Icon = "\xe629",
+            Icon = "🧪",
         });
     }
 }

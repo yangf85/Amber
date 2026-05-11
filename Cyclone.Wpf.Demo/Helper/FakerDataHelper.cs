@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace Cyclone.Wpf.Demo.Helper;
 
-
 public class FakerDataHelper
 {
-   
     public static List<FakerData> GenerateFakerDataCollection(int count)
     {
         var collection = new List<FakerData>();
@@ -29,7 +27,7 @@ public class FakerDataHelper
         {
             var node = new TreeFakerData
             {
-                Node =Faker. Name.FullName(), // 随机生成节点名称
+                Node = Faker.Name.FullName(), // 随机生成节点名称
                 Children = GenerateRandomTreeChildren() // 随机生成子节点
             };
             collection.Add(node);
@@ -50,7 +48,7 @@ public class FakerDataHelper
             {
                 var child = new TreeFakerData
                 {
-                    Node =Faker. Name.FullName(), // 随机生成子节点名称
+                    Node = Faker.Name.FullName(), // 随机生成子节点名称
                     Children = [.. GenerateRandomTreeChildren(maxDepth - 1, maxChildren)] // 递归生成子节点
                 };
                 children.Add(child);
@@ -60,4 +58,3 @@ public class FakerDataHelper
         return children;
     }
 }
-

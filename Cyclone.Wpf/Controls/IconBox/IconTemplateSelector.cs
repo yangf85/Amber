@@ -1,51 +1,36 @@
-﻿// IconTemplateSelector.cs
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 根据内容类型选择合适的模板的选择器
+/// 根据 Content 类型选择 IconBox 的渲染模板。
+/// <list type="bullet">
+/// <item><description><see cref="Geometry"/> → <see cref="PathTemplate"/></description></item>
+/// <item><description><see cref="ImageSource"/> → <see cref="ImageTemplate"/></description></item>
+/// <item><description><see cref="string"/> → <see cref="FontTemplate"/> (字体图标 Glyph)</description></item>
+/// </list>
 /// </summary>
 public class IconTemplateSelector : DataTemplateSelector
 {
-    /// <summary>
-    /// 路径图标模板
-    /// </summary>
-    public DataTemplate PathTemplate { get; set; }
+    /// <summary>字体图标模板 (string Glyph)。</summary>
+    public DataTemplate FontTemplate { get; set; }
 
-    /// <summary>
-    /// 图片图标模板
-    /// </summary>
+    /// <summary>位图图标模板 (ImageSource)。</summary>
     public DataTemplate ImageTemplate { get; set; }
 
-    /// <summary>
-    /// 字体图标模板
-    /// </summary>
-    public DataTemplate FontTemplate { get; set; }
+    /// <summary>路径图标模板 (Geometry)。</summary>
+    public DataTemplate PathTemplate { get; set; }
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-        if (item == null)
+        return item switch
         {
-            return null;
-        }
-
-        // 根据内容类型选择模板
-        if (item is Geometry)
-        {
-            return PathTemplate;
-        }
-        else if (item is ImageSource)
-        {
-            return ImageTemplate;
-        }
-        else if (item is string)
-        {
-            return FontTemplate;
-        }
-
-        return base.SelectTemplate(item, container);
+            Geometry => PathTemplate,
+            ImageSource => ImageTemplate,
+            string => FontTemplate,
+            _ => base.SelectTemplate(item, container),
+        };
     }
 }
