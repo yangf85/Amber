@@ -144,6 +144,49 @@ public class RotationEditor : Control
 
     #endregion Step
 
+    #region AutoToolTipPlacement
+
+    public static readonly DependencyProperty AutoToolTipPlacementProperty =
+        DependencyProperty.Register(
+            nameof(AutoToolTipPlacement),
+            typeof(AutoToolTipPlacement),
+            typeof(RotationEditor),
+            new PropertyMetadata(AutoToolTipPlacement.TopLeft));
+
+    /// <summary>
+    /// 拖动 Thumb 时显示当前角度值的 ToolTip 位置,语义跟 <see cref="Slider.AutoToolTipPlacement"/> 一致。
+    /// 默认 <see cref="System.Windows.Controls.Primitives.AutoToolTipPlacement.TopLeft"/>;
+    /// 设 <see cref="System.Windows.Controls.Primitives.AutoToolTipPlacement.None"/> 关闭 ToolTip。
+    /// </summary>
+    public AutoToolTipPlacement AutoToolTipPlacement
+    {
+        get => (AutoToolTipPlacement)GetValue(AutoToolTipPlacementProperty);
+        set => SetValue(AutoToolTipPlacementProperty, value);
+    }
+
+    #endregion AutoToolTipPlacement
+
+    #region AutoToolTipPrecision
+
+    public static readonly DependencyProperty AutoToolTipPrecisionProperty =
+        DependencyProperty.Register(
+            nameof(AutoToolTipPrecision),
+            typeof(int),
+            typeof(RotationEditor),
+            new PropertyMetadata(0));
+
+    /// <summary>
+    /// 拖动 Thumb 时 ToolTip 显示角度值的小数位数,语义跟 <see cref="Slider.AutoToolTipPrecision"/> 一致。
+    /// 默认 0(整数显示)。
+    /// </summary>
+    public int AutoToolTipPrecision
+    {
+        get => (int)GetValue(AutoToolTipPrecisionProperty);
+        set => SetValue(AutoToolTipPrecisionProperty, value);
+    }
+
+    #endregion AutoToolTipPrecision
+
     #region LabelX
 
     public static readonly DependencyProperty LabelXProperty =

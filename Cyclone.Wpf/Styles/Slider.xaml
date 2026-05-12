@@ -71,6 +71,61 @@
                             <Setter TargetName="Body" Property="Height" Value="20" />
                         </Trigger>
 
+                        <!--  IsKeyboardFocused — Slider 自身获焦点时(用户 Tab 切到 Slider)外圈光环弹入  -->
+                        <!--  注意:Thumb Focusable=False,所以监听 TemplatedParent (Slider) 的 IsKeyboardFocusWithin  -->
+                        <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType={x:Type Slider}}}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.3"
+                                            Duration="0:0:0.15" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+
                         <!--  IsDragging — 外圈光环弹入  -->
                         <Trigger Property="IsDragging" Value="True">
                             <Setter TargetName="Body" Property="Fill" Value="{DynamicResource Background.Selected}" />

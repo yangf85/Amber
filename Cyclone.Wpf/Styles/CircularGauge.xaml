@@ -1,21 +1,113 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    CircularGauge 样式
+    
+    架构:
+    - 控件 OnRender 画底层:背景圆 + 边框 + 分段染色 + 刻度 + 标签
+    - 模板只放交互/动态元素:
+      1. PART_PointerRotation: 指针 + RotateTransform (cs 动画驱动)
+      2. 中心 cap 圆点
+      3. 数值文本 (binding DisplayText) + 单位文本
+    
+    渲染顺序 (从下到上): Control.OnRender → Template 内容
+    所以模板里不能放背景 Ellipse,否则把 OnRender 画的刻度全盖住
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  CircularGauge ControlTemplate  -->
+    <!--  注意:背景圆 + 边框 + 刻度由 Control.OnRender 画,模板里不要放 Ellipse 背景  -->
+    <!--  ============================================================  -->
+    <ControlTemplate x:Key="CircularGauge.ControlTemplate.Basic" TargetType="ctl:CircularGauge">
+        <Grid>
+            <!--
+                指针层 — Viewbox 让指针随控件大小自动缩放
+                Viewbox 内是 100×100 虚拟坐标,RotateTransform 绕中心旋转
+            -->
+            <Viewbox
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                RenderTransformOrigin="0.5,0.5"
+                Stretch="Uniform">
+                <Viewbox.RenderTransform>
+                    <RotateTransform x:Name="PART_PointerRotation" Angle="0" />
+                </Viewbox.RenderTransform>
+                <Grid Width="100" Height="100">
+                    <!--
+                        指针 — 细长三角形,从中心 (50,50) 向上到 (50,15)
+                        根部窄 (49,50) - (51,50),只比中心 cap 略宽
+                    -->
+                    <Path Data="M50,15 L51.2,50 L48.8,50 Z" Fill="{TemplateBinding Foreground}" />
+                </Grid>
+            </Viewbox>
+
+            <!--  中心金属圆点 (cap) — 压住指针根部  -->
+            <Ellipse
+                Width="10"
+                Height="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Fill="{TemplateBinding Foreground}" />
+
+            <!--  数值 + 单位文字 — 中心下方  -->
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                RenderTransformOrigin="0.5,0">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform Y="24" />
+                </StackPanel.RenderTransform>
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="{TemplateBinding FontSize}"
+                    FontWeight="Bold"
+                    Foreground="{TemplateBinding Foreground}"
+                    Text="{Binding DisplayText, RelativeSource={RelativeSource TemplatedParent}}" />
+                <TextBlock
+                    x:Name="UnitText"
+                    Margin="0,2,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="{TemplateBinding Unit}" />
+            </StackPanel>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Unit" Value="{x:Null}">
+                <Setter TargetName="UnitText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Unit" Value="">
+                <Setter TargetName="UnitText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!--  ============================================================  -->
+    <!--  CircularGauge 默认样式  -->
+    <!--  ============================================================  -->
     <Style
         x:Key="CircularGauge.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type ctl:CircularGauge}">
-        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
-        <Setter Property="TickColor" Value="{DynamicResource Border.Hover}" />
-        <Setter Property="PointerColor" Value="{DynamicResource Icon.Foreground.Error}" />
-        <Setter Property="InnerRingBackground" Value="{DynamicResource Background.Active}" />
-        <Setter Property="InnerRingBorderBrush" Value="{DynamicResource Border.Active}" />
-        <Setter Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
+        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource Background.Selected}" />
+        <Setter Property="TickBrush" Value="{DynamicResource Foreground.Caption}" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Template" Value="{StaticResource CircularGauge.ControlTemplate.Basic}" />
     </Style>
 
     <Style BasedOn="{StaticResource CircularGauge.Style.Basic}" TargetType="ctl:CircularGauge" />

@@ -50,13 +50,16 @@ public partial class MainViewModel : ObservableObject
             "RangeSlider" => new RangeSliderSample(),
             "Range" => new RangeSample(),
             "ProgressBar" => new ProgressBarSample(),
+            "RotationEditor" => new RotationEditorSample(),
+            "CircularGaugeSample" => new CircularGaugeSample(),
 
             // Collections
-            "ListBox" => new ListBoxView(),
-            "ListView" => new ListViewView(),
-            "DataGrid" => new DataGridView(),
+            "ListBox" => new ListBoxSample(),
+            "ListView" => new ListViewSample(),
+            "DataGrid" => new DataGridSample(),
             "TreeView" => new TreeViewSample(),
             "Carousel" => new CarouselSample(),
+            "Pagination" => new PaginationSample(),
 
             // Navigation
             "TabControl" => new TabControlView(),
@@ -179,6 +182,8 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel { Header = "RangeSlider", Icon = "📏" },
                 new SideMenuItemViewModel { Header = "Range",       Icon = "📐" },
                 new SideMenuItemViewModel { Header = "ProgressBar", Icon = "⏳" },
+                new SideMenuItemViewModel { Header = "RotationEditor", Icon = "🎲" },
+                new SideMenuItemViewModel { Header = "CircularGaugeSample", Icon = "🎲" },
             ]
         });
 
@@ -194,6 +199,7 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel { Header = "DataGrid", Icon = "🗂" },
                 new SideMenuItemViewModel { Header = "TreeView", Icon = "🌳" },
                 new SideMenuItemViewModel { Header = "Carousel", Icon = "🎠" },
+                new SideMenuItemViewModel { Header = "Pagination", Icon = "🗂" },
             ]
         });
 

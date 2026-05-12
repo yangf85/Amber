@@ -1,359 +1,426 @@
-﻿using Cyclone.Wpf.Controls;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cyclone.Wpf.Controls;
 
-[TemplatePart(Name = PART_InfoTextBlock, Type = typeof(TextBlock))]
-[TemplatePart(Name = PART_PerpageCountComboBox, Type = typeof(ComboBox))]
-[TemplatePart(Name = PART_SelectListBox, Type = typeof(ListBox))]
-[TemplatePart(Name = PART_GotoPageNumberBox, Type = typeof(NumberBox))]
-[TemplatePart(Name = PART_GotoPageButton, Type = typeof(Button))]
-[TemplatePart(Name = PART_PrevRepeatButton, Type = typeof(RepeatButton))]
-[TemplatePart(Name = PART_NextRepeatButton, Type = typeof(RepeatButton))]
+/// <summary>
+/// 分页栏控件。提供页码导航、每页数量切换、跳转输入、信息显示。
+/// <para>用法 — 手动绑定三个 DP:</para>
+/// <code>
+/// &lt;ctl:Pagination PageIndex="{Binding PageIndex, Mode=TwoWay}"
+///                 PageSize="{Binding PageSize, Mode=TwoWay}"
+///                 ItemCount="{Binding ItemCount}" /&gt;
+/// </code>
+/// <para>
+/// 命令:<see cref="FirstCommand"/> / <see cref="PrevCommand"/> / <see cref="NextCommand"/> /
+/// <see cref="LastCommand"/> / <see cref="GotoCommand"/> — 全部类级 CommandBinding 自动响应。
+/// </para>
+/// </summary>
+[TemplatePart(Name = PART_GotoNumberBox, Type = typeof(NumberBox))]
 public class Pagination : Control
 {
-    private const string Ellipsis = "···";
+    private const string PART_GotoNumberBox = nameof(PART_GotoNumberBox);
 
-    private const string PART_GotoPageButton = nameof(PART_GotoPageButton);
+    private NumberBox _gotoNumberBox;
 
-    private const string PART_GotoPageNumberBox = nameof(PART_GotoPageNumberBox);
-
-    private const string PART_InfoTextBlock = nameof(PART_InfoTextBlock);
-
-    private const string PART_NextRepeatButton = nameof(PART_NextRepeatButton);
-
-    private const string PART_PerpageCountComboBox = nameof(PART_PerpageCountComboBox);
-
-    private const string PART_PrevRepeatButton = nameof(PART_PrevRepeatButton);
-
-    private const string PART_SelectListBox = nameof(PART_SelectListBox);
-
-    private Button _gotoPageButton;
-
-    private NumberBox _gotoPageNumberBox;
-
-    private RepeatButton _nextPageButton;
-
-    private ComboBox _perPageCountComboBox;
-
-    private TextBox _perPageCountTextBox;
-
-    private RepeatButton _prevPageButton;
-
-    private ListBox _selectListBox;
+    #region Constructors
 
     static Pagination()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(Pagination), new FrameworkPropertyMetadata(typeof(Pagination)));
-        InitializeCommands();
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(Pagination),
+            new FrameworkPropertyMetadata(typeof(Pagination)));
+
+        // 命令 + 类级 CommandBinding — 所有 Pagination 实例自动响应
+        FirstCommand = new RoutedCommand(nameof(FirstCommand), typeof(Pagination));
+        PrevCommand = new RoutedCommand(nameof(PrevCommand), typeof(Pagination));
+        NextCommand = new RoutedCommand(nameof(NextCommand), typeof(Pagination));
+        LastCommand = new RoutedCommand(nameof(LastCommand), typeof(Pagination));
+        GotoCommand = new RoutedCommand(nameof(GotoCommand), typeof(Pagination));
+
+        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
+            new CommandBinding(FirstCommand, OnFirstExecuted, OnCanPrev));
+        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
+            new CommandBinding(PrevCommand, OnPrevExecuted, OnCanPrev));
+        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
+            new CommandBinding(NextCommand, OnNextExecuted, OnCanNext));
+        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
+            new CommandBinding(LastCommand, OnLastExecuted, OnCanNext));
+        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
+            new CommandBinding(GotoCommand, OnGotoExecuted));
+
+        // 只读 DP 注册放在 cctor 里 — 项目惯例
+        PageCountPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PageCount),
+            typeof(int),
+            typeof(Pagination),
+            new PropertyMetadata(1));
+        PageCountProperty = PageCountPropertyKey.DependencyProperty;
+
+        PageItemsPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PageItems),
+            typeof(IReadOnlyList<PageItem>),
+            typeof(Pagination),
+            new PropertyMetadata(Array.Empty<PageItem>()));
+        PageItemsProperty = PageItemsPropertyKey.DependencyProperty;
     }
 
-    #region PageCount
-
-    private static readonly DependencyPropertyKey PageCountPropertyKey =
-              DependencyProperty.RegisterReadOnly("PageCount", typeof(int), typeof(Pagination),
-                  new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPageCountPropertyChanged));
-
-    public static readonly DependencyProperty PageCountProperty = PageCountPropertyKey.DependencyProperty;
-
-    /// <summary>
-    /// 总页数
-    /// </summary>
-    public int PageCount => (int)GetValue(PageCountProperty);
-
-    private static void OnPageCountPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    public Pagination()
     {
+        // 默认 PageSizeOptions 给个常用集合
+        SetCurrentValue(PageSizeOptionsProperty, new[] { 10, 20, 30, 50, 100 });
     }
 
-    #endregion PageCount
-
-    #region ItemCount
-
-    public static readonly DependencyProperty ItemCountProperty = DependencyProperty.Register(nameof(ItemCount), typeof(int), typeof(Pagination),
-         new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnItemCountPropertyChanged, CoerceItemCount));
-
-    /// <summary>
-    /// 总数
-    /// </summary>
-    public int ItemCount
-    {
-        get => (int)GetValue(ItemCountProperty);
-        set => SetValue(ItemCountProperty, value);
-    }
-
-    private static object CoerceItemCount(DependencyObject d, object value)
-    {
-        var count = (int)value;
-        return Math.Max(count, 0);
-    }
-
-    private static void OnItemCountPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var ctrl = d as Pagination;
-        var count = (int)e.NewValue;
-
-        ctrl.SetValue(PageCountPropertyKey, (int)Math.Ceiling(count * 1.0 / ctrl.PerpageCount));
-        ctrl.UpdatePages();
-    }
-
-    #endregion ItemCount
-
-    #region PerPageCount
-
-    public static readonly DependencyProperty PerpageCountProperty = DependencyProperty.Register(nameof(PerpageCount), typeof(int),
-        typeof(Pagination), new FrameworkPropertyMetadata(50, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPerpageCountPropertyChanged, CoercePerpageCount));
-
-    /// <summary>
-    /// 每页数量
-    /// </summary>
-    public int PerpageCount
-    {
-        get => (int)GetValue(PerpageCountProperty);
-        set => SetValue(PerpageCountProperty, value);
-    }
-
-    private static object CoercePerpageCount(DependencyObject d, object value)
-    {
-        var countPerpage = (int)value;
-        return Math.Max(countPerpage, 1);
-    }
-
-    private static void OnPerpageCountPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is not Pagination pagination)
-        {
-            return;
-        }
-
-        var countPerpage = (int)e.NewValue;
-
-        if (pagination._perPageCountTextBox != null)
-        {
-            pagination._perPageCountTextBox.Text = countPerpage.ToString();
-        }
-
-        pagination.SetValue(PageCountPropertyKey, (int)Math.Ceiling(pagination.ItemCount * 1.0 / countPerpage));
-
-        if (pagination.PageIndex != 1)
-        {
-            pagination.PageIndex = 1;
-        }
-        else
-        {
-            pagination.UpdatePages();
-        }
-    }
-
-    #endregion PerPageCount
+    #endregion Constructors
 
     #region PageIndex
 
-    public static readonly DependencyProperty PageIndexProperty = DependencyProperty.Register(nameof(PageIndex), typeof(int), typeof(Pagination),
-         new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPageIndexPropertyChanged, CoercePageIndex));
+    public static readonly DependencyProperty PageIndexProperty =
+        DependencyProperty.Register(
+            nameof(PageIndex),
+            typeof(int),
+            typeof(Pagination),
+            new FrameworkPropertyMetadata(
+                1,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnPageIndexChanged,
+                CoercePageIndex));
 
-    /// <summary>
-    /// 当前页面位置
-    /// </summary>
+    /// <summary>当前页索引 (1-based)。</summary>
     public int PageIndex
     {
         get => (int)GetValue(PageIndexProperty);
         set => SetValue(PageIndexProperty, value);
     }
 
-    private static object CoercePageIndex(DependencyObject d, object value)
+    private static object CoercePageIndex(DependencyObject d, object baseValue)
     {
-        return Math.Max((int)value, 1);
+        var p = (Pagination)d;
+        var v = (int)baseValue;
+        return Math.Max(1, Math.Min(v, Math.Max(1, p.PageCount)));
     }
 
-    private static void OnPageIndexPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static void OnPageIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var pagination = d as Pagination;
-        var current = (int)e.NewValue;
-
-        if (pagination._selectListBox != null)
-            pagination._selectListBox.SelectedItem = current.ToString();
-
-        if (pagination._gotoPageNumberBox != null)
-            pagination._gotoPageNumberBox.Value = current;
-
-        var arg = new RoutedEventArgs(PageIndexChangedEvent, pagination);
-        pagination.RaiseEvent(arg);
-        pagination.UpdatePages();
+        var p = (Pagination)d;
+        p.UpdatePageItems();
+        p.SyncGotoNumberBox();
+        p.RaiseEvent(new RoutedEventArgs(PageIndexChangedEvent, p));
     }
 
     #endregion PageIndex
 
-    #region Pages
+    #region PageSize
 
-    private static readonly DependencyPropertyKey PagesPropertyKey =
-        DependencyProperty.RegisterReadOnly(nameof(Pages), typeof(IEnumerable<string>), typeof(Pagination),
+    public static readonly DependencyProperty PageSizeProperty =
+        DependencyProperty.Register(
+            nameof(PageSize),
+            typeof(int),
+            typeof(Pagination),
+            new FrameworkPropertyMetadata(
+                20,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnPageSizeChanged,
+                CoercePageSize));
+
+    /// <summary>每页显示数量。默认 20。</summary>
+    public int PageSize
+    {
+        get => (int)GetValue(PageSizeProperty);
+        set => SetValue(PageSizeProperty, value);
+    }
+
+    private static object CoercePageSize(DependencyObject d, object baseValue)
+    {
+        return Math.Max(1, (int)baseValue);
+    }
+
+    private static void OnPageSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var p = (Pagination)d;
+
+        // 不强制跳首页 — 让用户停在原数据位置附近
+        int oldSize = (int)e.OldValue;
+        int newSize = (int)e.NewValue;
+        int firstItemOffset = (p.PageIndex - 1) * oldSize;
+
+        p.RecalculatePageCount();
+        int newIndex = firstItemOffset / newSize + 1;
+        p.SetCurrentValue(PageIndexProperty, newIndex);
+
+        // PageIndex 没变也要刷一次 PageItems(PageCount 变了)
+        p.UpdatePageItems();
+    }
+
+    #endregion PageSize
+
+    #region ItemCount
+
+    public static readonly DependencyProperty ItemCountProperty =
+        DependencyProperty.Register(
+            nameof(ItemCount),
+            typeof(int),
+            typeof(Pagination),
+            new FrameworkPropertyMetadata(
+                0,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnItemCountChanged,
+                CoerceItemCount));
+
+    /// <summary>总条目数。默认 0。</summary>
+    public int ItemCount
+    {
+        get => (int)GetValue(ItemCountProperty);
+        set => SetValue(ItemCountProperty, value);
+    }
+
+    private static object CoerceItemCount(DependencyObject d, object baseValue)
+    {
+        return Math.Max(0, (int)baseValue);
+    }
+
+    private static void OnItemCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var p = (Pagination)d;
+        p.RecalculatePageCount();
+        // ItemCount 减少可能让 PageIndex 越界,触发一次 coerce
+        p.CoerceValue(PageIndexProperty);
+        p.UpdatePageItems();
+    }
+
+    #endregion ItemCount
+
+    #region PageCount (只读)
+
+    private static readonly DependencyPropertyKey PageCountPropertyKey;
+
+    public static readonly DependencyProperty PageCountProperty;
+
+    /// <summary>总页数。由 ItemCount / PageSize 计算,至少为 1。</summary>
+    public int PageCount => (int)GetValue(PageCountProperty);
+
+    private void RecalculatePageCount()
+    {
+        // ItemCount=0 时仍显示"第 1 页 / 共 1 页",避免显示矛盾
+        int newCount = ItemCount > 0
+            ? (int)Math.Ceiling(ItemCount * 1.0 / PageSize)
+            : 1;
+        SetValue(PageCountPropertyKey, newCount);
+    }
+
+    #endregion PageCount
+
+    #region PageItems (只读)
+
+    private static readonly DependencyPropertyKey PageItemsPropertyKey;
+
+    public static readonly DependencyProperty PageItemsProperty;
+
+    /// <summary>当前可见的页码集合(含省略号占位)。模板通过此属性渲染页码按钮。</summary>
+    public IReadOnlyList<PageItem> PageItems => (IReadOnlyList<PageItem>)GetValue(PageItemsProperty);
+
+    /// <summary>重建 PageItems — 5/7 个页码 + 至多 2 个省略号,当前页标 IsCurrent。</summary>
+    private void UpdatePageItems()
+    {
+        int total = Math.Max(1, PageCount);
+        int current = Math.Max(1, Math.Min(PageIndex, total));
+
+        var items = new List<PageItem>();
+
+        if (total <= 7)
+        {
+            for (int i = 1; i <= total; i++)
+            {
+                items.Add(new PageItem { PageNumber = i, IsCurrent = i == current });
+            }
+        }
+        else if (current <= 4)
+        {
+            for (int i = 1; i <= 5; i++)
+                items.Add(new PageItem { PageNumber = i, IsCurrent = i == current });
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = total, IsCurrent = total == current });
+        }
+        else if (current >= total - 3)
+        {
+            items.Add(new PageItem { PageNumber = 1, IsCurrent = current == 1 });
+            items.Add(new PageItem { IsEllipsis = true });
+            for (int i = total - 4; i <= total; i++)
+                items.Add(new PageItem { PageNumber = i, IsCurrent = i == current });
+        }
+        else
+        {
+            items.Add(new PageItem { PageNumber = 1 });
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = current - 1 });
+            items.Add(new PageItem { PageNumber = current, IsCurrent = true });
+            items.Add(new PageItem { PageNumber = current + 1 });
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = total });
+        }
+
+        SetValue(PageItemsPropertyKey, (IReadOnlyList<PageItem>)items);
+    }
+
+    #endregion PageItems
+
+    #region PageSizeOptions
+
+    public static readonly DependencyProperty PageSizeOptionsProperty =
+        DependencyProperty.Register(
+            nameof(PageSizeOptions),
+            typeof(IEnumerable<int>),
+            typeof(Pagination),
             new PropertyMetadata(null));
 
-    public static readonly DependencyProperty PagesProperty = PagesPropertyKey.DependencyProperty;
-
-    public IEnumerable<string> Pages => (IEnumerable<string>)GetValue(PagesProperty);
-
-    #endregion Pages
-
-    #region Command
-
-    public static RoutedCommand NextCommand { get; private set; }
-
-    public static RoutedCommand PrevCommand { get; private set; }
-
-    private static void InitializeCommands()
+    /// <summary>每页数量的可选项集合。默认 {10, 20, 30, 50, 100}。</summary>
+    public IEnumerable<int> PageSizeOptions
     {
-        PrevCommand = new RoutedCommand("Prev", typeof(Pagination));
-        NextCommand = new RoutedCommand("Next", typeof(Pagination));
-
-        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
-            new CommandBinding(PrevCommand, OnPrevCommand, OnCanPrevCommand));
-        CommandManager.RegisterClassCommandBinding(typeof(Pagination),
-            new CommandBinding(NextCommand, OnNextCommand, OnCanNextCommand));
+        get => (IEnumerable<int>)GetValue(PageSizeOptionsProperty);
+        set => SetValue(PageSizeOptionsProperty, value);
     }
 
-    private static void OnCanNextCommand(object sender, CanExecuteRoutedEventArgs e)
+    #endregion PageSizeOptions
+
+    #region ShowJumper / ShowSizeChanger / ShowInfo
+
+    public static readonly DependencyProperty ShowJumperProperty =
+        DependencyProperty.Register(
+            nameof(ShowJumper),
+            typeof(bool),
+            typeof(Pagination),
+            new PropertyMetadata(true));
+
+    /// <summary>是否显示"前往第 N 页"输入框。</summary>
+    public bool ShowJumper
     {
-        var ctrl = sender as Pagination;
-        e.CanExecute = ctrl.PageIndex < ctrl.PageCount;
+        get => (bool)GetValue(ShowJumperProperty);
+        set => SetValue(ShowJumperProperty, value);
     }
 
-    private static void OnCanPrevCommand(object sender, CanExecuteRoutedEventArgs e)
+    public static readonly DependencyProperty ShowSizeChangerProperty =
+        DependencyProperty.Register(
+            nameof(ShowSizeChanger),
+            typeof(bool),
+            typeof(Pagination),
+            new PropertyMetadata(true));
+
+    /// <summary>是否显示"每页 N 条"切换器。</summary>
+    public bool ShowSizeChanger
     {
-        var ctrl = sender as Pagination;
-        e.CanExecute = ctrl.PageIndex > 1;
+        get => (bool)GetValue(ShowSizeChangerProperty);
+        set => SetValue(ShowSizeChangerProperty, value);
     }
 
-    private static void OnNextCommand(object sender, RoutedEventArgs e)
+    public static readonly DependencyProperty ShowInfoProperty =
+        DependencyProperty.Register(
+            nameof(ShowInfo),
+            typeof(bool),
+            typeof(Pagination),
+            new PropertyMetadata(true));
+
+    /// <summary>是否显示"共 N 条"信息文本。</summary>
+    public bool ShowInfo
     {
-        var ctrl = sender as Pagination;
-        ctrl.PageIndex++;
+        get => (bool)GetValue(ShowInfoProperty);
+        set => SetValue(ShowInfoProperty, value);
     }
 
-    private static void OnPrevCommand(object sender, RoutedEventArgs e)
+    #endregion ShowJumper / ShowSizeChanger / ShowInfo
+
+    #region RoutedEvents
+
+    public static readonly RoutedEvent PageIndexChangedEvent =
+        EventManager.RegisterRoutedEvent(
+            nameof(PageIndexChanged),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(Pagination));
+
+    /// <summary>PageIndex 改变后触发。</summary>
+    public event RoutedEventHandler PageIndexChanged
     {
-        var ctrl = sender as Pagination;
-        ctrl.PageIndex--;
+        add => AddHandler(PageIndexChangedEvent, value);
+        remove => RemoveHandler(PageIndexChangedEvent, value);
     }
 
-    #endregion Command
+    #endregion RoutedEvents
+
+    #region Commands
+
+    public static RoutedCommand FirstCommand { get; }
+    public static RoutedCommand PrevCommand { get; }
+    public static RoutedCommand NextCommand { get; }
+    public static RoutedCommand LastCommand { get; }
+
+    /// <summary>跳到指定页。CommandParameter 传 int 页码或 PageItem(自动取 PageNumber)。</summary>
+    public static RoutedCommand GotoCommand { get; }
+
+    private static void OnCanPrev(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = sender is Pagination p && p.PageIndex > 1;
+    }
+
+    private static void OnCanNext(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = sender is Pagination p && p.PageIndex < p.PageCount;
+    }
+
+    private static void OnFirstExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is Pagination p) p.PageIndex = 1;
+    }
+
+    private static void OnPrevExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is Pagination p) p.PageIndex--;
+    }
+
+    private static void OnNextExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is Pagination p) p.PageIndex++;
+    }
+
+    private static void OnLastExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is Pagination p) p.PageIndex = p.PageCount;
+    }
+
+    private static void OnGotoExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (sender is not Pagination p) return;
+
+        int target = e.Parameter switch
+        {
+            PageItem item when !item.IsEllipsis => item.PageNumber,
+            int i => i,
+            string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) => n,
+            _ => -1
+        };
+
+        if (target >= 1) p.PageIndex = target;
+    }
+
+    #endregion Commands
 
     #region Override
-
-    private void GotoPageButton_Click(object sender, RoutedEventArgs e)
-    {
-        PageIndex = (int)_gotoPageNumberBox.Value;
-    }
-
-    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_selectListBox.SelectedItem == null)
-            return;
-
-        PageIndex = int.Parse(_selectListBox.SelectedItem.ToString());
-    }
 
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
 
-        _perPageCountComboBox = GetTemplateChild(PART_PerpageCountComboBox) as ComboBox;
-        if (_perPageCountComboBox != null)
-        {
-            _perPageCountComboBox.ItemsSource = GeneratePerpageCount();
-            _perPageCountComboBox.SelectedIndex = 0;
-        }
+        _gotoNumberBox = GetTemplateChild(PART_GotoNumberBox) as NumberBox;
+        SyncGotoNumberBox();
+        UpdatePageItems();
+    }
 
-        _selectListBox = GetTemplateChild(PART_SelectListBox) as ListBox;
-        if (_selectListBox != null)
-        {
-            _selectListBox.SelectedItem = PageIndex.ToString();
-            _selectListBox.SelectionChanged -= OnSelectionChanged;
-            _selectListBox.SelectionChanged += OnSelectionChanged;
-        }
-
-        _gotoPageNumberBox = GetTemplateChild(PART_GotoPageNumberBox) as NumberBox;
-
-        _gotoPageButton = GetTemplateChild(PART_GotoPageButton) as Button;
-        if (_gotoPageButton != null)
-        {
-            _gotoPageButton.Click -= GotoPageButton_Click;
-            _gotoPageButton.Click += GotoPageButton_Click;
-        }
-
-        SetValue(PageCountPropertyKey, (int)Math.Ceiling(ItemCount * 1.0 / PerpageCount));
+    private void SyncGotoNumberBox()
+    {
+        _gotoNumberBox?.SetCurrentValue(NumberBox.ValueProperty, (double)PageIndex);
     }
 
     #endregion Override
-
-    #region Private
-
-    private IEnumerable<string> GeneratePageNumber(int count, int current)
-    {
-        if (count == 0)
-            return null;
-
-        if (PageCount <= 7)
-            return Enumerable.Range(1, PageCount).Select(p => p.ToString()).ToArray();
-
-        if (current <= 4)
-            return ["1", "2", "3", "4", "5", Ellipsis, PageCount.ToString()];
-
-        if (current >= PageCount - 3)
-            return
-            [
-                "1", Ellipsis, (PageCount - 4).ToString(), (PageCount - 3).ToString(), (PageCount - 2).ToString(),
-                (PageCount - 1).ToString(), PageCount.ToString()
-            ];
-
-        return
-        [
-            "1", Ellipsis, (current - 1).ToString(), current.ToString(), (current + 1).ToString(), Ellipsis,
-            PageCount.ToString()
-        ];
-    }
-
-    private IEnumerable<int> GeneratePerpageCount()
-    {
-        return [10, 20, 30, 40, 50, 100];
-    }
-
-    private void UpdatePages()
-    {
-        SetValue(PagesPropertyKey, GeneratePageNumber(ItemCount, PageIndex));
-
-        if (_selectListBox != null && _selectListBox.SelectedItem == null)
-        {
-            _selectListBox.SelectedItem = PageIndex.ToString();
-        }
-    }
-
-    #endregion Private
-
-    #region PageIndexChanged
-
-    public static readonly RoutedEvent PageIndexChangedEvent = EventManager.RegisterRoutedEvent("PageIndexChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Pagination));
-
-    public event RoutedEventHandler PageIndexChanged
-    {
-        add { AddHandler(PageIndexChangedEvent, value); }
-        remove { RemoveHandler(PageIndexChangedEvent, value); }
-    }
-
-    #endregion PageIndexChanged
 }

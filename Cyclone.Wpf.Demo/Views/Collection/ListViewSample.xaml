@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Cyclone.Wpf.Demo.Views.ListViewView"
+    x:Class="Cyclone.Wpf.Demo.Views.ListViewSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cy="https://www.cyclone/wpf"

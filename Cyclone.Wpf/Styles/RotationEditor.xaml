@@ -1,3 +1,22 @@
+<!--
+    ============================================================================
+    RotationEditor 样式 (XYZ 三轴角度编辑器)
+    
+    设计要点:
+    - XYZ 三轴用 红/绿/蓝 经典色彩约定(Blender/Unity/3ds Max 通用),不用主题 token
+    - 每条 Slider 视觉跟项目 Slider 一致 — 圆形 Thumb,4px Track,左段彩色填充
+    - 轴标签 22×22 彩色方块 + 白字
+    - IsSnapToTickEnabled=True + TickFrequency=Step,让 Step 控制鼠标拖动也按步长跳
+    - Reset 命令通过类级 CommandBinding 处理 — 模板不需要写命令绑定
+    
+    修复 (vs 旧版):
+    - Thumb 12×18 方形 → 14px 圆形,跟项目其他 Slider 一致
+    - Background.Control / BorderThickness.Thin → Background.Container / BorderThickness=1
+    - 命名三段式:RotationEditor.Slider.Style.X 等
+    - 轴标签去掉冗余的 ContentPresenter Style (Border 已经定义了尺寸)
+    - 加 IsSnapToTickEnabled — 让 Step 真正生效(原版 Step 只控制键盘,鼠标拖动是连续的)
+    ============================================================================
+-->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,9 +27,17 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!--  ============================================================  -->
-    <!--  RepeatButton：滑块轨道两侧的可点击区域，无视觉  -->
+    <!--  XYZ 标准色 (Blender / Unity / 3ds Max 通用约定)  -->
+    <!--  这些是语义色,不放主题 token (主题切换也不应该变)  -->
     <!--  ============================================================  -->
-    <Style x:Key="RotationEditor.SliderRepeatButtonStyle" TargetType="RepeatButton">
+    <SolidColorBrush x:Key="RotationEditor.Color.X" Color="#D44040" />
+    <SolidColorBrush x:Key="RotationEditor.Color.Y" Color="#3AAA5C" />
+    <SolidColorBrush x:Key="RotationEditor.Color.Z" Color="#3A7AD4" />
+
+    <!--  ============================================================  -->
+    <!--  RepeatButton — 轨道两侧,只承担 Background 渲染  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RotationEditor.Slider.RepeatButton.Style.Basic" TargetType="RepeatButton">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
@@ -21,32 +48,37 @@
                     <Border
                         Height="4"
                         VerticalAlignment="Center"
-                        Background="{TemplateBinding Background}" />
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <!--  ============================================================  -->
-    <!--  Thumb：滑块拖拽手柄，方形无圆角，边框使用所属 Slider 的 Foreground  -->
+    <!--  Thumb — 圆形,边框跟随 Slider.Foreground (= 轴色)  -->
+    <!--  Hover 略放大,跟项目 Slider 视觉语言一致  -->
     <!--  ============================================================  -->
-    <Style x:Key="RotationEditor.SliderThumbStyle" TargetType="Thumb">
+    <Style x:Key="RotationEditor.Slider.Thumb.Style.Basic" TargetType="Thumb">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Focusable" Value="False" />
-        <Setter Property="Width" Value="12" />
-        <Setter Property="Height" Value="18" />
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border
-                        x:Name="ThumbBorder"
-                        Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
-                        BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
-                        BorderThickness="1"
-                        SnapsToDevicePixels="True" />
+                    <Ellipse
+                        x:Name="ThumbBody"
+                        Fill="{DynamicResource Background.Container}"
+                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
+                        StrokeThickness="2" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Opacity" Value="0.75" />
+                            <Setter TargetName="ThumbBody" Property="Width" Value="16" />
+                            <Setter TargetName="ThumbBody" Property="Height" Value="16" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="ThumbBody" Property="Fill" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -55,9 +87,9 @@
     </Style>
 
     <!--  ============================================================  -->
-    <!--  Slider 自定义模板：4px 扁平轨道，左侧填充使用 Foreground 着色  -->
+    <!--  Slider 模板 — 4px 轨道,Foreground 作为左侧已通过段颜色 (轴色)  -->
     <!--  ============================================================  -->
-    <ControlTemplate x:Key="RotationEditor.SliderTemplate" TargetType="Slider">
+    <ControlTemplate x:Key="RotationEditor.Slider.ControlTemplate.Basic" TargetType="Slider">
         <Grid
             Height="22"
             VerticalAlignment="Center"
@@ -68,22 +100,22 @@
                 VerticalAlignment="Center"
                 Background="{DynamicResource Background.Inactive}"
                 SnapsToDevicePixels="True" />
-            <!--  真正的 Track，左侧 RepeatButton 用 Foreground 染色作为已选区段  -->
+            <!--  实际 Track  -->
             <Track x:Name="PART_Track">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton
                         Background="{TemplateBinding Foreground}"
                         Command="Slider.DecreaseLarge"
-                        Style="{StaticResource RotationEditor.SliderRepeatButtonStyle}" />
+                        Style="{StaticResource RotationEditor.Slider.RepeatButton.Style.Basic}" />
                 </Track.DecreaseRepeatButton>
                 <Track.IncreaseRepeatButton>
                     <RepeatButton
                         Background="Transparent"
                         Command="Slider.IncreaseLarge"
-                        Style="{StaticResource RotationEditor.SliderRepeatButtonStyle}" />
+                        Style="{StaticResource RotationEditor.Slider.RepeatButton.Style.Basic}" />
                 </Track.IncreaseRepeatButton>
                 <Track.Thumb>
-                    <Thumb Style="{StaticResource RotationEditor.SliderThumbStyle}" />
+                    <Thumb Style="{StaticResource RotationEditor.Slider.Thumb.Style.Basic}" />
                 </Track.Thumb>
             </Track>
         </Grid>
@@ -95,9 +127,9 @@
     </ControlTemplate>
 
     <!--  ============================================================  -->
-    <!--  三轴 Slider 样式：共享自定义模板，仅区分 Foreground 颜色  -->
+    <!--  三轴 Slider 基础样式 + 三个变体  -->
     <!--  ============================================================  -->
-    <Style x:Key="RotationEditor.SliderStyle.Base" TargetType="Slider">
+    <Style x:Key="RotationEditor.Slider.Style.Basic" TargetType="Slider">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Minimum" Value="0" />
@@ -105,36 +137,35 @@
         <Setter Property="MinHeight" Value="22" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="Template" Value="{StaticResource RotationEditor.SliderTemplate}" />
+        <Setter Property="Template" Value="{StaticResource RotationEditor.Slider.ControlTemplate.Basic}" />
     </Style>
 
     <Style
-        x:Key="RotationEditor.XSliderStyle"
-        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        x:Key="RotationEditor.Slider.Style.X"
+        BasedOn="{StaticResource RotationEditor.Slider.Style.Basic}"
         TargetType="Slider">
-        <Setter Property="Foreground" Value="#D44040" />
+        <Setter Property="Foreground" Value="{StaticResource RotationEditor.Color.X}" />
     </Style>
 
     <Style
-        x:Key="RotationEditor.YSliderStyle"
-        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        x:Key="RotationEditor.Slider.Style.Y"
+        BasedOn="{StaticResource RotationEditor.Slider.Style.Basic}"
         TargetType="Slider">
-        <Setter Property="Foreground" Value="#3AAA5C" />
+        <Setter Property="Foreground" Value="{StaticResource RotationEditor.Color.Y}" />
     </Style>
 
     <Style
-        x:Key="RotationEditor.ZSliderStyle"
-        BasedOn="{StaticResource RotationEditor.SliderStyle.Base}"
+        x:Key="RotationEditor.Slider.Style.Z"
+        BasedOn="{StaticResource RotationEditor.Slider.Style.Basic}"
         TargetType="Slider">
-        <Setter Property="Foreground" Value="#3A7AD4" />
+        <Setter Property="Foreground" Value="{StaticResource RotationEditor.Color.Z}" />
     </Style>
 
     <!--  ============================================================  -->
-    <!--  轴标签容器样式（彩色方块外框）  -->
+    <!--  轴标签 ContentPresenter 样式  -->
+    <!--  Border 父容器负责尺寸和背景,ContentPresenter 只管文字居中和样式  -->
     <!--  ============================================================  -->
-    <Style x:Key="RotationEditor.AxisLabelContainerStyle" TargetType="ContentPresenter">
-        <Setter Property="Width" Value="22" />
-        <Setter Property="Height" Value="22" />
+    <Style x:Key="RotationEditor.AxisLabel.Style.Basic" TargetType="ContentPresenter">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextElement.FontSize" Value="12" />
@@ -144,15 +175,15 @@
     </Style>
 
     <!--  ============================================================  -->
-    <!--  默认控件模板  -->
+    <!--  RotationEditor 主模板  -->
     <!--  ============================================================  -->
-    <ControlTemplate x:Key="RotationEditor.Template.Basic" TargetType="ctl:RotationEditor">
+    <ControlTemplate x:Key="RotationEditor.ControlTemplate.Basic" TargetType="ctl:RotationEditor">
         <Border
             Padding="{TemplateBinding Padding}"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
-            CornerRadius="0">
+            SnapsToDevicePixels="True">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -164,7 +195,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!--  X 轴  -->
+                <!--  X 轴标签 + Slider  -->
                 <Border
                     Grid.Row="0"
                     Grid.Column="0"
@@ -172,17 +203,20 @@
                     Height="22"
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
-                    Background="#D44040"
-                    CornerRadius="0">
-                    <ContentPresenter Content="{TemplateBinding LabelX}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                    Background="{StaticResource RotationEditor.Color.X}">
+                    <ContentPresenter Content="{TemplateBinding LabelX}" Style="{StaticResource RotationEditor.AxisLabel.Style.Basic}" />
                 </Border>
                 <Slider
                     x:Name="PART_XSlider"
                     Grid.Row="0"
                     Grid.Column="1"
+                    AutoToolTipPlacement="{TemplateBinding AutoToolTipPlacement}"
+                    AutoToolTipPrecision="{TemplateBinding AutoToolTipPrecision}"
+                    IsSnapToTickEnabled="True"
                     LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
-                    Style="{StaticResource RotationEditor.XSliderStyle}"
+                    Style="{StaticResource RotationEditor.Slider.Style.X}"
+                    TickFrequency="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     Value="{Binding AngleX, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
 
                 <!--  Y 轴  -->
@@ -191,20 +225,23 @@
                     Grid.Column="0"
                     Width="22"
                     Height="22"
-                    Margin="0,4,10,0"
+                    Margin="0,8,10,0"
                     VerticalAlignment="Center"
-                    Background="#3AAA5C"
-                    CornerRadius="0">
-                    <ContentPresenter Content="{TemplateBinding LabelY}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                    Background="{StaticResource RotationEditor.Color.Y}">
+                    <ContentPresenter Content="{TemplateBinding LabelY}" Style="{StaticResource RotationEditor.AxisLabel.Style.Basic}" />
                 </Border>
                 <Slider
                     x:Name="PART_YSlider"
                     Grid.Row="1"
                     Grid.Column="1"
-                    Margin="0,4,0,0"
+                    Margin="0,8,0,0"
+                    AutoToolTipPlacement="{TemplateBinding AutoToolTipPlacement}"
+                    AutoToolTipPrecision="{TemplateBinding AutoToolTipPrecision}"
+                    IsSnapToTickEnabled="True"
                     LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
-                    Style="{StaticResource RotationEditor.YSliderStyle}"
+                    Style="{StaticResource RotationEditor.Slider.Style.Y}"
+                    TickFrequency="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     Value="{Binding AngleY, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
 
                 <!--  Z 轴  -->
@@ -213,34 +250,39 @@
                     Grid.Column="0"
                     Width="22"
                     Height="22"
-                    Margin="0,4,10,0"
+                    Margin="0,8,10,0"
                     VerticalAlignment="Center"
-                    Background="#3A7AD4"
-                    CornerRadius="0">
-                    <ContentPresenter Content="{TemplateBinding LabelZ}" Style="{StaticResource RotationEditor.AxisLabelContainerStyle}" />
+                    Background="{StaticResource RotationEditor.Color.Z}">
+                    <ContentPresenter Content="{TemplateBinding LabelZ}" Style="{StaticResource RotationEditor.AxisLabel.Style.Basic}" />
                 </Border>
                 <Slider
                     x:Name="PART_ZSlider"
                     Grid.Row="2"
                     Grid.Column="1"
-                    Margin="0,4,0,0"
+                    Margin="0,8,0,0"
+                    AutoToolTipPlacement="{TemplateBinding AutoToolTipPlacement}"
+                    AutoToolTipPrecision="{TemplateBinding AutoToolTipPrecision}"
+                    IsSnapToTickEnabled="True"
                     LargeChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     SmallChange="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
-                    Style="{StaticResource RotationEditor.ZSliderStyle}"
+                    Style="{StaticResource RotationEditor.Slider.Style.Z}"
+                    TickFrequency="{Binding Step, RelativeSource={RelativeSource TemplatedParent}}"
                     Value="{Binding AngleZ, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
             </Grid>
         </Border>
     </ControlTemplate>
 
     <!--  ============================================================  -->
-    <!--  默认样式  -->
+    <!--  RotationEditor 默认样式  -->
     <!--  ============================================================  -->
-    <Style TargetType="ctl:RotationEditor">
-        <Setter Property="Background" Value="{DynamicResource Background.Control}" />
+    <Style x:Key="RotationEditor.Style.Basic" TargetType="ctl:RotationEditor">
+        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource BorderThickness.Thin}" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="16,12" />
-        <Setter Property="Template" Value="{StaticResource RotationEditor.Template.Basic}" />
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template" Value="{StaticResource RotationEditor.ControlTemplate.Basic}" />
     </Style>
+
+    <Style BasedOn="{StaticResource RotationEditor.Style.Basic}" TargetType="ctl:RotationEditor" />
 </ResourceDictionary>

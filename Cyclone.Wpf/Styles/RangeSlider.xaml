@@ -1,40 +1,182 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    RangeSlider 样式 (跟 Slider 视觉完全一致)
+    
+    Thumb (复用 Slider 风格):
+    - 圆形 18px,白底 + 2px 主色边
+    - Hover — body 略大 (20px)
+    - IsDragging — body 变主色实心 + 外圈 28px 光环 Storyboard 弹入
+    - IsKeyboardFocused — 外圈光环弹入 (键盘可达性反馈)
+    
+    Track:
+    - 4px 厚度
+    - ActiveTrackBrush (中段) = Background.Selected 主色
+    - InactiveTrackBrush (两端) = Background.Inactive 浅灰
+    
+    跟 Slider.xaml 的差异点 (RangeSlider 特有):
+    - 双 Thumb 共用 PART_StartThumb / PART_EndThumb
+    - RangeTrack 取代标准 Track (支持双 Thumb 动态布局)
+    - 三段 RepeatButton: StartRegion / MiddleRegion / EndRegion
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
 
-    <!--
-        =================================================================
-        Thumb 样式
-        Width / Height 不在此设置——由模板通过 TemplateBinding ThumbSize 提供
-        =================================================================
-    -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
+    </ResourceDictionary.MergedDictionaries>
 
+    <!--  ============================================================  -->
+    <!--  Thumb 样式 — 跟 Slider.ThumbStyle 完全一致  -->
+    <!--  ============================================================  -->
     <Style x:Key="RangeSlider.Thumb.Style.Basic" TargetType="{x:Type Thumb}">
-        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Focusable" Value="True" />
         <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Border
-                        x:Name="RootBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="True" />
+                    <Grid>
+                        <!--  外圈光环 — IsDragging / IsKeyboardFocused 时弹入  -->
+                        <Ellipse
+                            x:Name="FocusRing"
+                            Width="28"
+                            Height="28"
+                            Fill="{DynamicResource Background.Selected}"
+                            Opacity="0"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="FocusRingScale" ScaleX="0.7" ScaleY="0.7" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!--  Thumb 主体 — 圆形,白底主色边  -->
+                        <Ellipse
+                            x:Name="Body"
+                            Width="18"
+                            Height="18"
+                            Fill="{DynamicResource Background.Container}"
+                            Stroke="{DynamicResource Background.Selected}"
+                            StrokeThickness="2" />
+                    </Grid>
+
                     <ControlTemplate.Triggers>
+                        <!--  Hover — body 略大,提示可交互  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
+                            <Setter TargetName="Body" Property="Width" Value="20" />
+                            <Setter TargetName="Body" Property="Height" Value="20" />
                         </Trigger>
+
+                        <!--  IsKeyboardFocused — 外圈光环弹入 (键盘可达性)  -->
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Focused}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.3"
+                                            Duration="0:0:0.15" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
+
+                        <!--  IsDragging — body 变主色实心 + 外圈光环弹入  -->
                         <Trigger Property="IsDragging" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Pressed}" />
+                            <Setter TargetName="Body" Property="Fill" Value="{DynamicResource Background.Selected}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.3"
+                                            Duration="0:0:0.15" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -42,56 +184,39 @@
         </Setter>
     </Style>
 
-    <!--
-        =================================================================
-        RepeatButton 样式(横向轨道段 / 纵向轨道段)
-        =================================================================
-    -->
-
-    <Style x:Key="RangeSlider.RepeatButton.Style.Horizontal" TargetType="{x:Type RepeatButton}">
+    <!--  ============================================================  -->
+    <!--  RepeatButton 样式 — 横竖共用  -->
+    <!--  ============================================================  -->
+    <Style x:Key="RangeSlider.RepeatButton.Style.Basic" TargetType="{x:Type RepeatButton}">
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RepeatButton}">
-                    <Border Background="{TemplateBinding Background}" />
+                    <Border Background="{TemplateBinding Background}" SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="RangeSlider.RepeatButton.Style.Vertical" TargetType="{x:Type RepeatButton}">
-        <Setter Property="IsTabStop" Value="False" />
-        <Setter Property="Focusable" Value="False" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type RepeatButton}">
-                    <Border Background="{TemplateBinding Background}" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!--
-        =================================================================
-        水平模板
-        =================================================================
-    -->
-
+    <!--  ============================================================  -->
+    <!--  水平模板  -->
+    <!--  ============================================================  -->
     <ControlTemplate x:Key="RangeSlider.ControlTemplate.Horizontal" TargetType="{x:Type ctl:RangeSlider}">
-        <Grid SnapsToDevicePixels="True">
+        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!--  顶部刻度线  -->
             <TickBar
                 x:Name="TopTickBar"
                 Grid.Row="0"
                 Height="4"
-                Fill="{TemplateBinding Foreground}"
+                Margin="0,0,0,2"
+                Fill="{DynamicResource Tick.Primary}"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 Maximum="{TemplateBinding Maximum}"
                 Minimum="{TemplateBinding Minimum}"
@@ -101,7 +226,6 @@
                 Ticks="{TemplateBinding Ticks}"
                 Visibility="Collapsed" />
 
-            <!--  Track —— 双 thumb 动态布局  -->
             <ctl:RangeTrack
                 Grid.Row="1"
                 VerticalAlignment="Center"
@@ -116,13 +240,14 @@
                         x:Name="PART_StartRegion"
                         Height="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding InactiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Horizontal}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.StartRegion>
                 <ctl:RangeTrack.StartThumb>
                     <Thumb
                         x:Name="PART_StartThumb"
                         Width="{TemplateBinding ThumbSize}"
                         Height="{TemplateBinding ThumbSize}"
+                        Panel.ZIndex="99"
                         Style="{StaticResource RangeSlider.Thumb.Style.Basic}" />
                 </ctl:RangeTrack.StartThumb>
                 <ctl:RangeTrack.MiddleRegion>
@@ -130,13 +255,14 @@
                         x:Name="PART_MiddleRegion"
                         Height="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding ActiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Horizontal}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.MiddleRegion>
                 <ctl:RangeTrack.EndThumb>
                     <Thumb
                         x:Name="PART_EndThumb"
                         Width="{TemplateBinding ThumbSize}"
                         Height="{TemplateBinding ThumbSize}"
+                        Panel.ZIndex="99"
                         Style="{StaticResource RangeSlider.Thumb.Style.Basic}" />
                 </ctl:RangeTrack.EndThumb>
                 <ctl:RangeTrack.EndRegion>
@@ -144,16 +270,16 @@
                         x:Name="PART_EndRegion"
                         Height="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding InactiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Horizontal}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.EndRegion>
             </ctl:RangeTrack>
 
-            <!--  底部刻度线  -->
             <TickBar
                 x:Name="BottomTickBar"
                 Grid.Row="2"
                 Height="4"
-                Fill="{TemplateBinding Foreground}"
+                Margin="0,2,0,0"
+                Fill="{DynamicResource Tick.Primary}"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 Maximum="{TemplateBinding Maximum}"
                 Minimum="{TemplateBinding Minimum}"
@@ -178,27 +304,23 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
-    <!--
-        =================================================================
-        垂直模板
-        垂直方向:底部 = Minimum,顶部 = Maximum
-        =================================================================
-    -->
-
+    <!--  ============================================================  -->
+    <!--  垂直模板  -->
+    <!--  ============================================================  -->
     <ControlTemplate x:Key="RangeSlider.ControlTemplate.Vertical" TargetType="{x:Type ctl:RangeSlider}">
-        <Grid SnapsToDevicePixels="True">
+        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <!--  左侧刻度线  -->
             <TickBar
                 x:Name="LeftTickBar"
                 Grid.Column="0"
                 Width="4"
-                Fill="{TemplateBinding Foreground}"
+                Margin="0,0,2,0"
+                Fill="{DynamicResource Tick.Primary}"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 Maximum="{TemplateBinding Maximum}"
                 Minimum="{TemplateBinding Minimum}"
@@ -208,7 +330,6 @@
                 Ticks="{TemplateBinding Ticks}"
                 Visibility="Collapsed" />
 
-            <!--  Track —— 双 thumb 动态布局  -->
             <ctl:RangeTrack
                 Grid.Column="1"
                 HorizontalAlignment="Center"
@@ -223,13 +344,14 @@
                         x:Name="PART_StartRegion"
                         Width="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding InactiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Vertical}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.StartRegion>
                 <ctl:RangeTrack.StartThumb>
                     <Thumb
                         x:Name="PART_StartThumb"
                         Width="{TemplateBinding ThumbSize}"
                         Height="{TemplateBinding ThumbSize}"
+                        Panel.ZIndex="99"
                         Style="{StaticResource RangeSlider.Thumb.Style.Basic}" />
                 </ctl:RangeTrack.StartThumb>
                 <ctl:RangeTrack.MiddleRegion>
@@ -237,13 +359,14 @@
                         x:Name="PART_MiddleRegion"
                         Width="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding ActiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Vertical}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.MiddleRegion>
                 <ctl:RangeTrack.EndThumb>
                     <Thumb
                         x:Name="PART_EndThumb"
                         Width="{TemplateBinding ThumbSize}"
                         Height="{TemplateBinding ThumbSize}"
+                        Panel.ZIndex="99"
                         Style="{StaticResource RangeSlider.Thumb.Style.Basic}" />
                 </ctl:RangeTrack.EndThumb>
                 <ctl:RangeTrack.EndRegion>
@@ -251,16 +374,16 @@
                         x:Name="PART_EndRegion"
                         Width="{TemplateBinding TrackThickness}"
                         Background="{TemplateBinding InactiveTrackBrush}"
-                        Style="{StaticResource RangeSlider.RepeatButton.Style.Vertical}" />
+                        Style="{StaticResource RangeSlider.RepeatButton.Style.Basic}" />
                 </ctl:RangeTrack.EndRegion>
             </ctl:RangeTrack>
 
-            <!--  右侧刻度线  -->
             <TickBar
                 x:Name="RightTickBar"
                 Grid.Column="2"
                 Width="4"
-                Fill="{TemplateBinding Foreground}"
+                Margin="2,0,0,0"
+                Fill="{DynamicResource Tick.Primary}"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 Maximum="{TemplateBinding Maximum}"
                 Minimum="{TemplateBinding Minimum}"
@@ -285,32 +408,40 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
-    <!--
-        =================================================================
-        基础样式
-        =================================================================
-    -->
-
-    <Style x:Key="RangeSlider.Style.Basic" TargetType="{x:Type ctl:RangeSlider}">
+    <!--  ============================================================  -->
+    <!--  基础样式  -->
+    <!--  ============================================================  -->
+    <Style
+        x:Key="RangeSlider.Style.Basic"
+        BasedOn="{StaticResource Control.Style.Basic}"
+        TargetType="{x:Type ctl:RangeSlider}">
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="InactiveTrackBrush" Value="{DynamicResource Background.Inactive}" />
-        <Setter Property="ActiveTrackBrush" Value="{DynamicResource Background.Highlighted}" />
+        <Setter Property="ActiveTrackBrush" Value="{DynamicResource Background.Selected}" />
         <Setter Property="TrackThickness" Value="4" />
-        <Setter Property="ThumbSize" Value="16" />
+        <Setter Property="ThumbSize" Value="18" />
         <Setter Property="TickFrequency" Value="1" />
-        <Setter Property="AutoToolTipPrecision" Value="1" />
+        <Setter Property="AutoToolTipPrecision" Value="2" />
+        <Setter Property="AutoToolTipPlacement" Value="TopLeft" />
         <Setter Property="Focusable" Value="True" />
         <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Template" Value="{StaticResource RangeSlider.ControlTemplate.Horizontal}" />
-                <Setter Property="MinHeight" Value="20" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="MinHeight" Value="28" />
                 <Setter Property="MinWidth" Value="100" />
             </Trigger>
             <Trigger Property="Orientation" Value="Vertical">
                 <Setter Property="Template" Value="{StaticResource RangeSlider.ControlTemplate.Vertical}" />
-                <Setter Property="MinWidth" Value="20" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="MinWidth" Value="28" />
                 <Setter Property="MinHeight" Value="100" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
             </Trigger>
         </Style.Triggers>
     </Style>

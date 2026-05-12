@@ -44,8 +44,6 @@ public class RangeSlider : Control
     // 缓存的刻度线值，避免每次拖动都重算
     private List<double> _cachedTickValues;
 
-    private bool _suppressSync;
-
     private enum ThumbKind { Start, End }
 
     #region Constructors
@@ -337,13 +335,13 @@ public class RangeSlider : Control
             typeof(double),
             typeof(RangeSlider),
             new FrameworkPropertyMetadata(
-                16d,
+                18d,
                 FrameworkPropertyMetadataOptions.AffectsArrange));
 
     /// <summary>
     /// thumb 在主轴方向上的尺寸(水平=宽,垂直=高)。
     /// 同时决定 TickBar 两端的预留空间(<see cref="TickBar.ReservedSpace"/>),
-    /// 保证 thumb 中心和刻度始终对齐。默认 16。
+    /// 保证 thumb 中心和刻度始终对齐。默认 18(跟 Slider 一致)。
     /// </summary>
     public double ThumbSize
     {
@@ -756,11 +754,14 @@ public class RangeSlider : Control
         var thumb = e.OriginalSource as Thumb;
         if (thumb is null || !TryGetTrackTotalSize(out double total) || total <= 0) return;
 
-        // 把像素位移转成数值——只用 track 总长度（不含 padding/border）
+        // thumb 中心实际可走距离 = total - ThumbSize (thumb 自身占了首尾各 ThumbSize/2)
+        var usableTrack = Math.Max(total - ThumbSize, 1e-9);
+
+        // 把像素位移转成数值
         var range = Maximum - Minimum;
         var pixelDelta = Orientation == Orientation.Horizontal ? e.HorizontalChange : -e.VerticalChange;
         if (IsDirectionReversed) pixelDelta = -pixelDelta;
-        var valueDelta = pixelDelta / total * range;
+        var valueDelta = pixelDelta / usableTrack * range;
 
         if (thumb == _startThumb)
         {
@@ -911,30 +912,14 @@ public class RangeSlider : Control
 
     private void CoerceValueToStep()
     {
-        _suppressSync = true;
-        try
-        {
-            LowerValue = RoundToStep(LowerValue);
-            UpperValue = RoundToStep(UpperValue);
-        }
-        finally
-        {
-            _suppressSync = false;
-        }
+        LowerValue = RoundToStep(LowerValue);
+        UpperValue = RoundToStep(UpperValue);
     }
 
     private void CoerceValueToTick()
     {
-        _suppressSync = true;
-        try
-        {
-            LowerValue = SnapToNearestTick(LowerValue);
-            UpperValue = SnapToNearestTick(UpperValue);
-        }
-        finally
-        {
-            _suppressSync = false;
-        }
+        LowerValue = SnapToNearestTick(LowerValue);
+        UpperValue = SnapToNearestTick(UpperValue);
     }
 
     #endregion Value setting helpers
@@ -956,11 +941,15 @@ public class RangeSlider : Control
         }
         else if (TickFrequency > 0)
         {
-            for (double v = Minimum; v <= Maximum; v += TickFrequency)
+            // 用 int 循环避免浮点累加误差(确保最后一个刻度精确等于 Maximum)
+            double range = Maximum - Minimum;
+            int n = (int)Math.Round(range / TickFrequency);
+            for (int i = 0; i <= n; i++)
             {
-                list.Add(v);
+                list.Add(Minimum + i * TickFrequency);
             }
-            if (list.Count == 0 || Math.Abs(list[list.Count - 1] - Maximum) > double.Epsilon)
+            // 如果 (Maximum-Minimum) 不是 TickFrequency 的整数倍,补一个 Maximum
+            if (list.Count == 0 || Math.Abs(list[list.Count - 1] - Maximum) > 1e-9)
             {
                 list.Add(Maximum);
             }

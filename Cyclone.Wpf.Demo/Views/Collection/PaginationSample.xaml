@@ -1,0 +1,653 @@
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.PaginationSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls;assembly=Cyclone.Wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:PaginationViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ 顶部 Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M3,6 L21,6 M3,12 L21,12 M3,18 L21,18"
+                            Stretch="None"
+                            Stroke="White"
+                            StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2.5" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="Pagination" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="自定义控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="分页栏控件——三个独立 DP (PageIndex / PageSize / ItemCount),ViewModel 零依赖控件库。支持页码导航、每页数量切换、跳转输入、命令体系(First / Prev / Next / Last / Goto)。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 配 DataGrid 的实战场景  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="配 DataGrid 实战" Subtitle="分页 + 用户列表 + 实时显示数据范围">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="137 条假数据,通过 LINQ Skip+Take 模拟分页查询。PageIndex 或 PageSize 改变,ViewModel 自动重新加载当前页数据(实际项目中调用 API)。" />
+
+                            <DataGrid
+                                Height="280"
+                                Margin="0,0,0,12"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding CurrentPageUsers}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="60"
+                                        Binding="{Binding Id}"
+                                        Header="ID" />
+                                    <DataGridTextColumn
+                                        Width="160"
+                                        Binding="{Binding Name}"
+                                        Header="姓名" />
+                                    <DataGridTextColumn
+                                        Width="100"
+                                        Binding="{Binding Department}"
+                                        Header="部门" />
+                                    <DataGridTextColumn
+                                        Width="200"
+                                        Binding="{Binding Email}"
+                                        Header="邮箱" />
+                                    <DataGridTextColumn
+                                        Width="60"
+                                        Binding="{Binding Age}"
+                                        Header="年龄" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <ctl:Pagination
+                                ItemCount="{Binding ItemCount}"
+                                PageIndex="{Binding PageIndex, Mode=TwoWay}"
+                                PageSize="{Binding PageSize, Mode=TwoWay}" />
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="当前显示:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CurrentRange, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Margin="16,0,0,0" Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="数据加载次数:" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding LoadCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② ItemCount 动态变化  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="ItemCount 动态变化" Subtitle="增删数据时分页自动适应">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="操作上面那个总数据集 — ItemCount 变化时,如果当前页超出范围会自动跳回最后一页。ItemCount=0 时显示 '第 1 页 / 共 1 页',不再矛盾。" />
+
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Margin="0,0,8,0"
+                                    Padding="14,8"
+                                    Command="{Binding AddRandomUsersCommand}"
+                                    Content="+ 添加 20 条" />
+                                <Button
+                                    Margin="0,0,8,0"
+                                    Padding="14,8"
+                                    Command="{Binding RemoveHalfUsersCommand}"
+                                    Content="- 删一半" />
+                                <Button
+                                    Padding="14,8"
+                                    Command="{Binding ClearAllCommand}"
+                                    Content="✕ 清空" />
+                            </StackPanel>
+
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="提示:翻到最后一页后点 &quot;删一半&quot;,观察 PageIndex 自动收缩到新的最后一页。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ③ 显示开关  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="显示开关" Subtitle="ShowInfo / ShowSizeChanger / ShowJumper">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="三个 bool 属性单独控制信息文本、每页数量切换器、跳转输入的显示。简洁场景可全部关闭只保留页码。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="完整模式(默认)" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="500"
+                                PageIndex="3"
+                                PageSize="20" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="无 Info" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="500"
+                                PageIndex="3"
+                                PageSize="20"
+                                ShowInfo="False" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="无跳转输入" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="500"
+                                PageIndex="3"
+                                PageSize="20"
+                                ShowJumper="False" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="极简(只剩页码)" />
+                            <ctl:Pagination
+                                ItemCount="500"
+                                PageIndex="3"
+                                PageSize="20"
+                                ShowInfo="False"
+                                ShowJumper="False"
+                                ShowSizeChanger="False" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ 边界情况  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="边界情况" Subtitle="ItemCount=0 / 单页 / 海量数据">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="ItemCount=0(空数据)" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="0"
+                                PageSize="20" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="只有 1 页(数据不足)" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="5"
+                                PageSize="20" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="海量数据(99999 条)" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="99999"
+                                PageIndex="500"
+                                PageSize="50" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 自定义 PageSizeOptions  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="自定义每页数量选项" Subtitle="PageSizeOptions">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="默认 {10, 20, 30, 50, 100},通过 PageSizeOptions 传入 int 集合自定义。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="小数据集 5/10/15/25" />
+                            <ctl:Pagination
+                                Margin="0,0,0,16"
+                                ItemCount="60"
+                                PageSize="10">
+                                <ctl:Pagination.PageSizeOptions>
+                                    <x:Array Type="{x:Type sys:Int32}" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                        <sys:Int32>5</sys:Int32>
+                                        <sys:Int32>10</sys:Int32>
+                                        <sys:Int32>15</sys:Int32>
+                                        <sys:Int32>25</sys:Int32>
+                                    </x:Array>
+                                </ctl:Pagination.PageSizeOptions>
+                            </ctl:Pagination>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="大数据集 100/200/500/1000" />
+                            <ctl:Pagination ItemCount="50000" PageSize="100">
+                                <ctl:Pagination.PageSizeOptions>
+                                    <x:Array Type="{x:Type sys:Int32}" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                        <sys:Int32>100</sys:Int32>
+                                        <sys:Int32>200</sys:Int32>
+                                        <sys:Int32>500</sys:Int32>
+                                        <sys:Int32>1000</sys:Int32>
+                                    </x:Array>
+                                </ctl:Pagination.PageSizeOptions>
+                            </ctl:Pagination>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <cy:Card Grid.Row="0" Margin="0,0,0,20">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="Pagination 主要属性 + 命令">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource Background.Header}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="属性 / 命令" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="类型(默认)" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableHeaderStyle}"
+                                Text="说明" />
+                            <Border
+                                Grid.Row="0"
+                                Grid.ColumnSpan="3"
+                                Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource Border.Default}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PageIndex" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (1)" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前页索引(1-based)。TwoWay 双向绑定。" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PageSize" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (20)" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="每页数量。改变时 PageIndex 自动保持原数据位置(不强制跳首页)。" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemCount" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (0)" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="总条目数。改变时 PageIndex 自动 coerce 到有效范围。" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PageCount" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int 只读" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="总页数。ItemCount=0 时返回 1(避免显示矛盾)。" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PageSizeOptions" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEnumerable&lt;int&gt;" />
+                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="每页数量切换器的可选项。默认 {10, 20, 30, 50, 100}。" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ShowInfo / ShowSizeChanger / ShowJumper" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (true)" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三个区域(信息文本 / 每页切换 / 跳转输入)的显示开关。" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="FirstCommand / PrevCommand / NextCommand / LastCommand" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
+                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="跳第一页 / 上一页 / 下一页 / 最后一页。类级 CommandBinding,所有实例自动响应,无需 CommandTarget。" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="GotoCommand" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
+                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="跳到指定页。CommandParameter 可传 int / string / PageItem。跳转输入框 Enter 键自动触发。" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PageIndexChanged" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
+                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="PageIndex 改变后触发,Bubble 路由策略。" />
+                        </Grid>
+                    </Border>
+                </cy:Card>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <cy:Card Grid.Column="0">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="XAML + ViewModel 示例">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                            <![CDATA[<!-- XAML — 三个 DP 独立绑定,ViewModel 零依赖控件库 -->
+<ctl:Pagination
+    PageIndex="{Binding PageIndex, Mode=TwoWay}"
+    PageSize="{Binding PageSize, Mode=TwoWay}"
+    ItemCount="{Binding ItemCount}" />
+
+<!-- ViewModel — 标准 MVVM 写法 -->
+public partial class UserListVM : ObservableObject
+{
+    [ObservableProperty] public partial int PageIndex { get; set; } = 1;
+    [ObservableProperty] public partial int PageSize { get; set; } = 20;
+    [ObservableProperty] public partial int ItemCount { get; set; }
+
+    partial void OnPageIndexChanged(int v) => _ = LoadDataAsync();
+    partial void OnPageSizeChanged(int v) => _ = LoadDataAsync();
+
+    private async Task LoadDataAsync()
+    {
+        var page = await _api.GetUsersAsync(PageIndex, PageSize);
+        Users = new(page.Items);
+        ItemCount = page.Total;
+    }
+}
+
+<!-- 极简模式 — 只显示页码 -->
+<ctl:Pagination
+    ItemCount="500"
+    PageIndex="{Binding Idx, Mode=TwoWay}"
+    ShowInfo="False"
+    ShowJumper="False"
+    ShowSizeChanger="False" />
+
+<!-- 自定义每页选项 -->
+<ctl:Pagination ItemCount="{Binding Total}" PageSize="10">
+    <ctl:Pagination.PageSizeOptions>
+        <x:Array Type="{x:Type sys:Int32}">
+            <sys:Int32>5</sys:Int32>
+            <sys:Int32>10</sys:Int32>
+            <sys:Int32>25</sys:Int32>
+        </x:Array>
+    </ctl:Pagination.PageSizeOptions>
+</ctl:Pagination>]]>
+                        </TextBox>
+                    </cy:Card>
+
+                    <cy:Card Grid.Column="2">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="设计要点">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="纯 WPF 玩法" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="三个独立 DP,ViewModel 不依赖控件库。属性名字对就能绑,鸭子类型"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="保持位置" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="PageSize 改变时 PageIndex 自动调整让用户停在原数据位置附近,不强制跳首页"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="类级 CommandBinding" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="5 个命令全局注册,所有实例自动响应,无需 CommandTarget"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="PageItem 对象" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="替代字符串集合,样式 trigger 用 IsEllipsis/IsCurrent 属性,不再字符串比较"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
