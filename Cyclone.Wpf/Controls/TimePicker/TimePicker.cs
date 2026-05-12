@@ -23,31 +23,35 @@ public class TimePicker : Control
 {
     #region 私有字段
 
-    private ToggleButton _openButton;
-    private Popup _popup;
-    private TimeSelector _hourSelector;
-    private TimeSelector _minuteSelector;
-    private TimeSelector _secondSelector;
-    private Button _confirmButton;
     private Button _cancelButton;
+
+    private Button _confirmButton;
+
     private TextBox _displayText;
-    private TimeSpan? _tempSelectedTime; // 临时存储用户选择但未确认的时间
-    private bool _isSyncingSelectors = false; // 是否正在同步选择器
-    private bool _isPopupClosing = false; // 标记弹窗是否正在关闭
+
+    private TimeSelector _hourSelector;
+
+    private bool _isSyncingSelectors = false;
+
+    private TimeSelector _minuteSelector;
+
+    private ToggleButton _openButton;
+
+    /// <summary>
+    /// Popup 打开时缓存的"原始时间" — Cancel / 点外部关闭时,
+    /// 把 selectors 回滚到这个值,SelectedTime DP 不动。
+    /// </summary>
+    private TimeSpan? _originalTime;
+
+    private Popup _popup;
+
+    private TimeSelector _secondSelector;
+
+    // 是否正在同步选择器
 
     #endregion 私有字段
 
     #region 构造函数
-
-    static TimePicker()
-    {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(TimePicker), new FrameworkPropertyMetadata(typeof(TimePicker)));
-    }
-
-    public TimePicker()
-    {
-        Loaded += TimePicker_Loaded;
-    }
 
     private void TimePicker_Loaded(object sender, RoutedEventArgs e)
     {
@@ -61,11 +65,24 @@ public class TimePicker : Control
         }
     }
 
+    static TimePicker()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(TimePicker), new FrameworkPropertyMetadata(typeof(TimePicker)));
+    }
+
+    public TimePicker()
+    {
+        Loaded += TimePicker_Loaded;
+    }
+
     #endregion 构造函数
 
     #region 依赖属性
 
     #region MaxContainerHeight
+
+    public static readonly DependencyProperty MaxContainerHeightProperty =
+        DependencyProperty.Register(nameof(MaxContainerHeight), typeof(double), typeof(TimePicker), new PropertyMetadata(150d));
 
     public double MaxContainerHeight
     {
@@ -73,12 +90,13 @@ public class TimePicker : Control
         set => SetValue(MaxContainerHeightProperty, value);
     }
 
-    public static readonly DependencyProperty MaxContainerHeightProperty =
-        DependencyProperty.Register(nameof(MaxContainerHeight), typeof(double), typeof(TimePicker), new PropertyMetadata(150d));
-
     #endregion MaxContainerHeight
 
     #region SelectedTime
+
+    public static readonly DependencyProperty SelectedTimeProperty =
+        DependencyProperty.Register("SelectedTime", typeof(TimeSpan?), typeof(TimePicker),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedTimeChanged));
 
     public TimeSpan? SelectedTime
     {
@@ -86,16 +104,13 @@ public class TimePicker : Control
         set { SetValue(SelectedTimeProperty, value); }
     }
 
-    public static readonly DependencyProperty SelectedTimeProperty =
-        DependencyProperty.Register("SelectedTime", typeof(TimeSpan?), typeof(TimePicker),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedTimeChanged));
-
     private static void OnSelectedTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var timePicker = (TimePicker)d;
         timePicker.UpdateDisplayText();
 
-        if (timePicker.IsOpen && !timePicker._isPopupClosing)
+        // Popup 打开时 SelectedTime 变化(外部 binding 改的),同步到 selectors
+        if (timePicker.IsOpen && !timePicker._isSyncingSelectors)
         {
             timePicker.SyncSelectorsWithTime();
         }
@@ -105,28 +120,28 @@ public class TimePicker : Control
 
     #region DisplayText
 
+    public static readonly DependencyProperty DisplayTextProperty =
+        DependencyProperty.Register("DisplayText", typeof(string), typeof(TimePicker), new PropertyMetadata(string.Empty));
+
     public string DisplayText
     {
         get { return (string)GetValue(DisplayTextProperty); }
         set { SetValue(DisplayTextProperty, value); }
     }
 
-    public static readonly DependencyProperty DisplayTextProperty =
-        DependencyProperty.Register("DisplayText", typeof(string), typeof(TimePicker), new PropertyMetadata(string.Empty));
-
     #endregion DisplayText
 
     #region TimeFormat
+
+    public static readonly DependencyProperty TimeFormatProperty =
+        DependencyProperty.Register("TimeFormat", typeof(string), typeof(TimePicker),
+            new PropertyMetadata("HH:mm:ss", OnTimeFormatChanged));
 
     public string TimeFormat
     {
         get { return (string)GetValue(TimeFormatProperty); }
         set { SetValue(TimeFormatProperty, value); }
     }
-
-    public static readonly DependencyProperty TimeFormatProperty =
-        DependencyProperty.Register("TimeFormat", typeof(string), typeof(TimePicker),
-            new PropertyMetadata("HH:mm:ss", OnTimeFormatChanged));
 
     private static void OnTimeFormatChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -138,25 +153,37 @@ public class TimePicker : Control
 
     #region IsOpen
 
+    public static readonly DependencyProperty IsOpenProperty =
+        DependencyProperty.Register("IsOpen", typeof(bool), typeof(TimePicker),
+            new PropertyMetadata(false, OnIsOpenChanged));
+
     public bool IsOpen
     {
         get { return (bool)GetValue(IsOpenProperty); }
         set { SetValue(IsOpenProperty, value); }
     }
 
-    public static readonly DependencyProperty IsOpenProperty =
-        DependencyProperty.Register("IsOpen", typeof(bool), typeof(TimePicker),
-            new PropertyMetadata(false, OnIsOpenChanged));
-
     private static void OnIsOpenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var timePicker = (TimePicker)d;
-        timePicker.SyncSelectorsWithTime();
+
+        if ((bool)e.NewValue)
+        {
+            // 打开 — 缓存当前值作为 Snapshot,Cancel 回滚用
+            timePicker._originalTime = timePicker.SelectedTime;
+            timePicker.SyncSelectorsWithTime();
+        }
+
+        // 关闭不做事 — 取消/确定 button click 已经处理
     }
 
     #endregion IsOpen
 
     #region Watermark
+
+    public static readonly DependencyProperty WatermarkProperty =
+        DependencyProperty.Register("Watermark", typeof(string), typeof(TimePicker),
+            new PropertyMetadata("请选择时间"));
 
     public string Watermark
     {
@@ -164,13 +191,13 @@ public class TimePicker : Control
         set { SetValue(WatermarkProperty, value); }
     }
 
-    public static readonly DependencyProperty WatermarkProperty =
-        DependencyProperty.Register("Watermark", typeof(string), typeof(TimePicker),
-            new PropertyMetadata("请选择时间"));
-
     #endregion Watermark
 
     #region VisibleItemCount
+
+    public static readonly DependencyProperty VisibleItemCountProperty =
+        DependencyProperty.Register("VisibleItemCount", typeof(int), typeof(TimePicker),
+            new PropertyMetadata(5));
 
     public int VisibleItemCount
     {
@@ -178,46 +205,11 @@ public class TimePicker : Control
         set { SetValue(VisibleItemCountProperty, value); }
     }
 
-    public static readonly DependencyProperty VisibleItemCountProperty =
-        DependencyProperty.Register("VisibleItemCount", typeof(int), typeof(TimePicker),
-            new PropertyMetadata(5));
-
     #endregion VisibleItemCount
 
     #endregion 依赖属性
 
     #region 私有方法
-
-    private void UpdateDisplayText()
-    {
-        if (SelectedTime.HasValue)
-        {
-            try
-            {
-                TimeSpan time = SelectedTime.Value;
-                DateTime dateTime = DateTime.Today.Add(time);
-                DisplayText = dateTime.ToString(TimeFormat);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"时间格式化错误: {ex.Message}");
-                DisplayText = SelectedTime.Value.ToString();
-            }
-        }
-        else
-        {
-            DisplayText = string.Empty;
-        }
-    }
-
-    private void SyncSelectorsWithTime()
-    {
-        if (_hourSelector == null || _minuteSelector == null || _secondSelector == null) { return; }
-        if (SelectedTime == null) { return; }
-        _hourSelector.SelectedIndex = SelectedTime.Value.Hours;
-        _minuteSelector.SelectedIndex = SelectedTime.Value.Minutes;
-        _secondSelector.SelectedIndex = SelectedTime.Value.Seconds;
-    }
 
     /// <summary>
     /// 从选择器获取当前选中的时间
@@ -241,6 +233,48 @@ public class TimePicker : Control
         {
             System.Diagnostics.Debug.WriteLine($"从选择器获取时间错误: {ex.Message}");
             return TimeSpan.Zero;
+        }
+    }
+
+    private void SyncSelectorsWithTime()
+    {
+        if (_hourSelector == null || _minuteSelector == null || _secondSelector == null) { return; }
+        if (SelectedTime == null) { return; }
+
+        // 设置 selectors 的 SelectedIndex 会触发 ValueChanged,在此期间标记同步中,
+        // 防止 TimeSelector_ValueChanged 回头来覆盖 _originalTime / 触发 confirm 逻辑
+        _isSyncingSelectors = true;
+        try
+        {
+            _hourSelector.SelectedIndex = SelectedTime.Value.Hours;
+            _minuteSelector.SelectedIndex = SelectedTime.Value.Minutes;
+            _secondSelector.SelectedIndex = SelectedTime.Value.Seconds;
+        }
+        finally
+        {
+            _isSyncingSelectors = false;
+        }
+    }
+
+    private void UpdateDisplayText()
+    {
+        if (SelectedTime.HasValue)
+        {
+            try
+            {
+                TimeSpan time = SelectedTime.Value;
+                DateTime dateTime = DateTime.Today.Add(time);
+                DisplayText = dateTime.ToString(TimeFormat);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"时间格式化错误: {ex.Message}");
+                DisplayText = SelectedTime.Value.ToString();
+            }
+        }
+        else
+        {
+            DisplayText = string.Empty;
         }
     }
 
@@ -269,43 +303,6 @@ public class TimePicker : Control
         SubscribeEvents();
 
         UpdateDisplayText();
-    }
-
-    /// <summary>
-    /// 解除事件绑定
-    /// </summary>
-    private void UnsubscribeEvents()
-    {
-        if (_confirmButton != null)
-        {
-            _confirmButton.Click -= ConfirmButton_Click;
-        }
-
-        if (_cancelButton != null)
-        {
-            _cancelButton.Click -= CancelButton_Click;
-        }
-
-        // 解除选择器事件
-        if (_hourSelector != null)
-        {
-            _hourSelector.ValueChanged -= TimeSelector_ValueChanged;
-        }
-
-        if (_minuteSelector != null)
-        {
-            _minuteSelector.ValueChanged -= TimeSelector_ValueChanged;
-        }
-
-        if (_secondSelector != null)
-        {
-            _secondSelector.ValueChanged -= TimeSelector_ValueChanged;
-        }
-
-        if (_popup != null)
-        {
-            _popup.Closed -= Popup_Closed;
-        }
     }
 
     /// <summary>
@@ -345,69 +342,121 @@ public class TimePicker : Control
         }
     }
 
+    /// <summary>
+    /// 解除事件绑定
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        if (_confirmButton != null)
+        {
+            _confirmButton.Click -= ConfirmButton_Click;
+        }
+
+        if (_cancelButton != null)
+        {
+            _cancelButton.Click -= CancelButton_Click;
+        }
+
+        // 解除选择器事件
+        if (_hourSelector != null)
+        {
+            _hourSelector.ValueChanged -= TimeSelector_ValueChanged;
+        }
+
+        if (_minuteSelector != null)
+        {
+            _minuteSelector.ValueChanged -= TimeSelector_ValueChanged;
+        }
+
+        if (_secondSelector != null)
+        {
+            _secondSelector.ValueChanged -= TimeSelector_ValueChanged;
+        }
+
+        if (_popup != null)
+        {
+            _popup.Closed -= Popup_Closed;
+        }
+    }
+
     #endregion 重写方法
 
     #region 事件处理
 
     /// <summary>
-    /// 确认按钮点击事件处理
+    /// 取消按钮点击事件处理 — 真正回滚:把 selectors 同步回 _originalTime,
+    /// SelectedTime DP 不动(因为本来确认前就没改)。
+    /// </summary>
+    private void CancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        // 关键:把 selectors 回滚到打开 Popup 时的快照值,
+        // 下次再打开 Popup 时看到的就是原值而不是用户上次"取消"前的滑动位置
+        RollbackSelectorsToOriginal();
+        IsOpen = false;
+    }
+
+    /// <summary>
+    /// 确认按钮点击事件处理 — 把 selectors 当前值提交到 SelectedTime DP。
     /// </summary>
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            // 从选择器获取时间值
-            TimeSpan newTime = GetTimeFromSelectors();
-
-            // 设置最终选择的时间
-            SelectedTime = newTime;
-
-            // 清除临时选中的时间
-            _tempSelectedTime = null;
+            // 从选择器获取时间值并提交
+            SelectedTime = GetTimeFromSelectors();
         }
         catch (Exception ex)
         {
-            // 记录异常但继续执行
             System.Diagnostics.Debug.WriteLine($"确认时间时出错: {ex.Message}");
         }
 
-        // 关闭弹出窗口
         IsOpen = false;
     }
 
     /// <summary>
-    /// 取消按钮点击事件处理
-    /// </summary>
-    private void CancelButton_Click(object sender, RoutedEventArgs e)
-    {
-        // 取消操作，不保存临时选择的时间
-        _tempSelectedTime = null;
-        IsOpen = false;
-    }
-
-    /// <summary>
-    /// Popup关闭事件处理
+    /// Popup关闭事件处理 — 点 Popup 外部时 StaysOpen=False 自动关闭,
+    /// 此时视为"取消"(用户没按确定),回滚 selectors。
     /// </summary>
     private void Popup_Closed(object sender, EventArgs e)
     {
-        // 确保IsOpen状态与Popup状态同步
-        if (IsOpen && _popup != null && !_popup.IsOpen)
+        if (IsOpen)
         {
             IsOpen = false;
+
+            // 点外部 = 取消语义,回滚 selectors
+            RollbackSelectorsToOriginal();
+        }
+    }
+
+    /// <summary>把 selectors 视觉同步回 _originalTime,不动 SelectedTime DP。</summary>
+    private void RollbackSelectorsToOriginal()
+    {
+        if (_originalTime == null) return;
+        if (_hourSelector == null || _minuteSelector == null || _secondSelector == null) return;
+
+        _isSyncingSelectors = true;
+        try
+        {
+            _hourSelector.SelectedIndex = _originalTime.Value.Hours;
+            _minuteSelector.SelectedIndex = _originalTime.Value.Minutes;
+            _secondSelector.SelectedIndex = _originalTime.Value.Seconds;
+        }
+        finally
+        {
+            _isSyncingSelectors = false;
         }
     }
 
     /// <summary>
-    /// 时间选择器值变化事件处理
+    /// 时间选择器值变化事件处理 — 旧实现写了 _tempSelectedTime 但 Confirm 不用,
+    /// 现在改成 Snapshot 机制,这个事件保留只是为了将来扩展(如实时显示)。
     /// </summary>
     private void TimeSelector_ValueChanged(object sender, TimeValueChangedEventArgs e)
     {
-        // 避免在同步选择器过程中处理值变化事件
-        if (_isSyncingSelectors)
-            return;
+        if (_isSyncingSelectors) return;
 
-        // 当选择器的值发生变化时，更新临时选中的时间
-        _tempSelectedTime = GetTimeFromSelectors();
+        // 不做任何事 — 用户操作 selectors 只更新它们自身状态,
+        // 确认前不污染 SelectedTime DP。Confirm 时 GetTimeFromSelectors 取当前值。
     }
 
     #endregion 事件处理

@@ -3,16 +3,19 @@
     FluidTabControl 样式 (WinUI 3 风格 · 无圆角 · 整行高亮 + 左竖条)
 
     视觉对齐 SideMenu / ListBox:
-    - 左 3px 竖条 indicator (pill, Opacity 淡入 + ScaleY BackEase 弹入)
+    - 左 3px 竖条 indicator (pill, Opacity 淡入 + ScaleY CubicEase 弹入,跟 cs 滚动动画节奏统一)
     - 整行 Hover / Selected 浅底
     - 文字色保持不变 (不再 invert)
-    - 失焦弱化 — selected + IsKeyboardFocusWithin=false 时竖条降级为 Highlighted
-    - IsKeyboardFocused 视觉反馈
     - 无圆角
 
     Right placement 时 Indicator 移到最右,整行视觉镜像。
 
-    修复的 bug:
+    性能优化 (vs 旧版):
+    - 删 IsKeyboardFocusWithin MultiDataTrigger — 滚动期间频繁求值导致每次切换全列重算
+    - 删 IsKeyboardFocused 单独 Trigger — 跟 IsSelected 覆盖的视觉重叠
+    - Indicator BackEase 0.22s 弹性 → CubicEase 0.15s — 减少视觉负担,跟 cs 滚动动画时长统一
+
+    修复的 bug (沿用旧版的):
     - Icon 显示逻辑反了 — 默认 Visible,Icon=null 时才 Collapsed
     - Right placement 的 Column trigger 是 no-op — 默认值就是 trigger 要设的值
     ============================================================================
@@ -74,14 +77,20 @@
                     ContentTemplate="{TemplateBinding IconTemplate}"
                     Focusable="False" />
 
-                <!--  Header  -->
+                <!--  
+                    Header — 用 TemplateBinding 显式绑 Content/ContentTemplate/ContentTemplateSelector
+                    注意:不能用 ContentSource="Header",因为 FluidTabItem 继承自 Control 不是 HeaderedContentControl,
+                    ContentSource 这个 ContentPresenter 特殊功能只对 HeaderedContentControl 容器有效
+                -->
                 <ContentPresenter
                     x:Name="HeaderPresenter"
                     Grid.Column="2"
                     Margin="8,0,12,0"
                     HorizontalAlignment="{Binding ItemHeaderHorizontalAlignment, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}"
                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                    ContentSource="Header"
+                    Content="{TemplateBinding Header}"
+                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                    ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
                     Focusable="False"
                     RecognizesAccessKey="True" />
             </Grid>
@@ -139,9 +148,9 @@
                                 Storyboard.TargetName="IndicatorScale"
                                 Storyboard.TargetProperty="ScaleY"
                                 To="1"
-                                Duration="0:0:0.22">
+                                Duration="0:0:0.15">
                                 <DoubleAnimation.EasingFunction>
-                                    <BackEase Amplitude="0.3" EasingMode="EaseOut" />
+                                    <CubicEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
@@ -163,20 +172,6 @@
                         </Storyboard>
                     </BeginStoryboard>
                 </Trigger.ExitActions>
-            </Trigger>
-
-            <!--  失焦弱化 — 整个 FluidTabControl 不在键盘焦点范围内 → 竖条降级  -->
-            <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
-                    <Condition Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType=ctl:FluidTabControl}}" Value="False" />
-                </MultiDataTrigger.Conditions>
-                <Setter TargetName="Indicator" Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            </MultiDataTrigger>
-
-            <!--  键盘焦点反馈 — Tab 进入可见  -->
-            <Trigger Property="IsKeyboardFocused" Value="True">
-                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
             </Trigger>
 
             <!--  禁用态  -->

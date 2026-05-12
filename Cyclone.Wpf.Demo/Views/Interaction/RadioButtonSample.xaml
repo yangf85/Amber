@@ -1,0 +1,345 @@
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.RadioButtonSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:RadioButtonViewModel}}"
+    d:DesignHeight="2200"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Header  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="56" Height="56" Background="{DynamicResource Background.Info}">
+                        <Grid Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse Stroke="White" StrokeThickness="2.5" />
+                            <Ellipse Width="12" Height="12" Fill="White" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="32" FontWeight="Bold"
+                                       Foreground="{DynamicResource Foreground.Default}" Text="RadioButton" />
+                            <Border Margin="12,4,0,0" Padding="10,4" VerticalAlignment="Center"
+                                    Background="{DynamicResource Background.Info}">
+                                <TextBlock FontSize="12" FontWeight="Medium"
+                                           Foreground="White" Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0" FontSize="14"
+                                   Foreground="{DynamicResource Foreground.Caption}"
+                                   Text="单选按钮——同 GroupName 内互斥。Checked 时外圈主色实心 + 白色中心点弹入动画(150ms CubicEase EaseOut),视觉跟 CheckBox 协调。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  主体  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① enum 绑定 (主题/字号/通知)  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="enum 绑定" Subtitle="设置页常用 — 三个互斥分组">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,16" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="每组 RadioButton 用 GroupName 互斥;IsChecked 通过对比 enum 值实现 (这里用 d:DesignInstance 简化展示,实际项目通常配合 EnumToBoolConverter)。" />
+
+                            <!--  主题  -->
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="主题" />
+                            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                                <RadioButton Margin="0,0,16,0" Content="浅色" GroupName="Theme" />
+                                <RadioButton Margin="0,0,16,0" Content="深色" GroupName="Theme" />
+                                <RadioButton Content="跟随系统" GroupName="Theme" IsChecked="True" />
+                            </StackPanel>
+
+                            <!--  字号  -->
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="字号" />
+                            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                                <RadioButton Margin="0,0,16,0" Content="小" GroupName="FontSize" />
+                                <RadioButton Margin="0,0,16,0" Content="中" GroupName="FontSize" IsChecked="True" />
+                                <RadioButton Margin="0,0,16,0" Content="大" GroupName="FontSize" />
+                                <RadioButton Content="特大" GroupName="FontSize" />
+                            </StackPanel>
+
+                            <!--  通知  -->
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="通知偏好" />
+                            <StackPanel Orientation="Vertical">
+                                <RadioButton Margin="0,0,0,6" Content="接收所有通知" GroupName="Notif" />
+                                <RadioButton Margin="0,0,0,6" Content="只接收 @ 我的通知" GroupName="Notif" IsChecked="True" />
+                                <RadioButton Content="完全静默" GroupName="Notif" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 富内容 (套餐选择)  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="富内容卡片选择" Subtitle="RadioButton 配复杂 Content">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,16" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="套餐选择 — Content 用 StackPanel 放标题/价格/描述。" />
+
+                            <StackPanel>
+                                <RadioButton Margin="0,0,0,10" GroupName="Plan" Padding="8" VerticalContentAlignment="Center">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Medium" Text="免费版" />
+                                            <TextBlock Margin="8,0,0,0" Foreground="{DynamicResource Foreground.Caption}" Text="$0 / 月" />
+                                        </StackPanel>
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource Foreground.Caption}"
+                                                   Text="3 个项目,基础功能,社区支持" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Margin="0,0,0,10" GroupName="Plan" IsChecked="True" Padding="8" VerticalContentAlignment="Center">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Medium" Text="Pro 版" />
+                                            <TextBlock Margin="8,0,0,0" FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="$19 / 月" />
+                                            <Border Margin="8,0,0,0" Padding="6,1" Background="{DynamicResource Background.Info}">
+                                                <TextBlock FontSize="10" FontWeight="Medium" Foreground="White" Text="推荐" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource Foreground.Caption}"
+                                                   Text="无限项目,全部功能,邮件支持" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton GroupName="Plan" Padding="8" VerticalContentAlignment="Center">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Medium" Text="企业版" />
+                                            <TextBlock Margin="8,0,0,0" Foreground="{DynamicResource Foreground.Caption}" Text="联系销售" />
+                                        </StackPanel>
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource Foreground.Caption}"
+                                                   Text="SSO,审计日志,SLA,7×24 支持" />
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+
+                    <!--  ③ 横竖布局 + 禁用  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="布局 + 禁用态" Subtitle="水平 / 垂直 / 禁用">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="水平排列" />
+                            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                                <RadioButton Margin="0,0,16,0" Content="选项 1" GroupName="Layout1" IsChecked="True" />
+                                <RadioButton Margin="0,0,16,0" Content="选项 2" GroupName="Layout1" />
+                                <RadioButton Content="选项 3" GroupName="Layout1" />
+                            </StackPanel>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="垂直排列" />
+                            <StackPanel Margin="0,0,0,16">
+                                <RadioButton Margin="0,0,0,6" Content="高优先级" GroupName="Layout2" />
+                                <RadioButton Margin="0,0,0,6" Content="中优先级" GroupName="Layout2" IsChecked="True" />
+                                <RadioButton Content="低优先级" GroupName="Layout2" />
+                            </StackPanel>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="禁用态" />
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Margin="0,0,16,0" Content="选中(禁用)" IsChecked="True" IsEnabled="False" />
+                                <RadioButton Content="未选(禁用)" IsEnabled="False" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ 键盘交互  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="键盘交互" Subtitle="↑↓ 切换同组 + Space 选中">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,12" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="先点一下进入控件,Tab 切到 RadioButton 组,然后 ↑↓ 切换组内选项 — 注意每个 RadioButton 外圈出现 focus ring,选中态自动跟随。" />
+
+                            <StackPanel>
+                                <RadioButton Margin="0,0,0,8" Content="付款方式 — 微信" GroupName="Pay" />
+                                <RadioButton Margin="0,0,0,8" Content="付款方式 — 支付宝" GroupName="Pay" IsChecked="True" />
+                                <RadioButton Margin="0,0,0,8" Content="付款方式 — 银行卡" GroupName="Pay" />
+                                <RadioButton Content="付款方式 — 余额" GroupName="Pay" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  底部  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <cy:Card Grid.Column="0">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="XAML 示例">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+                    <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                        <![CDATA[<!-- 互斥分组:同 GroupName 内只能选一个 -->
+<StackPanel Orientation="Horizontal">
+    <RadioButton Content="浅色" GroupName="Theme" />
+    <RadioButton Content="深色" GroupName="Theme" IsChecked="True" />
+    <RadioButton Content="跟随系统" GroupName="Theme" />
+</StackPanel>
+
+<!-- 富内容 -->
+<RadioButton GroupName="Plan" IsChecked="True">
+    <StackPanel>
+        <TextBlock FontWeight="Medium" Text="Pro 版" />
+        <TextBlock FontSize="11" Text="无限项目,邮件支持" />
+    </StackPanel>
+</RadioButton>
+
+<!-- enum 绑定 (用 EnumToBoolConverter) -->
+<RadioButton Content="深色"
+             IsChecked="{Binding Theme,
+                Converter={x:Static conv:EnumToBoolConverter.Default},
+                ConverterParameter={x:Static local:AppTheme.Dark}}" />]]>
+                    </TextBox>
+                </cy:Card>
+
+                <cy:Card Grid.Column="2">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="设计要点">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="标准中心点" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="Checked 时主色实心外圈 + 白色 6px 中心点,符合 RadioButton 标准视觉"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="弹入动画" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="中心点从 0→6px CubicEase EaseOut,Uncheck 时反向收回"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="GroupName" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="同 GroupName 互斥,跨容器也有效。父容器作用域,自动管理状态"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </cy:Card>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

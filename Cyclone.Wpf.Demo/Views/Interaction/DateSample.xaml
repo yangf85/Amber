@@ -12,92 +12,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <cy:SpacingStackPanel
-            Margin="20"
-            Spacing="30">
-
-            <!--  DateRangePicker 案例  -->
-            <Border
-                Padding="20"
-                BorderBrush="LightGray"
-                BorderThickness="1">
-                <StackPanel>
-                    <TextBlock
-                        Margin="0,0,0,15"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        Text="DateRangePicker - 日期范围选择器" />
-
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <!--  基础日期范围选择  -->
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="基础范围选择:" />
-                        <cy:DateRangePicker
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Margin="10,5"
-                            End="{Binding EndDate}"
-                            SelectedDateFormat="yyyy-MM-dd"
-                            Start="{Binding StartDate}" />
-                        <Button
-                            Grid.Row="0"
-                            Grid.Column="2"
-                            Padding="10,5"
-                            Command="{Binding ShowDateRangeCommand}"
-                            Content="显示日期" />
-
-                        <!--  带预定义选项的日期范围选择  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="预定义选项:" />
-                        <cy:DateRangePicker
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="10,5"
-                            End="{Binding EndDate2}"
-                            IsShowPredfine="True"
-                            SelectedDateFormat="yyyy/MM/dd"
-                            Start="{Binding StartDate2}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            FontWeight="Bold"
-                            Text="{Binding DateRangeInfo}" />
-
-                        <!--  带禁用日期的范围选择  -->
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="禁用特定日期:" />
-                        <cy:DateRangePicker
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="10,5"
-                            BlackoutDates="{Binding BlockoutDates}"
-                            End="{Binding EndDate3}"
-                            SelectedDateFormat="MM/dd/yyyy"
-                            Start="{Binding StartDate3}" />
-                    </Grid>
-                </StackPanel>
-            </Border>
+        <cy:SpacingStackPanel Margin="20" Spacing="30">
 
             <!--  TimePicker 案例  -->
             <Border
@@ -216,9 +131,7 @@
                             SelectionMode="MultipleRange" />
 
                         <!--  控制面板  -->
-                        <StackPanel
-                            Grid.Column="1"
-                            Margin="20,0,0,0">
+                        <StackPanel Grid.Column="1" Margin="20,0,0,0">
                             <TextBlock
                                 Margin="0,0,0,5"
                                 FontWeight="Bold"

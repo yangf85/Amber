@@ -25,7 +25,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter TargetName="DisplayText" Property="Foreground" Value="{DynamicResource Foreground.Invert}" />
+                            <Setter TargetName="DisplayText" Property="Foreground" Value="{DynamicResource Foreground.Default}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="DisplayText" Property="Foreground" Value="{DynamicResource Foreground.Focused}" />
@@ -253,16 +253,16 @@
                                                 Margin="5,0" />
                                             <ctl:TimeSelector x:Name="PART_SecondSelector" Grid.Column="2" />
 
-                                            <!--  中间遮罩区域  -->
+                                            <!--  中间遮罩区域 — 浅蓝底,标识"选中项停在中心"  -->
                                             <Border
                                                 x:Name="PART_CenterMask"
                                                 Grid.ColumnSpan="3"
                                                 Height="30"
                                                 VerticalAlignment="Center"
-                                                Background="{DynamicResource Background.Mask}"
+                                                Background="{DynamicResource Selection.Background}"
                                                 BorderThickness="0"
                                                 IsHitTestVisible="False"
-                                                Opacity="0.15"
+                                                Opacity="0.5"
                                                 SnapsToDevicePixels="True" />
                                         </Grid>
 

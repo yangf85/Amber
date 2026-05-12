@@ -128,7 +128,7 @@ public class SectionHeader : Control
     }
 
     public static readonly DependencyProperty MainTitleForegroundProperty =
-        DependencyProperty.Register(nameof(MainTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Black));
+        DependencyProperty.Register(nameof(MainTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
     #endregion MainTitleForeground
 
@@ -258,7 +258,7 @@ public class SectionHeader : Control
     }
 
     public static readonly DependencyProperty SubTitleForegroundProperty =
-        DependencyProperty.Register(nameof(SubTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Gray));
+        DependencyProperty.Register(nameof(SubTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
     #endregion SubTitleForeground
 
@@ -294,59 +294,59 @@ public class SectionHeader : Control
 
     #endregion SubTitleVisibility
 
-    #region SeperaterThickness
+    #region SeparatorThickness
 
-    public double SeperaterThickness
+    public double SeparatorThickness
     {
-        get => (double)GetValue(SeperaterThicknessProperty);
-        set => SetValue(SeperaterThicknessProperty, value);
+        get => (double)GetValue(SeparatorThicknessProperty);
+        set => SetValue(SeparatorThicknessProperty, value);
     }
 
-    public static readonly DependencyProperty SeperaterThicknessProperty =
-        DependencyProperty.Register(nameof(SeperaterThickness), typeof(double), typeof(SectionHeader), new PropertyMetadata(1.0));
+    public static readonly DependencyProperty SeparatorThicknessProperty =
+        DependencyProperty.Register(nameof(SeparatorThickness), typeof(double), typeof(SectionHeader), new PropertyMetadata(1.0));
 
-    #endregion SeperaterThickness
+    #endregion SeparatorThickness
 
-    #region SeperaterColor
+    #region SeparatorBrush
 
-    public Brush SeperaterColor
+    public Brush SeparatorBrush
     {
-        get => (Brush)GetValue(SeperaterColorProperty);
-        set => SetValue(SeperaterColorProperty, value);
+        get => (Brush)GetValue(SeparatorBrushProperty);
+        set => SetValue(SeparatorBrushProperty, value);
     }
 
-    public static readonly DependencyProperty SeperaterColorProperty =
-        DependencyProperty.Register(nameof(SeperaterColor), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.LightGray));
+    public static readonly DependencyProperty SeparatorBrushProperty =
+        DependencyProperty.Register(nameof(SeparatorBrush), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
-    #endregion SeperaterColor
+    #endregion SeparatorBrush
 
-    #region SeperaterMargin
+    #region SeparatorMargin
 
-    public Thickness SeperaterMargin
+    public Thickness SeparatorMargin
     {
-        get => (Thickness)GetValue(SeperaterMarginProperty);
-        set => SetValue(SeperaterMarginProperty, value);
+        get => (Thickness)GetValue(SeparatorMarginProperty);
+        set => SetValue(SeparatorMarginProperty, value);
     }
 
-    public static readonly DependencyProperty SeperaterMarginProperty =
-        DependencyProperty.Register(nameof(SeperaterMargin), typeof(Thickness), typeof(SectionHeader),
+    public static readonly DependencyProperty SeparatorMarginProperty =
+        DependencyProperty.Register(nameof(SeparatorMargin), typeof(Thickness), typeof(SectionHeader),
             new PropertyMetadata(new Thickness(0, 5, 0, 5)));
 
-    #endregion SeperaterMargin
+    #endregion SeparatorMargin
 
-    #region SeperaterVisibility
+    #region SeparatorVisibility
 
-    public Visibility SeperaterVisibility
+    public Visibility SeparatorVisibility
     {
-        get => (Visibility)GetValue(SeperaterVisibilityProperty);
-        set => SetValue(SeperaterVisibilityProperty, value);
+        get => (Visibility)GetValue(SeparatorVisibilityProperty);
+        set => SetValue(SeparatorVisibilityProperty, value);
     }
 
-    public static readonly DependencyProperty SeperaterVisibilityProperty =
-        DependencyProperty.Register(nameof(SeperaterVisibility), typeof(Visibility), typeof(SectionHeader),
+    public static readonly DependencyProperty SeparatorVisibilityProperty =
+        DependencyProperty.Register(nameof(SeparatorVisibility), typeof(Visibility), typeof(SectionHeader),
             new PropertyMetadata(Visibility.Collapsed));
 
-    #endregion SeperaterVisibility
+    #endregion SeparatorVisibility
 
     #region IsUseUnifiedBackground
 

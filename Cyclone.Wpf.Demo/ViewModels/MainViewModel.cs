@@ -22,6 +22,9 @@ public partial class MainViewModel : ObservableObject
         {
             // Buttons
             "Button" => new ButtonSample(),
+            "CheckBox" => new CheckBoxSample(),
+            "RadioButton" => new RadioButtonSample(),
+            "ToggleButton" => new ToggleButtonSample(),
             "SwitchButton" => new SwitchButtonSample(),
             "SplitButton" => new SplitButtonSample(),
             "HyperlinkButton" => new HyperlinkButtonSample(),
@@ -44,11 +47,12 @@ public partial class MainViewModel : ObservableObject
 
             // DateTime
             "DateTime" => new DateSample(),
+            "DateRangePicker" => new DateRangePickerSample(),
+            "TimePicker" => new TimePickerSample(),
 
             // Numeric
             "Slider" => new SliderSample(),
             "RangeSlider" => new RangeSliderSample(),
-            "Range" => new RangeSample(),
             "ProgressBar" => new ProgressBarSample(),
             "RotationEditor" => new RotationEditorSample(),
             "CircularGaugeSample" => new CircularGaugeSample(),
@@ -121,7 +125,10 @@ public partial class SideMenuViewModel : ObservableObject
             Icon = "🔘",
             Items =
             [
-                new SideMenuItemViewModel { Header = "Button",          Icon = "🟦" },
+                new SideMenuItemViewModel { Header = "Button",          Icon = "👆" },
+                new SideMenuItemViewModel { Header = "CheckBox",          Icon = "✅" },
+                new SideMenuItemViewModel { Header = "RadioButton",          Icon = "⚪" },
+                new SideMenuItemViewModel { Header = "ToggleButton",          Icon = "⏯️" },
                 new SideMenuItemViewModel { Header = "SwitchButton",    Icon = "🎚" },
                 new SideMenuItemViewModel { Header = "SplitButton",     Icon = "🔀" },
                 new SideMenuItemViewModel { Header = "HyperlinkButton", Icon = "🔗" },
@@ -168,6 +175,8 @@ public partial class SideMenuViewModel : ObservableObject
             Items =
             [
                 new SideMenuItemViewModel { Header = "DateTime", Icon = "🕐" },
+                new SideMenuItemViewModel { Header = "DateRangePicker", Icon = "📆" },
+                new SideMenuItemViewModel { Header = "TimePicker", Icon = "🕐" },
             ]
         });
 
@@ -238,7 +247,6 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel { Header = "GroupBox",       Icon = "🗃" },
                 new SideMenuItemViewModel { Header = "Expander",       Icon = "🔽" },
                 new SideMenuItemViewModel { Header = "Card",           Icon = "🃏" },
-                new SideMenuItemViewModel { Header = "SectionHeader",  Icon = "📌" },
                 new SideMenuItemViewModel { Header = "Form",           Icon = "📋" },
                 new SideMenuItemViewModel { Header = "SettingItem",    Icon = "⚙️" },
                 new SideMenuItemViewModel { Header = "TransitionBox",  Icon = "🎬" },
@@ -284,6 +292,7 @@ public partial class SideMenuViewModel : ObservableObject
             Items =
             [
                 new SideMenuItemViewModel { Header = "IconBox", Icon = "🎯" },
+                new SideMenuItemViewModel { Header = "SectionHeader",  Icon = "📌" },
             ]
         });
 

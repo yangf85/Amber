@@ -17,22 +17,24 @@ namespace Cyclone.Wpf.Controls;
 [TemplatePart(Name = PartThumbTransform, Type = typeof(TranslateTransform))]
 public class SwitchButton : ToggleButton
 {
-    private const string PartTrack = "PART_Track";
-
     private const string PartThumb = "PART_Thumb";
 
     private const string PartThumbTransform = "PART_ThumbTransform";
 
+    private const string PartTrack = "PART_Track";
+
+    // ============ 默认 Brush(freeze 共享,避免每实例分配)============
+    // 注意:这些是 fallback 默认值,实际样式 xaml 里会 setter 覆盖成主题 token。
+    // 颜色 #2196F3 = BlueDefault (BasicTheme.xaml 的主蓝),保证不应用样式时也是主蓝
+    private static readonly Brush DefaultCheckedBackground = CreateFrozenBrush(33, 150, 243);
+
     private static readonly Brush DefaultUncheckedBackground = CreateFrozenBrush(204, 204, 204);
-
-    // ============ 默认 Brush（freeze 共享，避免每实例分配）============
-    private static readonly Brush DefaultCheckedBackground = CreateFrozenBrush(255, 75, 75);
-
-    private FrameworkElement _track;
 
     private FrameworkElement _thumb;
 
     private TranslateTransform _thumbTransform;
+
+    private FrameworkElement _track;
 
     private static Brush CreateFrozenBrush(byte r, byte g, byte b)
     {
@@ -185,7 +187,7 @@ public class SwitchButton : ToggleButton
             nameof(ThumbCornerRadius),
             typeof(CornerRadius),
             typeof(SwitchButton),
-            new PropertyMetadata(new CornerRadius(11)));
+            new PropertyMetadata(new CornerRadius(8)));
 
     /// <summary>滑块的圆角半径。</summary>
     public CornerRadius ThumbCornerRadius
@@ -300,18 +302,6 @@ public class SwitchButton : ToggleButton
     #region Private Methods
 
     /// <summary>
-    /// 布局相关 DP（TrackWidth / TrackHeight / ThumbSize / ThumbMargin）改变时立即重定位 thumb，
-    /// <b>不带动画</b>——动画只用于 user 交互触发的 IsChecked 切换。
-    /// </summary>
-    private static void OnLayoutPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is SwitchButton switchButton)
-        {
-            switchButton.UpdateThumbPosition(animate: false);
-        }
-    }
-
-    /// <summary>
     /// 把 thumb 移动到 IsChecked 对应的位置。<paramref name="animate"/>=true 时带 ease-out 动画；
     /// false 时立即跳转——会先清除已有 animation（否则 active animation 在 effective value 计算里
     /// 优先级高于 local value，直接 SetValue X 不会生效）。
@@ -340,6 +330,18 @@ public class SwitchButton : ToggleButton
             // 必须先清除 animation，否则 SetValue 无效
             _thumbTransform.BeginAnimation(TranslateTransform.XProperty, null);
             _thumbTransform.X = targetX;
+        }
+    }
+
+    /// <summary>
+    /// 布局相关 DP（TrackWidth / TrackHeight / ThumbSize / ThumbMargin）改变时立即重定位 thumb，
+    /// <b>不带动画</b>——动画只用于 user 交互触发的 IsChecked 切换。
+    /// </summary>
+    private static void OnLayoutPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is SwitchButton switchButton)
+        {
+            switchButton.UpdateThumbPosition(animate: false);
         }
     }
 

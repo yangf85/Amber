@@ -1,21 +1,41 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    SwitchButton 样式
+    
+    改动 (vs 旧版):
+    - Checked 颜色 Background.Checked (浅蓝) → Background.Selected (主蓝)
+      跟项目其他控件 (CheckBox/RadioButton/ToggleButton) 选中态统一
+    - Hover MultiTrigger 分 Checked/Unchecked 两态 (旧版统一变 Background.Hover 浅灰,
+      Checked 态 thumb 从白变浅灰反而像"褪色")
+    - ContentPresenter 显式 TemplateBinding Content/ContentTemplate/Foreground
+    - 焦点 ring CornerRadius 跟随 TrackCornerRadius (旧版写死 13)
+    - 加 Cursor=Hand + Disabled Cursor=Arrow
+    - Track BorderBrush/BorderThickness TemplateBinding (允许用户自定义边框)
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!--  焦点视觉：仅围绕 track 部分（不含 Content 文字），更精致  -->
-    <Style x:Key="SwitchButton.FocusVisual">
-        <Setter Property="Control.Template">
+    <!--  焦点视觉:仅围绕 track,Tab 进入时才显示  -->
+    <Style x:Key="SwitchButton.FocusVisual" TargetType="{x:Type Control}">
+        <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate>
+                <ControlTemplate TargetType="{x:Type Control}">
+                    <!--  Width/Height 跟 track 一致 + Margin -3 给 ring 留外圈空间  -->
                     <Border
-                        Margin="-3"
-                        BorderBrush="{DynamicResource Background.Highlighted}"
+                        Width="46"
+                        Height="28"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        BorderBrush="{DynamicResource Border.Focused}"
                         BorderThickness="2"
-                        CornerRadius="13"
+                        CornerRadius="14"
                         SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
@@ -32,11 +52,14 @@
         <Setter Property="TrackCornerRadius" Value="11" />
         <Setter Property="ThumbCornerRadius" Value="8" />
         <Setter Property="UncheckedBackground" Value="{DynamicResource Background.UnChecked}" />
-        <Setter Property="CheckedBackground" Value="{DynamicResource Background.Checked}" />
-        <Setter Property="ThumbBackground" Value="{DynamicResource Background.Default}" />
+        <Setter Property="CheckedBackground" Value="{DynamicResource Background.Selected}" />
+        <Setter Property="ThumbBackground" Value="{DynamicResource Background.Container}" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="AnimationDuration" Value="0:0:0.2" />
-        <Setter Property="Padding" Value="5,0,0,0" />
+        <Setter Property="Padding" Value="6,0,0,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SwitchButton.FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ctl:SwitchButton}">
@@ -46,7 +69,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!--  开关按钮部分  -->
+                        <!--  开关部分  -->
                         <Grid Grid.Column="0" VerticalAlignment="Center">
                             <Border
                                 x:Name="PART_Track"
@@ -55,8 +78,10 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Background="{TemplateBinding UncheckedBackground}"
-                                BorderThickness="0"
-                                CornerRadius="{TemplateBinding TrackCornerRadius}" />
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding TrackCornerRadius}"
+                                SnapsToDevicePixels="True" />
                             <Border
                                 x:Name="PART_Thumb"
                                 Width="{TemplateBinding ThumbSize}"
@@ -66,7 +91,8 @@
                                 VerticalAlignment="Center"
                                 Background="{TemplateBinding ThumbBackground}"
                                 BorderThickness="0"
-                                CornerRadius="{TemplateBinding ThumbCornerRadius}">
+                                CornerRadius="{TemplateBinding ThumbCornerRadius}"
+                                SnapsToDevicePixels="True">
                                 <Border.Effect>
                                     <DropShadowEffect
                                         BlurRadius="6"
@@ -80,55 +106,76 @@
                             </Border>
                         </Grid>
 
-                        <!--  文本内容部分  -->
+                        <!--  文本内容  -->
                         <ContentPresenter
+                            x:Name="ContentContainer"
                             Grid.Column="1"
                             Margin="{TemplateBinding Padding}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            RecognizesAccessKey="True" />
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                            RecognizesAccessKey="True"
+                            TextElement.Foreground="{TemplateBinding Foreground}" />
                     </Grid>
 
                     <ControlTemplate.Triggers>
+                        <!--  Checked — Track 主色  -->
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="PART_Track" Property="Background" Value="{Binding CheckedBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
 
-                        <!--  hover 整个控件时 thumb 变色——之前用 SourceName=PART_Thumb 时鼠标会"追不上"切换中的 thumb 导致状态闪烁  -->
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <!--  Hover (unchecked) — Track 边框淡变(若用户配 BorderBrush 才可见)  -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="False" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="PART_Thumb" Property="Background" Value="{DynamicResource Background.Hover}" />
-                        </Trigger>
+                        </MultiTrigger>
 
+                        <!--  Hover (checked) — Track 颜色稍变深,Thumb 保持白  -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="PART_Track" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                        </MultiTrigger>
+
+                        <!--  Pressed — 整体 Opacity 略降  -->
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="PART_Thumb" Property="Background" Value="{DynamicResource Background.Pressed}" />
+                            <Setter TargetName="PART_Track" Property="Opacity" Value="0.85" />
+                            <Setter TargetName="PART_Thumb" Property="Opacity" Value="0.85" />
                         </Trigger>
 
+                        <!--  Disabled  -->
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="PART_Track" Property="Opacity" Value="0.5" />
-                            <Setter TargetName="PART_Thumb" Property="Opacity" Value="0.5" />
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="Cursor" Value="Arrow" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Setter Property="FocusVisualStyle" Value="{StaticResource SwitchButton.FocusVisual}" />
     </Style>
 
+    <!--  Toggle 风格 (iOS Pill — thumb 凸出 track)  -->
     <Style
         x:Key="SwitchButton.Style.Toggle"
         BasedOn="{StaticResource SwitchButton.Style.Basic}"
         TargetType="{x:Type ctl:SwitchButton}">
-        <Setter Property="ThumbBackground" Value="{DynamicResource Background.Container}" />
-        <Setter Property="ThumbCornerRadius" Value="12" />
-        <Setter Property="ThumbMargin" Value="0" />
-        <Setter Property="ThumbSize" Value="24" />
-        <Setter Property="TrackCornerRadius" Value="5" />
-        <Setter Property="TrackHeight" Value="10" />
         <Setter Property="TrackWidth" Value="45" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="CheckedBackground" Value="{DynamicResource Background.Checked}" />
+        <Setter Property="TrackHeight" Value="10" />
+        <Setter Property="TrackCornerRadius" Value="5" />
+        <Setter Property="ThumbSize" Value="24" />
+        <Setter Property="ThumbMargin" Value="0" />
+        <Setter Property="ThumbCornerRadius" Value="12" />
+        <Setter Property="ThumbBackground" Value="{DynamicResource Background.Container}" />
+        <Setter Property="CheckedBackground" Value="{DynamicResource Background.Selected}" />
         <Setter Property="UncheckedBackground" Value="{DynamicResource Background.UnChecked}" />
     </Style>
 
-    <Style BasedOn="{StaticResource SwitchButton.Style.Basic}" TargetType="ctl:SwitchButton" />
+    <Style BasedOn="{StaticResource SwitchButton.Style.Basic}" TargetType="{x:Type ctl:SwitchButton}" />
 </ResourceDictionary>

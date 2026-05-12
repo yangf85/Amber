@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.SectionHeaderSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,102 +6,566 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="2400"
+    d:DesignWidth="1400"
     mc:Ignorable="d">
-    <Grid>
-        <StackPanel Margin="20">
-            <!--  基本用法  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="单表态"
-                MainTitleBackground="{DynamicResource Background.Caption}"
-                MainTitleForeground="{DynamicResource Text.Invert}"
-                MainTitleHeight="48" />
 
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="系统设置"
-                SeperaterVisibility="Visible"
-                SubTitle="配置应用程序的基本参数"
-                SubTitleVisibility="Visible" />
+    <UserControl.Resources>
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,16,0,8" />
+        </Style>
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
 
-            <!--  自定义样式  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="用户管理"
-                MainTitleFontSize="20"
-                MainTitleForeground="#2196F3"
-                SeperaterColor="#2196F3"
-                SeperaterThickness="2"
-                SeperaterVisibility="Visible"
-                SubTitle="管理系统用户和权限"
-                SubTitleForeground="#757575"
-                SubTitleVisibility="Visible" />
+        <!--  Demo 容器:展示一个 SectionHeader 用的统一外框  -->
+        <Style x:Key="DemoBorderStyle" TargetType="{x:Type Border}">
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="Padding" Value="20,16" />
+            <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+        </Style>
+    </UserControl.Resources>
 
-            <!--  无子标题  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="操作记录"
-                SeperaterVisibility="Visible" />
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <!--  无分隔线  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="帮助中心"
-                SubTitle="获取系统使用帮助"
-                SubTitleVisibility="Visible" />
+            <!--  ============ Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                FontSize="16"
+                                FontWeight="Bold"
+                                Foreground="White"
+                                Text="Title" />
+                            <Rectangle
+                                Height="2"
+                                Margin="0,18,0,0"
+                                VerticalAlignment="Top"
+                                Fill="White" />
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                FontSize="11"
+                                Foreground="White"
+                                Text="Subtitle" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="SectionHeader" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="区域标题——主标题 + 副标题 + 可选分隔线。所有视觉细节(字号/字重/字色/对齐/Margin)都作为 DP 暴露,开箱即用不需要写 Style。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
-            <!--  居中对齐  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="关于我们"
-                MainTitleHorizontalAlignment="Center"
-                SeperaterVisibility="Visible"
-                SubTitle="版本信息和联系方式"
-                SubTitleHorizontalAlignment="Center"
-                SubTitleVisibility="Visible" />
+            <!--  ============ 主体 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <!--  更多自定义样式  -->
-            <cy:SectionHeader
-                Margin="0,0,0,20"
-                MainTitle="高级功能"
-                MainTitleFontSize="18"
-                MainTitleFontWeight="Bold"
-                MainTitleForeground="#FF5722"
-                SeperaterColor="#FF5722"
-                SeperaterThickness="1.5"
-                SeperaterVisibility="Visible"
-                SubTitle="仅限管理员使用"
-                SubTitleFontSize="11"
-                SubTitleForeground="#9E9E9E"
-                SubTitleVisibility="Visible" />
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
 
-            <cy:SectionHeader
-                Grid.Column="1"
-                Margin="10,5"
-                MainTitle="左侧强调条"
-                MainTitleBackground="#fff3cd"
-                MainTitleForeground="#856404"
-                SeperaterColor="#ffeeba"
-                SeperaterVisibility="Visible"
-                SubTitle="带有左侧黄色强调条的警告样式标题"
-                SubTitleForeground="#856404"
-                SubTitleVisibility="Visible" />
+                    <!--  ① 开箱即用  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="开箱即用" Subtitle="只设 MainTitle / SubTitle,其他默认值即生效">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
 
-            <cy:SectionHeader
-                Margin="10,10,10,0"
-                Background="DarkGray"
-                IsUseUnifiedBackground="True"
-                MainTitle="完整内容区块"
-                MainTitleFontWeight="Bold"
-                MainTitleForeground="White"
-                SeperaterColor="White"
-                SeperaterMargin="0,5"
-                SeperaterVisibility="Visible"
-                SubTitle="整个区块都有背景色的示例"
-                SubTitleForeground="White"
-                SubTitleVisibility="Visible" />
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="最简用法 — 只需 MainTitle 就能跑;加 SubTitle 时记得设 SubTitleVisibility=Visible(默认 Collapsed)。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="① 只有主标题" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader MainTitle="账户设置" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="② 主标题 + 副标题" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="账户设置"
+                                    SubTitle="管理登录信息、安全选项与通知偏好"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="③ 主标题 + 副标题 + 分隔线" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="账户设置"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="管理登录信息、安全选项与通知偏好"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 对齐方式  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="对齐方式" Subtitle="MainTitleHorizontalAlignment 控制水平对齐">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="主标题和副标题分别有 HorizontalAlignment / VerticalAlignment DP,默认都是 Center。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Left 对齐" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="项目概览"
+                                    MainTitleHorizontalAlignment="Left"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="左对齐 — 常用于文档/页面标题"
+                                    SubTitleHorizontalAlignment="Left"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Center 对齐 (默认)" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="项目概览"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="居中对齐 — 适合卡片头部" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Right 对齐" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="项目概览"
+                                    MainTitleHorizontalAlignment="Right"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="右对齐 — 配合徽章 / 状态栏"
+                                    SubTitleHorizontalAlignment="Right"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ③ 字号 + 字重组合  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="字号 / 字重" Subtitle="不写 Style 就能调字号字重">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="MainTitleFontSize / MainTitleFontWeight (SubTitle 同款) 控制字号字重,不需要写 Style。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Hero (24, Bold)" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="欢迎使用 Cyclone WPF"
+                                    MainTitleFontSize="24"
+                                    SubTitle="一套现代化的 WPF 控件库"
+                                    SubTitleFontSize="14"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="标题 (16, Bold) — 默认" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="设置"
+                                    SubTitle="管理你的偏好"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="小标题 (13, Medium)" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="高级选项"
+                                    MainTitleFontSize="13"
+                                    MainTitleFontWeight="Medium"
+                                    SubTitle="这些选项影响应用行为"
+                                    SubTitleFontSize="11"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ④ 分隔线变化  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="分隔线" Subtitle="SeparatorThickness / SeparatorBrush / SeparatorMargin">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="分隔线默认 Collapsed (拼写已修正:Seperater → Separator)。SeparatorBrush 默认主题灰色。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="① 默认分隔线 (1px 灰)" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="商品详情"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="规格、库存、价格"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="② 粗线 + 主色" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="重要通知"
+                                    SeparatorBrush="{DynamicResource Background.Selected}"
+                                    SeparatorThickness="3"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="账户安全更新"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="③ 加大 Margin" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="数据统计"
+                                    SeparatorMargin="0,12"
+                                    SeparatorVisibility="Visible"
+                                    SubTitle="本月概览"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑤ 背景色 + 统一背景  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="背景色场景" Subtitle="MainTitleBackground / SubTitleBackground / IsUseUnifiedBackground">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="主/副标题各有独立背景色,IsUseUnifiedBackground=True 时禁用各自背景,改用控件 Background 整体填充。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="① 主标题加亮底" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="今日推荐"
+                                    MainTitleBackground="{DynamicResource Background.InfoContainer}"
+                                    MainTitleHorizontalAlignment="Left"
+                                    MainTitleMargin="12,8"
+                                    SubTitle="精选 3 篇文章"
+                                    SubTitleHorizontalAlignment="Left"
+                                    SubTitleMargin="12,4,0,0"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="② 统一背景 (IsUseUnifiedBackground)" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    Background="{DynamicResource Background.Header}"
+                                    IsUseUnifiedBackground="True"
+                                    MainTitle="📊 销售概览"
+                                    MainTitleHorizontalAlignment="Left"
+                                    MainTitleMargin="14,10,0,0"
+                                    SubTitle="近 30 天数据"
+                                    SubTitleHorizontalAlignment="Left"
+                                    SubTitleMargin="14,4,0,10"
+                                    SubTitleVisibility="Visible" />
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ⑥ 富 Content  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="富 Content" Subtitle="MainTitle / SubTitle 是 object 类型,可放任意控件">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="MainTitle/SubTitle 是 object,可放 StackPanel 等富内容。注意:放富内容时 MainTitleFontSize 等细节 DP 不生效(因为内容不再是简单 TextBlock),富内容里自己控制样式。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="① 主标题 + 徽章" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader MainTitleHorizontalAlignment="Left" SeparatorVisibility="Visible">
+                                    <cy:SectionHeader.MainTitle>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                FontSize="16"
+                                                FontWeight="Bold"
+                                                Foreground="{DynamicResource Foreground.Default}"
+                                                Text="API 文档" />
+                                            <Border
+                                                Margin="10,0,0,0"
+                                                Padding="8,2"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource Background.Info}">
+                                                <TextBlock
+                                                    FontSize="10"
+                                                    FontWeight="Medium"
+                                                    Foreground="White"
+                                                    Text="v2.0" />
+                                            </Border>
+                                        </StackPanel>
+                                    </cy:SectionHeader.MainTitle>
+                                    <cy:SectionHeader.SubTitle>
+                                        <TextBlock Foreground="{DynamicResource Foreground.Inactive}" Text="最后更新 2 小时前" />
+                                    </cy:SectionHeader.SubTitle>
+                                </cy:SectionHeader>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="② 副标题带链接" />
+                            <Border Style="{StaticResource DemoBorderStyle}">
+                                <cy:SectionHeader
+                                    MainTitle="账户安全"
+                                    MainTitleHorizontalAlignment="Left"
+                                    SubTitleVisibility="Visible">
+                                    <cy:SectionHeader.SubTitle>
+                                        <TextBlock Foreground="{DynamicResource Foreground.Inactive}">
+                                            <Run Text="开启两步验证后" />
+                                            <Hyperlink Foreground="{DynamicResource Foreground.Link}">查看详情</Hyperlink>
+                                        </TextBlock>
+                                    </cy:SectionHeader.SubTitle>
+                                </cy:SectionHeader>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <cy:Card Grid.Column="0">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="XAML 示例">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+                    <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                        <![CDATA[<!-- 最简:只设主标题 -->
+<cy:SectionHeader MainTitle="账户设置" />
+
+<!-- 主标题 + 副标题 + 分隔线 -->
+<cy:SectionHeader MainTitle="账户设置"
+                  SubTitle="管理登录信息"
+                  SubTitleVisibility="Visible"
+                  SeparatorVisibility="Visible" />
+
+<!-- 改字号 / 对齐 / 字色,不需要写 Style -->
+<cy:SectionHeader MainTitle="欢迎使用"
+                  MainTitleFontSize="24"
+                  MainTitleHorizontalAlignment="Left"
+                  SubTitle="一套现代化的 WPF 控件库"
+                  SubTitleVisibility="Visible" />
+
+<!-- 加粗分隔线 + 主色 -->
+<cy:SectionHeader MainTitle="重要通知"
+                  SubTitle="账户安全更新"
+                  SubTitleVisibility="Visible"
+                  SeparatorVisibility="Visible"
+                  SeparatorThickness="3"
+                  SeparatorBrush="{DynamicResource Background.Selected}" />
+
+<!-- 富 Content -->
+<cy:SectionHeader MainTitleHorizontalAlignment="Left">
+    <cy:SectionHeader.MainTitle>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="API 文档" FontWeight="Bold" />
+            <Border Background="..."><TextBlock Text="v2.0" /></Border>
         </StackPanel>
-    </Grid>
+    </cy:SectionHeader.MainTitle>
+</cy:SectionHeader>]]>
+                    </TextBox>
+                </cy:Card>
+
+                <cy:Card Grid.Column="2">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="设计要点">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="开箱即用" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="26 个 DP 覆盖字号/字重/字色/对齐/Margin/背景等所有视觉细节,不写 Style 也能改外观"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="主题响应" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="默认颜色通过 Style 设主题 token (Foreground.Default / Inactive / Border.Default),适配深浅主题"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="默认隐藏" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="SubTitle / Separator 默认 Visibility=Collapsed,需显式设 Visible 才显示 (设计上的 明示优先 )"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="富内容局限" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="MainTitle 用 StackPanel 等富内容时,MainTitleFontSize 等细节 DP 不再生效。富内容自己控制样式即可"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </cy:Card>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

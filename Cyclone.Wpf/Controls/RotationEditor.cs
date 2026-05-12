@@ -14,11 +14,15 @@ namespace Cyclone.Wpf.Controls;
 public class RotationEditor : Control
 {
     private const string PART_XSlider = "PART_XSlider";
+
     private const string PART_YSlider = "PART_YSlider";
+
     private const string PART_ZSlider = "PART_ZSlider";
 
     private RangeBase _xSlider;
+
     private RangeBase _ySlider;
+
     private RangeBase _zSlider;
 
     static RotationEditor()
@@ -317,11 +321,6 @@ public class RotationEditor : Control
         return angle;
     }
 
-    private void RaiseAngleChanged(string axis, double oldValue, double newValue)
-    {
-        RaiseEvent(new AngleChangedEventArgs(AngleChangedEvent, this, axis, oldValue, newValue));
-    }
-
     private void AttachSliderEvents()
     {
         _xSlider?.ValueChanged += OnXSliderValueChanged;
@@ -351,6 +350,11 @@ public class RotationEditor : Control
         AngleZ = e.NewValue;
     }
 
+    private void RaiseAngleChanged(string axis, double oldValue, double newValue)
+    {
+        RaiseEvent(new AngleChangedEventArgs(AngleChangedEvent, this, axis, oldValue, newValue));
+    }
+
     private void SyncSlidersFromProperties()
     {
         _xSlider?.Value = AngleX;
@@ -367,8 +371,10 @@ public class RotationEditor : Control
 public class AngleChangedEventArgs : RoutedEventArgs
 {
     public string Axis { get; }
-    public double OldValue { get; }
+
     public double NewValue { get; }
+
+    public double OldValue { get; }
 
     public AngleChangedEventArgs(RoutedEvent routedEvent, object source, string axis, double oldValue, double newValue)
         : base(routedEvent, source)

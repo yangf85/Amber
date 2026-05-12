@@ -1,0 +1,446 @@
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.TimePickerSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:TimePickerViewModel}}"
+    d:DesignHeight="2200"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Header  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M 14 0 A 14 14 0 1 0 14 28 A 14 14 0 1 0 14 0 Z M 14 6 L 14 14 L 20 18"
+                            Stretch="None"
+                            Stroke="White"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2.2" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="TimePicker" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="时间选择器 — 三列滚轮(时/分/秒)。基于 CyclicPanel 的拖动选择,中心遮罩高亮选中态。Snapshot 机制:确定提交,取消真正回滚。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  主体  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础绑定 — 会议时间  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础绑定" Subtitle="SelectedTime 双向绑定 TimeSpan?">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="会议起止时间 — 选时间后下方计算 会议时长 。点确定才提交,取消回滚到原值。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="开始时间" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding MeetingStart, Mode=TwoWay}" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="结束时间" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding MeetingEnd, Mode=TwoWay}" />
+
+                            <Border
+                                Margin="0,16,0,0"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="开始 = " />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding MeetingStart, Mode=OneWay, StringFormat={}{0:hh\\:mm\\:ss}}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="结束 = " />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding MeetingEnd, Mode=OneWay, StringFormat={}{0:hh\\:mm\\:ss}}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="时长 = " />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding MeetingDuration, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② Watermark 与 null  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="未设置时间" Subtitle="Watermark + null 值绑定">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="SelectedTime 为 null 时显示 Watermark 占位文字。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="闹钟时间(默认 null)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding AlarmTime, Mode=TwoWay}"
+                                Watermark="设置闹钟..." />
+
+                            <Border
+                                Margin="0,12,0,0"
+                                Padding="12,8"
+                                Background="{DynamicResource Background.Header}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1">
+                                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                    <Run Text="AlarmTime = " />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding AlarmTime, Mode=OneWay, StringFormat={}{0:hh\\:mm\\:ss}, TargetNullValue='(未设置)'}" />
+                                </TextBlock>
+                            </Border>
+
+                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                <Button
+                                    Margin="0,0,8,0"
+                                    Padding="14,6"
+                                    Command="{Binding SetNowCommand}"
+                                    Content="设为当前时间" />
+                                <Button
+                                    Padding="14,6"
+                                    Command="{Binding ClearAlarmCommand}"
+                                    Content="清空" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+
+                    <!--  ③ TimeFormat  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="自定义格式" Subtitle="TimeFormat 控制显示文本格式">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,16"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="DateTime 标准格式串 — 不影响内部 TimeSpan 选值,只影响显示文本。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="HH:mm:ss(默认)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding DepartureTime}" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="HH:mm(隐藏秒)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding DepartureTime}"
+                                TimeFormat="HH:mm" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="hh:mm tt(12 小时制 + AM/PM)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                SelectedTime="{Binding DepartureTime}"
+                                TimeFormat="hh:mm tt" />
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ 高度 / 可见项 / 禁用  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="尺寸 + 禁用" Subtitle="VisibleItemCount / MaxContainerHeight / IsEnabled">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock
+                                Margin="0,0,0,12"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="VisibleItemCount 必须是奇数(中心项是选中项),非法值会自动 clamp。MaxContainerHeight 控制 Popup 内 selector 总高度。" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="3 项可见(紧凑)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                MaxContainerHeight="100"
+                                SelectedTime="{Binding DepartureTime}"
+                                VisibleItemCount="3" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="7 项可见(宽阔)" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                MaxContainerHeight="200"
+                                SelectedTime="{Binding DepartureTime}"
+                                VisibleItemCount="7" />
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="禁用态" />
+                            <cy:TimePicker
+                                Width="200"
+                                HorizontalAlignment="Left"
+                                IsEnabled="False"
+                                SelectedTime="{Binding FrozenTime}" />
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  底部  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <cy:Card Grid.Column="0">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="XAML 示例">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+                    <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                        <![CDATA[<!-- 基础绑定 -->
+<cy:TimePicker SelectedTime="{Binding MeetingStart, Mode=TwoWay}" />
+
+<!-- 自定义占位文字 -->
+<cy:TimePicker SelectedTime="{Binding AlarmTime, Mode=TwoWay}"
+               Watermark="设置闹钟..." />
+
+<!-- 自定义显示格式 -->
+<cy:TimePicker SelectedTime="{Binding T}" TimeFormat="HH:mm" />
+<cy:TimePicker SelectedTime="{Binding T}" TimeFormat="hh:mm tt" />
+
+<!-- 可见项数 + 高度(必须奇数,非法值自动 clamp) -->
+<cy:TimePicker SelectedTime="{Binding T}"
+               VisibleItemCount="3"
+               MaxContainerHeight="100" />
+
+<!-- 禁用 -->
+<cy:TimePicker IsEnabled="False" SelectedTime="{Binding T}" />
+
+// C#: TimeSpan? 双向绑定
+[ObservableProperty]
+public partial TimeSpan? MeetingStart { get; set; }
+    = new TimeSpan(9, 30, 0);]]>
+                    </TextBox>
+                </cy:Card>
+
+                <cy:Card Grid.Column="2">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="设计要点">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="拖动滚动" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="基于 CyclicPanel 的拖动选择 + Snap 到中心,中心遮罩高亮选中态"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="Snapshot 机制" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Popup 打开时缓存原值,确定提交,取消/点外部真正回滚 selectors 位置"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="奇数项" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="VisibleItemCount 必须是奇数(中心项是选中项),传 4 自动调成 5"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="主题响应" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="中心遮罩 Selection.Background(主色淡蓝)、选中字 Foreground.Focused,适配主题"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </cy:Card>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

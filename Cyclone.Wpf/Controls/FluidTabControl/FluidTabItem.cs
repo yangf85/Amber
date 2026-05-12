@@ -2,15 +2,21 @@
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Markup;
 
 namespace Cyclone.Wpf.Controls;
 
 /// <summary>
-/// 流式标签控件的标签项。继承自 <see cref="HeaderedContentControl"/>：
-/// Header 在 Tab 头列表中渲染；Content 不出现在 FluidTabItem 自身的视觉树里，
-/// 而是由 <see cref="FluidTabControl"/> 在内容滚动区独立渲染，避免单个对象被多父级持有。
+/// 流式标签控件的标签项。
+/// <para>
+/// **重要设计决策**:继承 <see cref="Control"/> 而不是 <see cref="HeaderedContentControl"/> 或 <see cref="ContentControl"/>。
+/// 原因:ContentControl 会把 Content 当 logical child,而 FluidTabControl 把同一 Content 显示在另一处
+/// (内容滚动区),会导致 logical tree 冲突和视觉元素连接错误。
+/// 因此自己声明 ContentProperty 而不复用 ContentControl 的实现。
+/// </para>
 /// </summary>
-public class FluidTabItem : HeaderedContentControl
+[ContentProperty(nameof(Content))]
+public class FluidTabItem : Control
 {
     static FluidTabItem()
     {
@@ -18,11 +24,112 @@ public class FluidTabItem : HeaderedContentControl
             new FrameworkPropertyMetadata(typeof(FluidTabItem)));
     }
 
+    #region Content
+
+    public static readonly DependencyProperty ContentProperty =
+        DependencyProperty.Register(
+            nameof(Content),
+            typeof(object),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    /// <summary>该 Tab 项的内容,由 FluidTabControl 在内容滚动区独立渲染。</summary>
+    public object Content
+    {
+        get => GetValue(ContentProperty);
+        set => SetValue(ContentProperty, value);
+    }
+
+    #endregion Content
+
+    #region ContentTemplate
+
+    public static readonly DependencyProperty ContentTemplateProperty =
+        DependencyProperty.Register(
+            nameof(ContentTemplate),
+            typeof(DataTemplate),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    public DataTemplate ContentTemplate
+    {
+        get => (DataTemplate)GetValue(ContentTemplateProperty);
+        set => SetValue(ContentTemplateProperty, value);
+    }
+
+    #endregion ContentTemplate
+
+    #region ContentTemplateSelector
+
+    public static readonly DependencyProperty ContentTemplateSelectorProperty =
+        DependencyProperty.Register(
+            nameof(ContentTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    public DataTemplateSelector ContentTemplateSelector
+    {
+        get => (DataTemplateSelector)GetValue(ContentTemplateSelectorProperty);
+        set => SetValue(ContentTemplateSelectorProperty, value);
+    }
+
+    #endregion ContentTemplateSelector
+
+    #region Header
+
+    public static readonly DependencyProperty HeaderProperty =
+        DependencyProperty.Register(
+            nameof(Header),
+            typeof(object),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    /// <summary>该 Tab 项左侧列表中显示的 Header。</summary>
+    public object Header
+    {
+        get => GetValue(HeaderProperty);
+        set => SetValue(HeaderProperty, value);
+    }
+
+    #endregion Header
+
+    #region HeaderTemplate
+
+    public static readonly DependencyProperty HeaderTemplateProperty =
+        DependencyProperty.Register(
+            nameof(HeaderTemplate),
+            typeof(DataTemplate),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    public DataTemplate HeaderTemplate
+    {
+        get => (DataTemplate)GetValue(HeaderTemplateProperty);
+        set => SetValue(HeaderTemplateProperty, value);
+    }
+
+    #endregion HeaderTemplate
+
+    #region HeaderTemplateSelector
+
+    public static readonly DependencyProperty HeaderTemplateSelectorProperty =
+        DependencyProperty.Register(
+            nameof(HeaderTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(FluidTabItem),
+            new PropertyMetadata(null));
+
+    public DataTemplateSelector HeaderTemplateSelector
+    {
+        get => (DataTemplateSelector)GetValue(HeaderTemplateSelectorProperty);
+        set => SetValue(HeaderTemplateSelectorProperty, value);
+    }
+
+    #endregion HeaderTemplateSelector
+
     #region Icon
 
-    /// <summary>
-    /// 定义图标内容的依赖属性。
-    /// </summary>
     public static readonly DependencyProperty IconProperty =
         DependencyProperty.Register(
             nameof(Icon),
@@ -30,9 +137,7 @@ public class FluidTabItem : HeaderedContentControl
             typeof(FluidTabItem),
             new PropertyMetadata(null));
 
-    /// <summary>
-    /// 获取或设置标签项左侧的图标内容。
-    /// </summary>
+    /// <summary>该 Tab 项左侧的图标内容。</summary>
     public object Icon
     {
         get => GetValue(IconProperty);
@@ -43,9 +148,6 @@ public class FluidTabItem : HeaderedContentControl
 
     #region IconTemplate
 
-    /// <summary>
-    /// 定义图标模板的依赖属性。
-    /// </summary>
     public static readonly DependencyProperty IconTemplateProperty =
         DependencyProperty.Register(
             nameof(IconTemplate),
@@ -53,9 +155,6 @@ public class FluidTabItem : HeaderedContentControl
             typeof(FluidTabItem),
             new PropertyMetadata(null));
 
-    /// <summary>
-    /// 获取或设置图标模板。
-    /// </summary>
     public DataTemplate IconTemplate
     {
         get => (DataTemplate)GetValue(IconTemplateProperty);
@@ -66,17 +165,11 @@ public class FluidTabItem : HeaderedContentControl
 
     #region IsSelected
 
-    /// <summary>
-    /// 定义是否选中的依赖属性（来自 <see cref="Selector.IsSelectedProperty"/>）。
-    /// </summary>
     public static readonly DependencyProperty IsSelectedProperty =
         Selector.IsSelectedProperty.AddOwner(
             typeof(FluidTabItem),
             new FrameworkPropertyMetadata(false, OnIsSelectedChanged));
 
-    /// <summary>
-    /// 获取或设置标签项是否被选中。
-    /// </summary>
     public bool IsSelected
     {
         get => (bool)GetValue(IsSelectedProperty);
@@ -85,20 +178,15 @@ public class FluidTabItem : HeaderedContentControl
 
     private static void OnIsSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not FluidTabItem item)
-        {
-            return;
-        }
-
+        if (d is not FluidTabItem item) return;
         var routed = (bool)e.NewValue ? Selector.SelectedEvent : Selector.UnselectedEvent;
         item.RaiseEvent(new RoutedEventArgs(routed, item));
     }
 
     #endregion IsSelected
 
-    #region Override Methods
+    #region Override
 
-    /// <inheritdoc />
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);
@@ -112,5 +200,5 @@ public class FluidTabItem : HeaderedContentControl
         tab.SelectedItem = dataItem != DependencyProperty.UnsetValue ? dataItem : this;
     }
 
-    #endregion Override Methods
+    #endregion Override
 }

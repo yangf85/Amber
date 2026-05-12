@@ -1,72 +1,155 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
-    xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+<!--
+    ============================================================================
+    RadioButton 样式 (跟 CheckBox 视觉一致 · 圆形版)
+    
+    设计:
+    - OuterEllipse 18,无填充 + 1px 边框
+    - Checked: 主色实心 OuterEllipse + 白色 6px 内圈点(从 0 缩放弹入)
+    - Hover (unchecked): 边框变主色淡边 Border.Hover
+    - Pressed: Opacity 0.8
+    - IsKeyboardFocused: 外圈 2px focus ring
+    - Disabled: 整体 Opacity 0.5
+    
+    改动 (vs 旧版):
+    - 删 VisibilityConverter (Trigger 即可)
+    - Checked InnerEllipse 大小 15px (几乎填满) → 6px 中心点 (标准 RadioButton 视觉)
+    - 加 Storyboard ExitActions (旧版只进不出)
+    - 加焦点 ring / Pressed / Disabled (旧版全无)
+    - Hover 改边框变色而不是 InnerEllipse 染色 (旧版 InnerEllipse 默认不可见,hover 染色无效)
+    ============================================================================
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <ControlTemplate x:Key="RadioButton.ControlTemplate.Basic" TargetType="RadioButton">
-        <StackPanel
-            Margin="{TemplateBinding Padding}"
-            Background="Transparent"
-            Orientation="Horizontal"
-            SnapsToDevicePixels="True">
-            <Grid>
+    <!--
+        FocusVisual — 仅在键盘 Tab 进入时显示,鼠标点击不显示
+        (WPF FocusVisualStyle 框架内置区分输入方式)
+    -->
+    <Style x:Key="RadioButton.FocusVisual" TargetType="{x:Type Control}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Control}">
+                    <Ellipse
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Stroke="{DynamicResource Border.Focused}"
+                        StrokeThickness="2"
+                        SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ControlTemplate x:Key="RadioButton.ControlTemplate.Basic" TargetType="{x:Type RadioButton}">
+        <StackPanel Background="Transparent" Orientation="Horizontal" SnapsToDevicePixels="True">
+            <Grid Width="18" Height="18" VerticalAlignment="Center">
+                <!--  Outer — 外圈圆,Checked 时变主色实心  -->
                 <Ellipse
                     x:Name="OuterEllipse"
-                    Width="18"
-                    Height="18"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Stroke="{DynamicResource Border.Default}"
+                    Fill="{TemplateBinding Background}"
+                    Stroke="{TemplateBinding BorderBrush}"
                     StrokeThickness="1" />
+
+                <!--  Inner — 中心白色小圆点,Checked 时显示,从 0 弹入  -->
                 <Ellipse
                     x:Name="InnerEllipse"
-                    Width="15"
-                    Height="15"
+                    Width="0"
+                    Height="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Fill="{DynamicResource Icon.Foreground.Checked}"
-                    Visibility="{Binding Path=IsChecked, Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                    Fill="White" />
             </Grid>
-            <Grid
-                Name="ContentGrid"
-                Margin="5,0,0,0"
-                VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
-                <ContentPresenter
-                    x:Name="PART_Content"
-                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                    Content="{TemplateBinding Content}" />
-            </Grid>
+
+            <ContentPresenter
+                x:Name="ContentContainer"
+                Margin="6,0,0,0"
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                Content="{TemplateBinding Content}"
+                ContentTemplate="{TemplateBinding ContentTemplate}"
+                ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                RecognizesAccessKey="True"
+                TextElement.Foreground="{TemplateBinding Foreground}" />
         </StackPanel>
+
         <ControlTemplate.Triggers>
-            <Trigger SourceName="OuterEllipse" Property="IsMouseOver" Value="True">
-                <Setter TargetName="OuterEllipse" Property="Fill" Value="{DynamicResource Background.Hover}" />
+            <!--  没文字时不留左侧 margin  -->
+            <Trigger Property="Content" Value="{x:Null}">
+                <Setter TargetName="ContentContainer" Property="Margin" Value="0" />
             </Trigger>
-            <Trigger SourceName="InnerEllipse" Property="IsMouseOver" Value="True">
-                <Setter TargetName="InnerEllipse" Property="Fill" Value="{DynamicResource Icon.Foreground.Hover}" />
+            <Trigger Property="Content" Value="">
+                <Setter TargetName="ContentContainer" Property="Margin" Value="0" />
             </Trigger>
+
+            <!--  Hover (unchecked) — 边框变主色淡边  -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsChecked" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter TargetName="OuterEllipse" Property="Stroke" Value="{DynamicResource Border.Hover}" />
+            </MultiTrigger>
+
+            <!--  Checked — 外圈主色实心 + 内圈白色小点弹入  -->
             <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="OuterEllipse" Property="Fill" Value="{DynamicResource Background.Selected}" />
+                <Setter TargetName="OuterEllipse" Property="Stroke" Value="{DynamicResource Background.Selected}" />
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation
                                 Storyboard.TargetName="InnerEllipse"
                                 Storyboard.TargetProperty="Width"
-                                From="0"
-                                To="10"
-                                Duration="0:0:0.2" />
+                                To="6"
+                                Duration="0:0:0.15">
+                                <DoubleAnimation.EasingFunction>
+                                    <CubicEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
                             <DoubleAnimation
                                 Storyboard.TargetName="InnerEllipse"
                                 Storyboard.TargetProperty="Height"
-                                From="0"
-                                To="10"
-                                Duration="0:0:0.2" />
+                                To="6"
+                                Duration="0:0:0.15">
+                                <DoubleAnimation.EasingFunction>
+                                    <CubicEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
                         </Storyboard>
                     </BeginStoryboard>
                 </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="InnerEllipse"
+                                Storyboard.TargetProperty="Width"
+                                To="0"
+                                Duration="0:0:0.10" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="InnerEllipse"
+                                Storyboard.TargetProperty="Height"
+                                To="0"
+                                Duration="0:0:0.10" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+
+            <!--  Pressed — Opacity 略降  -->
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="OuterEllipse" Property="Opacity" Value="0.8" />
+            </Trigger>
+
+            <!--  Disabled  -->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+                <Setter Property="Cursor" Value="Arrow" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -74,10 +157,17 @@
     <Style
         x:Key="RadioButton.Style.Basic"
         BasedOn="{StaticResource Control.Style.Basic}"
-        TargetType="RadioButton">
-        <Setter Property="Template" Value="{StaticResource RadioButton.ControlTemplate.Basic}" />
+        TargetType="{x:Type RadioButton}">
+        <Setter Property="MinHeight" Value="{DynamicResource Height.Horizontal.Control}" />
+        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource RadioButton.FocusVisual}" />
+        <Setter Property="Template" Value="{StaticResource RadioButton.ControlTemplate.Basic}" />
     </Style>
-    <Style BasedOn="{StaticResource RadioButton.Style.Basic}" TargetType="RadioButton" />
+
+    <Style BasedOn="{StaticResource RadioButton.Style.Basic}" TargetType="{x:Type RadioButton}" />
 </ResourceDictionary>

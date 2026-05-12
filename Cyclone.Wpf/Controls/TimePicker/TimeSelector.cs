@@ -18,11 +18,15 @@ public class TimeSelector : Selector
 {
     #region 私有字段
 
-    private ScrollViewer _scrollViewer;
     private CyclicPanel _cyclicPanel;
+
     private DependencyPropertyDescriptor _dpd;
-    private bool _isUpdatingSelection = false;
+
     private bool _isScrolling = false;
+
+    private bool _isUpdatingSelection = false;
+
+    private ScrollViewer _scrollViewer;
 
     #endregion 私有字段
 
@@ -33,70 +37,6 @@ public class TimeSelector : Selector
     #endregion 事件
 
     #region 构造函数
-
-    static TimeSelector()
-    {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(TimeSelector), new FrameworkPropertyMetadata(typeof(TimeSelector)));
-    }
-
-    public TimeSelector()
-    {
-        GenerateItems();
-        Loaded += TimeSelector_Loaded;
-        Unloaded += TimeSelector_Unloaded;
-    }
-
-    private void TimeSelector_Unloaded(object sender, RoutedEventArgs e)
-    {
-        // 移除事件监听，防止内存泄漏
-        if (_cyclicPanel != null && _dpd != null)
-        {
-            _dpd.RemoveValueChanged(_cyclicPanel, HandlePanelVisbleIndicesChanged);
-        }
-
-        // 保存当前选中的索引
-        if (Items.Count > VisibleItemCount && _cyclicPanel?.VisibleItemIndices?.Count > 0)
-        {
-            SelectedIndex = _cyclicPanel.VisibleItemIndices[VisibleItemCount / 2];
-        }
-    }
-
-    /// <summary>
-    /// 更新所有项目的选中状态
-    /// </summary>
-    private void UpdateSelectedIndex()
-    {
-        // 避免重复更新，提高性能
-        if (_isUpdatingSelection)
-            return;
-
-        _isUpdatingSelection = true;
-        try
-        {
-            for (int i = 0; i < Items.Count; i++)
-            {
-                // 获取项目容器
-                var container = ItemContainerGenerator.ContainerFromIndex(i);
-                if (container is TimeSelectorItem item)
-                {
-                    bool shouldBeSelected = i == SelectedIndex;
-                    if (item.IsSelected != shouldBeSelected)
-                    {
-                        item.IsSelected = shouldBeSelected;
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // 记录异常但不抛出，保持UI稳定性
-            System.Diagnostics.Debug.WriteLine($"UpdateSelectedIndex异常: {ex.Message}");
-        }
-        finally
-        {
-            _isUpdatingSelection = false;
-        }
-    }
 
     private void HandlePanelVisbleIndicesChanged(object? sender, EventArgs e)
     {
@@ -159,6 +99,7 @@ public class TimeSelector : Selector
     {
         if (_cyclicPanel == null) { return; }
         AddHandler(TimeSelectorItem.ItemClickedEvent, new RoutedEventHandler(OnTimeSelectorItemClicked));
+
         // 确保 CyclicPanel 禁用动画
         _cyclicPanel.IsAnimationEnabled = false;
 
@@ -194,46 +135,84 @@ public class TimeSelector : Selector
         }), DispatcherPriority.Loaded);
     }
 
+    private void TimeSelector_Unloaded(object sender, RoutedEventArgs e)
+    {
+        // 移除事件监听，防止内存泄漏
+        if (_cyclicPanel != null && _dpd != null)
+        {
+            _dpd.RemoveValueChanged(_cyclicPanel, HandlePanelVisbleIndicesChanged);
+        }
+
+        // 保存当前选中的索引
+        if (Items.Count > VisibleItemCount && _cyclicPanel?.VisibleItemIndices?.Count > 0)
+        {
+            SelectedIndex = _cyclicPanel.VisibleItemIndices[VisibleItemCount / 2];
+        }
+    }
+
+    /// <summary>
+    /// 更新所有项目的选中状态
+    /// </summary>
+    private void UpdateSelectedIndex()
+    {
+        // 避免重复更新，提高性能
+        if (_isUpdatingSelection)
+            return;
+
+        _isUpdatingSelection = true;
+        try
+        {
+            for (int i = 0; i < Items.Count; i++)
+            {
+                // 获取项目容器
+                var container = ItemContainerGenerator.ContainerFromIndex(i);
+                if (container is TimeSelectorItem item)
+                {
+                    bool shouldBeSelected = i == SelectedIndex;
+                    if (item.IsSelected != shouldBeSelected)
+                    {
+                        item.IsSelected = shouldBeSelected;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // 记录异常但不抛出，保持UI稳定性
+            System.Diagnostics.Debug.WriteLine($"UpdateSelectedIndex异常: {ex.Message}");
+        }
+        finally
+        {
+            _isUpdatingSelection = false;
+        }
+    }
+
+    static TimeSelector()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(TimeSelector), new FrameworkPropertyMetadata(typeof(TimeSelector)));
+    }
+
+    public TimeSelector()
+    {
+        GenerateItems();
+        Loaded += TimeSelector_Loaded;
+        Unloaded += TimeSelector_Unloaded;
+    }
+
     #endregion 构造函数
 
     #region 依赖属性
 
     #region VisibleItemCount
 
-    public int VisibleItemCount
-    {
-        get => (int)GetValue(VisibleItemCountProperty);
-        set => SetValue(VisibleItemCountProperty, value);
-    }
-
     public static readonly DependencyProperty VisibleItemCountProperty =
         DependencyProperty.Register(nameof(VisibleItemCount), typeof(int), typeof(TimeSelector),
             new PropertyMetadata(5, OnVisibleItemCountChanged, OnCoerceVisibleItemCount));
 
-    private static object OnCoerceVisibleItemCount(DependencyObject d, object baseValue)
+    public int VisibleItemCount
     {
-        var value = (int)baseValue;
-        var selector = (TimeSelector)d;
-
-        // 验证值的有效性
-        if (selector.Items.Count > 0 && value >= selector.Items.Count)
-        {
-            throw new ArgumentException("VisibleItemCount必须小于等于Items.Count。");
-        }
-        if (value <= 0) { throw new ArgumentException("VisibleItemCount必须大于0。"); }
-        if (value % 2 == 0) { throw new ArgumentException("VisibleItemCount必须是奇数。"); }
-
-        return baseValue;
-    }
-
-    private static void OnVisibleItemCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var selector = (TimeSelector)d;
-
-        selector.Dispatcher.BeginInvoke(new Action(() =>
-        {
-            selector.UpdateItemHeight();
-        }), DispatcherPriority.Loaded);
+        get => (int)GetValue(VisibleItemCountProperty);
+        set => SetValue(VisibleItemCountProperty, value);
     }
 
     private void UpdateItemHeight()
@@ -252,19 +231,48 @@ public class TimeSelector : Selector
         }
     }
 
+    private static object OnCoerceVisibleItemCount(DependencyObject d, object baseValue)
+    {
+        // Coerce 不抛异常 — 它在 WPF 属性系统内部调用,异常会破坏 DP 状态。
+        // 这里强制 clamp 到合法范围:奇数,3 ≤ v ≤ Items.Count
+        var value = (int)baseValue;
+        var selector = (TimeSelector)d;
+
+        if (value < 3) value = 3;
+        if (value % 2 == 0) value += 1;  // 强制奇数
+        if (selector.Items.Count > 0 && value > selector.Items.Count)
+        {
+            // 不能超过 Items.Count(否则中心索引算法越界)
+            value = selector.Items.Count;
+            if (value % 2 == 0) value -= 1;
+        }
+
+        return value;
+    }
+
+    private static void OnVisibleItemCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var selector = (TimeSelector)d;
+
+        selector.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            selector.UpdateItemHeight();
+        }), DispatcherPriority.Loaded);
+    }
+
     #endregion VisibleItemCount
 
     #region SelectedTimeValue
+
+    public static readonly DependencyProperty SelectedTimeValueProperty =
+        DependencyProperty.Register("SelectedTimeValue", typeof(int), typeof(TimeSelector),
+            new PropertyMetadata(0, OnSelectedTimeValueChanged));
 
     public int SelectedTimeValue
     {
         get { return (int)GetValue(SelectedTimeValueProperty); }
         set { SetValue(SelectedTimeValueProperty, value); }
     }
-
-    public static readonly DependencyProperty SelectedTimeValueProperty =
-        DependencyProperty.Register("SelectedTimeValue", typeof(int), typeof(TimeSelector),
-            new PropertyMetadata(0, OnSelectedTimeValueChanged));
 
     private static void OnSelectedTimeValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -308,20 +316,14 @@ public class TimeSelector : Selector
 
     #region SelectorType
 
-    public TimeSelectorType SelectorType
-    {
-        get { return (TimeSelectorType)GetValue(SelectorTypeProperty); }
-        set { SetValue(SelectorTypeProperty, value); }
-    }
-
     public static readonly DependencyProperty SelectorTypeProperty =
         DependencyProperty.Register("SelectorType", typeof(TimeSelectorType), typeof(TimeSelector),
             new PropertyMetadata(TimeSelectorType.Hour, OnSelectorTypeChanged));
 
-    private static void OnSelectorTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    public TimeSelectorType SelectorType
     {
-        var selector = (TimeSelector)d;
-        selector.GenerateItems();
+        get { return (TimeSelectorType)GetValue(SelectorTypeProperty); }
+        set { SetValue(SelectorTypeProperty, value); }
     }
 
     private void GenerateItems()
@@ -337,6 +339,12 @@ public class TimeSelector : Selector
             };
             Items.Add(item);
         }
+    }
+
+    private static void OnSelectorTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var selector = (TimeSelector)d;
+        selector.GenerateItems();
     }
 
     private IEnumerable<int> GetValues(TimeSelectorType type)
@@ -417,6 +425,7 @@ public class TimeSelector : Selector
             try
             {
                 UpdateSelectedIndex();
+
                 // 使用新方法滚动到中心位置
                 _cyclicPanel.ScrollToIndexCentered(SelectedIndex, false);
             }
@@ -431,28 +440,6 @@ public class TimeSelector : Selector
     #endregion 公共方法
 
     #region 重写方法
-
-    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
-    {
-        base.OnSelectionChanged(e);
-
-        if (SelectedIndex >= 0 && SelectedIndex < Items.Count)
-        {
-            // 查找选中的项目并更新值
-            if (Items[SelectedIndex] is TimeSelectorItem selectedItem)
-            {
-                int oldValue = SelectedTimeValue;
-                SelectedTimeValue = selectedItem.Value;
-
-                // 仅当值实际变化时触发事件
-                if (oldValue != selectedItem.Value)
-                {
-                    // 触发ValueChanged事件
-                    ValueChanged?.Invoke(this, new TimeValueChangedEventArgs(selectedItem.Value));
-                }
-            }
-        }
-    }
 
     public override void OnApplyTemplate()
     {
@@ -487,6 +474,28 @@ public class TimeSelector : Selector
         if (sizeInfo.HeightChanged)
         {
             UpdateItemHeight();
+        }
+    }
+
+    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+    {
+        base.OnSelectionChanged(e);
+
+        if (SelectedIndex >= 0 && SelectedIndex < Items.Count)
+        {
+            // 查找选中的项目并更新值
+            if (Items[SelectedIndex] is TimeSelectorItem selectedItem)
+            {
+                int oldValue = SelectedTimeValue;
+                SelectedTimeValue = selectedItem.Value;
+
+                // 仅当值实际变化时触发事件
+                if (oldValue != selectedItem.Value)
+                {
+                    // 触发ValueChanged事件
+                    ValueChanged?.Invoke(this, new TimeValueChangedEventArgs(selectedItem.Value));
+                }
+            }
         }
     }
 

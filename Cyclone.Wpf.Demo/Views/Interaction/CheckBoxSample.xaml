@@ -1,0 +1,346 @@
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.CheckBoxSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:CheckBoxViewModel}}"
+    d:DesignHeight="2200"
+    d:DesignWidth="1400"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="40,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  ============ Header ============  -->
+            <Border Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="56" Height="56" Background="{DynamicResource Background.Info}">
+                        <Path Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center"
+                              Data="M4 12 L 10 18 L 20 6" Stretch="None"
+                              Stroke="White" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                              StrokeStartLineCap="Round" StrokeThickness="3" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="32" FontWeight="Bold"
+                                       Foreground="{DynamicResource Foreground.Default}" Text="CheckBox" />
+                            <Border Margin="12,4,0,0" Padding="10,4" VerticalAlignment="Center"
+                                    Background="{DynamicResource Background.Info}">
+                                <TextBlock FontSize="12" FontWeight="Medium"
+                                           Foreground="White" Text="WPF 控件" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0" FontSize="14"
+                                   Foreground="{DynamicResource Foreground.Caption}"
+                                   Text="复选框——支持两态(Checked/Unchecked)和三态(含 Indeterminate)。Checked 时 Box 主色实心 + 白色 ✓ stroke,跟项目其他控件视觉一致。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ============ 主体 ============  -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ===== 左列 =====  -->
+                <StackPanel Grid.Column="0">
+
+                    <!--  ① 基础勾选 — 注册表单  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="基础勾选" Subtitle="两态 Checked / Unchecked">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,16" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="模拟注册表单 — IsChecked TwoWay binding。Hover 时边框变主色淡边,Checked 时整个 Box 主色实心 + 白色勾。" />
+
+                            <CheckBox Margin="0,0,0,12" Content="同意服务条款和隐私政策"
+                                      IsChecked="{Binding AcceptTerms, Mode=TwoWay}" />
+                            <CheckBox Margin="0,0,0,12" Content="订阅产品更新邮件"
+                                      IsChecked="{Binding SubscribeNewsletter, Mode=TwoWay}" />
+                            <CheckBox Margin="0,0,0,16" Content="记住我的登录状态"
+                                      IsChecked="{Binding RememberMe, Mode=TwoWay}" />
+
+                            <Border Padding="12,8" Background="{DynamicResource Background.Header}"
+                                    BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="AcceptTerms = " />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding AcceptTerms, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="SubscribeNewsletter = " />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SubscribeNewsletter, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                                        <Run Text="RememberMe = " />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding RememberMe, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ② 禁用态 + 多种 Content  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="禁用 + 多种 Content" Subtitle="文字 / 富内容 / 无文字">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="禁用态" />
+                            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                                <CheckBox Margin="0,0,16,0" Content="勾选(禁用)" IsChecked="True" IsEnabled="False" />
+                                <CheckBox Margin="0,0,16,0" Content="未勾(禁用)" IsEnabled="False" />
+                                <CheckBox Content="三态(禁用)" IsChecked="{x:Null}" IsEnabled="False" IsThreeState="True" />
+                            </StackPanel>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="富内容(StackPanel)" />
+                            <CheckBox Margin="0,0,0,16" IsChecked="True">
+                                <StackPanel>
+                                    <TextBlock FontWeight="Medium" Text="高级模式" />
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource Foreground.Caption}"
+                                               Text="开启后显示更多调试选项和实验性功能" />
+                                </StackPanel>
+                            </CheckBox>
+
+                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="无文字(只显示 Box)" />
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox Margin="0,0,8,0" />
+                                <CheckBox Margin="0,0,8,0" IsChecked="True" />
+                                <CheckBox IsChecked="{x:Null}" IsThreeState="True" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+
+                <!--  ===== 右列 =====  -->
+                <StackPanel Grid.Column="2">
+
+                    <!--  ③ 三态父子联动 (Todo)  -->
+                    <cy:Card Margin="0,0,0,20">
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="三态父子联动" Subtitle="IsThreeState 经典场景:全选 / 部分选 / 未选">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,16" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="父 CheckBox 用 IsThreeState=True,根据子项状态自动显示:全选(✓) / 部分选(横线) / 未选(空)。子→父 自动计算,父→子 一键全选/取消。" />
+
+                            <Border Padding="12,8" Margin="0,0,0,12"
+                                    Background="{DynamicResource Background.Header}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1">
+                                <CheckBox FontWeight="Medium"
+                                          IsChecked="{Binding ParentChecked, Mode=TwoWay}"
+                                          IsThreeState="True">
+                                    <TextBlock>
+                                        <Run Text="任务清单 — 已完成" />
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CheckedCount, Mode=OneWay}" />
+                                        <Run Text="/" />
+                                        <Run Text="{Binding TotalCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                </CheckBox>
+                            </Border>
+
+                            <ItemsControl Margin="20,0,0,0" ItemsSource="{Binding Todos}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:TodoItem}">
+                                        <CheckBox Margin="0,0,0,6"
+                                                  Content="{Binding Title}"
+                                                  IsChecked="{Binding IsDone, Mode=TwoWay}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                <Button Margin="0,0,8,0" Padding="14,6"
+                                        Command="{Binding CheckAllCommand}" Content="全选" />
+                                <Button Padding="14,6"
+                                        Command="{Binding UncheckAllCommand}" Content="全不选" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+
+                    <!--  ④ 键盘焦点  -->
+                    <cy:Card>
+                        <cy:Card.Header>
+                            <cy:CardHeader Title="键盘焦点" Subtitle="Tab 切换 + Space 切换">
+                                <cy:CardHeader.Icon>
+                                    <Border Style="{StaticResource SectionNumberStyle}">
+                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
+                                    </Border>
+                                </cy:CardHeader.Icon>
+                            </cy:CardHeader>
+                        </cy:Card.Header>
+
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,12" FontSize="13"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="先点一下任意 CheckBox 让控件获得焦点,再用 Tab 在三个之间切换 — Box 外圈出现 2px focus ring。按 Space 切换勾选状态。" />
+
+                            <StackPanel Orientation="Vertical">
+                                <CheckBox Margin="0,0,0,8" Content="选项 A" />
+                                <CheckBox Margin="0,0,0,8" Content="选项 B" />
+                                <CheckBox Content="选项 C" />
+                            </StackPanel>
+                        </StackPanel>
+                    </cy:Card>
+                </StackPanel>
+            </Grid>
+
+            <!--  ============ 底部 ============  -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <cy:Card Grid.Column="0">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="XAML 示例">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+                    <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                        <![CDATA[<!-- 基础勾选 -->
+<CheckBox Content="同意服务条款"
+          IsChecked="{Binding AcceptTerms, Mode=TwoWay}" />
+
+<!-- 三态 -->
+<CheckBox Content="全选"
+          IsChecked="{Binding ParentChecked, Mode=TwoWay}"
+          IsThreeState="True" />
+
+<!-- 富内容 -->
+<CheckBox IsChecked="{Binding HighMode, Mode=TwoWay}">
+    <StackPanel>
+        <TextBlock FontWeight="Medium" Text="高级模式" />
+        <TextBlock FontSize="11" Text="开启后显示调试选项" />
+    </StackPanel>
+</CheckBox>
+
+<!-- 禁用 -->
+<CheckBox Content="已锁定"
+          IsChecked="True" IsEnabled="False" />]]>
+                    </TextBox>
+                </cy:Card>
+
+                <cy:Card Grid.Column="2">
+                    <cy:Card.Header>
+                        <cy:CardHeader Title="设计要点">
+                            <cy:CardHeader.Icon>
+                                <Border Style="{StaticResource SectionNumberStyle}">
+                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
+                                </Border>
+                            </cy:CardHeader.Icon>
+                        </cy:CardHeader>
+                    </cy:Card.Header>
+
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="实心 Box" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="Checked 时 Box 整个变主色实心 + 白色 ✓ stroke,视觉对比强烈"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="焦点 ring" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="键盘焦点态显示 2px 外圈 ring,可访问性反馈"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock FontFamily="Consolas" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource Foreground.Link}" Text="三态完整" />
+                            <TextBlock Margin="0,4,0,0" FontSize="12"
+                                       Foreground="{DynamicResource Foreground.Caption}"
+                                       Text="Indeterminate 用横线代替勾,同样主色实心背景,跟 Checked 视觉权重对等"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </cy:Card>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

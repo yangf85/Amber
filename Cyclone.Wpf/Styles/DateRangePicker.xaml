@@ -1,62 +1,236 @@
-﻿<ResourceDictionary
+<!--
+    ============================================================================
+    DateRangePicker 完整样式 (含 DayCell + MonthView + DateRangePicker)
+    
+    DayCell 视觉规则 (按优先级):
+    - IsBlackout    → 灰色禁用,鼠标不可点
+    - 非当前月       → 浅灰显示,仍可点 (允许跨月选)
+    - IsRangeStart  → 主色实心,白字,左半圆角
+    - IsRangeEnd    → 主色实心,白字,右半圆角
+    - IsInRange     → 主色淡背景,字色不变
+    - IsInPreview   → 主色更淡背景,虚化感
+    - IsToday       → 加粗字,边框 dot 标识
+    - Hover         → 浅灰背景
+    
+    设计哲学:Element UI / AntD 风格,主色选区 + hover 预览渐进交互
+    ============================================================================
+-->
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="DateRangePicker.OpenButtonStyle" TargetType="{x:Type Button}">
-        <Setter Property="Foreground" Value="{DynamicResource Icon.Foreground.Default}" />
+    <!--
+        ===========================================================
+        DayCell 样式 — 单个日期格子
+        ===========================================================
+    -->
+    <Style x:Key="DayCell.Style.Basic" TargetType="{x:Type ctl:DayCell}">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <Grid Background="{TemplateBinding Background}">
-                        <Path
-                            x:Name="IconPath"
-                            Width="16"
-                            Height="16"
-                            Data="M384 256h256V213.333333h85.333333v42.666667h128v554.666667H170.666667V256h128V213.333333h85.333333v42.666667z m384 85.333333H256v384h512V341.333333z m-341.333333 85.333334v85.333333H341.333333v-85.333333h85.333334z m128 0v85.333333h-85.333334v-85.333333h85.333334z m128 0v85.333333h-85.333334v-85.333333h85.333334z m-256 128v85.333333H341.333333v-85.333333h85.333334z m128 0v85.333333h-85.333334v-85.333333h85.333334z m128 0v85.333333h-85.333334v-85.333333h85.333334z"
-                            Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Stretch="Uniform" />
+                <ControlTemplate TargetType="{x:Type ctl:DayCell}">
+                    <Grid>
+                        <!--  范围淡底 (撑满格子,无圆角)  -->
+                        <Border x:Name="RangeBackground"
+                                Background="Transparent"
+                                SnapsToDevicePixels="True" />
+                        <!--  端点实心圆 (在淡底之上,确保覆盖)  -->
+                        <Border x:Name="EndpointCircle"
+                                Width="28" Height="28"
+                                Background="Transparent"
+                                CornerRadius="14"
+                                SnapsToDevicePixels="True" />
+                        <!--  Today 标识 (圆环边框)  -->
+                        <Border x:Name="TodayRing"
+                                Width="28" Height="28"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                SnapsToDevicePixels="True" />
+                        <!--  数字  -->
+                        <TextBlock x:Name="DayText"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontSize="13"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   Text="{TemplateBinding DayText}" />
+                        <!--  禁止符号 (⊘) — IsBlackout 时显示,盖在数字上  -->
+                        <Grid x:Name="BlackoutGlyph" Width="22" Height="22" Visibility="Collapsed">
+                            <Ellipse Stroke="{DynamicResource Foreground.InputError}" StrokeThickness="1.5" />
+                            <!--  斜线从左上到右下 (圆心 11,11,半径 11,√2/2 ≈ 7.78 偏移)  -->
+                            <Path Data="M 3.2 3.2 L 18.8 18.8"
+                                  Stretch="None"
+                                  Stroke="{DynamicResource Foreground.InputError}"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeThickness="1.5" />
+                        </Grid>
                     </Grid>
+
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource Icon.Foreground.Hover}" />
+                        <!--  非当前月 — 浅灰,可点  -->
+                        <Trigger Property="IsCurrentMonth" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
                         </Trigger>
-                        <DataTrigger Binding="{Binding Path=IsOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ctl:DateRangePicker}}" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource Icon.Foreground.Selected}" />
-                            <Setter TargetName="IconPath" Property="Data" Value="M384 256h256V213.333333h85.333333v42.666667h128v554.666667H170.666667V256h128V213.333333h85.333333v42.666667zM256 341.333333v384h512V341.333333H256z m170.666667 42.666667v85.333333H298.666667V384h128z" />
-                        </DataTrigger>
+
+                        <!--  Today — 圆环 + 主色字 (优先级低于 RangeStart/End)  -->
+                        <Trigger Property="IsToday" Value="True">
+                            <Setter TargetName="TodayRing" Property="BorderBrush" Value="{DynamicResource Background.Selected}" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="Foreground" Value="{DynamicResource Background.Selected}" />
+                        </Trigger>
+
+                        <!--  Hover 视觉反馈 — 由父 MonthView 通过 hit-test 控制(不用 IsMouseOver 因为拖动 capture 在 grid 层级,IsMouseOver 不一定准确)  -->
+                        <Trigger Property="IsHovered" Value="True">
+                            <Setter TargetName="EndpointCircle" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+
+                        <!--  IsInPreview — 主色更淡背景  -->
+                        <Trigger Property="IsInPreview" Value="True">
+                            <Setter TargetName="RangeBackground" Property="Background" Value="{DynamicResource Selection.Background}" />
+                        </Trigger>
+
+                        <!--  IsInRange — 主色淡背景  -->
+                        <Trigger Property="IsInRange" Value="True">
+                            <Setter TargetName="RangeBackground" Property="Background" Value="{DynamicResource Selection.Background}" />
+                        </Trigger>
+
+                        <!--  IsRangeStart — 主色实心 + 白字 (覆盖 Hover)  -->
+                        <Trigger Property="IsRangeStart" Value="True">
+                            <Setter TargetName="EndpointCircle" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter TargetName="TodayRing" Property="BorderBrush" Value="Transparent" />
+                        </Trigger>
+
+                        <!--  IsRangeEnd — 同 RangeStart  -->
+                        <Trigger Property="IsRangeEnd" Value="True">
+                            <Setter TargetName="EndpointCircle" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter TargetName="TodayRing" Property="BorderBrush" Value="Transparent" />
+                        </Trigger>
+
+                        <!--  IsBlackout — 灰色禁用,不可点,显示红色禁止符号  -->
+                        <Trigger Property="IsBlackout" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                            <Setter Property="IsHitTestVisible" Value="False" />
+                            <Setter TargetName="DayText" Property="Opacity" Value="0.4" />
+                            <Setter TargetName="BlackoutGlyph" Property="Visibility" Value="Visible" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers />
     </Style>
 
-    <Style x:Key="DateRangePicker.TextBoxStyle" TargetType="{x:Type DatePickerTextBox}">
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Style BasedOn="{StaticResource DayCell.Style.Basic}" TargetType="{x:Type ctl:DayCell}" />
+
+    <!--
+        ===========================================================
+        MonthView 样式 — 月份导航 + 周标头 + 6x7 日期格
+        ===========================================================
+    -->
+
+    <!--  月份导航按钮  -->
+    <Style x:Key="MonthView.NavButton.Style" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="IsReadOnly" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
-                    <Border
-                        x:Name="RootBorder"
-                        Background="Transparent"
-                        BorderThickness="0">
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="RootBorder" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MonthView.Style.Basic" TargetType="{x:Type ctl:MonthView}">
+        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ctl:MonthView}">
+                    <Border Background="{TemplateBinding Background}" Padding="12">
                         <Grid>
-                            <ScrollViewer
-                                x:Name="PART_ContentHost"
-                                Padding="2"
-                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Background="Transparent" />
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!--  Row 0: 月份导航  -->
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="PART_PrevButton"
+                                        Grid.Column="0"
+                                        Style="{StaticResource MonthView.NavButton.Style}">
+                                    <Path Width="8" Height="12"
+                                          Data="M 8 0 L 0 6 L 8 12"
+                                          Stretch="None"
+                                          Stroke="{DynamicResource Foreground.Default}"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeThickness="1.5" />
+                                </Button>
+                                <TextBlock x:Name="PART_HeaderText"
+                                           Grid.Column="1"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="14" FontWeight="Medium"
+                                           Foreground="{DynamicResource Foreground.Default}" />
+                                <Button x:Name="PART_NextButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource MonthView.NavButton.Style}">
+                                    <Path Width="8" Height="12"
+                                          Data="M 0 0 L 8 6 L 0 12"
+                                          Stretch="None"
+                                          Stroke="{DynamicResource Foreground.Default}"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeThickness="1.5" />
+                                </Button>
+                            </Grid>
+
+                            <!--  Row 1: 周标头 (七列文字,cs 里填内容)  -->
+                            <Grid x:Name="PART_WeekHeader" Grid.Row="1" Height="28" Margin="0,0,0,4">
+                                <Grid.Resources>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="Foreground" Value="{DynamicResource Foreground.Inactive}" />
+                                    </Style>
+                                </Grid.Resources>
+                            </Grid>
+
+                            <!--  Row 2: 6×7 日期格 (cs 里 BuildCells 填充)  -->
+                            <Grid x:Name="PART_DayGrid" Grid.Row="2" />
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -64,94 +238,215 @@
         </Setter>
     </Style>
 
-    <Style
-        x:Key="DateRangePicker.Style.Basic"
-        BasedOn="{StaticResource Control.Style.Basic}"
-        TargetType="{x:Type ctl:DateRangePicker}">
-        <Setter Property="IsTodayHighlighted" Value="True" />
-        <Setter Property="SelectedDateFormat" Value="yyyy-MM-dd" />
+    <Style BasedOn="{StaticResource MonthView.Style.Basic}" TargetType="{x:Type ctl:MonthView}" />
+
+    <!--
+        ===========================================================
+        预定义范围 ListBoxItem 样式
+        ===========================================================
+    -->
+    <Style x:Key="PredefinedRange.ListBoxItem.Style" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border x:Name="RootBorder"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        ===========================================================
+        DateRangePicker 主控件样式
+        ===========================================================
+    -->
+
+    <!--  日期文本框  -->
+    <Style x:Key="DateRangePicker.DateText.Style" TargetType="{x:Type TextBlock}">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Padding" Value="8,0" />
+    </Style>
+
+    <Style x:Key="DateRangePicker.Style.Basic"
+           BasedOn="{StaticResource Control.Style.Basic}"
+           TargetType="{x:Type ctl:DateRangePicker}">
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
+        <Setter Property="MinWidth" Value="240" />
+        <Setter Property="Background" Value="{DynamicResource Background.Container}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ctl:DateRangePicker}">
-                    <Grid x:Name="RootGrid">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Border
-                            x:Name="RootBoder"
-                            Grid.Column="0"
-                            Padding="{TemplateBinding Margin}"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            SnapsToDevicePixels="True">
-                            <Grid x:Name="PART_Root">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <DatePickerTextBox
-                                    x:Name="PART_StartTextBox"
-                                    Grid.Column="0"
-                                    HorizontalContentAlignment="Left"
-                                    Style="{StaticResource DateRangePicker.TextBoxStyle}" />
-                                <ContentPresenter
-                                    Grid.Column="1"
-                                    Margin="2,0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                    Content="{TemplateBinding Seperater}" />
-                                <DatePickerTextBox
-                                    x:Name="PART_EndTextBox"
-                                    Grid.Column="2"
-                                    HorizontalContentAlignment="Right"
-                                    Style="{StaticResource DateRangePicker.TextBoxStyle}" />
-                                <Button
-                                    x:Name="PART_OpenButton"
-                                    Grid.Column="3"
-                                    Margin="0,0,3,0"
-                                    HorizontalAlignment="Right"
-                                    Focusable="False"
-                                    Style="{StaticResource DateRangePicker.OpenButtonStyle}" />
+                    <Grid>
+                        <!--  ToggleButton 覆盖整个控件区域,点哪都能开关 Popup  -->
+                        <ToggleButton x:Name="PART_ToggleButton"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      Cursor="{TemplateBinding Cursor}"
+                                      Focusable="False"
+                                      IsChecked="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                      OverridesDefaultStyle="True">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border x:Name="RootBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            SnapsToDevicePixels="True">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
-                                <Popup
-                                    x:Name="PART_Container"
-                                    AllowsTransparency="True"
-                                    IsOpen="{Binding IsOpen, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                                    Placement="Bottom"
-                                    PlacementTarget="{Binding ElementName=RootBoder}"
-                                    StaysOpen="False">
-                                    <Grid>
-                                        <Calendar
-                                            x:Name="PART_Calendar"
-                                            IsTodayHighlighted="{TemplateBinding IsTodayHighlighted}"
-                                            SelectionMode="MultipleRange" />
+                                            <!--  起始日期文本  -->
+                                            <TextBlock Grid.Column="0"
+                                                       Style="{StaticResource DateRangePicker.DateText.Style}"
+                                                       Text="{Binding RangeStart, RelativeSource={RelativeSource AncestorType=ctl:DateRangePicker}, StringFormat={}{0:yyyy-MM-dd}}" />
+                                            <!--  分隔符  -->
+                                            <ContentPresenter Grid.Column="1"
+                                                              Margin="4,0"
+                                                              VerticalAlignment="Center"
+                                                              Content="{Binding Separator, RelativeSource={RelativeSource AncestorType=ctl:DateRangePicker}}"
+                                                              TextElement.Foreground="{DynamicResource Foreground.Inactive}" />
+                                            <!--  结束日期文本  -->
+                                            <TextBlock Grid.Column="2"
+                                                       Style="{StaticResource DateRangePicker.DateText.Style}"
+                                                       Text="{Binding RangeEnd, RelativeSource={RelativeSource AncestorType=ctl:DateRangePicker}, StringFormat={}{0:yyyy-MM-dd}}" />
+                                            <!--  日历图标  -->
+                                            <Path Grid.Column="3"
+                                                  Width="14" Height="14"
+                                                  Margin="6,0,8,0"
+                                                  Data="M 0 3 L 14 3 L 14 13 L 0 13 Z M 0 5 L 14 5 M 3 0 L 3 5 M 11 0 L 11 5"
+                                                  Stretch="None"
+                                                  Stroke="{DynamicResource Foreground.Inactive}"
+                                                  StrokeThickness="1.2" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource Border.Focused}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               IsOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                               Placement="Bottom"
+                               PlacementTarget="{Binding ElementName=PART_ToggleButton}"
+                               StaysOpen="False">
+                            <Border Margin="0,4,8,8"
+                                    Background="{DynamicResource Background.Container}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="12" Opacity="0.18"
+                                                      ShadowDepth="2" Color="Black" />
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition x:Name="PredefinedColumn" Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  左侧:预定义范围列表  -->
+                                    <Border x:Name="PredefinedPanel"
+                                            Grid.Column="0"
+                                            BorderBrush="{DynamicResource Border.Default}"
+                                            BorderThickness="0,0,1,0">
+                                        <ScrollViewer Width="110"
+                                                      MaxHeight="320"
+                                                      HorizontalScrollBarVisibility="Disabled"
+                                                      VerticalScrollBarVisibility="Auto">
+                                            <ListBox x:Name="PART_PredefinedList"
+                                                     Background="Transparent"
+                                                     BorderThickness="0"
+                                                     ItemContainerStyle="{StaticResource PredefinedRange.ListBoxItem.Style}"
+                                                     ItemsSource="{Binding PredefinedRanges, RelativeSource={RelativeSource TemplatedParent}}">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type ctl:IPredefinedRange}">
+                                                        <TextBlock Text="{Binding Name}" />
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </ScrollViewer>
+                                    </Border>
+
+                                    <!--  右侧:月历 + 底部确定/取消按钮  -->
+                                    <Grid Grid.Column="1">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <ctl:MonthView x:Name="PART_MonthView"
+                                                       Grid.Row="0"
+                                                       FirstDayOfWeek="{Binding FirstDayOfWeek, RelativeSource={RelativeSource TemplatedParent}}"
+                                                       IsTodayHighlighted="{Binding IsTodayHighlighted, RelativeSource={RelativeSource TemplatedParent}}"
+                                                       BlackoutDates="{Binding BlackoutDates, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                                        <Border Grid.Row="1"
+                                                Padding="12,8"
+                                                BorderBrush="{DynamicResource Border.Default}"
+                                                BorderThickness="0,1,0,0">
+                                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                                <Button x:Name="PART_CancelButton"
+                                                        Width="64" Margin="0,0,8,0" Padding="0,4"
+                                                        Content="取消" />
+                                                <Button x:Name="PART_ConfirmButton"
+                                                        Width="64" Padding="0,4"
+                                                        Background="{DynamicResource Background.Selected}"
+                                                        BorderBrush="{DynamicResource Background.Selected}"
+                                                        Content="确定"
+                                                        Foreground="White" />
+                                            </StackPanel>
+                                        </Border>
                                     </Grid>
-                                </Popup>
-                            </Grid>
-                        </Border>
-                        <ComboBox
-                            x:Name="PART_ComboBox"
-                            Grid.Column="1"
-                            Height="{TemplateBinding Height}"
-                            MinWidth="75"
-                            Margin="3,0,0,0"
-                            Visibility="{Binding Path=IsShowPredfine, Converter={x:Static conv:VisibilityConverter.VisibleWhenTrue}, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                </Grid>
+                            </Border>
+                        </Popup>
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <Trigger SourceName="RootBoder" Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{DynamicResource Border.Hover}" />
+                        <Trigger Property="ShowPredefinedRanges" Value="False">
+                            <Setter TargetName="PredefinedPanel" Property="Visibility" Value="Collapsed" />
                         </Trigger>
-                        <Trigger Property="IsOpen" Value="True">
-                            <Setter Property="BorderBrush" Value="{DynamicResource Border.Editing}" />
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="Cursor" Value="Arrow" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
