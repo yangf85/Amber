@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.LoadingBoxSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,72 +6,51 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     d:DataContext="{d:DesignInstance Type={x:Type local:LoadingBoxViewModel}}"
-    d:DesignHeight="3200"
-    d:DesignWidth="1400"
+    d:DesignHeight="3800"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
-        <Style x:Key="HintTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Margin" Value="0,0,0,12" />
-        </Style>
-
-        <Style x:Key="FieldLabelStyle" TargetType="{x:Type TextBlock}">
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
-            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
-        <Style x:Key="ResultBoxStyle" TargetType="{x:Type Border}">
-            <Setter Property="Padding" Value="14,12" />
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Margin" Value="0,12,0,0" />
-        </Style>
-
-        <Style x:Key="ResultLabelStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-        </Style>
-
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
 
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Padding" Value="12,10" />
@@ -95,29 +74,26 @@
             BasedOn="{StaticResource PropTableCellStyle}"
             TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
 
-        <!--  Card 内的"演示卡片"——下方放在 LoadingBox 内被遮盖的"内容"  -->
+        <!--  演示卡片 — LoadingBox 内被遮盖的内容  -->
         <Style x:Key="DemoContentCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource Background.Container}" />
             <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="20" />
         </Style>
-
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
@@ -129,7 +105,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"
-                            Fill="White"
+                            Fill="{DynamicResource Text.Invert}"
                             Stretch="Uniform" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -147,655 +123,540 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
-                            Foreground="{DynamicResource Foreground.Container}"
-                            Text="加载遮罩控件——在内容之上叠加 mask + 加载指示器，IsLoading 切换控制显隐与动画启停。内置 6 种 indicator（Ring/Chase/Pulse/Particle/FlipCube/Tesseract），支持自定义 mask 样式。" />
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="加载遮罩控件 — 在内容之上叠加 mask + 加载指示器, IsLoading 切换控制显隐与动画启停。内置 6 种 indicator (Ring / Chase / Pulse / Particle / FlipCube / Tesseract), 支持自定义 mask 样式。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体卡片 ============  -->
-            <StackPanel Grid.Row="1">
+            <!--  ========== ① 基础切换 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础切换"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="IsLoading 控制 mask + indicator 显隐" />
 
-                <!--  ① 基础切换  -->
-                <cy:Card Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="基础切换" Subtitle="IsLoading 控制 mask + indicator 显隐">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="最简场景: 把任意内容放进 LoadingBox, 绑定 IsLoading 即可。loading 状态下 mask 半透明黑覆盖内容, indicator 显示并自动开始动画 — 切换 IsLoading 自动启停。" />
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="280" />
-                        </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
 
-                        <!--  左：演示  -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="最简场景：把任意内容放进 LoadingBox，绑定 IsLoading 即可。loading 状态下 mask 半透明黑覆盖内容，indicator 显示并自动开始动画——切换 IsLoading 自动启停。" />
-
-                            <cy:LoadingBox
-                                Height="280"
-                                HorizontalAlignment="Stretch"
-                                IsLoading="{Binding IsLoadingBasic}">
-                                <Border Style="{StaticResource DemoContentCardStyle}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="18"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="数据卡片" />
-                                        <TextBlock
-                                            Margin="0,8,0,0"
-                                            FontSize="13"
-                                            Foreground="{DynamicResource Foreground.Container}"
-                                            Text="这是一段被 LoadingBox 包裹的内容。当 IsLoading=true 时，上面会出现半透明遮罩 + 加载指示器。"
-                                            TextWrapping="Wrap" />
-                                        <Border
-                                            Margin="0,16,0,0"
-                                            Padding="12"
-                                            Background="{DynamicResource Background.InfoContainer}"
-                                            BorderBrush="{DynamicResource Border.Info}"
-                                            BorderThickness="1">
-                                            <TextBlock
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.InfoContainer}"
-                                                Text="提示框：mask 透明度合适时，下方内容仍能模糊看见——告诉 user 数据未消失，只是在更新。"
-                                                TextWrapping="Wrap" />
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
-                            </cy:LoadingBox>
-                        </StackPanel>
-
-                        <!--  右：控制  -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="IsLoading：" />
-                            <cy:SwitchButton IsChecked="{Binding IsLoadingBasic}" />
-
-                            <Border Style="{StaticResource ResultBoxStyle}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource ResultLabelStyle}">
-                                        <Run Text="状态：" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding IsLoadingBasic, Mode=OneWay}" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </cy:Card>
-
-                <!--  ② 6 种 indicator 切换  -->
-                <cy:Card Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="6 种内置加载指示器" Subtitle="Ring / Chase / Pulse / Particle / FlipCube / Tesseract">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="220" />
-                        </Grid.ColumnDefinitions>
-
-                        <!--  左：演示  -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="切换 SelectedIndicatorType 时 VM 重新 new 一个 indicator 实例赋给 LoadingContent——避免共享同一 Visual instance（多 LoadingBox 场景必崩）。LoadingBox.OnLoadingContentChanged 自动解绑旧 indicator + 绑定新 indicator 的 IsActive。" />
-
-                            <cy:LoadingBox
-                                Height="280"
-                                IsLoading="True"
-                                LoadingContent="{Binding CurrentIndicator}">
-                                <Border Style="{StaticResource DemoContentCardStyle}" />
-                            </cy:LoadingBox>
-                        </StackPanel>
-
-                        <!--  右：ComboBox 选 indicator 类型  -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="选择 Indicator：" />
-                            <ComboBox
-                                FontSize="13"
-                                ItemsSource="{Binding IndicatorTypes}"
-                                SelectedItem="{Binding SelectedIndicatorType}" />
-
-                            <Border Style="{StaticResource ResultBoxStyle}">
-                                <TextBlock Style="{StaticResource ResultLabelStyle}">
-                                    <Run Text="当前：" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedIndicatorType, Mode=OneWay}" />
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </cy:Card>
-
-                <!--  ③ LoadingRing 属性调节  -->
-                <cy:Card Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="LoadingRing 属性调节" Subtitle="实时调整 RingSize / Thickness / RotationSpeed / ArcLength">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="320" />
-                        </Grid.ColumnDefinitions>
-
-                        <!--  左：演示  -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="LoadingRing 的属性都是 DependencyProperty——可以直接 binding 到 VM 字段。值变化时控件内部自动重建几何或重启动画。" />
-
-                            <cy:LoadingBox Height="280" IsLoading="True">
-                                <cy:LoadingBox.LoadingContent>
-                                    <cy:LoadingRing
-                                        ArcLength="{Binding Card3ArcLength}"
-                                        RingColor="White"
-                                        RingSize="{Binding Card3RingSize}"
-                                        RingThickness="{Binding Card3RingThickness}"
-                                        RotationSpeed="{Binding Card3RotationSpeed}" />
-                                </cy:LoadingBox.LoadingContent>
-                                <Border Style="{StaticResource DemoContentCardStyle}" />
-                            </cy:LoadingBox>
-                        </StackPanel>
-
-                        <!--  右：4 个 Slider  -->
-                        <StackPanel Grid.Column="2">
-                            <StackPanel Margin="0,0,0,12">
-                                <Grid>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Container}"
-                                        Text="RingSize" />
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        HorizontalAlignment="Right"
-                                        Text="{Binding Card3RingSize, StringFormat=F0}" />
-                                </Grid>
-                                <Slider
-                                    Maximum="120"
-                                    Minimum="20"
-                                    Value="{Binding Card3RingSize}" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <Grid>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Container}"
-                                        Text="RingThickness" />
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        HorizontalAlignment="Right"
-                                        Text="{Binding Card3RingThickness, StringFormat=F1}" />
-                                </Grid>
-                                <Slider
-                                    Maximum="12"
-                                    Minimum="1"
-                                    Value="{Binding Card3RingThickness}" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <Grid>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Container}"
-                                        Text="RotationSpeed (秒/圈)" />
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        HorizontalAlignment="Right"
-                                        Text="{Binding Card3RotationSpeed, StringFormat=F2}" />
-                                </Grid>
-                                <Slider
-                                    Maximum="3.0"
-                                    Minimum="0.3"
-                                    Value="{Binding Card3RotationSpeed}" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <Grid>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Container}"
-                                        Text="ArcLength (度)" />
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        HorizontalAlignment="Right"
-                                        Text="{Binding Card3ArcLength, StringFormat=F0}" />
-                                </Grid>
-                                <Slider
-                                    Maximum="350"
-                                    Minimum="30"
-                                    Value="{Binding Card3ArcLength}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </cy:Card>
-
-                <!--  ④ Mask 样式  -->
-                <cy:Card Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="自定义 MaskBackground" Subtitle="切换不同的遮罩 brush（5 种预设 + 自定义颜色）">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="280" />
-                        </Grid.ColumnDefinitions>
-
-                        <!--  左：演示  -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="MaskBackground 接受任意 Brush——半透明黑（默认）、半透明白、彩色调、Transparent（无遮罩）等。注意：透明度太低会让下方内容完全可见，造成 user 不知道在加载；太高会完全遮挡。一般 80-CC 透明度（半透明）最合适。" />
-
-                            <cy:LoadingBox
-                                Height="280"
-                                IsLoading="True"
-                                MaskBackground="{Binding SelectedMaskPreset.Brush}">
-                                <cy:LoadingBox.LoadingContent>
-                                    <cy:LoadingRing RingColor="White" RingSize="56" />
-                                </cy:LoadingBox.LoadingContent>
-                                <Border Style="{StaticResource DemoContentCardStyle}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="18"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="原始内容" />
-                                        <TextBlock
-                                            Margin="0,8,0,0"
-                                            FontSize="13"
-                                            Foreground="{DynamicResource Foreground.Container}"
-                                            Text="切换右侧不同的 mask 预设，观察被遮挡的视觉效果差异——透明度越低，下方内容越可见。"
-                                            TextWrapping="Wrap" />
-                                        <Rectangle
-                                            Height="80"
-                                            Margin="0,16,0,0"
-                                            Fill="{DynamicResource Background.InfoContainer}" />
-                                    </StackPanel>
-                                </Border>
-                            </cy:LoadingBox>
-                        </StackPanel>
-
-                        <!--  右：ComboBox 选 mask 预设（ItemTemplate 显示色块 + 名称）  -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="选择 Mask 预设：" />
-                            <ComboBox
-                                FontSize="13"
-                                ItemsSource="{Binding MaskPresets}"
-                                SelectedItem="{Binding SelectedMaskPreset}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type local:MaskPreset}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Rectangle
-                                                Width="20"
-                                                Height="20"
-                                                Margin="0,0,8,0"
-                                                Fill="{Binding Brush}"
-                                                Stroke="{DynamicResource Border.Default}"
-                                                StrokeThickness="1" />
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <Border Style="{StaticResource ResultBoxStyle}">
-                                <TextBlock Style="{StaticResource ResultLabelStyle}">
-                                    <Run Text="当前：" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SelectedMaskPreset.Name, Mode=OneWay}" />
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </cy:Card>
-
-                <!--  ⑤ 综合实战 — 异步加载  -->
-                <cy:Card>
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="综合实战 — 异步数据加载" Subtitle="点击按钮触发 Task.Delay 模拟网络请求，IsLoading 自动响应">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource HintTextStyle}" Text="真实业务场景：刷新数据时把 IsLoading 设为 true，await 异步任务，完成后置回 false。LoadingBox 自动管理 mask + indicator 启停。Button 在 loading 期间禁用避免重复触发。" />
-
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                            <Button
-                                Padding="20,10"
-                                Command="{Binding RefreshDataCommand}"
-                                Content="🔄 刷新数据（2.5秒模拟）" />
-                            <Border
-                                Margin="16,0,0,0"
-                                Padding="12,8"
-                                VerticalAlignment="Center"
-                                Background="{DynamicResource Background.Header}">
-                                <TextBlock FontFamily="Consolas" FontSize="12" VerticalAlignment="Center">
-                                    <Run Text="累计刷新次数: " />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding RefreshCount, Mode=OneWay}" />
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-
-                        <cy:LoadingBox
-                            Height="380"
-                            IsLoading="{Binding IsDataLoading}">
-                            <cy:LoadingBox.LoadingContent>
-                                <cy:LoadingRing RingColor="White" RingSize="48" />
-                            </cy:LoadingBox.LoadingContent>
-                            <Border Style="{StaticResource DemoContentCardStyle}">
-                                <ItemsControl ItemsSource="{Binding DataItems}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type local:DataItem}">
-                                            <Border
-                                                Margin="0,0,0,8"
-                                                Padding="14,12"
-                                                Background="{DynamicResource Background.Header}"
-                                                BorderBrush="{DynamicResource Border.Default}"
-                                                BorderThickness="1">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0">
-                                                        <TextBlock
-                                                            FontSize="14"
-                                                            FontWeight="Medium"
-                                                            Foreground="{DynamicResource Foreground.Default}"
-                                                            Text="{Binding Title}" />
-                                                        <TextBlock
-                                                            Margin="0,4,0,0"
-                                                            FontSize="12"
-                                                            Foreground="{DynamicResource Foreground.Container}"
-                                                            Text="{Binding Subtitle}" />
-                                                    </StackPanel>
-                                                    <Border
-                                                        Grid.Column="1"
-                                                        Padding="8,4"
-                                                        VerticalAlignment="Center"
-                                                        Background="{DynamicResource Background.SuccessContainer}">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            FontWeight="Medium"
-                                                            Foreground="{DynamicResource Foreground.SuccessContainer}"
-                                                            Text="{Binding Status}" />
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Border>
-                        </cy:LoadingBox>
-                    </StackPanel>
-                </cy:Card>
-
-            </StackPanel>
-
-            <!--  ============ 底部：API 表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <!--  API 表  -->
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="主要 API">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="成员" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsLoading" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否正在加载。true 时显示 mask 和 indicator + indicator 自动启动动画；false 时隐藏 + 动画停止。" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LoadingContent" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="LoadingIndicator" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="加载指示器实例。LoadingBox 自动给它的 IsActive 绑定 IsLoading。不设时 OnApplyTemplate 自动 new 一个 LoadingRing。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaskBackground" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="遮罩层 brush。默认走 token Background.Mask（半透明黑 #80000000）。设 Transparent 可去除遮罩仅显示 indicator。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Content" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="被遮罩的内容（继承自 ContentControl）。任意 UI 元素——卡片、列表、表格等。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <!--  代码示例 + 设计要点  -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="320" />
-                    </Grid.ColumnDefinitions>
-
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><sys:String xml:space="preserve">&lt;!-- 1. 最简用法（默认 LoadingRing） --&gt;
-&lt;cy:LoadingBox IsLoading="{Binding IsLoading}"&gt;
-    &lt;Border Background="White"&gt;
-        &lt;!-- 任意内容 --&gt;
-    &lt;/Border&gt;
-&lt;/cy:LoadingBox&gt;
-
-&lt;!-- 2. 自定义 indicator 样式（XAML 内联） --&gt;
-&lt;cy:LoadingBox IsLoading="{Binding IsLoading}"&gt;
-    &lt;cy:LoadingBox.LoadingContent&gt;
-        &lt;cy:LoadingRing
-            RingColor="{DynamicResource Brand.Primary}"
-            RingSize="64"
-            RingThickness="6"
-            RotationSpeed="1.2"
-            ArcLength="280" /&gt;
-    &lt;/cy:LoadingBox.LoadingContent&gt;
-    &lt;ListBox ItemsSource="{Binding Items}" /&gt;
-&lt;/cy:LoadingBox&gt;
-
-&lt;!-- 3. 自定义 Mask --&gt;
-&lt;cy:LoadingBox IsLoading="{Binding IsLoading}"
-               MaskBackground="#CCFFFFFF"&gt;
-    ...
-&lt;/cy:LoadingBox&gt;
-
-&lt;!-- 4. 切换不同 indicator 类型（VM 控制实例） --&gt;
-&lt;cy:LoadingBox IsLoading="True"
-               LoadingContent="{Binding CurrentIndicator}" /&gt;
-
-// VM:
-[ObservableProperty]
-public partial LoadingIndicator CurrentIndicator { get; set; }
-
-void Switch(string type) =&gt; CurrentIndicator = type switch
-{
-    "Ring"  =&gt; new LoadingRing { RingColor = Brushes.White },
-    "Pulse" =&gt; new LoadingPulse { DotColor = Brushes.White },
-    _       =&gt; new LoadingRing(),
-};</sys:String></TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
+                <cy:LoadingBox
+                    Grid.Column="0"
+                    Height="280"
+                    HorizontalAlignment="Stretch"
+                    IsLoading="{Binding IsLoadingBasic}">
+                    <Border Style="{StaticResource DemoContentCardStyle}">
                         <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
+                            <TextBlock
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="数据卡片" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="这是一段被 LoadingBox 包裹的内容。当 IsLoading=true 时, 上面会出现半透明遮罩 + 加载指示器。"
+                                TextWrapping="Wrap" />
+                            <Border
+                                Margin="0,16,0,0"
+                                Padding="12"
+                                Background="{DynamicResource Background.InfoContainer}"
+                                BorderBrush="{DynamicResource Border.Info}"
+                                BorderThickness="1">
                                 <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="自动启停动画" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
                                     FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="LoadingBox 给 indicator 的 IsActive 绑 IsLoading——切换 IsLoading 自动启停动画，避免不可见时还在转浪费资源。"
+                                    Foreground="{DynamicResource Foreground.InfoContainer}"
+                                    Text="提示框: mask 透明度合适时, 下方内容仍能模糊看见 — 告诉 user 数据未消失, 只是在更新。"
                                     TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="不要 Style 默认 indicator" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="不要在 default Style 设 LoadingContent 默认值——多个 LoadingBox 会共享同一 Visual instance 抛 'Specified Visual is already a child' 异常。OnApplyTemplate 按需 new。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="子类不重新 Register" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="自定义 indicator 必须继承 LoadingIndicator 且不要重新 Register IsActiveProperty——会 shadow 基类 DP 导致 LoadingBox 的 binding 失效。只 override OnIsActiveChanged。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="Frozen 默认 brush" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="MaskBackground DP 默认值是 frozen SolidColorBrush——所有实例安全共享，避免跨线程异常。MaskBackground 走 token Background.Mask 支持暗色主题切换。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </cy:Card>
-                </Grid>
+                    </Border>
+                </cy:LoadingBox>
 
+                <StackPanel Grid.Column="2">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsLoading" />
+                    <cy:SwitchButton IsChecked="{Binding IsLoadingBasic}" />
+
+                    <Border
+                        Margin="0,16,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource Background.Header}"
+                        BorderBrush="{DynamicResource Border.Default}"
+                        BorderThickness="1">
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="状态: " />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding IsLoadingBasic, Mode=OneWay}" />
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
             </Grid>
 
-        </Grid>
+            <!--  ========== ② 6 种内置加载指示器 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 6 种内置加载指示器"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Ring / Chase / Pulse / Particle / FlipCube / Tesseract" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="切换 SelectedIndicatorType 时 VM 重新 new 一个 indicator 实例赋给 LoadingContent — 避免共享同一 Visual instance (多 LoadingBox 场景必崩)。LoadingBox.OnLoadingContentChanged 自动解绑旧 indicator + 绑定新 indicator 的 IsActive。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <cy:LoadingBox
+                    Grid.Column="0"
+                    Height="280"
+                    IsLoading="True"
+                    LoadingContent="{Binding CurrentIndicator}">
+                    <Border Style="{StaticResource DemoContentCardStyle}" />
+                </cy:LoadingBox>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择 Indicator" />
+                    <ComboBox
+                        FontSize="13"
+                        ItemsSource="{Binding IndicatorTypes}"
+                        SelectedItem="{Binding SelectedIndicatorType}" />
+
+                    <Border
+                        Margin="0,16,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource Background.Header}"
+                        BorderBrush="{DynamicResource Border.Default}"
+                        BorderThickness="1">
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="当前: " />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding SelectedIndicatorType, Mode=OneWay}" />
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!--  ========== ③ LoadingRing 属性调节 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ LoadingRing 属性调节"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="实时调整 RingSize / Thickness / RotationSpeed / ArcLength" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="LoadingRing 的属性都是 DependencyProperty — 可以直接 binding 到 VM 字段。值变化时控件内部自动重建几何或重启动画。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <cy:LoadingBox
+                    Grid.Column="0"
+                    Height="280"
+                    IsLoading="True">
+                    <cy:LoadingBox.LoadingContent>
+                        <cy:LoadingRing
+                            ArcLength="{Binding Card3ArcLength}"
+                            RingColor="White"
+                            RingSize="{Binding Card3RingSize}"
+                            RingThickness="{Binding Card3RingThickness}"
+                            RotationSpeed="{Binding Card3RotationSpeed}" />
+                    </cy:LoadingBox.LoadingContent>
+                    <Border Style="{StaticResource DemoContentCardStyle}" />
+                </cy:LoadingBox>
+
+                <StackPanel Grid.Column="2">
+                    <StackPanel Margin="0,0,0,12">
+                        <Grid>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="RingSize" />
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding Card3RingSize, StringFormat=F0}" />
+                        </Grid>
+                        <Slider
+                            Maximum="120"
+                            Minimum="20"
+                            Value="{Binding Card3RingSize}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <Grid>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="RingThickness" />
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding Card3RingThickness, StringFormat=F1}" />
+                        </Grid>
+                        <Slider
+                            Maximum="12"
+                            Minimum="1"
+                            Value="{Binding Card3RingThickness}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <Grid>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="RotationSpeed (秒/圈)" />
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding Card3RotationSpeed, StringFormat=F2}" />
+                        </Grid>
+                        <Slider
+                            Maximum="3.0"
+                            Minimum="0.3"
+                            Value="{Binding Card3RotationSpeed}" />
+                    </StackPanel>
+
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="ArcLength (度)" />
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding Card3ArcLength, StringFormat=F0}" />
+                        </Grid>
+                        <Slider
+                            Maximum="350"
+                            Minimum="30"
+                            Value="{Binding Card3ArcLength}" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!--  ========== ④ 自定义 MaskBackground ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 自定义 MaskBackground"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="切换不同的遮罩 brush (5 种预设 + 自定义颜色)" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="MaskBackground 接受任意 Brush — 半透明黑 (默认) / 半透明白 / 彩色调 / Transparent (无遮罩) 等。一般 80-CC 透明度最合适: 太低 user 不知道在加载, 太高完全遮挡。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="240" />
+                </Grid.ColumnDefinitions>
+
+                <cy:LoadingBox
+                    Grid.Column="0"
+                    Height="280"
+                    IsLoading="True"
+                    MaskBackground="{Binding SelectedMaskPreset.Brush}">
+                    <cy:LoadingBox.LoadingContent>
+                        <cy:LoadingRing RingColor="White" RingSize="56" />
+                    </cy:LoadingBox.LoadingContent>
+                    <Border Style="{StaticResource DemoContentCardStyle}">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="原始内容" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="13"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="切换右侧不同的 mask 预设, 观察被遮挡的视觉效果差异 — 透明度越低, 下方内容越可见。"
+                                TextWrapping="Wrap" />
+                            <Rectangle
+                                Height="80"
+                                Margin="0,16,0,0"
+                                Fill="{DynamicResource Background.InfoContainer}" />
+                        </StackPanel>
+                    </Border>
+                </cy:LoadingBox>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择 Mask 预设" />
+                    <ComboBox
+                        FontSize="13"
+                        ItemsSource="{Binding MaskPresets}"
+                        SelectedItem="{Binding SelectedMaskPreset}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:MaskPreset}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle
+                                        Width="20"
+                                        Height="20"
+                                        Margin="0,0,8,0"
+                                        Fill="{Binding Brush}"
+                                        Stroke="{DynamicResource Border.Default}"
+                                        StrokeThickness="1" />
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Border
+                        Margin="0,16,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource Background.Header}"
+                        BorderBrush="{DynamicResource Border.Default}"
+                        BorderThickness="1">
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="当前: " />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding SelectedMaskPreset.Name, Mode=OneWay}" />
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!--  ========== ⑤ 综合实战 — 异步数据加载 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 综合实战 — 异步数据加载"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="点击按钮触发 Task.Delay 模拟网络请求, IsLoading 自动响应" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="真实业务场景: 刷新数据时把 IsLoading 设为 true, await 异步任务, 完成后置回 false。LoadingBox 自动管理 mask + indicator 启停。Button 在 loading 期间禁用避免重复触发。" />
+
+            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                <Button
+                    Padding="20,10"
+                    Command="{Binding RefreshDataCommand}"
+                    Content="🔄 刷新数据 (2.5 秒模拟)" />
+                <Border
+                    Margin="16,0,0,0"
+                    Padding="12,8"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        FontSize="12">
+                        <Run Text="累计刷新次数: " />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding RefreshCount, Mode=OneWay}" />
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+
+            <cy:LoadingBox Height="380" IsLoading="{Binding IsDataLoading}">
+                <cy:LoadingBox.LoadingContent>
+                    <cy:LoadingRing RingColor="White" RingSize="48" />
+                </cy:LoadingBox.LoadingContent>
+                <Border Style="{StaticResource DemoContentCardStyle}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding DataItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:DataItem}">
+                                    <Border
+                                        Margin="0,0,0,8"
+                                        Padding="14,12"
+                                        Background="{DynamicResource Background.Header}"
+                                        BorderBrush="{DynamicResource Border.Default}"
+                                        BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    Foreground="{DynamicResource Foreground.Default}"
+                                                    Text="{Binding Title}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource Foreground.Caption}"
+                                                    Text="{Binding Subtitle}" />
+                                            </StackPanel>
+                                            <Border
+                                                Grid.Column="1"
+                                                Padding="8,4"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource Background.SuccessContainer}">
+                                                <TextBlock
+                                                    FontSize="11"
+                                                    FontWeight="Medium"
+                                                    Foreground="{DynamicResource Foreground.SuccessContainer}"
+                                                    Text="{Binding Status}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </cy:LoadingBox>
+
+            <!--  ========== ⑥ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="LoadingBox 核心 DP" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource PropTableHeaderStyle}" Text="成员" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource PropTableHeaderStyle}" Text="类型" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource PropTableHeaderStyle}" Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsLoading" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否正在加载。true 时显示 mask 和 indicator + indicator 自动启动动画; false 时隐藏 + 动画停止。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LoadingContent" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="LoadingIndicator" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="加载指示器实例。LoadingBox 自动给它的 IsActive 绑定 IsLoading。不设时 OnApplyTemplate 自动 new 一个 LoadingRing。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaskBackground" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="遮罩层 brush。默认走 token Background.Mask (半透明黑 #80000000)。设 Transparent 可去除遮罩仅显示 indicator。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Content" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="被遮罩的内容 (继承自 ContentControl)。任意 UI 元素 — 卡片、列表、表格等。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑦ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="4 条架构理念 / 实现陷阱" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="自动启停动画" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="LoadingBox 给 indicator 的 IsActive 绑 IsLoading — 切换 IsLoading 自动启停动画, 避免不可见时还在转浪费资源。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="不要 Style 默认 indicator" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="不要在 default Style 设 LoadingContent 默认值 — 多个 LoadingBox 会共享同一 Visual instance 抛 'Specified Visual is already a child' 异常。OnApplyTemplate 按需 new。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="子类不重新 Register" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="自定义 indicator 必须继承 LoadingIndicator 且不要重新 Register IsActiveProperty — 会 shadow 基类 DP 导致 LoadingBox 的 binding 失效。只 override OnIsActiveChanged。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Frozen 默认 brush" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="MaskBackground DP 默认值是 frozen SolidColorBrush — 所有实例安全共享, 避免跨线程异常。MaskBackground 走 token Background.Mask 支持暗色主题切换。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

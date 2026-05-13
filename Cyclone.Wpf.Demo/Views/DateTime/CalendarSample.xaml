@@ -7,25 +7,28 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:CalendarViewModel}}"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3200"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
+
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
@@ -38,28 +41,51 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!--  API 表样式  -->
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  Header  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
@@ -72,7 +98,8 @@
                             VerticalAlignment="Center"
                             Data="M 0 5 L 22 5 L 22 20 L 0 20 Z M 0 8 L 22 8 M 5 0 L 5 8 M 17 0 L 17 8 M 8 12 L 14 12 L 14 16 L 8 16 Z"
                             Stretch="None"
-                            Stroke="White"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeLineJoin="Round"
                             StrokeThickness="2" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -90,369 +117,317 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 原生控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="WPF 原生月历控件 — WinUI 3 无圆角风格重制。支持单选 / 范围 / 多段三种模式,可配置导航边界、禁用日期、周首日等。" />
+                            Text="WPF 原生月历控件 — WinUI 3 无圆角风格重制。支持单选 / 范围 / 多段三种模式, 可配置导航边界、禁用日期、周首日等。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  主体  -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  ========== ① 基础绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SelectedDate 双向绑定 ViewModel" />
 
-                <!--  左列  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="最常见场景 — 填表单的出生日期 / 入职日期。SelectedDate 是 DP, 直接 TwoWay 绑定到 VM。" />
 
-                    <!--  ① 基础绑定 — 单选  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础绑定" Subtitle="SelectedDate 双向绑定 ViewModel">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="出生日期" />
+            <Calendar
+                HorizontalAlignment="Left"
+                SelectedDate="{Binding BirthDate, Mode=TwoWay}" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="最常见场景 — 填表单的出生日期 / 入职日期。SelectedDate 是 DP, 直接 TwoWay 绑定到 VM。" />
+            <Border
+                Margin="0,16,0,0"
+                Padding="12,8"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                    <Run Text="SelectedDate = " />
+                    <Run
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="{Binding BirthDateDisplay, Mode=OneWay}" />
+                </TextBlock>
+            </Border>
 
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="出生日期" />
-                            <Calendar
-                                HorizontalAlignment="Left"
-                                SelectedDate="{Binding BirthDate, Mode=TwoWay}" />
+            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="14,6"
+                    Command="{Binding SetBirthTodayCommand}"
+                    Content="设为今天" />
+                <Button
+                    Padding="14,6"
+                    Command="{Binding ClearBirthDateCommand}"
+                    Content="清空" />
+            </StackPanel>
 
-                            <Border
-                                Margin="0,16,0,0"
-                                Padding="12,8"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                        <Run Text="SelectedDate = " />
-                                        <Run
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding BirthDateDisplay, Mode=OneWay}" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
+            <!--  ========== ② 禁用日期 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 禁用日期"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="BlackoutDates 集合 — 节假日不可预约" />
 
-                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
-                                <Button
-                                    Margin="0,0,8,0"
-                                    Padding="14,6"
-                                    Command="{Binding SetBirthTodayCommand}"
-                                    Content="设为今天" />
-                                <Button
-                                    Padding="14,6"
-                                    Command="{Binding ClearBirthDateCommand}"
-                                    Content="清空" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="模拟节假日不可预约场景 — 用代码把日期 Add 到 BlackoutDates 集合即可, 选中态会有跨叉图标。BlackoutDates 是只读集合, 需要在 Loaded 时从 VM Add (集合无 setter, 不可 TwoWay 绑定)。" />
 
-                    <!--  ② BlackoutDates  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="禁用日期" Subtitle="BlackoutDates 列表中的日期划掉禁选">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="预约时间 (避开节假日)" />
+            <Calendar
+                x:Name="AppointmentCalendar"
+                HorizontalAlignment="Left"
+                Loaded="OnAppointmentCalendarLoaded"
+                SelectedDate="{Binding AppointmentDate, Mode=TwoWay}" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="模拟 节假日不可预约 场景 — 用代码把日期 Add 到 BlackoutDates 集合即可,选中态会有跨叉图标。" />
+            <Border
+                Margin="0,16,0,0"
+                Padding="12,8"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                    <Run Text="AppointmentDate = " />
+                    <Run
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="{Binding AppointmentDisplay, Mode=OneWay}" />
+                </TextBlock>
+            </Border>
 
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="预约时间(避开节假日)" />
-                            <Calendar
-                                x:Name="AppointmentCalendar"
-                                HorizontalAlignment="Left"
-                                Loaded="OnAppointmentCalendarLoaded"
-                                SelectedDate="{Binding AppointmentDate, Mode=TwoWay}" />
+            <TextBlock
+                Margin="0,12,0,0"
+                FontSize="12"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="Holidays 列表里设了 5 个日期 (前 3 天、后 5~7 天)。"
+                TextWrapping="Wrap" />
 
-                            <Border
-                                Margin="0,16,0,0"
-                                Padding="12,8"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                    <Run Text="AppointmentDate = " />
-                                    <Run
-                                        FontWeight="Bold"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="{Binding AppointmentDisplay, Mode=OneWay}" />
-                                </TextBlock>
-                            </Border>
+            <!--  ========== ③ 选择模式 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 选择模式"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SingleRange / MultipleRange" />
 
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="提示:Holidays 列表里设了 5 个日期(前 3 天、后 5~7 天)。BlackoutDates 是只读集合,需要在 Loaded 时从 VM Add。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="SelectionMode 切换日历的选择行为。注意: SelectedDates 是只读集合, 无法 TwoWay 绑定到 VM, 需通过 SelectionChanged 事件读取。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="SingleRange — 拖选连续区段" />
+            <Calendar HorizontalAlignment="Left" SelectionMode="SingleRange" />
+            <TextBlock
+                Margin="0,4,0,16"
+                FontSize="12"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="鼠标按下拖动 / Shift+点击 → 选中连续区段"
+                TextWrapping="Wrap" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="MultipleRange — 多段非连续" />
+            <Calendar HorizontalAlignment="Left" SelectionMode="MultipleRange" />
+            <TextBlock
+                Margin="0,4,0,0"
+                FontSize="12"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="Ctrl+点击单日 / Ctrl+拖动 → 多段选择, 每段独立"
+                TextWrapping="Wrap" />
+
+            <!--  ========== ④ 自定义 + 禁用 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 自定义 + 禁用"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="周首日 / 今天高亮 / 导航边界 / 禁用态" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="FirstDayOfWeek=Monday (周一开始)" />
+            <Calendar HorizontalAlignment="Left" FirstDayOfWeek="Monday" />
+
+            <TextBlock
+                Margin="0,16,0,8"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="IsTodayHighlighted=False (不高亮今天)" />
+            <Calendar HorizontalAlignment="Left" IsTodayHighlighted="False" />
+
+            <TextBlock
+                Margin="0,16,0,8"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="DisplayDateStart/End (限制可导航范围)" />
+            <Calendar
+                HorizontalAlignment="Left"
+                DisplayDateEnd="{Binding BusinessTripEnd, Mode=OneWay}"
+                DisplayDateStart="{Binding BusinessTripStart, Mode=OneWay}"
+                SelectedDate="{Binding TripDate, Mode=TwoWay}" />
+            <TextBlock
+                Margin="0,4,0,16"
+                FontSize="12"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="只能在 [今天, 今天+30 天] 内导航, 导航按钮自动禁用"
+                TextWrapping="Wrap" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsEnabled=False (禁用态)" />
+            <Calendar
+                HorizontalAlignment="Left"
+                IsEnabled="False"
+                SelectedDate="{Binding FrozenDate}" />
+
+            <!--  ========== ⑤ 主要属性 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 主要属性"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="原生 WPF Calendar DP" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource PropTableHeaderStyle}" Text="名称" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource PropTableHeaderStyle}" Text="类型" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource PropTableHeaderStyle}" Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedDate" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DateTime?" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前选中的日期 (单选模式)。可 TwoWay 绑定。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedDates" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="SelectedDatesCollection" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="范围 / 多段模式下的选中日期集合。只读, 不可绑定, 需 SelectedDatesChanged 事件读取。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectionMode" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="None / SingleDate (默认) / SingleRange (拖选连续) / MultipleRange (Ctrl 多段)。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="BlackoutDates" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="CalendarBlackoutDatesCollection" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="禁用日期集合 — 划掉禁选。只读, Loaded 时用 Add 写入。" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DisplayDate" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DateTime" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前正在显示的月份 (导航位置)。可绑定。" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DisplayDateStart / End" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DateTime?" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="可导航的最早 / 最晚日期。超出区间的导航按钮自动禁用。" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="FirstDayOfWeek" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DayOfWeek" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="每周第一天。默认跟随系统区域 (中国 Monday, 美国 Sunday)。" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsTodayHighlighted" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
+                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否高亮今天 — 主题以 1px Border.Selected 描边 (无填充) 表示。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑥ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="主题样式 + WPF 限制" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="WinUI 3 无圆角" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="与 ListBox v4 对齐: 全部 DynamicResource 走主题 token, 扁平直角, SnapsToDevicePixels。"
+                        TextWrapping="Wrap" />
                 </StackPanel>
 
-                <!--  右列  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ③ 选择模式  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="选择模式" Subtitle="SingleRange / MultipleRange">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="SelectionMode 切换日历的选择行为。注意:SelectedDates 是只读集合,无法 TwoWay 绑定到 VM,需通过 SelectionChanged 事件读取。" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="SingleRange — 拖选连续区段" />
-                            <Calendar HorizontalAlignment="Left" SelectionMode="SingleRange" />
-                            <TextBlock
-                                Margin="0,4,0,16"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="鼠标按下拖动 / Shift+点击 → 选中连续区段"
-                                TextWrapping="Wrap" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="MultipleRange — 多段非连续" />
-                            <Calendar HorizontalAlignment="Left" SelectionMode="MultipleRange" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Ctrl+点击单日 / Ctrl+拖动 → 多段选择, 每段独立"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ④ 自定义 + 禁用  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="自定义 + 禁用" Subtitle="周首日 / 今天高亮 / 导航边界 / 禁用态">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="FirstDayOfWeek=Monday (周一开始)" />
-                            <Calendar HorizontalAlignment="Left" FirstDayOfWeek="Monday" />
-
-                            <TextBlock
-                                Margin="0,16,0,8"
-                                Style="{StaticResource DemoItemTitleStyle}"
-                                Text="IsTodayHighlighted=False (不高亮今天)" />
-                            <Calendar HorizontalAlignment="Left" IsTodayHighlighted="False" />
-
-                            <TextBlock
-                                Margin="0,16,0,8"
-                                Style="{StaticResource DemoItemTitleStyle}"
-                                Text="DisplayDateStart/End (限制可导航范围)" />
-                            <Calendar
-                                HorizontalAlignment="Left"
-                                DisplayDateEnd="{Binding BusinessTripEnd, Mode=OneWay}"
-                                DisplayDateStart="{Binding BusinessTripStart, Mode=OneWay}"
-                                SelectedDate="{Binding TripDate, Mode=TwoWay}" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="只能在 [今天, 今天+30 天] 内导航,导航按钮自动禁用"
-                                TextWrapping="Wrap" />
-
-                            <TextBlock
-                                Margin="0,16,0,8"
-                                Style="{StaticResource DemoItemTitleStyle}"
-                                Text="IsEnabled=False (禁用态)" />
-                            <Calendar
-                                HorizontalAlignment="Left"
-                                IsEnabled="False"
-                                SelectedDate="{Binding FrozenDate}" />
-                        </StackPanel>
-                    </cy:Card>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="今天: 描边圈" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="IsToday → 1px Border.Selected 描边 (无填充), 不再用奇怪的勾选 Path。"
+                        TextWrapping="Wrap" />
                 </StackPanel>
-            </Grid>
 
-            <!--  底部  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="280" />
-                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="选中: 实色 + 反白" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="IsSelected → Background.Selected 实色填充 + Foreground.Invert 反白文字。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
 
-                <cy:Card Grid.Column="0">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="XAML 示例">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-                    <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                        <![CDATA[<!-- 基础绑定 (SelectedDate 是 DP,可直接 TwoWay) -->
-<Calendar SelectedDate="{Binding BirthDate, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="状态优先级" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="MultiTrigger 处理 Hover+IsSelected=False; IsPressed 排在 IsSelected 之后, 按下选中态也能看到反馈。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
 
-<!-- 选择模式 -->
-<Calendar SelectionMode="SingleDate" />     <!-- 默认: 单选 -->
-<Calendar SelectionMode="SingleRange" />    <!-- 拖选连续区段 -->
-<Calendar SelectionMode="MultipleRange" />  <!-- Ctrl 多段 -->
-<Calendar SelectionMode="None" />           <!-- 只展示不可选 -->
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="WPF 限制提醒" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="SelectedDates / BlackoutDates 是只读集合, 不可 TwoWay 绑定, 需通过事件或 Loaded 时初始化。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
 
-<!-- 周首日 / 今天高亮 -->
-<Calendar FirstDayOfWeek="Monday"
-          IsTodayHighlighted="False" />
-
-<!-- 导航边界 -->
-<Calendar DisplayDateStart="{Binding TripStart}"
-          DisplayDateEnd="{Binding TripEnd}" />
-
-<!-- BlackoutDates 集合操作 (代码: 该集合无 setter, 只能 Add) -->
-public partial class CalendarSample : UserControl
-{
-    private void OnAppointmentCalendarLoaded(object sender, RoutedEventArgs e)
-    {
-        var cal = (Calendar)sender;
-        var vm = (CalendarViewModel)DataContext;
-        cal.BlackoutDates.Clear();
-        foreach (var d in vm.Holidays)
-            cal.BlackoutDates.Add(new CalendarDateRange(d));
-    }
-}
-
-<!-- SelectedDates (多选/范围) 不能 TwoWay 绑定, 需用事件: -->
-<Calendar SelectionMode="MultipleRange"
-          SelectedDatesChanged="OnSelectionChanged" />]]>
-                    </TextBox>
-                </cy:Card>
-
-                <cy:Card Grid.Column="2">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="设计要点">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <StackPanel>
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                FontWeight="Medium"
-                                Foreground="{DynamicResource Foreground.Link}"
-                                Text="WinUI 3 无圆角" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="与 ListBox v4 对齐: 全部 DynamicResource 走主题 token, 扁平直角, SnapsToDevicePixels"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                FontWeight="Medium"
-                                Foreground="{DynamicResource Foreground.Link}"
-                                Text="今天: 描边圈" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="IsToday → 1px Border.Selected 描边(无填充), 不再用奇怪的勾选 Path"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                FontWeight="Medium"
-                                Foreground="{DynamicResource Foreground.Link}"
-                                Text="选中: 实色 + 反白" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="IsSelected → Background.Selected 实色填充 + Foreground.Invert 反白文字"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                FontWeight="Medium"
-                                Foreground="{DynamicResource Foreground.Link}"
-                                Text="状态优先级" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="MultiTrigger 处理 Hover+IsSelected=False; IsPressed 排在 IsSelected 之后, 按下选中态也能看到反馈"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel>
-                            <TextBlock
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                FontWeight="Medium"
-                                Foreground="{DynamicResource Foreground.Link}"
-                                Text="WPF 限制提醒" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="SelectedDates / BlackoutDates 是只读集合, 不可 TwoWay 绑定, 需通过事件或 Loaded 时初始化"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </StackPanel>
-                </cy:Card>
-            </Grid>
-        </Grid>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

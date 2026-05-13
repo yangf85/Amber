@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.NotificationSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,28 +6,27 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     d:DataContext="{d:DesignInstance Type={x:Type local:NotificationViewModel}}"
-    d:DesignHeight="2200"
-    d:DesignWidth="1400"
+    d:DesignHeight="3200"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -36,35 +35,22 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
-        <Style x:Key="HintTextStyle" TargetType="{x:Type TextBlock}">
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
 
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
-
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Padding" Value="12,10" />
@@ -88,15 +74,15 @@
             BasedOn="{StaticResource PropTableCellStyle}"
             TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Container}" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
 
-        <!--  Level 按钮基础样式：每种级别用对应的主题色  -->
+        <!--  Level 按钮通用样式 (彩色背景 + 反白文字)  -->
         <Style x:Key="LevelButtonStyle" TargetType="{x:Type Button}">
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="{DynamicResource Text.Invert}" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="14,8" />
-            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="MinWidth" Value="100" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Template">
@@ -112,39 +98,36 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="RootBorder" Property="Opacity" Value="0.85" />
                             </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.7" />
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.4" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
                         <Path
-                            Width="32"
-                            Height="32"
+                            Width="28"
+                            Height="28"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
-                            Fill="White"
+                            Fill="{DynamicResource Text.Invert}"
                             Stretch="Uniform" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -162,538 +145,388 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 服务" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
-                            Foreground="{DynamicResource Foreground.Container}"
-                            Text="桌面 toast 通知服务。单例 Instance、5 种内置 Level、滑入动画、自动堆叠、跟随 owner 窗口、PerMonitor DPI 感知。Show 返回 INotificationHandle 用于跟踪 / 关闭 / 更新 / 监听点击。" />
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="桌面 toast 通知服务。单例 Instance、5 种内置 Level、滑入动画、自动堆叠、跟随 owner 窗口、PerMonitor DPI 感知。Show 返回 INotificationHandle 用于跟踪 / 关闭 / 更新 / 监听点击。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== ① 5 种内置级别 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 5 种内置级别"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="service.Notify(message, level)" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="点击按钮触发对应级别的通知。每种级别对应一组背景色 + 图标, 由内部 NotificationMessage 控件按 Level 的 Trigger 切换。" />
+
+            <WrapPanel>
+                <Button
+                    Margin="0,0,8,8"
+                    Background="{DynamicResource Foreground.Caption}"
+                    Command="{Binding ShowLevelCommand}"
+                    CommandParameter="Default"
+                    Content="Default"
+                    Style="{StaticResource LevelButtonStyle}" />
+                <Button
+                    Margin="0,0,8,8"
+                    Background="{DynamicResource Background.Info}"
+                    Command="{Binding ShowLevelCommand}"
+                    CommandParameter="Information"
+                    Content="Information"
+                    Style="{StaticResource LevelButtonStyle}" />
+                <Button
+                    Margin="0,0,8,8"
+                    Background="{DynamicResource Background.Success}"
+                    Command="{Binding ShowLevelCommand}"
+                    CommandParameter="Success"
+                    Content="Success"
+                    Style="{StaticResource LevelButtonStyle}" />
+                <Button
+                    Margin="0,0,8,8"
+                    Background="{DynamicResource Background.Warning}"
+                    Command="{Binding ShowLevelCommand}"
+                    CommandParameter="Warning"
+                    Content="Warning"
+                    Style="{StaticResource LevelButtonStyle}" />
+                <Button
+                    Margin="0,0,8,8"
+                    Background="{DynamicResource Background.Error}"
+                    Command="{Binding ShowLevelCommand}"
+                    CommandParameter="Error"
+                    Content="Error"
+                    Style="{StaticResource LevelButtonStyle}" />
+            </WrapPanel>
+
+            <!--  ========== ② 句柄跟踪 — 上传场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 句柄跟踪 — 上传场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="INotificationHandle.Update / Close / Clicked" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="点 开始上传 后弹出 Information 上传中..., 3 秒后自动改为 Success 上传成功!。期间 立即取消 按钮可调 handle.Close() 中止。点击通知主体会触发 Clicked 事件, 下方计数累加。" />
+
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Margin="0,0,8,0"
+                    Background="{DynamicResource Background.Info}"
+                    Command="{Binding SimulateUploadCommand}"
+                    Content="开始上传"
+                    Style="{StaticResource LevelButtonStyle}" />
+                <Button
+                    Background="{DynamicResource Foreground.Caption}"
+                    Command="{Binding CancelTrackedCommand}"
+                    Content="立即取消"
+                    IsEnabled="{Binding HasActiveTrackedHandle}"
+                    Style="{StaticResource LevelButtonStyle}" />
+            </StackPanel>
+
+            <Border
+                Margin="0,12,0,0"
+                Padding="14,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <TextBlock Style="{StaticResource ValueLabelStyle}">
+                    <Run Text="通知点击累计: " />
+                    <Run
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="{Binding CustomClickCount, Mode=OneWay}" />
+                    <Run Text=" 次" />
+                </TextBlock>
+            </Border>
+
+            <!--  ========== ③ 自定义内容 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 自定义内容"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="service.Show(任意 UIElement)" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Show 接受任意 object — NotificationMessage 是默认 5 级别消息, 但也可以塞 Border / UserControl / 自定义控件。下面这条通知是 code-behind 动态构造的 Border + StackPanel + 两行文字。" />
+
+            <Button
+                HorizontalAlignment="Left"
+                Background="{DynamicResource Background.Highlighted}"
+                Command="{Binding ShowCustomContentCommand}"
+                Content="显示自定义通知"
+                Style="{StaticResource LevelButtonStyle}" />
+
+            <!--  ========== ④ 位置切换 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 位置切换"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Option.Position (4 角)" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="切换通知出现的角落。Top* 时新通知从顶部往下堆叠, Bottom* 时从底部往上堆叠。每次切换会自动弹一条提示验证。" />
+
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  ① 5 种 Level 按钮  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="5 种内置级别" Subtitle="service.Notify(message, level)">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="点击按钮触发对应级别的通知。每种级别对应一组背景色 + 图标，由内部 NotificationMessage 控件按 Level 的 Trigger 切换。" />
-                            <WrapPanel>
-                                <Button
-                                    Margin="0,0,8,8"
-                                    Background="{DynamicResource Foreground.Container}"
-                                    Command="{Binding ShowLevelCommand}"
-                                    CommandParameter="Default"
-                                    Content="Default"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                                <Button
-                                    Margin="0,0,8,8"
-                                    Background="{DynamicResource Background.Info}"
-                                    Command="{Binding ShowLevelCommand}"
-                                    CommandParameter="Information"
-                                    Content="Information"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                                <Button
-                                    Margin="0,0,8,8"
-                                    Background="{DynamicResource Background.Success}"
-                                    Command="{Binding ShowLevelCommand}"
-                                    CommandParameter="Success"
-                                    Content="Success"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                                <Button
-                                    Margin="0,0,8,8"
-                                    Background="{DynamicResource Background.Warning}"
-                                    Command="{Binding ShowLevelCommand}"
-                                    CommandParameter="Warning"
-                                    Content="Warning"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                                <Button
-                                    Margin="0,0,8,8"
-                                    Background="{DynamicResource Background.Error}"
-                                    Command="{Binding ShowLevelCommand}"
-                                    CommandParameter="Error"
-                                    Content="Error"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                            </WrapPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 句柄跟踪  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="句柄跟踪 — 上传场景" Subtitle="INotificationHandle.Update / Close / Clicked">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="点&quot;开始上传&quot;后弹出 Information &quot;上传中...&quot;，3 秒后自动改为 Success &quot;上传成功！&quot;。期间&quot;立即取消&quot;按钮可调 handle.Close() 中止。点击通知主体会触发 Clicked 事件，下方计数累加。" />
-
-                            <StackPanel Orientation="Horizontal">
-                                <Button
-                                    Margin="0,0,8,0"
-                                    Padding="14,8"
-                                    Background="{DynamicResource Background.Info}"
-                                    Command="{Binding SimulateUploadCommand}"
-                                    Content="开始上传"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                                <Button
-                                    Padding="14,8"
-                                    Background="{DynamicResource Foreground.Container}"
-                                    Command="{Binding CancelTrackedCommand}"
-                                    Content="立即取消"
-                                    IsEnabled="{Binding HasActiveTrackedHandle}"
-                                    Style="{StaticResource LevelButtonStyle}" />
-                            </StackPanel>
-
-                            <Border
-                                Margin="0,12,0,0"
-                                Padding="14,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                    <Run Text="通知点击累计：" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CustomClickCount, Mode=OneWay}" />
-                                    <Run Text=" 次" />
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 自定义 UI  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="自定义内容" Subtitle="service.Show(任意 UIElement)">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="Show 接受任意 object —— NotificationMessage 是默认 5 级别消息，但也可以塞 Border / UserControl / 自定义控件。下面这条通知是 code-behind 动态构造的 Border + StackPanel + 两行文字。" />
-                            <Button
-                                HorizontalAlignment="Left"
-                                Padding="14,8"
-                                Background="{DynamicResource Background.Highlighted}"
-                                Command="{Binding ShowCustomContentCommand}"
-                                Content="显示自定义通知"
-                                Style="{StaticResource LevelButtonStyle}" />
-                        </StackPanel>
-                    </cy:Card>
-
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ 位置切换  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="位置切换" Subtitle="Option.Position（4 角）">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="切换通知出现的角落。Top* 时新通知从顶部往下堆叠，Bottom* 时从底部往上堆叠。每次切换会自动弹一条提示验证。" />
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <RadioButton
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    Margin="0,0,0,6"
-                                    Content="左上 TopLeft"
-                                    GroupName="position"
-                                    IsChecked="{Binding IsTopLeft, Mode=TwoWay}" />
-                                <RadioButton
-                                    Grid.Row="0"
-                                    Grid.Column="1"
-                                    Margin="0,0,0,6"
-                                    Content="右上 TopRight"
-                                    GroupName="position"
-                                    IsChecked="{Binding IsTopRight, Mode=TwoWay}" />
-                                <RadioButton
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Content="左下 BottomLeft"
-                                    GroupName="position"
-                                    IsChecked="{Binding IsBottomLeft, Mode=TwoWay}" />
-                                <RadioButton
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Content="右下 BottomRight"
-                                    GroupName="position"
-                                    IsChecked="{Binding IsBottomRight, Mode=TwoWay}" />
-                            </Grid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ MaxCount + Duration  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="堆叠与时长" Subtitle="MaxCount / DisplayDuration">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource HintTextStyle}" Text="MaxCount 限制屏上同时显示数量；超过时最早一条立即关闭（无动画，避免视觉跳变）。DisplayDuration 控制每条停留时间，0 = 不自动关。" />
-
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="40" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="MaxCount" />
-                                <Slider
-                                    Grid.Column="1"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Maximum="10"
-                                    Minimum="1"
-                                    TickFrequency="1"
-                                    TickPlacement="BottomRight"
-                                    Value="{Binding MaxCount, Mode=TwoWay}" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="{Binding MaxCount, Mode=OneWay}" />
-                            </Grid>
-
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="40" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="Duration (s)" />
-                                <Slider
-                                    Grid.Column="1"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Maximum="10"
-                                    Minimum="0"
-                                    TickFrequency="0.5"
-                                    Value="{Binding DisplayDurationSeconds, Mode=TwoWay}" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="{Binding DisplayDurationSeconds, StringFormat=F1, Mode=OneWay}" />
-                            </Grid>
-
-                            <Button
-                                HorizontalAlignment="Left"
-                                Padding="14,8"
-                                Background="{DynamicResource Background.Info}"
-                                Command="{Binding TestMaxCountCommand}"
-                                Content="连续发 8 条"
-                                Style="{StaticResource LevelButtonStyle}" />
-                        </StackPanel>
-                    </cy:Card>
-
-                </StackPanel>
-            </Grid>
-
-            <!--  ============ 底部：API 表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--  ⑥ API 表  -->
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="主要 API">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="成员" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Instance" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static NotificationService" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="单例入口。也可手动 new 多个实例（不同配置 / 多 owner）。" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SetOwner(window | hwnd | ForegroundWindow)" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="设置通知 owner——通知会跟随 owner 移动 / 缩放。多次调用先解绑旧 owner 的事件，无内存泄漏。owner 关闭时不再 Dispose 单例，仅切回屏幕定位。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Show(content, title)" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="INotificationHandle" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="底层 API。content 为 null 时抛 ArgumentNullException。返回 handle，调用方可 Close / Update / 监听 Clicked / Closed。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Notify(message, level)" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="INotificationHandle" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="扩展方法。把 message 包到 NotificationMessage（按 level 切换样式），再调 Show。" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Message / Information / Success / Warning / Error" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="扩展方法" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="对应 5 个 NotificationLevel 的便捷封装，等价 Notify(text, NotificationLevel.Xxx)。" />
-
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="UpdateOption(action)" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="运行时修改 NotificationOption（Position / MaxCount / DisplayDuration / Spacing 等）。" />
-
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Dispose()" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="立即关闭所有通知（无动画）+ 解绑 owner 事件。不自动 ResetInstance——单例语义独立于 Dispose。" />
-
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ResetInstance()" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static void" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="显式重置单例（旧实例的引用仍然存在但 disposed）。" />
-
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Close()" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="关闭这条通知（带滑出动画）。重复调用幂等。线程安全。" />
-
-                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Update(content)" />
-                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
-                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="替换内容。原 Content 是 NotificationMessage 且传入字符串时仅更新文本（保留 Level）；否则整体替换。" />
-
-                            <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Clicked / Closed" />
-                            <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="event" />
-                            <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Clicked：通知主体被点击（按钮内部点击不触发）。Closed：通知已关闭（动画完成后）。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <!--  ⑦ 代码示例 + ⑧ 设计要点  -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
-                    </Grid.ColumnDefinitions>
-
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="C# 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}"><sys:String xml:space="preserve">// 启动时绑定主窗口
-NotificationService.Instance.SetOwner(mainWindow);
-
-// 简单 5 级别通知（fire-and-forget）
-NotificationService.Instance.Success("文件已保存");
-NotificationService.Instance.Warning("磁盘空间不足");
-
-// 句柄跟踪：上传进度场景
-var handle = NotificationService.Instance.Information("上传中...");
-handle.Clicked += (s, e) => OpenDetail();
-handle.Closed += (s, e) => Cleanup();
-
-await UploadAsync();
-handle.Update("已上传 50%");
-
-await UploadAsync();
-handle.Close();
-NotificationService.Instance.Success("上传完成");
-
-// 自定义 UI 通知
-var card = new MyCustomNotificationCard();
-var customHandle = NotificationService.Instance.Show(card);
-
-// 配置
-NotificationService.Instance.UpdateOption(opt =>
-{
-    opt.Position = NotificationPosition.TopRight;
-    opt.MaxCount = 3;
-    opt.DisplayDuration = TimeSpan.FromSeconds(5);
-});
-
-// 不带 owner，用屏幕坐标定位
-NotificationService.Instance.SetOwnerToForegroundWindow();</sys:String></TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="PerMonitor DPI" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="按 owner 所在显示器的 DPI 转换坐标，多屏不同缩放下也对齐。host 应用需声明 PerMonitorV2 awareness。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="Handle = 跟踪 + 控制" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="Show 返回 INotificationHandle，让&quot;跟踪进度&quot;&quot;主动关闭&quot;&quot;点击跳转&quot;等场景成为可能；不再是 fire-and-forget。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="淘汰立即关" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="MaxCount 触发时旧通知走 CloseImmediately（无动画），避免动画期间位置失维护造成的视觉跳变。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="单例 ≠ Dispose" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Container}"
-                                    Text="Dispose 不再自动 ResetInstance；owner.Closed 也不再 Dispose 单例。两个语义彼此独立，避免&quot;静默换实例&quot;。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-                </Grid>
-
+                <RadioButton
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,0,6"
+                    Content="左上 TopLeft"
+                    GroupName="position"
+                    IsChecked="{Binding IsTopLeft, Mode=TwoWay}" />
+                <RadioButton
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,0,0,6"
+                    Content="右上 TopRight"
+                    GroupName="position"
+                    IsChecked="{Binding IsTopRight, Mode=TwoWay}" />
+                <RadioButton
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Content="左下 BottomLeft"
+                    GroupName="position"
+                    IsChecked="{Binding IsBottomLeft, Mode=TwoWay}" />
+                <RadioButton
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Content="右下 BottomRight"
+                    GroupName="position"
+                    IsChecked="{Binding IsBottomRight, Mode=TwoWay}" />
             </Grid>
 
-        </Grid>
+            <!--  ========== ⑤ 堆叠与时长 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 堆叠与时长"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="MaxCount / DisplayDuration" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="MaxCount 限制屏上同时显示数量; 超过时最早一条立即关闭 (无动画, 避免视觉跳变)。DisplayDuration 控制每条停留时间, 0 = 不自动关。" />
+
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="MaxCount" />
+                <Slider
+                    Grid.Column="1"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Maximum="10"
+                    Minimum="1"
+                    TickFrequency="1"
+                    TickPlacement="BottomRight"
+                    Value="{Binding MaxCount, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="{Binding MaxCount, Mode=OneWay}" />
+            </Grid>
+
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="Duration (s)" />
+                <Slider
+                    Grid.Column="1"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Maximum="10"
+                    Minimum="0"
+                    TickFrequency="0.5"
+                    Value="{Binding DisplayDurationSeconds, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="{Binding DisplayDurationSeconds, StringFormat=F1, Mode=OneWay}" />
+            </Grid>
+
+            <Button
+                HorizontalAlignment="Left"
+                Background="{DynamicResource Background.Info}"
+                Command="{Binding TestMaxCountCommand}"
+                Content="连续发 8 条"
+                Style="{StaticResource LevelButtonStyle}" />
+
+            <!--  ========== ⑥ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="NotificationService + INotificationHandle" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource PropTableHeaderStyle}" Text="成员" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource PropTableHeaderStyle}" Text="类型" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource PropTableHeaderStyle}" Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Instance" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static NotificationService" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="单例入口。也可手动 new 多个实例 (不同配置 / 多 owner)。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SetOwner(window | hwnd | ForegroundWindow)" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="设置通知 owner — 通知会跟随 owner 移动 / 缩放。多次调用先解绑旧 owner 的事件, 无内存泄漏。owner 关闭时不再 Dispose 单例, 仅切回屏幕定位。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Show(content, title)" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="INotificationHandle" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="底层 API。content 为 null 时抛 ArgumentNullException。返回 handle, 调用方可 Close / Update / 监听 Clicked / Closed。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Notify(message, level)" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="INotificationHandle" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="扩展方法。把 message 包到 NotificationMessage (按 level 切换样式), 再调 Show。" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Message / Information / Success / Warning / Error" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="扩展方法" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="对应 5 个 NotificationLevel 的便捷封装, 等价 Notify(text, NotificationLevel.Xxx)。" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="UpdateOption(action)" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="运行时修改 NotificationOption (Position / MaxCount / DisplayDuration / Spacing 等)。" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Dispose()" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="立即关闭所有通知 (无动画) + 解绑 owner 事件。不自动 ResetInstance — 单例语义独立于 Dispose。" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ResetInstance()" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="static void" />
+                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="显式重置单例 (旧实例的引用仍然存在但 disposed)。" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Close()" />
+                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="关闭这条通知 (带滑出动画)。重复调用幂等。线程安全。" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Update(content)" />
+                    <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="void" />
+                    <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="替换内容。原 Content 是 NotificationMessage 且传入字符串时仅更新文本 (保留 Level); 否则整体替换。" />
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="INotificationHandle.Clicked / Closed" />
+                    <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="event" />
+                    <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Clicked: 通知主体被点击 (按钮内部点击不触发)。Closed: 通知已关闭 (动画完成后)。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑦ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="4 条架构理念" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="PerMonitor DPI" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="按 owner 所在显示器的 DPI 转换坐标, 多屏不同缩放下也对齐。host 应用需声明 PerMonitorV2 awareness。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Handle = 跟踪 + 控制" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Show 返回 INotificationHandle, 让 跟踪进度 / 主动关闭 / 点击跳转 等场景成为可能; 不再是 fire-and-forget。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="淘汰立即关" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="MaxCount 触发时旧通知走 CloseImmediately (无动画), 避免动画期间位置失维护造成的视觉跳变。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="单例 ≠ Dispose" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Dispose 不再自动 ResetInstance; owner.Closed 也不再 Dispose 单例。两个语义彼此独立, 避免 静默换实例。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

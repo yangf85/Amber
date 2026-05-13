@@ -7,48 +7,48 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:SettingItemViewModel}}"
-    d:DesignHeight="2200"
-    d:DesignWidth="1400"
+    d:DesignHeight="3000"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--  ============ 章节编号小圆圈 ============  -->
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <!--  ============ 演示项标题 ============  -->
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
-        <Style x:Key="DemoItemSubtitleStyle" TargetType="{x:Type TextBlock}">
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
 
-        <!--  ============ 属性表的列样式 ============  -->
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Padding" Value="12,10" />
         </Style>
-
         <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
@@ -56,7 +56,6 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
-
         <Style
             x:Key="PropTableNameStyle"
             BasedOn="{StaticResource PropTableCellStyle}"
@@ -64,7 +63,6 @@
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
         </Style>
-
         <Style
             x:Key="PropTableTypeStyle"
             BasedOn="{StaticResource PropTableCellStyle}"
@@ -72,44 +70,28 @@
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
-
-        <!--  ============ 代码块样式 ============  -->
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
-                        Background="{DynamicResource Background.Info}"
-                        CornerRadius="0">
+                        Background="{DynamicResource Background.Info}">
                         <Path
                             Width="28"
                             Height="28"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 Z M12,2 V5 M12,19 V22 M4.93,4.93 L7.05,7.05 M16.95,16.95 L19.07,19.07 M2,12 H5 M19,12 H22 M4.93,19.07 L7.05,16.95 M16.95,7.05 L19.07,4.93"
-                            Stroke="{DynamicResource Foreground.Link}"
+                            Stroke="{DynamicResource Text.Invert}"
                             StrokeEndLineCap="Round"
                             StrokeStartLineCap="Round"
                             StrokeThickness="2" />
@@ -125,642 +107,409 @@
                                 Margin="12,4,0,0"
                                 Padding="10,4"
                                 VerticalAlignment="Center"
-                                Background="{DynamicResource Background.Info}"
-                                CornerRadius="0">
+                                Background="{DynamicResource Background.Info}">
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="设置页 / 偏好面板的“标签 + 描述 + 操作控件”语义化单元。可独立使用,也可放入 SettingGroup 作为分组,附加属性 LabelWidth / ContentAlignment 通过属性继承自动下传到组内所有项。" />
+                            Text="设置页 / 偏好面板的 标签 + 描述 + 操作控件 语义化单元。可独立使用, 也可放入 SettingGroup 作为分组, 附加属性 LabelWidth / ContentAlignment 通过属性继承自动下传到组内所有项。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  ========== ① 基础用法 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础用法"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Label + Description + Content 三段语义" />
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="最简形式 — Label 是标签, Description 是描述, Content 是操作控件 (SwitchButton / TextBox / ComboBox 任意)。" />
 
-                    <!--  ① 基础用法  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础用法">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                <StackPanel>
-                                    <cy:SettingItem Description="有新消息时弹出系统通知" Label="桌面通知">
-                                        <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
-                                    </cy:SettingItem>
-                                    <Border Height="1" Background="{DynamicResource Border.Default}" />
-                                    <cy:SettingItem Description="开机时自动运行本程序" Label="自动启动">
-                                        <cy:SwitchButton IsChecked="{Binding AutoStart}" />
-                                    </cy:SettingItem>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 其他样式示例  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="其他样式示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <!--  LabelWidth 批量对齐  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="LabelWidth 批量对齐(在容器上设一次,全部子项跟随)" />
-                                <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                    <StackPanel
-                                        cy:SettingItem.ContentAlignment="Left"
-                                        cy:SettingItem.ContentSpacing="30"
-                                        cy:SettingItem.LabelWidth="60">
-                                        <cy:SettingItem Description="显示桌面通知" Label="桌面通知">
-                                            <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
-                                        </cy:SettingItem>
-                                        <cy:SettingItem Description="切换立即生效" Label="界面语言">
-                                            <ComboBox
-                                                MinWidth="140"
-                                                ItemsSource="{Binding Languages}"
-                                                SelectedItem="{Binding CurrentLanguage}" />
-                                        </cy:SettingItem>
-                                        <cy:SettingItem Label="字体大小">
-                                            <Slider
-                                                Width="160"
-                                                Maximum="20"
-                                                Minimum="10"
-                                                Value="{Binding FontSize}" />
-                                        </cy:SettingItem>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!--  ContentAlignment 控制对齐方向  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="ContentAlignment 控制内容方向(Right / Left / Center / Stretch)" />
-                                <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                    <StackPanel cy:SettingItem.LabelWidth="160">
-                                        <cy:SettingItem ContentAlignment="Right" Label="Right(默认)">
-                                            <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
-                                        </cy:SettingItem>
-                                        <cy:SettingItem ContentAlignment="Left" Label="Left">
-                                            <cy:SwitchButton IsChecked="{Binding AutoStart}" />
-                                        </cy:SettingItem>
-                                        <cy:SettingItem ContentAlignment="Stretch" Label="Stretch(适合输入框)">
-                                            <TextBox Text="{Binding ProxyAddress}" />
-                                        </cy:SettingItem>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!--  整行可点击  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsClickable + Command(整行可点击 / Hover 高亮 / 手型光标)" />
-                                <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                    <StackPanel cy:SettingItem.LabelWidth="180">
-                                        <cy:SettingItem
-                                            Command="{Binding OpenAccountCommand}"
-                                            Description="管理你的账户信息"
-                                            IsClickable="True"
-                                            Label="账号详情">
-                                            <TextBlock
-                                                VerticalAlignment="Center"
-                                                FontSize="14"
-                                                Foreground="{DynamicResource Foreground.Placeholder}"
-                                                Text="›" />
-                                        </cy:SettingItem>
-                                        <cy:SettingItem
-                                            Command="{Binding ExportDataCommand}"
-                                            Description="导出账户配置和偏好设置"
-                                            IsClickable="True"
-                                            Label="导出数据">
-                                            <TextBlock
-                                                VerticalAlignment="Center"
-                                                FontSize="14"
-                                                Foreground="{DynamicResource Foreground.Placeholder}"
-                                                Text="›" />
-                                        </cy:SettingItem>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!--  SettingGroup  -->
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="SettingGroup(自带组标题、描述、对齐配置)" />
-                                <cy:SettingGroup
-                                    Description="代理服务器与超时配置"
-                                    Header="网络"
-                                    LabelWidth="160">
-                                    <cy:SettingItem Label="代理服务器">
-                                        <TextBox MinWidth="200" Text="{Binding ProxyAddress}" />
-                                    </cy:SettingItem>
-                                    <cy:SettingItem Label="超时(秒)">
-                                        <cy:NumberBox
-                                            MinWidth="120"
-                                            Maximum="600"
-                                            Minimum="1"
-                                            NumberMode="Integer"
-                                            Value="{Binding TimeoutSeconds}" />
-                                    </cy:SettingItem>
-                                    <cy:SettingItem Label="日志级别">
-                                        <ComboBox
-                                            MinWidth="140"
-                                            ItemsSource="{Binding LogLevels}"
-                                            SelectedItem="{Binding CurrentLogLevel}" />
-                                    </cy:SettingItem>
-                                </cy:SettingGroup>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 常见使用场景  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="常见使用场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <UniformGrid Columns="4" Rows="1">
-                                <UniformGrid.Resources>
-                                    <Style TargetType="{x:Type cy:Card}">
-                                        <Setter Property="Margin" Value="6,0" />
-                                    </Style>
-                                </UniformGrid.Resources>
-
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M12,5 A4,4 0 1 0 12,13 A4,4 0 1 0 12,5 Z M5,21 C5,17 8,15 12,15 C16,15 19,17 19,21"
-                                            Stroke="{DynamicResource Foreground.Link}"
-                                            StrokeLineJoin="Round"
-                                            StrokeThickness="1.8" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="用户偏好" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="主题、语言、字号等个性化设置"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M3,5 H21 V19 H3 Z M3,9 H21 M7,14 H10"
-                                            Stroke="{DynamicResource Foreground.Success}"
-                                            StrokeEndLineCap="Round"
-                                            StrokeLineJoin="Round"
-                                            StrokeStartLineCap="Round"
-                                            StrokeThickness="1.8" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="系统设置" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="网络、日志、性能等系统级配置"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M12,3 L4,7 V12 C4,16 8,20 12,21 C16,20 20,16 20,12 V7 Z M9,12 L11,14 L15,10"
-                                            Stroke="{DynamicResource Foreground.Warning}"
-                                            StrokeEndLineCap="Round"
-                                            StrokeLineJoin="Round"
-                                            StrokeStartLineCap="Round"
-                                            StrokeThickness="1.8" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="安全配置" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="登录、双因素、隐私等安全选项"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M3,7 H21 M3,12 H17 M3,17 H21"
-                                            Stroke="#8B5CF6"
-                                            StrokeEndLineCap="Round"
-                                            StrokeStartLineCap="Round"
-                                            StrokeThickness="1.8" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="详情面板" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="只读字段展示,作为 Config 信息块"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                            </UniformGrid>
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ 主要属性(SettingItem)  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="SettingItem 主要属性">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="2*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <Border
-                                        Grid.Row="0"
-                                        Grid.ColumnSpan="4"
-                                        Background="{DynamicResource Background.Header}" />
-
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="属性" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="类型" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="默认值" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="说明" />
-
-                                    <Border
-                                        Grid.Row="0"
-                                        Grid.ColumnSpan="4"
-                                        Height="1"
-                                        VerticalAlignment="Bottom"
-                                        Background="{DynamicResource Border.Default}" />
-
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="Label" />
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="object" />
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="null" />
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="标签列内容" />
-
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="Description" />
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="string" />
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="null" />
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="标签下方说明文字(空时收起)" />
-
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="Icon" />
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="object" />
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="null" />
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="左侧图标内容(空时收起)" />
-
-                                    <TextBlock
-                                        Grid.Row="4"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="LabelWidth" />
-                                    <TextBlock
-                                        Grid.Row="4"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="GridLength" />
-                                    <TextBlock
-                                        Grid.Row="4"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="Auto" />
-                                    <TextBlock
-                                        Grid.Row="4"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="附加属性 + Inherits,可在祖先批量配置" />
-
-                                    <TextBlock
-                                        Grid.Row="5"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="ContentAlignment" />
-                                    <TextBlock
-                                        Grid.Row="5"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="enum" />
-                                    <TextBlock
-                                        Grid.Row="5"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="Right" />
-                                    <TextBlock
-                                        Grid.Row="5"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="附加属性 + Inherits,控制 Content 对齐" />
-
-                                    <TextBlock
-                                        Grid.Row="6"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="IsClickable" />
-                                    <TextBlock
-                                        Grid.Row="6"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="bool" />
-                                    <TextBlock
-                                        Grid.Row="6"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="False" />
-                                    <TextBlock
-                                        Grid.Row="6"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="整行可点击 / Hover 高亮 / 手型光标" />
-
-                                    <TextBlock
-                                        Grid.Row="7"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableNameStyle}"
-                                        Text="Command" />
-                                    <TextBlock
-                                        Grid.Row="7"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="ICommand" />
-                                    <TextBlock
-                                        Grid.Row="7"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableTypeStyle}"
-                                        Text="null" />
-                                    <TextBlock
-                                        Grid.Row="7"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableCellStyle}"
-                                        Text="整行点击触发的命令" />
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ XAML 示例 + ⑥ 设计要点  -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="240" />
-                        </Grid.ColumnDefinitions>
-
-                        <cy:Card Grid.Column="0">
-                            <cy:Card.Header>
-                                <cy:CardHeader Title="XAML 示例">
-                                    <cy:CardHeader.Icon>
-                                        <Border Style="{StaticResource SectionNumberStyle}">
-                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                        </Border>
-                                    </cy:CardHeader.Icon>
-                                </cy:CardHeader>
-                            </cy:Card.Header>
-                            <StackPanel>
-                                <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                                    <![CDATA[<cy:SettingGroup Header="网络"
-                 LabelWidth="160">
-    <cy:SettingItem Label="代理服务器">
-        <TextBox Text="{Binding ProxyAddress}" />
-    </cy:SettingItem>
-    <cy:SettingItem Label="账号"
-                    Description="管理你的账户"
-                    IsClickable="True"
-                    Command="{Binding OpenAccount}">
-        <TextBlock Text="›" />
-    </cy:SettingItem>
-</cy:SettingGroup>]]>
-                                </TextBox>
-                            </StackPanel>
-                        </cy:Card>
-
-                        <cy:Card Grid.Column="2">
-                            <cy:Card.Header>
-                                <cy:CardHeader Title="设计要点">
-                                    <cy:CardHeader.Icon>
-                                        <Border Style="{StaticResource SectionNumberStyle}">
-                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                        </Border>
-                                    </cy:CardHeader.Icon>
-                                </cy:CardHeader>
-                            </cy:Card.Header>
-                            <StackPanel>
-
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="附加属性 + Inherits" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="LabelWidth / ContentAlignment 注册时带 Inherits 标志,可在任意祖先容器上设置一次,自动下传给所有后代 SettingItem。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="单项可覆盖" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="任何 SettingItem 都可在自身上显式赋值,覆盖从祖先继承的值。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </StackPanel>
-                        </cy:Card>
-                    </Grid>
-                </StackPanel>
-            </Grid>
-
-            <!--  ============ 底部 Tip ============  -->
-            <Border
-                Grid.Row="2"
-                Margin="0,20,0,0"
-                Padding="16,12"
-                Background="{DynamicResource Background.Info}"
-                BorderBrush="{DynamicResource Border.Info}"
-                BorderThickness="1"
-                CornerRadius="0">
-                <StackPanel Orientation="Horizontal">
-                    <Border
-                        Width="20"
-                        Height="20"
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource Background.Highlighted}"
-                        CornerRadius="999">
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="13"
-                            FontWeight="Bold"
-                            Foreground="White"
-                            Text="i" />
-                    </Border>
-                    <TextBlock
-                        Margin="10,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Foreground="{DynamicResource Foreground.Default}">
-                        <Run Text="SettingGroup 的 LabelWidth / ContentAlignment 是 CLR 实例包装,转发到 SettingItem 上的同名附加属性——既保持单一真理源,又让用户在 SettingGroup 上的写法和直接配置 SettingItem 一致。" />
-                    </TextBlock>
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <StackPanel>
+                    <cy:SettingItem Description="有新消息时弹出系统通知" Label="桌面通知">
+                        <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
+                    </cy:SettingItem>
+                    <Border Height="1" Background="{DynamicResource Border.Default}" />
+                    <cy:SettingItem Description="开机时自动运行本程序" Label="自动启动">
+                        <cy:SwitchButton IsChecked="{Binding AutoStart}" />
+                    </cy:SettingItem>
                 </StackPanel>
             </Border>
-        </Grid>
+
+            <!--  ========== ② 其他样式示例 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 其他样式示例"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="LabelWidth / ContentAlignment / IsClickable / SettingGroup" />
+
+            <!--  LabelWidth 批量对齐  -->
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="LabelWidth 批量对齐 (在容器上设一次, 全部子项跟随)" />
+            <Border Margin="0,0,0,16" BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <StackPanel
+                    cy:SettingItem.ContentAlignment="Left"
+                    cy:SettingItem.ContentSpacing="30"
+                    cy:SettingItem.LabelWidth="60">
+                    <cy:SettingItem Description="显示桌面通知" Label="桌面通知">
+                        <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
+                    </cy:SettingItem>
+                    <cy:SettingItem Description="切换立即生效" Label="界面语言">
+                        <ComboBox
+                            MinWidth="140"
+                            ItemsSource="{Binding Languages}"
+                            SelectedItem="{Binding CurrentLanguage}" />
+                    </cy:SettingItem>
+                    <cy:SettingItem Label="字体大小">
+                        <Slider
+                            Width="160"
+                            Maximum="20"
+                            Minimum="10"
+                            Value="{Binding FontSize}" />
+                    </cy:SettingItem>
+                </StackPanel>
+            </Border>
+
+            <!--  ContentAlignment 控制对齐方向  -->
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="ContentAlignment 控制内容方向 (Right / Left / Center / Stretch)" />
+            <Border Margin="0,0,0,16" BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <StackPanel cy:SettingItem.LabelWidth="160">
+                    <cy:SettingItem ContentAlignment="Right" Label="Right (默认)">
+                        <cy:SwitchButton IsChecked="{Binding NotifyEnabled}" />
+                    </cy:SettingItem>
+                    <cy:SettingItem ContentAlignment="Left" Label="Left">
+                        <cy:SwitchButton IsChecked="{Binding AutoStart}" />
+                    </cy:SettingItem>
+                    <cy:SettingItem ContentAlignment="Stretch" Label="Stretch (适合输入框)">
+                        <TextBox Text="{Binding ProxyAddress}" />
+                    </cy:SettingItem>
+                </StackPanel>
+            </Border>
+
+            <!--  整行可点击  -->
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsClickable + Command (整行可点击 / Hover 高亮 / 手型光标)" />
+            <Border Margin="0,0,0,16" BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <StackPanel cy:SettingItem.LabelWidth="180">
+                    <cy:SettingItem
+                        Command="{Binding OpenAccountCommand}"
+                        Description="管理你的账户信息"
+                        IsClickable="True"
+                        Label="账号详情">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Placeholder}"
+                            Text="›" />
+                    </cy:SettingItem>
+                    <cy:SettingItem
+                        Command="{Binding ExportDataCommand}"
+                        Description="导出账户配置和偏好设置"
+                        IsClickable="True"
+                        Label="导出数据">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Placeholder}"
+                            Text="›" />
+                    </cy:SettingItem>
+                </StackPanel>
+            </Border>
+
+            <!--  SettingGroup  -->
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="SettingGroup (自带组标题、描述、对齐配置)" />
+            <cy:SettingGroup
+                Description="代理服务器与超时配置"
+                Header="网络"
+                LabelWidth="160">
+                <cy:SettingItem Label="代理服务器">
+                    <TextBox MinWidth="200" Text="{Binding ProxyAddress}" />
+                </cy:SettingItem>
+                <cy:SettingItem Label="超时 (秒)">
+                    <cy:NumberBox
+                        MinWidth="120"
+                        Maximum="600"
+                        Minimum="1"
+                        NumberMode="Integer"
+                        Value="{Binding TimeoutSeconds}" />
+                </cy:SettingItem>
+                <cy:SettingItem Label="日志级别">
+                    <ComboBox
+                        MinWidth="140"
+                        ItemsSource="{Binding LogLevels}"
+                        SelectedItem="{Binding CurrentLogLevel}" />
+                </cy:SettingItem>
+            </cy:SettingGroup>
+
+            <!--  ========== ③ 常见使用场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 常见使用场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SettingItem 在产品里最常出现的 4 种位置" />
+
+            <UniformGrid Columns="2" Rows="2">
+                <Border
+                    Margin="0,0,8,8"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,5 A4,4 0 1 0 12,13 A4,4 0 1 0 12,5 Z M5,21 C5,17 8,15 12,15 C16,15 19,17 19,21"
+                            Stroke="{DynamicResource Foreground.Link}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.8" />
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="用户偏好" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="主题、语言、字号等个性化设置"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="8,0,0,8"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M3,5 H21 V19 H3 Z M3,9 H21 M7,14 H10"
+                            Stroke="{DynamicResource Foreground.Success}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.8" />
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="系统设置" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="网络、日志、性能等系统级配置"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="0,8,8,0"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,3 L4,7 V12 C4,16 8,20 12,21 C16,20 20,16 20,12 V7 Z M9,12 L11,14 L15,10"
+                            Stroke="{DynamicResource Foreground.Warning}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.8" />
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="安全配置" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="登录、双因素、隐私等安全选项"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="8,8,0,0"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M3,7 H21 M3,12 H17 M3,17 H21"
+                            Stroke="{DynamicResource Foreground.Info}"
+                            StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.8" />
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="详情面板" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="只读字段展示, 作为 Config 信息块"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!--  ========== ④ 主要属性 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 主要属性"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SettingItem 直接属性 + 附加属性" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="4"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource PropTableHeaderStyle}" Text="属性" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource PropTableHeaderStyle}" Text="类型" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource PropTableHeaderStyle}" Text="默认值" />
+                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource PropTableHeaderStyle}" Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="4"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Label" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
+                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="标签列内容" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Description" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
+                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="标签下方说明文字 (空时收起)" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Icon" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
+                    <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="左侧图标内容 (空时收起)" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LabelWidth" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="GridLength" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="Auto" />
+                    <TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="附加属性 + Inherits, 可在祖先批量配置" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ContentAlignment" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="Right" />
+                    <TextBlock Grid.Row="5" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="附加属性 + Inherits, 控制 Content 对齐" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsClickable" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="False" />
+                    <TextBlock Grid.Row="6" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="整行可点击 / Hover 高亮 / 手型光标" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Command" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
+                    <TextBlock Grid.Row="7" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="整行点击触发的命令" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑤ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="3 条用法约定" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="附加属性 + Inherits" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="LabelWidth / ContentAlignment 注册时带 Inherits 标志, 可在任意祖先容器上设置一次, 自动下传给所有后代 SettingItem。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="单项可覆盖" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="任何 SettingItem 都可在自身上显式赋值, 覆盖从祖先继承的值。常用于 表单大多对齐 + 某一项 Stretch。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="SettingGroup 是 Inherits 的语法糖" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="SettingGroup 的 LabelWidth / ContentAlignment 是 CLR 实例包装, 转发到 SettingItem 上的同名附加属性 — 既保持单一真理源, 又让用户在 SettingGroup 上的写法和直接配置 SettingItem 一致。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

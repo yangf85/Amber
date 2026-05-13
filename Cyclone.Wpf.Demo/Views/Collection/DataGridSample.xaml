@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.DataGridSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,26 +8,26 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type=local:DataGridViewModel}"
-    d:DesignHeight="2800"
-    d:DesignWidth="1400"
+    d:DesignHeight="3600"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -36,26 +36,20 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
 
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -86,15 +80,13 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
@@ -106,7 +98,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M3,4 L21,4 L21,20 L3,20 Z M3,9 L21,9 M3,14 L21,14 M9,4 L9,20 M15,4 L15,20"
-                            Stroke="White"
+                            Stroke="{DynamicResource Text.Invert}"
                             StrokeLineJoin="Round"
                             StrokeThickness="1.5" />
                     </Border>
@@ -125,901 +117,855 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 原生控件 · 主题样式 · Helper 扩展" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="数据网格——支持单元格编辑、多种列类型、排序、分组、行详情、隔行底色。本库提供 WinUI 3 风格主题样式（左 3px 竖条选中指示器 + 整行高亮）和 DataGridHelper 附加属性扩展（基于 [DataGridProperty] 特性自动生成列、SelectedItems 双向绑定、统一 EditingStyle）。" />
+                            Text="数据网格 — 支持单元格编辑、多种列类型、排序、分组、行详情、隔行底色。本库提供 WinUI 3 风格主题样式 (左 3px 竖条选中指示器 + 整行高亮) 和 DataGridHelper 附加属性扩展 (基于 [DataGridProperty] 特性自动生成列、SelectedItems 双向绑定、统一 EditingStyle)。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  ========== ① 多种列类型 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 多种列类型"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Text / CheckBox / ComboBox / Template" />
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="DataGrid 内置 4 种常用列类型: DataGridTextColumn (文本) / CheckBoxColumn (布尔) / ComboBoxColumn (下拉) / TemplateColumn (自定义)。AutoGenerateColumns=False 时显式声明每列。" />
 
-                    <!--  ① 多种列类型  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="多种列类型" Subtitle="Text / CheckBox / ComboBox / Template">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <DataGrid
+                Height="280"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                ItemsSource="{Binding BasicData}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Name}"
+                        Header="姓名" />
+                    <DataGridTextColumn
+                        Width="180"
+                        Binding="{Binding Email}"
+                        Header="邮箱" />
+                    <DataGridTextColumn
+                        Width="80"
+                        Binding="{Binding Department}"
+                        Header="部门" />
+                    <DataGridTextColumn
+                        Width="60"
+                        Binding="{Binding Age}"
+                        Header="年龄" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Salary, StringFormat=¥{0:N0}}"
+                        Header="薪资" />
+                    <DataGridCheckBoxColumn
+                        Width="60"
+                        Binding="{Binding IsActive}"
+                        Header="在职" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="DataGrid 内置 4 种常用列类型：DataGridTextColumn（文本）/ CheckBoxColumn（布尔）/ ComboBoxColumn（下拉）/ TemplateColumn（自定义）。AutoGenerateColumns=False 时显式声明每列。" />
+            <TextBlock
+                Margin="0,12,0,0"
+                FontSize="12"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="点击列头排序 — DataGrid 内置支持 (无需手写 SortDescriptions)。这是它和 ListView 的关键差异。"
+                TextWrapping="Wrap" />
 
-                            <DataGrid
-                                Height="280"
-                                AutoGenerateColumns="False"
-                                IsReadOnly="True"
-                                ItemsSource="{Binding BasicData}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding Name}"
-                                        Header="姓名" />
-                                    <DataGridTextColumn
-                                        Width="180"
-                                        Binding="{Binding Email}"
-                                        Header="邮箱" />
-                                    <DataGridTextColumn
-                                        Width="80"
-                                        Binding="{Binding Department}"
-                                        Header="部门" />
-                                    <DataGridTextColumn
-                                        Width="60"
-                                        Binding="{Binding Age}"
-                                        Header="年龄" />
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding Salary, StringFormat=¥{0:N0}}"
-                                        Header="薪资" />
-                                    <DataGridCheckBoxColumn
-                                        Width="60"
-                                        Binding="{Binding IsActive}"
-                                        Header="在职" />
-                                </DataGrid.Columns>
-                            </DataGrid>
+            <!--  ========== ② 单元格编辑 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 单元格编辑"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="双击进入编辑模式 + 自动应用 EditingStyle" />
 
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="点击列头排序——DataGrid 内置支持（无需手写 SortDescriptions）。这是它和 ListView 的关键差异。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="双击单元格进入编辑 (或选中后按 F2)。Enter 提交, Esc 取消。本库主题已自动应用统一的 EditingStyle — 文本列编辑时显示透明 TextBox + 高亮边框, 无需逐列配置。" />
 
-                    <!--  ② 单元格编辑  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="单元格编辑" Subtitle="双击进入编辑模式 + 自动应用 EditingStyle">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <DataGrid
+                Height="240"
+                AutoGenerateColumns="False"
+                ItemsSource="{Binding EditableData}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Name}"
+                        Header="姓名" />
+                    <DataGridTextColumn
+                        Width="180"
+                        Binding="{Binding Email}"
+                        Header="邮箱" />
+                    <!--  ComboBox 列: 编辑时弹出下拉  -->
+                    <DataGridComboBoxColumn
+                        Width="100"
+                        Header="部门"
+                        ItemsSource="{Binding DataContext.Departments, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        SelectedItemBinding="{Binding Department}" />
+                    <DataGridTextColumn
+                        Width="60"
+                        Binding="{Binding Age}"
+                        Header="年龄" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Salary, StringFormat=¥{0:N0}}"
+                        Header="薪资" />
+                    <!--  CheckBox 列默认就是可点击的 — 无需双击进入编辑  -->
+                    <DataGridCheckBoxColumn
+                        Width="60"
+                        Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}"
+                        Header="在职" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="双击单元格进入编辑（或选中后按 F2）。Enter 提交，Esc 取消。本库主题已自动应用统一的 EditingStyle——文本列编辑时显示透明 TextBox + 高亮边框，无需逐列配置。" />
-
-                            <DataGrid
-                                Height="240"
-                                AutoGenerateColumns="False"
-                                ItemsSource="{Binding EditableData}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding Name}"
-                                        Header="姓名" />
-                                    <DataGridTextColumn
-                                        Width="180"
-                                        Binding="{Binding Email}"
-                                        Header="邮箱" />
-                                    <!--  ComboBox 列：编辑时弹出下拉  -->
-                                    <DataGridComboBoxColumn
-                                        Width="100"
-                                        Header="部门"
-                                        ItemsSource="{Binding DataContext.Departments, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        SelectedItemBinding="{Binding Department}" />
-                                    <DataGridTextColumn
-                                        Width="60"
-                                        Binding="{Binding Age}"
-                                        Header="年龄" />
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding Salary, StringFormat=¥{0:N0}}"
-                                        Header="薪资" />
-                                    <!--  CheckBox 列默认就是可点击的——无需双击进入编辑  -->
-                                    <DataGridCheckBoxColumn
-                                        Width="60"
-                                        Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}"
-                                        Header="在职" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-
-                            <Border
-                                Margin="0,12,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="12"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="编辑快捷键" />
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Grid.Column="0"
-                                            Margin="0,0,12,2"
-                                            FontFamily="Consolas"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="F2" />
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Grid.Column="1"
-                                            Margin="0,0,0,2"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="进入编辑模式" />
-                                        <TextBlock
-                                            Grid.Row="1"
-                                            Grid.Column="0"
-                                            Margin="0,0,12,2"
-                                            FontFamily="Consolas"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="Enter" />
-                                        <TextBlock
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            Margin="0,0,0,2"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="提交编辑并移到下一行" />
-                                        <TextBlock
-                                            Grid.Row="2"
-                                            Grid.Column="0"
-                                            Margin="0,0,12,2"
-                                            FontFamily="Consolas"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="Esc" />
-                                        <TextBlock
-                                            Grid.Row="2"
-                                            Grid.Column="1"
-                                            Margin="0,0,0,2"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="取消编辑（按两次取消整行）" />
-                                        <TextBlock
-                                            Grid.Row="3"
-                                            Grid.Column="0"
-                                            Margin="0,0,12,0"
-                                            FontFamily="Consolas"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="Tab" />
-                                        <TextBlock
-                                            Grid.Row="3"
-                                            Grid.Column="1"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="提交并移到下一列" />
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 多选 + SelectedItems 双向  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="多选 + 双向绑定" Subtitle="hp:DataGridHelper.SelectedItems">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="原生 DataGrid.SelectedItems 是只读 DP——用本库 hp:DataGridHelper.SelectedItems 桥接到 ViewModel ObservableCollection 实现双向同步。Ctrl/Shift 配合多选。" />
-
-                            <DataGrid
-                                Height="280"
-                                AutoGenerateColumns="False"
-                                IsReadOnly="True"
-                                ItemsSource="{Binding MultiSelectData}"
-                                SelectionMode="Extended"
-                                hp:DataGridHelper.SelectedItems="{Binding SelectedRows}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn
-                                        Width="120"
-                                        Binding="{Binding FullName}"
-                                        Header="姓名" />
-                                    <DataGridTextColumn
-                                        Width="180"
-                                        Binding="{Binding Email}"
-                                        Header="邮箱" />
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding City}"
-                                        Header="城市" />
-                                    <DataGridTextColumn
-                                        Width="60"
-                                        Binding="{Binding Age}"
-                                        Header="年龄" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-
-                            <Border
-                                Margin="0,12,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        FontSize="12"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="ViewModel 实时收到：" />
-                                    <TextBlock Grid.Column="1" Style="{StaticResource ValueLabelStyle}">
-                                        <Run Text="共 " />
-                                        <Run
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding SelectedRows.Count, Mode=OneWay, FallbackValue=0}" />
-                                        <Run Text=" 项选中" />
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
+            <Border
+                Margin="0,12,0,0"
+                Padding="14,12"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="12"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="编辑快捷键" />
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="0,0,16,4"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="F2" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="0,0,0,4"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="进入编辑模式" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="0,0,16,4"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="Enter" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,0,0,4"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="提交编辑并移到下一行" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Margin="0,0,16,4"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="Esc" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="0,0,0,4"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="取消编辑 (按两次取消整行)" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Margin="0,0,16,0"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="Tab" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="提交并移到下一列" />
+                    </Grid>
                 </StackPanel>
+            </Border>
 
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
+            <!--  ========== ③ 多选 + 双向绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 多选 + 双向绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="hp:DataGridHelper.SelectedItems" />
 
-                    <!--  ④ 特性自动生成列  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="特性自动生成列" Subtitle="[DataGridProperty] + IsAutoGenerate=True">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="原生 DataGrid.SelectedItems 是只读 DP — 用本库 hp:DataGridHelper.SelectedItems 桥接到 ViewModel ObservableCollection 实现双向同步。Ctrl/Shift 配合多选。" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ViewModel 类属性上标 [DataGridProperty]——XAML 不写一个 Column 标签，列自动生成。支持 Header / Width / Index / StringFormat / IsReadOnly。比 WPF 原生 AutoGenerateColumns 控制更精细。" />
+            <DataGrid
+                Height="280"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                ItemsSource="{Binding MultiSelectData}"
+                SelectionMode="Extended"
+                hp:DataGridHelper.SelectedItems="{Binding SelectedRows}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding FullName}"
+                        Header="姓名" />
+                    <DataGridTextColumn
+                        Width="180"
+                        Binding="{Binding Email}"
+                        Header="邮箱" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding City}"
+                        Header="城市" />
+                    <DataGridTextColumn
+                        Width="60"
+                        Binding="{Binding Age}"
+                        Header="年龄" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-                            <DataGrid
-                                Height="260"
-                                IsReadOnly="True"
-                                ItemsSource="{Binding Products}"
-                                hp:DataGridHelper.IsAutoGenerate="True" />
-
-                            <Border
-                                Margin="0,12,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="12"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="DataGridProductSample 类标注示例" />
-                                    <TextBlock
-                                        Margin="0,8,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        TextWrapping="Wrap"><Run Foreground="{DynamicResource Foreground.Link}" Text="[DataGridProperty]" /><Run Text="(&quot;单价&quot;, Index=3, StringFormat=&quot;¥{0:N2}&quot;)" /><LineBreak /><Run Text="public partial decimal Price { get; set; }" /></TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ 行详情展开  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="行详情展开" Subtitle="RowDetailsTemplate · VisibleWhenSelected">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="选中行下方展开附加详情——RowDetailsTemplate 定义内容、RowDetailsVisibilityMode 控制时机（Visible 始终展开 / VisibleWhenSelected 仅选中行展开 / Collapsed 隐藏）。" />
-
-                            <DataGrid
-                                Height="320"
-                                AutoGenerateColumns="False"
-                                IsReadOnly="True"
-                                ItemsSource="{Binding DetailsData}"
-                                RowDetailsVisibilityMode="VisibleWhenSelected">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn
-                                        Width="120"
-                                        Binding="{Binding FullName}"
-                                        Header="姓名" />
-                                    <DataGridTextColumn
-                                        Width="160"
-                                        Binding="{Binding Email}"
-                                        Header="邮箱" />
-                                    <DataGridTextColumn
-                                        Width="60"
-                                        Binding="{Binding Age}"
-                                        Header="年龄" />
-                                </DataGrid.Columns>
-
-                                <DataGrid.RowDetailsTemplate>
-                                    <DataTemplate>
-                                        <Border
-                                            Margin="6"
-                                            Padding="14,12"
-                                            Background="{DynamicResource Background.Header}"
-                                            BorderBrush="{DynamicResource Background.Highlighted}"
-                                            BorderThickness="3,0,0,0">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock
-                                                        FontSize="11"
-                                                        Foreground="{DynamicResource Foreground.Caption}"
-                                                        Text="所在城市" />
-                                                    <TextBlock
-                                                        Margin="0,2,0,0"
-                                                        FontSize="13"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource Foreground.Default}"
-                                                        Text="{Binding City}" />
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="1">
-                                                    <TextBlock
-                                                        FontSize="11"
-                                                        Foreground="{DynamicResource Foreground.Caption}"
-                                                        Text="国家" />
-                                                    <TextBlock
-                                                        Margin="0,2,0,0"
-                                                        FontSize="13"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource Foreground.Default}"
-                                                        Text="{Binding Country}" />
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="2">
-                                                    <TextBlock
-                                                        FontSize="11"
-                                                        Foreground="{DynamicResource Foreground.Caption}"
-                                                        Text="状态" />
-                                                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
-                                                        <Border
-                                                            Padding="8,2"
-                                                            VerticalAlignment="Center">
-                                                            <Border.Style>
-                                                                <Style TargetType="Border">
-                                                                    <Setter Property="Background" Value="{DynamicResource Background.Success}" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
-                                                                            <Setter Property="Background" Value="{DynamicResource Background.Error}" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                                            <Setter Property="Background" Value="{DynamicResource Background.Warning}" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Border.Style>
-                                                            <TextBlock
-                                                                FontSize="11"
-                                                                FontWeight="Bold"
-                                                                Foreground="White"
-                                                                Text="{Binding Status}" />
-                                                        </Border>
-                                                        <TextBlock
-                                                            Margin="8,0,0,0"
-                                                            VerticalAlignment="Center"
-                                                            FontSize="11"
-                                                            Foreground="{DynamicResource Foreground.Caption}">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Text" Value="未验证" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsVerified}" Value="True">
-                                                                            <Setter Property="Text" Value="已验证 ✓" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGrid.RowDetailsTemplate>
-                            </DataGrid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ 常见使用场景  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="常见使用场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <UniformGrid Columns="2" Rows="2">
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M3,3 L17,3 L17,17 L3,17 Z M3,7 L17,7 M3,11 L17,11 M3,15 L17,15 M7,3 L7,17 M11,3 L11,17"
-                                        Stroke="{DynamicResource Foreground.Info}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="数据录入 / 编辑" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="单元格直接编辑 + 验证 + 撤销支持。比 ListView 强的核心场景。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M3,17 L17,17 M5,15 L5,9 M9,15 L9,5 M13,15 L13,12 M17,15 L17,7"
-                                        Stroke="{DynamicResource Foreground.Success}"
-                                        StrokeLineJoin="Round"
-                                        StrokeStartLineCap="Round"
-                                        StrokeEndLineCap="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="数据报表" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="IsReadOnly=True + 隔行底色 + 列头排序——Excel 风格只读展示。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M3,5 L9,5 L9,11 L3,11 Z M3,13 L9,13 L9,17 L3,17 Z M11,5 L17,5 L17,17 L11,17 Z"
-                                        Stroke="{DynamicResource Foreground.Warning}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="主从联动 (Master-Detail)" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="DataGrid 主表 + RowDetailsTemplate 嵌套子 DataGrid 显示明细。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M2,2 L18,2 L18,8 L2,8 Z M2,10 L18,10 L18,18 L2,18 Z M5,5 L15,5 M5,13 L15,13 M5,16 L15,16"
-                                        Stroke="#8B5CF6"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="后台 / 管理面板" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="批量操作 + 多选 + 自动生成列——快速搭起管理界面的核心。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-                        </UniformGrid>
-                    </cy:Card>
-                </StackPanel>
-            </Grid>
-
-            <!--  ============ 底部：属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <!--  ⑦ 属性表  -->
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="DataGrid 主要属性 / 附加属性">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="名称" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型 / 来源" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemsSource" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEnumerable" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据源（继承自 ItemsControl）。绑 ICollectionView 时支持过滤/排序/分组。" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AutoGenerateColumns" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否按数据类型反射自动生成列。本库主题默认 False（推荐显式声明）。如需自动生成且更精细控制，用 hp:DataGridHelper.IsAutoGenerate + [DataGridProperty]。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsReadOnly" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="整个 DataGrid 是否只读——禁用所有列编辑。单列只读用 DataGridColumn.IsReadOnly。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectionMode / SelectionUnit" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="SelectionMode：Single / Extended（Ctrl/Shift 多选）。SelectionUnit：FullRow（默认）/ Cell / CellOrRowHeader。" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="RowDetailsTemplate / VisibilityMode" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate / enum" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="行详情模板 + 显示时机（Visible / VisibleWhenSelected / Collapsed）。" />
-
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AlternationCount" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="隔行底色循环长度。本主题默认 2，配合 Alternation.Light/Dark 资源 key。" />
-
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="GridLinesVisibility" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="网格线可见性。本主题默认 Horizontal（仅水平线，符合现代设计）。" />
-
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DataGridColumn 类型" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="abstract class" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="内置 4 种：DataGridTextColumn / CheckBoxColumn / ComboBoxColumn / TemplateColumn。后者最灵活——可定义 CellTemplate（显示）和 CellEditingTemplate（编辑）。" />
-
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="hp:DataGridHelper.SelectedItems" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IList (TwoWay)" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="本库扩展：双向同步多选项到 ViewModel。要求集合实现 INotifyCollectionChanged（推荐 ObservableCollection&lt;T&gt;）。" />
-
-                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="hp:DataGridHelper.IsAutoGenerate" />
-                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="本库扩展：基于 [DataGridProperty] 特性自动生成列。比原生 AutoGenerateColumns 控制更精细——支持 Header/Width/Index/StringFormat/IsReadOnly/Template。ItemsSource 变化时自动重新生成。" />
-
-                            <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="hp:DataGridHelper.TextColumnEditingStyle" />
-                            <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                            <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="本库扩展：给 DataGridTextColumn.EditingElementStyle 统一应用样式——主题样式中已默认挂上，无需手动配置。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <!--  ⑧ XAML 示例 + ⑨ 设计要点  -->
-                <Grid Grid.Row="1">
+            <Border
+                Margin="0,12,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
                     </Grid.ColumnDefinitions>
-
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 1. 基础多列 -->
-<DataGrid AutoGenerateColumns="False"
-          ItemsSource="{Binding Employees}">
-    <DataGrid.Columns>
-        <DataGridTextColumn Header="姓名"
-            Binding="{Binding Name}" Width="120" />
-        <DataGridComboBoxColumn Header="部门"
-            ItemsSource="{Binding DataContext.Depts,
-                RelativeSource={RelativeSource AncestorType=UserControl}}"
-            SelectedItemBinding="{Binding Department}" Width="100" />
-        <DataGridTextColumn Header="薪资"
-            Binding="{Binding Salary, StringFormat=¥{0:N0}}" Width="100" />
-        <DataGridCheckBoxColumn Header="在职"
-            Binding="{Binding IsActive}" Width="60" />
-    </DataGrid.Columns>
-</DataGrid>
-
-<!-- 2. 多选双向绑定（本库扩展） -->
-<DataGrid SelectionMode="Extended"
-          ItemsSource="{Binding Items}"
-          hp:DataGridHelper.SelectedItems="{Binding SelectedRows}" />
-<!-- ViewModel.SelectedRows 必须是 ObservableCollection<T> -->
-
-<!-- 3. 特性自动生成列（本库扩展） -->
-<DataGrid hp:DataGridHelper.IsAutoGenerate="True"
-          ItemsSource="{Binding Products}" />
-
-// ViewModel
-public class Product
-{
-    [DataGridProperty("SKU", Index=0, Width=80, IsReadOnly=true)]
-    public string Sku { get; set; }
-
-    [DataGridProperty("单价", Index=3, StringFormat="¥{0:N2}")]
-    public decimal Price { get; set; }
-}
-
-<!-- 4. 行详情展开 -->
-<DataGrid RowDetailsVisibilityMode="VisibleWhenSelected">
-    <DataGrid.RowDetailsTemplate>
-        <DataTemplate>
-            <Border Padding="14" Background="...">
-                <!-- 详情内容 -->
-            </Border>
-        </DataTemplate>
-    </DataGrid.RowDetailsTemplate>
-</DataGrid>
-
-<!-- 5. 自定义列模板（最灵活） -->
-<DataGridTemplateColumn Header="状态" Width="80">
-    <DataGridTemplateColumn.CellTemplate>
-        <DataTemplate>
-            <Border Padding="6,2" Background="...">
-                <TextBlock Text="{Binding Status}" />
-            </Border>
-        </DataTemplate>
-    </DataGridTemplateColumn.CellTemplate>
-</DataGridTemplateColumn>]]>
-                        </TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="DataGrid vs ListView" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="需要单元格编辑就选 DataGrid——否则只读展示用 ListView 更轻量。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="ComboBox 列祖先绑定" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="ItemsSource 在行 DataContext 内找不到——用 RelativeSource AncestorType=UserControl 跳出当前行。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="CheckBox 列即时更新" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="加 UpdateSourceTrigger=PropertyChanged——否则单击后焦点丢失才提交。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="自动生成 vs 显式" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="原型阶段用 IsAutoGenerate 提速，定型后切回显式 Columns 完全控制。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="虚拟化默认开启" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="ScrollViewer.CanContentScroll=True 默认行虚拟化——上千行也流畅。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+                    <TextBlock
+                        Grid.Column="0"
+                        FontSize="12"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="ViewModel 实时收到:" />
+                    <TextBlock Grid.Column="1" Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="  共 " />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding SelectedRows.Count, Mode=OneWay, FallbackValue=0}" />
+                        <Run Text=" 项选中" />
+                    </TextBlock>
                 </Grid>
-            </Grid>
-        </Grid>
+            </Border>
+
+            <!--  ========== ④ 特性自动生成列 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 特性自动生成列"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="[DataGridProperty] + IsAutoGenerate=True" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ViewModel 类属性上标 [DataGridProperty] — XAML 不写一个 Column 标签, 列自动生成。支持 Header / Width / Index / StringFormat / IsReadOnly。比 WPF 原生 AutoGenerateColumns 控制更精细。" />
+
+            <DataGrid
+                Height="260"
+                IsReadOnly="True"
+                ItemsSource="{Binding Products}"
+                hp:DataGridHelper.IsAutoGenerate="True" />
+
+            <Border
+                Margin="0,12,0,0"
+                Padding="14,12"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="12"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="DataGridProductSample 类标注示例" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        FontFamily="Consolas"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        TextWrapping="Wrap"><Run Foreground="{DynamicResource Foreground.Link}" Text="[DataGridProperty]" /><Run Text="(&quot;单价&quot;, Index=3, StringFormat=&quot;¥{0:N2}&quot;)" /><LineBreak /><Run Text="public partial decimal Price { get; set; }" /></TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ⑤ 行详情展开 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 行详情展开"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="RowDetailsTemplate · VisibleWhenSelected" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="选中行下方展开附加详情 — RowDetailsTemplate 定义内容、RowDetailsVisibilityMode 控制时机 (Visible 始终展开 / VisibleWhenSelected 仅选中行展开 / Collapsed 隐藏)。" />
+
+            <DataGrid
+                Height="320"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                ItemsSource="{Binding DetailsData}"
+                RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding FullName}"
+                        Header="姓名" />
+                    <DataGridTextColumn
+                        Width="160"
+                        Binding="{Binding Email}"
+                        Header="邮箱" />
+                    <DataGridTextColumn
+                        Width="60"
+                        Binding="{Binding Age}"
+                        Header="年龄" />
+                </DataGrid.Columns>
+
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="6"
+                            Padding="14,12"
+                            Background="{DynamicResource Background.Header}"
+                            BorderBrush="{DynamicResource Background.Highlighted}"
+                            BorderThickness="3,0,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="所在城市" />
+                                    <TextBlock
+                                        Margin="0,2,0,0"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="{Binding City}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="国家" />
+                                    <TextBlock
+                                        Margin="0,2,0,0"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="{Binding Country}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock
+                                        FontSize="11"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="状态" />
+                                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                                        <Border Padding="8,2" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource Background.Success}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                            <Setter Property="Background" Value="{DynamicResource Background.Error}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                            <Setter Property="Background" Value="{DynamicResource Background.Warning}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock
+                                                FontSize="11"
+                                                FontWeight="Bold"
+                                                Foreground="{DynamicResource Text.Invert}"
+                                                Text="{Binding Status}" />
+                                        </Border>
+                                        <TextBlock
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource Foreground.Caption}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="未验证" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsVerified}" Value="True">
+                                                            <Setter Property="Text" Value="已验证 ✓" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>
+
+            <!--  ========== ⑥ 常见使用场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 常见使用场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="选型决策参考" />
+
+            <UniformGrid Columns="2" Rows="2">
+                <Border
+                    Margin="0,0,6,12"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M3,3 L17,3 L17,17 L3,17 Z M3,7 L17,7 M3,11 L17,11 M3,15 L17,15 M7,3 L7,17 M11,3 L11,17"
+                            Stroke="{DynamicResource Foreground.Info}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="数据录入 / 编辑" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="单元格直接编辑 + 验证 + 撤销支持。比 ListView 强的核心场景。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="6,0,0,12"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M3,17 L17,17 M5,15 L5,9 M9,15 L9,5 M13,15 L13,12 M17,15 L17,7"
+                            Stroke="{DynamicResource Foreground.Success}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="数据报表" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="IsReadOnly=True + 隔行底色 + 列头排序 — Excel 风格只读展示。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="0,0,6,0"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M3,5 L9,5 L9,11 L3,11 Z M3,13 L9,13 L9,17 L3,17 Z M11,5 L17,5 L17,17 L11,17 Z"
+                            Stroke="{DynamicResource Foreground.Warning}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="主从联动 (Master-Detail)" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="DataGrid 主表 + RowDetailsTemplate 嵌套子 DataGrid 显示明细。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Margin="6,0,0,0"
+                    Padding="16,14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M2,2 L18,2 L18,8 L2,8 Z M2,10 L18,10 L18,18 L2,18 Z M5,5 L15,5 M5,13 L15,13 M5,16 L15,16"
+                            Stroke="{DynamicResource Foreground.Link}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="后台 / 管理面板" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="批量操作 + 多选 + 自动生成列 — 快速搭起管理界面的核心。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!--  ========== ⑦ 主要属性 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 主要属性"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="DataGrid 原生 + DataGridHelper 附加属性" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="名称" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型 / 来源" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ItemsSource" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="IEnumerable" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="数据源 (继承自 ItemsControl)。绑 ICollectionView 时支持过滤 / 排序 / 分组。" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="AutoGenerateColumns" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="是否按数据类型反射自动生成列。本库主题默认 False (推荐显式声明)。如需自动生成且更精细控制, 用 hp:DataGridHelper.IsAutoGenerate + [DataGridProperty]。" />
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="IsReadOnly" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="整个 DataGrid 是否只读 — 禁用所有列编辑。单列只读用 DataGridColumn.IsReadOnly。" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="SelectionMode / SelectionUnit" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="enum" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="SelectionMode: Single / Extended (Ctrl/Shift 多选)。SelectionUnit: FullRow (默认) / Cell / CellOrRowHeader。" />
+
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="RowDetailsTemplate / VisibilityMode" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="DataTemplate / enum" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="行详情模板 + 显示时机 (Visible / VisibleWhenSelected / Collapsed)。" />
+
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="AlternationCount" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="int" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="隔行底色循环长度。本主题默认 2, 配合 Alternation.Light/Dark 资源 key。" />
+
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="GridLinesVisibility" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="enum" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="网格线可见性。本主题默认 Horizontal (仅水平线, 符合现代设计)。" />
+
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="DataGridColumn 类型" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="abstract class" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="内置 4 种: DataGridTextColumn / CheckBoxColumn / ComboBoxColumn / TemplateColumn。后者最灵活 — 可定义 CellTemplate (显示) 和 CellEditingTemplate (编辑)。" />
+
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:DataGridHelper.SelectedItems" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="IList (TwoWay)" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="本库扩展: 双向同步多选项到 ViewModel。要求集合实现 INotifyCollectionChanged (推荐 ObservableCollection&lt;T&gt;)。" />
+
+                    <TextBlock
+                        Grid.Row="10"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:DataGridHelper.IsAutoGenerate" />
+                    <TextBlock
+                        Grid.Row="10"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool" />
+                    <TextBlock
+                        Grid.Row="10"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="本库扩展: 基于 [DataGridProperty] 特性自动生成列。比原生 AutoGenerateColumns 控制更精细 — 支持 Header / Width / Index / StringFormat / IsReadOnly / Template。ItemsSource 变化时自动重新生成。" />
+
+                    <TextBlock
+                        Grid.Row="11"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:DataGridHelper.TextColumnEditingStyle" />
+                    <TextBlock
+                        Grid.Row="11"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="Style" />
+                    <TextBlock
+                        Grid.Row="11"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="本库扩展: 给 DataGridTextColumn.EditingElementStyle 统一应用样式 — 主题样式中已默认挂上, 无需手动配置。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑧ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="选型与实现的核心约定" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="DataGrid vs ListView" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="需要单元格编辑就选 DataGrid — 否则只读展示用 ListView 更轻量。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="ComboBox 列祖先绑定" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ItemsSource 在行 DataContext 内找不到 — 用 RelativeSource AncestorType=UserControl 跳出当前行。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="CheckBox 列即时更新" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="加 UpdateSourceTrigger=PropertyChanged — 否则单击后焦点丢失才提交。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="自动生成 vs 显式" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="原型阶段用 IsAutoGenerate 提速, 定型后切回显式 Columns 完全控制。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="虚拟化默认开启" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ScrollViewer.CanContentScroll=True 默认行虚拟化 — 上千行也流畅。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

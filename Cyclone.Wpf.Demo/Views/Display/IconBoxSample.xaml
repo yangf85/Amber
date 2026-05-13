@@ -5,26 +5,26 @@
     xmlns:cy="https://www.cyclone/wpf"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3600"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -33,26 +33,21 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
         <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <!--  IconCaptionStyle: icon 下方居中的小字标签  -->
+        <Style x:Key="IconCaptionStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,6,0,0" />
         </Style>
 
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
-
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -81,7 +76,7 @@
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
 
-        <!--  Geometry 资源 - 几个常用矢量图标 (放 Resources 让 IconBox.Content 引用)  -->
+        <!--  Geometry 资源 - 几个常用矢量图标  -->
         <PathGeometry x:Key="Geom.Menu" Figures="M3,7 L21,7 M3,12 L21,12 M3,17 L21,17" />
         <PathGeometry x:Key="Geom.Plus" Figures="M12,5 L12,19 M5,12 L19,12" />
         <PathGeometry x:Key="Geom.Search" Figures="M10,4 A6,6 0 1,1 10,16 A6,6 0 0,1 10,4 M14.5,14.5 L20,20" />
@@ -93,25 +88,23 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
                         <cy:IconBox
-                            Width="32"
-                            Height="32"
+                            Width="28"
+                            Height="28"
                             Content="{StaticResource Geom.Heart}"
-                            Foreground="White" />
+                            Foreground="{DynamicResource Text.Invert}" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
@@ -128,871 +121,615 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="统一图标控件——自动根据 Content 类型分发渲染。Geometry → 矢量 Path、ImageSource → 位图 Image、string → 字体图标 Glyph。默认 16×16,通过 Width/Height/FontSize 控制大小,Foreground 控制颜色。" />
+                            Text="统一图标控件 — 自动根据 Content 类型分发渲染。Geometry → 矢量 Path、ImageSource → 位图 Image、string → 字体图标 Glyph。默认 16×16, 通过 Width/Height/FontSize 控制大小, Foreground 控制颜色。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  ========== ① 矢量 Path ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 矢量 Path"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Content = Geometry, 可任意缩放 + 跟随 Foreground 改色" />
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="把 PathGeometry 放在 Resources 里复用, 直接用 Content 引用。Path 的 Fill 自动跟随 IconBox.Foreground。" />
 
-                    <!--  ① 矢量 Path  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="矢量 Path" Subtitle="Content = Geometry,可任意缩放 + 跟随 Foreground 改色">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <UniformGrid
+                Margin="0,0,0,16"
+                Columns="8"
+                Rows="1">
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Menu}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Menu" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Plus}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Plus" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Search}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Search" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Heart}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Heart" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Settings}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Settings" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Download}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Download" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.Bell}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Bell" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="24"
+                        Height="24"
+                        Content="{StaticResource Geom.User}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="User" />
+                </StackPanel>
+            </UniformGrid>
 
-                        <StackPanel>
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="任意大小 — Path 矢量缩放无损" />
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <cy:IconBox
+                    Width="16"
+                    Height="16"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Content="{StaticResource Geom.Heart}" />
+                <cy:IconBox
+                    Width="24"
+                    Height="24"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Content="{StaticResource Geom.Heart}" />
+                <cy:IconBox
+                    Width="36"
+                    Height="36"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Content="{StaticResource Geom.Heart}" />
+                <cy:IconBox
+                    Width="56"
+                    Height="56"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Content="{StaticResource Geom.Heart}" />
+                <cy:IconBox
+                    Width="80"
+                    Height="80"
+                    Margin="8,0"
+                    VerticalAlignment="Center"
+                    Content="{StaticResource Geom.Heart}" />
+            </StackPanel>
+
+            <!--  ========== ② 颜色控制 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 颜色控制"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Foreground 决定图标颜色" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Geometry 和字体图标自动跟随 Foreground。默认 Icon.Foreground.Default 灰色, 可改主题 token 或硬编码颜色。" />
+
+            <UniformGrid Columns="6" Rows="1">
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Default" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}"
+                        Foreground="{DynamicResource Background.Selected}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Selected" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}"
+                        Foreground="{DynamicResource Background.Success}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Success" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}"
+                        Foreground="{DynamicResource Background.Warning}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Warning" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}"
+                        Foreground="{DynamicResource Background.Error}" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Error" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Width="32"
+                        Height="32"
+                        Content="{StaticResource Geom.Heart}"
+                        Foreground="#9C27B0" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Custom" />
+                </StackPanel>
+            </UniformGrid>
+
+            <!--  ========== ③ 字体图标 (Glyph) ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 字体图标 (Glyph)"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Content = string, 通过 FontFamily 选字体" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Win10/11 自带 Segoe Fluent Icons 字体, Content 设字符代码即得图标。FontSize 控制大小, Foreground 控制颜色。字符代码参考: Microsoft Docs &quot;Segoe Fluent Icons font&quot; 列表。" />
+
+            <UniformGrid Columns="8" Rows="1">
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE700;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="E700" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE721;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Search" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE713;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Settings" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE74D;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Delete" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE74E;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Save" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE72E;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Lock" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE74A;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Up" />
+                </StackPanel>
+                <StackPanel>
+                    <cy:IconBox
+                        Content="&#xE74B;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="24" />
+                    <TextBlock Style="{StaticResource IconCaptionStyle}" Text="Down" />
+                </StackPanel>
+            </UniformGrid>
+
+            <!--  ========== ④ 组合 — 按钮里使用 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 组合 — 按钮里使用"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="替代 Path 显式声明" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="原本要写 StackPanel + Path 才能做 图标 + 文本 按钮, 有 IconBox 后可以共用 Geometry 资源, 代码更简洁。" />
+
+            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                <Button Padding="14,8">
+                    <StackPanel Orientation="Horizontal">
+                        <cy:IconBox
+                            Width="14"
+                            Height="14"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            Content="{StaticResource Geom.Plus}" />
+                        <TextBlock VerticalAlignment="Center" Text="新建" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Margin="8,0,0,0"
+                    Padding="14,8"
+                    Style="{DynamicResource Button.Style.Primary}">
+                    <StackPanel Orientation="Horizontal">
+                        <cy:IconBox
+                            Width="14"
+                            Height="14"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            Content="{StaticResource Geom.Download}"
+                            Foreground="{DynamicResource Text.Invert}" />
+                        <TextBlock VerticalAlignment="Center" Text="下载" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Margin="8,0,0,0"
+                    Padding="14,8"
+                    Style="{DynamicResource Button.Style.Subtle}">
+                    <StackPanel Orientation="Horizontal">
+                        <cy:IconBox
+                            Width="14"
+                            Height="14"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            Content="{StaticResource Geom.Settings}" />
+                        <TextBlock VerticalAlignment="Center" Text="设置" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="纯图标按钮" />
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{DynamicResource Button.Style.Icon}" ToolTip="菜单">
+                    <cy:IconBox
+                        Width="16"
+                        Height="16"
+                        Content="{StaticResource Geom.Menu}" />
+                </Button>
+                <Button
+                    Margin="4,0,0,0"
+                    Style="{DynamicResource Button.Style.Icon}"
+                    ToolTip="搜索">
+                    <cy:IconBox
+                        Width="16"
+                        Height="16"
+                        Content="{StaticResource Geom.Search}" />
+                </Button>
+                <Button
+                    Margin="4,0,0,0"
+                    Style="{DynamicResource Button.Style.Icon}"
+                    ToolTip="通知">
+                    <cy:IconBox
+                        Width="16"
+                        Height="16"
+                        Content="{StaticResource Geom.Bell}" />
+                </Button>
+                <Button
+                    Margin="4,0,0,0"
+                    Style="{DynamicResource Button.Style.Icon}"
+                    ToolTip="用户">
+                    <cy:IconBox
+                        Width="16"
+                        Height="16"
+                        Content="{StaticResource Geom.User}" />
+                </Button>
+            </StackPanel>
+
+            <!--  ========== ⑤ 组合 — 列表项前缀 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 组合 — 列表项前缀"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="设置项 / 导航菜单常用模式" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="设置项 / 导航菜单常用 — 图标 + 标题 + 描述, IconBox 占据固定列宽。" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <StackPanel>
+                    <Grid Margin="14,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <cy:IconBox
+                            Grid.Column="0"
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Content="{StaticResource Geom.User}" />
+                        <StackPanel Grid.Column="1">
                             <TextBlock
-                                Margin="0,0,0,16"
                                 FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="把 PathGeometry 放在 Resources 里复用,直接用 Content 引用。Path 的 Fill 自动跟随 IconBox.Foreground。" />
-
-                            <UniformGrid
-                                Margin="0,0,0,16"
-                                Columns="8"
-                                Rows="1">
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Menu}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Menu" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Plus}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Plus" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Search}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Search" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Heart}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Heart" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Settings}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Settings" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Download}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Download" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.Bell}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Bell" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="24"
-                                        Height="24"
-                                        Content="{StaticResource Geom.User}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="User" />
-                                </StackPanel>
-                            </UniformGrid>
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="任意大小 — Path 矢量缩放无损" />
-                            <StackPanel
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Orientation="Horizontal">
-                                <cy:IconBox
-                                    Width="16"
-                                    Height="16"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Content="{StaticResource Geom.Heart}" />
-                                <cy:IconBox
-                                    Width="24"
-                                    Height="24"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Content="{StaticResource Geom.Heart}" />
-                                <cy:IconBox
-                                    Width="36"
-                                    Height="36"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Content="{StaticResource Geom.Heart}" />
-                                <cy:IconBox
-                                    Width="56"
-                                    Height="56"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Content="{StaticResource Geom.Heart}" />
-                                <cy:IconBox
-                                    Width="80"
-                                    Height="80"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center"
-                                    Content="{StaticResource Geom.Heart}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 颜色控制  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="颜色控制" Subtitle="Foreground 决定图标颜色">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
+                                FontWeight="Medium"
+                                Text="账户" />
                             <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Geometry 和字体图标自动跟随 Foreground。默认 Icon.Foreground.Default 灰色,可改主题 token 或硬编码颜色。" />
-
-                            <UniformGrid Columns="6" Rows="1">
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Default" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}"
-                                        Foreground="{DynamicResource Background.Selected}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Selected" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}"
-                                        Foreground="{DynamicResource Background.Success}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Success" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}"
-                                        Foreground="{DynamicResource Background.Warning}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Warning" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}"
-                                        Foreground="{DynamicResource Background.Error}" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Error" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Width="32"
-                                        Height="32"
-                                        Content="{StaticResource Geom.Heart}"
-                                        Foreground="#9C27B0" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Custom" />
-                                </StackPanel>
-                            </UniformGrid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 字体图标 (Segoe Fluent Icons)  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="字体图标 (Glyph)" Subtitle="Content = string,通过 FontFamily 选字体">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Win10/11 自带 Segoe Fluent Icons 字体,Content 设字符代码即得图标。FontSize 控制大小,Foreground 控制颜色。"
-                                TextWrapping="Wrap" />
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontFamily="Consolas"
+                                Margin="0,2,0,0"
                                 FontSize="11"
                                 Foreground="{DynamicResource Foreground.Caption}"
-                                Text="字符代码参考:Microsoft Docs &quot;Segoe Fluent Icons font&quot; 列表"
-                                TextWrapping="Wrap" />
-
-                            <UniformGrid Columns="8" Rows="1">
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE700;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="E700" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE721;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Search" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE713;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Settings" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE74D;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Delete" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE74E;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Save" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE72E;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Lock" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE74A;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Up" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <cy:IconBox
-                                        Content="&#xE74B;"
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="24" />
-                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Down" />
-                                </StackPanel>
-                            </UniformGrid>
+                                Text="管理用户信息和登录方式" />
                         </StackPanel>
-                    </cy:Card>
+                    </Grid>
+                    <Rectangle Height="1" Fill="{DynamicResource Border.Default}" />
+                    <Grid Margin="14,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <cy:IconBox
+                            Grid.Column="0"
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Content="{StaticResource Geom.Bell}" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Text="通知" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="桌面通知和邮件订阅" />
+                        </StackPanel>
+                    </Grid>
+                    <Rectangle Height="1" Fill="{DynamicResource Border.Default}" />
+                    <Grid Margin="14,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <cy:IconBox
+                            Grid.Column="0"
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Content="{StaticResource Geom.Settings}" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Text="高级设置" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="11"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="网络、性能、隐私等" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
+            </Border>
 
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
+            <!--  ========== ⑥ 组合 — 状态信息提示 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 组合 — 状态信息提示"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="同一 Geometry, 不同 Foreground 表达状态" />
 
-                    <!--  ④ 实战:按钮中  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="组合 — 按钮里使用" Subtitle="替代 Path 显式声明">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="不同状态用不同 Foreground, 同一个 Geometry 复用。" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="原本要写 StackPanel + Path 才能做 图标 + 文本 按钮,有 IconBox 后可以共用 Geometry 资源,代码更简洁。" />
-
-                            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                                <Button Padding="14,8">
-                                    <StackPanel Orientation="Horizontal">
-                                        <cy:IconBox
-                                            Width="14"
-                                            Height="14"
-                                            Margin="0,0,8,0"
-                                            VerticalAlignment="Center"
-                                            Content="{StaticResource Geom.Plus}" />
-                                        <TextBlock VerticalAlignment="Center" Text="新建" />
-                                    </StackPanel>
-                                </Button>
-                                <Button
-                                    Margin="8,0,0,0"
-                                    Padding="14,8"
-                                    Style="{DynamicResource Button.Style.Primary}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <cy:IconBox
-                                            Width="14"
-                                            Height="14"
-                                            Margin="0,0,8,0"
-                                            VerticalAlignment="Center"
-                                            Content="{StaticResource Geom.Download}"
-                                            Foreground="White" />
-                                        <TextBlock VerticalAlignment="Center" Text="下载" />
-                                    </StackPanel>
-                                </Button>
-                                <Button
-                                    Margin="8,0,0,0"
-                                    Padding="14,8"
-                                    Style="{DynamicResource Button.Style.Subtle}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <cy:IconBox
-                                            Width="14"
-                                            Height="14"
-                                            Margin="0,0,8,0"
-                                            VerticalAlignment="Center"
-                                            Content="{StaticResource Geom.Settings}" />
-                                        <TextBlock VerticalAlignment="Center" Text="设置" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="纯图标按钮" />
-                            <StackPanel Orientation="Horizontal">
-                                <Button Style="{DynamicResource Button.Style.Icon}" ToolTip="菜单">
-                                    <cy:IconBox
-                                        Width="16"
-                                        Height="16"
-                                        Content="{StaticResource Geom.Menu}" />
-                                </Button>
-                                <Button
-                                    Margin="4,0,0,0"
-                                    Style="{DynamicResource Button.Style.Icon}"
-                                    ToolTip="搜索">
-                                    <cy:IconBox
-                                        Width="16"
-                                        Height="16"
-                                        Content="{StaticResource Geom.Search}" />
-                                </Button>
-                                <Button
-                                    Margin="4,0,0,0"
-                                    Style="{DynamicResource Button.Style.Icon}"
-                                    ToolTip="通知">
-                                    <cy:IconBox
-                                        Width="16"
-                                        Height="16"
-                                        Content="{StaticResource Geom.Bell}" />
-                                </Button>
-                                <Button
-                                    Margin="4,0,0,0"
-                                    Style="{DynamicResource Button.Style.Icon}"
-                                    ToolTip="用户">
-                                    <cy:IconBox
-                                        Width="16"
-                                        Height="16"
-                                        Content="{StaticResource Geom.User}" />
-                                </Button>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ 实战:列表项前缀  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="组合 — 列表项前缀">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="设置项 / 导航菜单常用——图标 + 标题 + 描述,IconBox 占据固定列宽。" />
-
-                            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                                <StackPanel>
-                                    <Grid Margin="14,12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <cy:IconBox
-                                            Grid.Column="0"
-                                            Width="20"
-                                            Height="20"
-                                            HorizontalAlignment="Left"
-                                            Content="{StaticResource Geom.User}" />
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock
-                                                FontSize="13"
-                                                FontWeight="Medium"
-                                                Text="账户" />
-                                            <TextBlock
-                                                Margin="0,2,0,0"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="管理用户信息和登录方式" />
-                                        </StackPanel>
-                                    </Grid>
-                                    <Rectangle Height="1" Fill="{DynamicResource Border.Default}" />
-                                    <Grid Margin="14,12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <cy:IconBox
-                                            Grid.Column="0"
-                                            Width="20"
-                                            Height="20"
-                                            HorizontalAlignment="Left"
-                                            Content="{StaticResource Geom.Bell}" />
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock
-                                                FontSize="13"
-                                                FontWeight="Medium"
-                                                Text="通知" />
-                                            <TextBlock
-                                                Margin="0,2,0,0"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="桌面通知和邮件订阅" />
-                                        </StackPanel>
-                                    </Grid>
-                                    <Rectangle Height="1" Fill="{DynamicResource Border.Default}" />
-                                    <Grid Margin="14,12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <cy:IconBox
-                                            Grid.Column="0"
-                                            Width="20"
-                                            Height="20"
-                                            HorizontalAlignment="Left"
-                                            Content="{StaticResource Geom.Settings}" />
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock
-                                                FontSize="13"
-                                                FontWeight="Medium"
-                                                Text="高级设置" />
-                                            <TextBlock
-                                                Margin="0,2,0,0"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="网络、性能、隐私等" />
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ 实战:状态信息  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="组合 — 状态信息提示">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="不同状态用不同 Foreground,同一个 Geometry 复用。" />
-
-                            <Border
-                                Margin="0,0,0,8"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <cy:IconBox
-                                        Width="18"
-                                        Height="18"
-                                        VerticalAlignment="Center"
-                                        Content="{StaticResource Geom.Bell}"
-                                        Foreground="{DynamicResource Background.Success}" />
-                                    <TextBlock
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Text="任务执行成功" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Margin="0,0,0,8"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <cy:IconBox
-                                        Width="18"
-                                        Height="18"
-                                        VerticalAlignment="Center"
-                                        Content="{StaticResource Geom.Bell}"
-                                        Foreground="{DynamicResource Background.Warning}" />
-                                    <TextBlock
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Text="存储空间即将用尽" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <cy:IconBox
-                                        Width="18"
-                                        Height="18"
-                                        VerticalAlignment="Center"
-                                        Content="{StaticResource Geom.Bell}"
-                                        Foreground="{DynamicResource Background.Error}" />
-                                    <TextBlock
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Text="网络连接失败" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
+            <Border
+                Margin="0,0,0,8"
+                Padding="12,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <cy:IconBox
+                        Width="18"
+                        Height="18"
+                        VerticalAlignment="Center"
+                        Content="{StaticResource Geom.Bell}"
+                        Foreground="{DynamicResource Background.Success}" />
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="任务执行成功" />
                 </StackPanel>
-            </Grid>
+            </Border>
+            <Border
+                Margin="0,0,0,8"
+                Padding="12,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <cy:IconBox
+                        Width="18"
+                        Height="18"
+                        VerticalAlignment="Center"
+                        Content="{StaticResource Geom.Bell}"
+                        Foreground="{DynamicResource Background.Warning}" />
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="存储空间即将用尽" />
+                </StackPanel>
+            </Border>
+            <Border
+                Padding="12,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <cy:IconBox
+                        Width="18"
+                        Height="18"
+                        VerticalAlignment="Center"
+                        Content="{StaticResource Geom.Bell}"
+                        Foreground="{DynamicResource Background.Error}" />
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="网络连接失败" />
+                </StackPanel>
+            </Border>
 
-            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <!--  ========== ⑦ IconBox 主要属性 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ IconBox 主要属性"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="5 个核心 DP" />
 
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="IconBox 主要属性">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Content" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="object" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="图标内容。Geometry → Path,ImageSource → Image,string → 字体图标 Glyph。" />
-
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Width / Height" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="double (16)" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="图标尺寸。默认 16,跟 Win10/WinUI 标准图标一致。Path 矢量缩放无损。" />
-
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Foreground" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="Brush" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="图标颜色。Geometry 用作 Fill,Glyph 用作文字色。Image 不受影响。" />
-
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="FontFamily / FontSize" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="FontFamily / double" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="字体图标专用。常见字体:Segoe Fluent Icons(Win10/11)、Material Icons、FontAwesome。" />
-
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="ContentTemplateSelector" />
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="DataTemplateSelector" />
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="默认 IconBox.TemplateSelector,按 Content 类型分发。可换成自定义 selector 扩展类型支持。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <Grid Grid.Row="1">
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 1) Geometry 资源 (Resources 中定义,便于复用) -->
-<PathGeometry x:Key="Geom.Search"
-              Figures="M10,4 A6,6 0 1,1 10,16 A6,6 0 0,1 10,4 M14.5,14.5 L20,20" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource PropTableHeaderStyle}" Text="属性" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource PropTableHeaderStyle}" Text="类型" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource PropTableHeaderStyle}" Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
 
-<!-- 2) 矢量 Path 图标 -->
-<cy:IconBox Width="20" Height="20"
-            Content="{StaticResource Geom.Search}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Content" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="图标内容。Geometry → Path, ImageSource → Image, string → 字体图标 Glyph。" />
 
-<!-- 改颜色 -->
-<cy:IconBox Width="20" Height="20"
-            Content="{StaticResource Geom.Search}"
-            Foreground="{DynamicResource Background.Success}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Width / Height" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (16)" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="图标尺寸。默认 16, 跟 Win10/WinUI 标准图标一致。Path 矢量缩放无损。" />
 
-<!-- 3) 位图 Image 图标 -->
-<cy:IconBox Width="24" Height="24">
-    <cy:IconBox.Content>
-        <BitmapImage UriSource="/Assets/logo.png" />
-    </cy:IconBox.Content>
-</cy:IconBox>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Foreground" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="图标颜色。Geometry 用作 Fill, Glyph 用作文字色。Image 不受影响。" />
 
-<!-- 4) 字体图标 (Segoe Fluent Icons) -->
-<cy:IconBox FontFamily="Segoe Fluent Icons"
-            FontSize="24"
-            Content="&#xE721;" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="FontFamily / FontSize" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="FontFamily / double" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="字体图标专用。常见字体: Segoe Fluent Icons (Win10/11)、Material Icons、FontAwesome。" />
 
-<!-- 5) 按钮中使用 -->
-<Button Padding="14,8">
-    <StackPanel Orientation="Horizontal">
-        <cy:IconBox Width="14" Height="14"
-                    Margin="0,0,8,0"
-                    VerticalAlignment="Center"
-                    Content="{StaticResource Geom.Plus}" />
-        <TextBlock VerticalAlignment="Center" Text="新建" />
-    </StackPanel>
-</Button>
-
-<!-- 6) 纯图标按钮 -->
-<Button Style="{StaticResource Button.Style.Icon}" ToolTip="搜索">
-    <cy:IconBox Width="16" Height="16"
-                Content="{StaticResource Geom.Search}" />
-</Button>]]>
-                        </TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="自动类型分发" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="按 Content 类型自动选模板,统一 API 适配三种图标源"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="复用 Geometry 资源" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="把 PathGeometry 放在主题资源里,全应用统一图标库"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="跟随 Foreground" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Path Fill 和 Glyph 颜色自动绑定 Foreground,主题切换无忧"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="字符串歧义" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Path Data 字符串会被识别为 Glyph,需显式构造 PathGeometry"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ContentTemplateSelector" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplateSelector" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="默认 IconBox.TemplateSelector, 按 Content 类型分发。可换成自定义 selector 扩展类型支持。" />
                 </Grid>
-            </Grid>
-        </Grid>
+            </Border>
+
+            <!--  ========== ⑧ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="4 条架构理念" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="自动类型分发" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="按 Content 类型自动选模板, 统一 API 适配三种图标源 (Geometry / ImageSource / string)。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="复用 Geometry 资源" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="把 PathGeometry 放在主题资源里, 全应用统一图标库。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="跟随 Foreground" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Path Fill 和 Glyph 颜色自动绑定 Foreground, 主题切换无忧。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="字符串歧义" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="13"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Path Data 字符串会被识别为 Glyph, 需显式构造 PathGeometry。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>
