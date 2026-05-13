@@ -1,0 +1,398 @@
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.RadioButtonSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:RadioButtonViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1100"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  ========== 与 ColorPickerSample / ComboBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
+
+            <!--  ========== Page Header ==========  -->
+            <Border>
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Grid
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                            <Ellipse Stroke="{DynamicResource Text.Invert}" StrokeThickness="2.5" />
+                            <Ellipse
+                                Width="12"
+                                Height="12"
+                                Fill="{DynamicResource Text.Invert}" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="RadioButton" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="单选按钮 — 同 GroupName 内互斥。Checked 时外圈主色实心 + 白色中心点弹入动画 (150ms CubicEase EaseOut)。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ① 互斥分组 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 互斥分组"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="GroupName 控制互斥范围, 设置页常见三个分组" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="每组 RadioButton 用 GroupName 互斥。IsChecked 通常配合 EnumToBoolConverter 绑定 enum, 这里为简洁直接用 IsChecked=True 设默认值。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="主题" />
+            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="浅色"
+                    GroupName="Theme" />
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="深色"
+                    GroupName="Theme" />
+                <RadioButton
+                    Content="跟随系统"
+                    GroupName="Theme"
+                    IsChecked="True" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="字号" />
+            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="小"
+                    GroupName="FontSize" />
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="中"
+                    GroupName="FontSize"
+                    IsChecked="True" />
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="大"
+                    GroupName="FontSize" />
+                <RadioButton Content="特大" GroupName="FontSize" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="通知偏好" />
+            <StackPanel HorizontalAlignment="Left">
+                <RadioButton
+                    Margin="0,0,0,6"
+                    Content="接收所有通知"
+                    GroupName="Notif" />
+                <RadioButton
+                    Margin="0,0,0,6"
+                    Content="只接收 @ 我的通知"
+                    GroupName="Notif"
+                    IsChecked="True" />
+                <RadioButton Content="完全静默" GroupName="Notif" />
+            </StackPanel>
+
+            <!--  ========== ② 富内容卡片 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 富内容卡片"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="RadioButton.Content 任意 UIElement — 标题 / 价格 / 描述" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="套餐选择 — Content 用 StackPanel 放标题/价格/描述, 配合 VerticalContentAlignment=Center 让圆点和首行文字对齐。" />
+
+            <StackPanel HorizontalAlignment="Left">
+                <RadioButton
+                    Margin="0,0,0,10"
+                    Padding="8"
+                    GroupName="Plan"
+                    VerticalContentAlignment="Center">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontWeight="Medium" Text="免费版" />
+                            <TextBlock
+                                Margin="8,0,0,0"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="$0 / 月" />
+                        </StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="3 个项目, 基础功能, 社区支持" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton
+                    Margin="0,0,0,10"
+                    Padding="8"
+                    GroupName="Plan"
+                    IsChecked="True"
+                    VerticalContentAlignment="Center">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontWeight="Medium" Text="Pro 版" />
+                            <TextBlock
+                                Margin="8,0,0,0"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="$19 / 月" />
+                            <Border
+                                Margin="8,0,0,0"
+                                Padding="6,1"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="10"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="推荐" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="无限项目, 全部功能, 邮件支持" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton
+                    Padding="8"
+                    GroupName="Plan"
+                    VerticalContentAlignment="Center">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontWeight="Medium" Text="企业版" />
+                            <TextBlock
+                                Margin="8,0,0,0"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="联系销售" />
+                        </StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="SSO, 审计日志, SLA, 7×24 支持" />
+                    </StackPanel>
+                </RadioButton>
+            </StackPanel>
+
+            <!--  ========== ③ 布局与禁用态 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 布局与禁用态"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="水平 / 垂直 / IsEnabled=False" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="水平排列" />
+            <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="选项 1"
+                    GroupName="Layout1"
+                    IsChecked="True" />
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="选项 2"
+                    GroupName="Layout1" />
+                <RadioButton Content="选项 3" GroupName="Layout1" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="垂直排列" />
+            <StackPanel Margin="0,0,0,16">
+                <RadioButton
+                    Margin="0,0,0,6"
+                    Content="高优先级"
+                    GroupName="Layout2" />
+                <RadioButton
+                    Margin="0,0,0,6"
+                    Content="中优先级"
+                    GroupName="Layout2"
+                    IsChecked="True" />
+                <RadioButton Content="低优先级" GroupName="Layout2" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="禁用态" />
+            <StackPanel Orientation="Horizontal">
+                <RadioButton
+                    Margin="0,0,16,0"
+                    Content="选中(禁用)"
+                    IsChecked="True"
+                    IsEnabled="False" />
+                <RadioButton
+                    Content="未选(禁用)"
+                    IsEnabled="False" />
+            </StackPanel>
+
+            <!--  ========== ④ 键盘交互 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 键盘交互"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Tab 进入组, ↑↓ 切换同组选项, Space 选中" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="先点一下进入控件, Tab 切到 RadioButton 组, 然后 ↑↓ 切换组内选项 — 每个 RadioButton 外圈出现 focus ring, 选中态自动跟随。" />
+
+            <StackPanel HorizontalAlignment="Left">
+                <RadioButton
+                    Margin="0,0,0,8"
+                    Content="付款方式 — 微信"
+                    GroupName="Pay" />
+                <RadioButton
+                    Margin="0,0,0,8"
+                    Content="付款方式 — 支付宝"
+                    GroupName="Pay"
+                    IsChecked="True" />
+                <RadioButton
+                    Margin="0,0,0,8"
+                    Content="付款方式 — 银行卡"
+                    GroupName="Pay" />
+                <RadioButton Content="付款方式 — 余额" GroupName="Pay" />
+            </StackPanel>
+
+            <!--  ========== ⑤ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="WinUI 3 风格下的 RadioButton 关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="标准中心点" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Checked 时主色实心外圈 + 白色 6px 中心点, 符合 RadioButton 标准视觉, 跟 CheckBox 协调"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="弹入动画" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="中心点从 0→6px CubicEase EaseOut, Uncheck 时反向收回, 150ms 节奏不抢戏不慢拍"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="GroupName 作用域" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="同 GroupName 互斥跨容器也有效。WPF 内部以 Logical Tree 父容器为作用域, 不需要手写 RadioGroup 容器"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="enum 绑定模式" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="IsChecked={Binding Theme, Converter=EnumToBoolConverter, ConverterParameter=AppTheme.Dark}, VM 暴露单个 enum 而非 N 个 bool"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="vs ToggleButton" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="RadioButton 互斥分组, ToggleButton 独立 on/off。视图切换器要互斥时用 RadioButton + ToggleButton 样式"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

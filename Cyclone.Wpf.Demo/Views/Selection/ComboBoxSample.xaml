@@ -1,0 +1,364 @@
+﻿<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.ComboBoxSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DataContext="{d:DesignInstance Type={x:Type local:ComboBoxViewModel}}"
+    d:DesignHeight="2200"
+    d:DesignWidth="1100"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  ========== 演示数据 ==========  -->
+        <x:Array x:Key="FruitItems" Type="{x:Type sys:String}">
+            <sys:String>苹果</sys:String>
+            <sys:String>香蕉</sys:String>
+            <sys:String>樱桃</sys:String>
+            <sys:String>榴莲</sys:String>
+            <sys:String>葡萄</sys:String>
+            <sys:String>橙子</sys:String>
+            <sys:String>草莓</sys:String>
+            <sys:String>芒果</sys:String>
+        </x:Array>
+
+        <!--  ========== 与 ColorPickerSample 对齐的版式样式 ==========  -->
+        <!--  统一段头样式: 左对齐, 显示副标题和分隔线, 段间距 36px  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
+
+            <!--  ========== Page Header ==========  -->
+            <Border>
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <!--  方框 + 朝下 chevron, 暗示 "下拉"  -->
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M 0 0 L 22 0 L 22 22 L 0 22 Z M 6 9 L 11 14 L 16 9"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeThickness="2" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="ComboBox" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="WinUI 3 无圆角" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="下拉选择控件 — 字符串绑定 + 枚举 MarkupExtension + CollectionViewSource 分组。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ① 基础绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SelectedItem 双向绑定 ViewModel 的字符串属性" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="最常见场景 — 表单里挑一个选项。ItemsSource 指向静态 x:Array 资源,SelectedItem 双向绑回 VM 的字符串属性即可。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择水果" />
+            <ComboBox
+                Width="240"
+                HorizontalAlignment="Left"
+                ItemsSource="{StaticResource FruitItems}"
+                SelectedItem="{Binding SelectedFruit, Mode=TwoWay}" />
+
+            <Border
+                Margin="0,16,0,0"
+                Padding="12,10"
+                HorizontalAlignment="Left"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid Width="380">
+                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="SelectedFruit = " />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding SelectedFruit, Mode=OneWay, TargetNullValue='(null)'}" />
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!--  ========== ② 枚举绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 枚举绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="EnumToItemsSource MarkupExtension + DescriptionAttribute 本地化文本" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="不想在 ViewModel 里手写一份枚举集合 — 用 cy:EnumToItemsSource 直接把枚举类型展开;每个值上的 [Description] 经 EnumDescriptionTypeConverter 转成中文显示。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择枚举值" />
+            <ComboBox
+                Width="240"
+                HorizontalAlignment="Left"
+                ItemsSource="{cy:EnumToItemsSource EnumType=local:ComboBoxEnum}"
+                SelectedItem="{Binding SelectedEnum, Mode=TwoWay}" />
+
+            <Border
+                Margin="0,16,0,0"
+                Padding="12,10"
+                HorizontalAlignment="Left"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid Width="380">
+                    <TextBlock Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="SelectedEnum = " />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding SelectedEnum, Mode=OneWay}" />
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                <Button
+                    Padding="14,6"
+                    Command="{Binding ShowSelectedEnumCommand}"
+                    Content="显示选中枚举" />
+            </StackPanel>
+
+            <!--  ========== ③ 分组下拉 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 分组下拉"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="CollectionViewSource + PropertyGroupDescription 自动分组" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="数据按 Department 分组显示, 通过 GroupStyle.HeaderTemplate 自定义分组头样式。DisplayMemberPath 指定每项显示 Name 列。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="选择员工" />
+            <ComboBox
+                Width="240"
+                HorizontalAlignment="Left"
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding GroupedEmployees.View}"
+                SelectedItem="{Binding SelectedEmployee, Mode=TwoWay}">
+                <ComboBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="8,4"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding Name}" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ComboBox.GroupStyle>
+            </ComboBox>
+
+            <Border
+                Margin="0,16,0,0"
+                Padding="12,10"
+                HorizontalAlignment="Left"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid Width="380">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="Name       = " />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding SelectedEmployee.Name, Mode=OneWay, TargetNullValue='(null)'}" />
+                    </TextBlock>
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="0,4,0,0"
+                        Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="Department = " />
+                        <Run Foreground="{DynamicResource Foreground.Default}" Text="{Binding SelectedEmployee.Department, Mode=OneWay, TargetNullValue='-'}" />
+                    </TextBlock>
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="0,4,0,0"
+                        Style="{StaticResource ValueLabelStyle}">
+                        <Run Text="Position   = " />
+                        <Run Foreground="{DynamicResource Foreground.Default}" Text="{Binding SelectedEmployee.Position, Mode=OneWay, TargetNullValue='-'}" />
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!--  ========== ④ 全局操作 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 全局操作"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="清空 / 弹窗显示当前选中值" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ViewModel 暴露的 RelayCommand — 弹 MessageBox 查看当前各路 SelectedXxx, 或一键清空所有选择。" />
+
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="14,6"
+                    Command="{Binding ShowSelectedFruitsCommand}"
+                    Content="显示选中水果" />
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="14,6"
+                    Command="{Binding ShowSelectedEmployeesCommand}"
+                    Content="显示选中员工" />
+                <Button
+                    Padding="14,6"
+                    Command="{Binding ClearAllSelectionsCommand}"
+                    Content="清空所有选择" />
+            </StackPanel>
+
+            <!--  ========== ⑤ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="WinUI 3 风格下的 ComboBox 关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="WinUI 3 无圆角" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ComboBox 触发器与 Popup 一致直角, 全部色彩走 BasicTheme token, 不硬编码任何颜色"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="EnumToItemsSource" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="MarkupExtension 反射枚举值, 配合 [Description] + EnumDescriptionTypeConverter 显示本地化文本, VM 端零冗余"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="分组数据源" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="CollectionViewSource.GroupDescriptions 自动分组, GroupStyle.HeaderTemplate 控制分组头视觉, 不需要后台代码"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="DisplayMemberPath" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="复杂对象列表只需指定显示列, 不必为每项写 DataTemplate — 性能更好, 模板缓存更稳"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="状态优先级" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Hover → Border.Hover; Focus/Open → Border.Active; Error → Border.InputError; Disabled 在最后, 终态压过其他"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

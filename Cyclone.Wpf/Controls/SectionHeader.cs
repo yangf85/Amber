@@ -17,18 +17,21 @@ public class SectionHeader : Control
 {
     #region MainTitle
 
+    public static readonly DependencyProperty MainTitleProperty =
+        DependencyProperty.Register(nameof(MainTitle), typeof(object), typeof(SectionHeader), new PropertyMetadata(default));
+
     public object MainTitle
     {
         get => (object)GetValue(MainTitleProperty);
         set => SetValue(MainTitleProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleProperty =
-        DependencyProperty.Register(nameof(MainTitle), typeof(object), typeof(SectionHeader), new PropertyMetadata(default));
-
     #endregion MainTitle
 
     #region MainTitleHeight
+
+    public static readonly DependencyProperty MainTitleHeightProperty =
+        DependencyProperty.Register(nameof(MainTitleHeight), typeof(GridLength), typeof(SectionHeader), new PropertyMetadata(new GridLength(1, GridUnitType.Star)));
 
     public GridLength MainTitleHeight
     {
@@ -36,12 +39,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleHeightProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleHeightProperty =
-        DependencyProperty.Register(nameof(MainTitleHeight), typeof(GridLength), typeof(SectionHeader), new PropertyMetadata(new GridLength(1, GridUnitType.Star)));
-
     #endregion MainTitleHeight
 
     #region MainTitleFontSize
+
+    public static readonly DependencyProperty MainTitleFontSizeProperty =
+        DependencyProperty.Register(nameof(MainTitleFontSize), typeof(double), typeof(SectionHeader), new PropertyMetadata(16.0));
 
     public double MainTitleFontSize
     {
@@ -49,12 +52,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleFontSizeProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleFontSizeProperty =
-        DependencyProperty.Register(nameof(MainTitleFontSize), typeof(double), typeof(SectionHeader), new PropertyMetadata(16.0));
-
     #endregion MainTitleFontSize
 
     #region MainTitleHorizontalAlignment
+
+    public static readonly DependencyProperty MainTitleHorizontalAlignmentProperty =
+        DependencyProperty.Register(nameof(MainTitleHorizontalAlignment), typeof(HorizontalAlignment), typeof(SectionHeader), new PropertyMetadata(HorizontalAlignment.Center));
 
     public HorizontalAlignment MainTitleHorizontalAlignment
     {
@@ -62,12 +65,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleHorizontalAlignmentProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleHorizontalAlignmentProperty =
-        DependencyProperty.Register(nameof(MainTitleHorizontalAlignment), typeof(HorizontalAlignment), typeof(SectionHeader), new PropertyMetadata(HorizontalAlignment.Center));
-
     #endregion MainTitleHorizontalAlignment
 
     #region MainTitleVerticalAlignment
+
+    public static readonly DependencyProperty MainTitleVerticalAlignmentProperty =
+        DependencyProperty.Register(nameof(MainTitleVerticalAlignment), typeof(VerticalAlignment), typeof(SectionHeader), new PropertyMetadata(VerticalAlignment.Center));
 
     public VerticalAlignment MainTitleVerticalAlignment
     {
@@ -75,12 +78,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleVerticalAlignmentProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleVerticalAlignmentProperty =
-        DependencyProperty.Register(nameof(MainTitleVerticalAlignment), typeof(VerticalAlignment), typeof(SectionHeader), new PropertyMetadata(VerticalAlignment.Center));
-
     #endregion MainTitleVerticalAlignment
 
     #region MainTitleMargin
+
+    public static readonly DependencyProperty MainTitleMarginProperty =
+        DependencyProperty.Register(nameof(MainTitleMargin), typeof(Thickness), typeof(SectionHeader), new PropertyMetadata(new Thickness(0)));
 
     public Thickness MainTitleMargin
     {
@@ -88,12 +91,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleMarginProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleMarginProperty =
-        DependencyProperty.Register(nameof(MainTitleMargin), typeof(Thickness), typeof(SectionHeader), new PropertyMetadata(new Thickness(0)));
-
     #endregion MainTitleMargin
 
     #region MainTitleFontFamily
+
+    public static readonly DependencyProperty MainTitleFontFamilyProperty =
+        DependencyProperty.Register(nameof(MainTitleFontFamily), typeof(FontFamily), typeof(SectionHeader), new PropertyMetadata(default));
 
     public FontFamily MainTitleFontFamily
     {
@@ -101,12 +104,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleFontFamilyProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleFontFamilyProperty =
-        DependencyProperty.Register(nameof(MainTitleFontFamily), typeof(FontFamily), typeof(SectionHeader), new PropertyMetadata(default));
-
     #endregion MainTitleFontFamily
 
     #region MainTitleFontWeight
+
+    public static readonly DependencyProperty MainTitleFontWeightProperty =
+        DependencyProperty.Register(nameof(MainTitleFontWeight), typeof(FontWeight), typeof(SectionHeader), new PropertyMetadata(FontWeights.Bold));
 
     public FontWeight MainTitleFontWeight
     {
@@ -114,12 +117,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleFontWeightProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleFontWeightProperty =
-        DependencyProperty.Register(nameof(MainTitleFontWeight), typeof(FontWeight), typeof(SectionHeader), new PropertyMetadata(FontWeights.Bold));
-
     #endregion MainTitleFontWeight
 
     #region MainTitleForeground
+
+    public static readonly DependencyProperty MainTitleForegroundProperty =
+        DependencyProperty.Register(nameof(MainTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
     public Brush MainTitleForeground
     {
@@ -127,12 +130,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleForegroundProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleForegroundProperty =
-        DependencyProperty.Register(nameof(MainTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
-
     #endregion MainTitleForeground
 
     #region MainTitleBackground
+
+    public static readonly DependencyProperty MainTitleBackgroundProperty =
+        DependencyProperty.Register(nameof(MainTitleBackground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Transparent));
 
     public Brush MainTitleBackground
     {
@@ -140,12 +143,12 @@ public class SectionHeader : Control
         set => SetValue(MainTitleBackgroundProperty, value);
     }
 
-    public static readonly DependencyProperty MainTitleBackgroundProperty =
-        DependencyProperty.Register(nameof(MainTitleBackground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Transparent));
-
     #endregion MainTitleBackground
 
     #region SubTitle
+
+    public static readonly DependencyProperty SubTitleProperty =
+        DependencyProperty.Register(nameof(SubTitle), typeof(object), typeof(SectionHeader), new PropertyMetadata(default));
 
     public object SubTitle
     {
@@ -153,12 +156,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleProperty =
-        DependencyProperty.Register(nameof(SubTitle), typeof(object), typeof(SectionHeader), new PropertyMetadata(default));
-
     #endregion SubTitle
 
     #region SubTitleHeight
+
+    public static readonly DependencyProperty SubTitleHeightProperty =
+        DependencyProperty.Register(nameof(SubTitleHeight), typeof(GridLength), typeof(SectionHeader), new PropertyMetadata(GridLength.Auto));
 
     public GridLength SubTitleHeight
     {
@@ -166,12 +169,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleHeightProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleHeightProperty =
-        DependencyProperty.Register(nameof(SubTitleHeight), typeof(GridLength), typeof(SectionHeader), new PropertyMetadata(GridLength.Auto));
-
     #endregion SubTitleHeight
 
     #region SubTitleFontSize
+
+    public static readonly DependencyProperty SubTitleFontSizeProperty =
+        DependencyProperty.Register(nameof(SubTitleFontSize), typeof(double), typeof(SectionHeader), new PropertyMetadata(12.0));
 
     public double SubTitleFontSize
     {
@@ -179,12 +182,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleFontSizeProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleFontSizeProperty =
-        DependencyProperty.Register(nameof(SubTitleFontSize), typeof(double), typeof(SectionHeader), new PropertyMetadata(12.0));
-
     #endregion SubTitleFontSize
 
     #region SubTitleHorizontalAlignment
+
+    public static readonly DependencyProperty SubTitleHorizontalAlignmentProperty =
+        DependencyProperty.Register(nameof(SubTitleHorizontalAlignment), typeof(HorizontalAlignment), typeof(SectionHeader), new PropertyMetadata(HorizontalAlignment.Center));
 
     public HorizontalAlignment SubTitleHorizontalAlignment
     {
@@ -192,12 +195,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleHorizontalAlignmentProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleHorizontalAlignmentProperty =
-        DependencyProperty.Register(nameof(SubTitleHorizontalAlignment), typeof(HorizontalAlignment), typeof(SectionHeader), new PropertyMetadata(HorizontalAlignment.Center));
-
     #endregion SubTitleHorizontalAlignment
 
     #region SubTitleVerticalAlignment
+
+    public static readonly DependencyProperty SubTitleVerticalAlignmentProperty =
+        DependencyProperty.Register(nameof(SubTitleVerticalAlignment), typeof(VerticalAlignment), typeof(SectionHeader), new PropertyMetadata(VerticalAlignment.Center));
 
     public VerticalAlignment SubTitleVerticalAlignment
     {
@@ -205,12 +208,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleVerticalAlignmentProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleVerticalAlignmentProperty =
-        DependencyProperty.Register(nameof(SubTitleVerticalAlignment), typeof(VerticalAlignment), typeof(SectionHeader), new PropertyMetadata(VerticalAlignment.Center));
-
     #endregion SubTitleVerticalAlignment
 
     #region SubTitleMargin
+
+    public static readonly DependencyProperty SubTitleMarginProperty =
+        DependencyProperty.Register(nameof(SubTitleMargin), typeof(Thickness), typeof(SectionHeader), new PropertyMetadata(new Thickness(0)));
 
     public Thickness SubTitleMargin
     {
@@ -218,12 +221,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleMarginProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleMarginProperty =
-        DependencyProperty.Register(nameof(SubTitleMargin), typeof(Thickness), typeof(SectionHeader), new PropertyMetadata(new Thickness(0)));
-
     #endregion SubTitleMargin
 
     #region SubTitleFontFamily
+
+    public static readonly DependencyProperty SubTitleFontFamilyProperty =
+        DependencyProperty.Register(nameof(SubTitleFontFamily), typeof(FontFamily), typeof(SectionHeader), new PropertyMetadata(default));
 
     public FontFamily SubTitleFontFamily
     {
@@ -231,12 +234,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleFontFamilyProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleFontFamilyProperty =
-        DependencyProperty.Register(nameof(SubTitleFontFamily), typeof(FontFamily), typeof(SectionHeader), new PropertyMetadata(default));
-
     #endregion SubTitleFontFamily
 
     #region SubTitleFontWeight
+
+    public static readonly DependencyProperty SubTitleFontWeightProperty =
+        DependencyProperty.Register(nameof(SubTitleFontWeight), typeof(FontWeight), typeof(SectionHeader), new PropertyMetadata(FontWeights.Normal));
 
     public FontWeight SubTitleFontWeight
     {
@@ -244,12 +247,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleFontWeightProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleFontWeightProperty =
-        DependencyProperty.Register(nameof(SubTitleFontWeight), typeof(FontWeight), typeof(SectionHeader), new PropertyMetadata(FontWeights.Normal));
-
     #endregion SubTitleFontWeight
 
     #region SubTitleForeground
+
+    public static readonly DependencyProperty SubTitleForegroundProperty =
+        DependencyProperty.Register(nameof(SubTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
     public Brush SubTitleForeground
     {
@@ -257,12 +260,12 @@ public class SectionHeader : Control
         set => SetValue(SubTitleForegroundProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleForegroundProperty =
-        DependencyProperty.Register(nameof(SubTitleForeground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
-
     #endregion SubTitleForeground
 
     #region SubTitleBackground
+
+    public static readonly DependencyProperty SubTitleBackgroundProperty =
+        DependencyProperty.Register(nameof(SubTitleBackground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Transparent));
 
     public Brush SubTitleBackground
     {
@@ -270,22 +273,19 @@ public class SectionHeader : Control
         set => SetValue(SubTitleBackgroundProperty, value);
     }
 
-    public static readonly DependencyProperty SubTitleBackgroundProperty =
-        DependencyProperty.Register(nameof(SubTitleBackground), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(Brushes.Transparent));
-
     #endregion SubTitleBackground
 
     #region SubTitleVisibility
+
+    public static readonly DependencyProperty SubTitleVisibilityProperty =
+        DependencyProperty.Register(nameof(SubTitleVisibility), typeof(Visibility), typeof(SectionHeader),
+            new PropertyMetadata(Visibility.Collapsed, OnSubTitleVisibilityChanged));
 
     public Visibility SubTitleVisibility
     {
         get => (Visibility)GetValue(SubTitleVisibilityProperty);
         set => SetValue(SubTitleVisibilityProperty, value);
     }
-
-    public static readonly DependencyProperty SubTitleVisibilityProperty =
-        DependencyProperty.Register(nameof(SubTitleVisibility), typeof(Visibility), typeof(SectionHeader),
-            new PropertyMetadata(Visibility.Collapsed, OnSubTitleVisibilityChanged));
 
     private static void OnSubTitleVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -296,18 +296,21 @@ public class SectionHeader : Control
 
     #region SeparatorThickness
 
+    public static readonly DependencyProperty SeparatorThicknessProperty =
+        DependencyProperty.Register(nameof(SeparatorThickness), typeof(double), typeof(SectionHeader), new PropertyMetadata(1.0));
+
     public double SeparatorThickness
     {
         get => (double)GetValue(SeparatorThicknessProperty);
         set => SetValue(SeparatorThicknessProperty, value);
     }
 
-    public static readonly DependencyProperty SeparatorThicknessProperty =
-        DependencyProperty.Register(nameof(SeparatorThickness), typeof(double), typeof(SectionHeader), new PropertyMetadata(1.0));
-
     #endregion SeparatorThickness
 
     #region SeparatorBrush
+
+    public static readonly DependencyProperty SeparatorBrushProperty =
+        DependencyProperty.Register(nameof(SeparatorBrush), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
 
     public Brush SeparatorBrush
     {
@@ -315,12 +318,13 @@ public class SectionHeader : Control
         set => SetValue(SeparatorBrushProperty, value);
     }
 
-    public static readonly DependencyProperty SeparatorBrushProperty =
-        DependencyProperty.Register(nameof(SeparatorBrush), typeof(Brush), typeof(SectionHeader), new PropertyMetadata(null));
-
     #endregion SeparatorBrush
 
     #region SeparatorMargin
+
+    public static readonly DependencyProperty SeparatorMarginProperty =
+        DependencyProperty.Register(nameof(SeparatorMargin), typeof(Thickness), typeof(SectionHeader),
+            new PropertyMetadata(new Thickness(0, 5, 0, 5)));
 
     public Thickness SeparatorMargin
     {
@@ -328,13 +332,13 @@ public class SectionHeader : Control
         set => SetValue(SeparatorMarginProperty, value);
     }
 
-    public static readonly DependencyProperty SeparatorMarginProperty =
-        DependencyProperty.Register(nameof(SeparatorMargin), typeof(Thickness), typeof(SectionHeader),
-            new PropertyMetadata(new Thickness(0, 5, 0, 5)));
-
     #endregion SeparatorMargin
 
     #region SeparatorVisibility
+
+    public static readonly DependencyProperty SeparatorVisibilityProperty =
+        DependencyProperty.Register(nameof(SeparatorVisibility), typeof(Visibility), typeof(SectionHeader),
+            new PropertyMetadata(Visibility.Collapsed));
 
     public Visibility SeparatorVisibility
     {
@@ -342,22 +346,18 @@ public class SectionHeader : Control
         set => SetValue(SeparatorVisibilityProperty, value);
     }
 
-    public static readonly DependencyProperty SeparatorVisibilityProperty =
-        DependencyProperty.Register(nameof(SeparatorVisibility), typeof(Visibility), typeof(SectionHeader),
-            new PropertyMetadata(Visibility.Collapsed));
-
     #endregion SeparatorVisibility
 
     #region IsUseUnifiedBackground
+
+    public static readonly DependencyProperty IsUseUnifiedBackgroundProperty =
+        DependencyProperty.Register(nameof(IsUseUnifiedBackground), typeof(bool), typeof(SectionHeader), new PropertyMetadata(default(bool)));
 
     public bool IsUseUnifiedBackground
     {
         get => (bool)GetValue(IsUseUnifiedBackgroundProperty);
         set => SetValue(IsUseUnifiedBackgroundProperty, value);
     }
-
-    public static readonly DependencyProperty IsUseUnifiedBackgroundProperty =
-        DependencyProperty.Register(nameof(IsUseUnifiedBackground), typeof(bool), typeof(SectionHeader), new PropertyMetadata(default(bool)));
 
     #endregion IsUseUnifiedBackground
 

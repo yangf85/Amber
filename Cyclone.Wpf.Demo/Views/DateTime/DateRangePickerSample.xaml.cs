@@ -19,29 +19,42 @@ public partial class DateRangePickerSample : UserControl
 
 public partial class DateRangePickerViewModel : ObservableObject
 {
+    [ObservableProperty]
+    public partial DateTime? FrozenEnd { get; set; } = new DateTime(2024, 12, 31);
+
+    // ⑤ 禁用态
+    [ObservableProperty]
+    public partial DateTime? FrozenStart { get; set; } = new DateTime(2024, 1, 1);
+
+    // ② BlackoutDates 演示 — 节假日不可选
+    public IList<DateTime> Holidays { get; } =
+    [
+        DateTime.Today.AddDays(-3),
+        DateTime.Today.AddDays(-2),
+        DateTime.Today.AddDays(2),
+        DateTime.Today.AddDays(3),
+    ];
+
+    public int OrderDays => (OrderStart.HasValue && OrderEnd.HasValue)
+            ? (OrderEnd.Value - OrderStart.Value).Days + 1
+            : 0;
+
+    [ObservableProperty]
+    public partial DateTime? OrderEnd { get; set; } = DateTime.Today;
+
     // ① 基础绑定
     [ObservableProperty]
     public partial DateTime? OrderStart { get; set; } = DateTime.Today.AddDays(-7);
 
     [ObservableProperty]
-    public partial DateTime? OrderEnd { get; set; } = DateTime.Today;
+    public partial DateTime? PlainEnd { get; set; }
 
-    public int OrderDays => (OrderStart.HasValue && OrderEnd.HasValue)
-        ? (OrderEnd.Value - OrderStart.Value).Days + 1
-        : 0;
+    // ④ 无预定义范围 — 极简模式
+    [ObservableProperty]
+    public partial DateTime? PlainStart { get; set; }
 
-    partial void OnOrderStartChanged(DateTime? value) => OnPropertyChanged(nameof(OrderDays));
-
-    partial void OnOrderEndChanged(DateTime? value) => OnPropertyChanged(nameof(OrderDays));
-
-    // ② BlackoutDates 演示 — 节假日不可选
-    public IList<DateTime> Holidays { get; } = new List<DateTime>
-    {
-        DateTime.Today.AddDays(-3),
-        DateTime.Today.AddDays(-2),
-        DateTime.Today.AddDays(2),
-        DateTime.Today.AddDays(3),
-    };
+    [ObservableProperty]
+    public partial DateTime? QuarterEnd { get; set; }
 
     // ③ 自定义预定义范围 — 业务场景:只显示 Q1/Q2/Q3/Q4
     public IList<IPredefinedRange> QuarterRanges { get; } = new List<IPredefinedRange>
@@ -63,23 +76,6 @@ public partial class DateRangePickerViewModel : ObservableObject
     [ObservableProperty]
     public partial DateTime? QuarterStart { get; set; }
 
-    [ObservableProperty]
-    public partial DateTime? QuarterEnd { get; set; }
-
-    // ④ 无预定义范围 — 极简模式
-    [ObservableProperty]
-    public partial DateTime? PlainStart { get; set; }
-
-    [ObservableProperty]
-    public partial DateTime? PlainEnd { get; set; }
-
-    // ⑤ 禁用态
-    [ObservableProperty]
-    public partial DateTime? FrozenStart { get; set; } = new DateTime(2024, 1, 1);
-
-    [ObservableProperty]
-    public partial DateTime? FrozenEnd { get; set; } = new DateTime(2024, 12, 31);
-
     // 操作
     [RelayCommand]
     private void ClearOrderRange()
@@ -87,6 +83,10 @@ public partial class DateRangePickerViewModel : ObservableObject
         OrderStart = null;
         OrderEnd = null;
     }
+
+    partial void OnOrderEndChanged(DateTime? value) => OnPropertyChanged(nameof(OrderDays));
+
+    partial void OnOrderStartChanged(DateTime? value) => OnPropertyChanged(nameof(OrderDays));
 
     [RelayCommand]
     private void SetLastWeek()

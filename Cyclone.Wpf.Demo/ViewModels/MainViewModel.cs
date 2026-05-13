@@ -29,12 +29,11 @@ public partial class MainViewModel : ObservableObject
             "SplitButton" => new SplitButtonSample(),
             "HyperlinkButton" => new HyperlinkButtonSample(),
 
-            // Input
+            // Text & Number
             "TextBox" => new TextBoxSample(),
             "NumberBox" => new NumberBoxSample(),
-            "Input" => new InputSample(),
+            "Input" => new PasswordBoxSample(),
             "HintBox" => new HintBoxSample(),
-            "HighlightTextBlock" => new HighlightTextBlockSample(),
             "FilterBox" => new FilterBoxSample(),
 
             // Selection
@@ -45,8 +44,8 @@ public partial class MainViewModel : ObservableObject
             "ColorPicker" => new ColorPickerSample(),
             "TransferBox" => new TransferBoxSample(),
 
-            // DateTime
-            "DateTime" => new DateSample(),
+            // Date & Time
+            "Calendar" => new CalendarSample(),
             "DateRangePicker" => new DateRangePickerSample(),
             "TimePicker" => new TimePickerSample(),
 
@@ -55,7 +54,7 @@ public partial class MainViewModel : ObservableObject
             "RangeSlider" => new RangeSliderSample(),
             "ProgressBar" => new ProgressBarSample(),
             "RotationEditor" => new RotationEditorSample(),
-            "CircularGaugeSample" => new CircularGaugeSample(),
+            "CircularGauge" => new CircularGaugeSample(),
 
             // Collections
             "ListBox" => new ListBoxSample(),
@@ -63,15 +62,15 @@ public partial class MainViewModel : ObservableObject
             "DataGrid" => new DataGridSample(),
             "TreeView" => new TreeViewSample(),
             "Carousel" => new CarouselSample(),
-            "Pagination" => new PaginationSample(),
 
             // Navigation
             "TabControl" => new TabControlView(),
             "FluidTab" => new FluidTabSample(),
             "Stepper" => new StepperSample(),
             "Breadcrumb" => new BreadcrumbBarSample(),
+            "Pagination" => new PaginationSample(),
 
-            // Menus
+            // Menu
             "Menu" => new MenuSample(),
 
             // Containers
@@ -82,25 +81,29 @@ public partial class MainViewModel : ObservableObject
             "Form" => new FormSample(),
             "SettingItem" => new SettingItemSample(),
             "TransitionBox" => new TransitionBoxSample(),
-            "Drawer" => new DrawerSample(),
 
             // Feedback
             "Notification" => new NotificationSample(),
             "Alert" => new AlertSample(),
             "LoadingBox" => new LoadingBoxSample(),
             "PopupBox" => new PopupBoxSample(),
+            "Drawer" => new DrawerSample(),
 
             // Panels
             "CyclicPanel" => new CyclicPanelSample(),
             "SpacingUniformGrid" => new SpacingUniformGridSample(),
             "SpacingStackPanel" => new SpacingStackPanelSample(),
-            "FisheyePanel" => new FisheyePanelSample(),
             "WaterfallPanel" => new WaterfallPanelSample(),
             "TilePanel" => new TilePanelSample(),
 
-            // Other
+            // Display
+            "HighlightTextBlock" => new HighlightTextBlockSample(),
             "IconBox" => new IconBoxSample(),
-            "Test" => new TestView(),
+
+            // Test
+            "Test1" => new TestView(),
+            "Test2" => new TestView(),
+            "Test3" => new TestView(),
             _ => null,
         };
     }
@@ -121,33 +124,32 @@ public partial class SideMenuViewModel : ObservableObject
         // ① Buttons
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Buttons",
+            Header = "Button",
             Icon = "🔘",
             Items =
             [
                 new SideMenuItemViewModel { Header = "Button",          Icon = "👆" },
-                new SideMenuItemViewModel { Header = "CheckBox",          Icon = "✅" },
-                new SideMenuItemViewModel { Header = "RadioButton",          Icon = "⚪" },
-                new SideMenuItemViewModel { Header = "ToggleButton",          Icon = "⏯️" },
+                new SideMenuItemViewModel { Header = "CheckBox",        Icon = "✅" },
+                new SideMenuItemViewModel { Header = "RadioButton",     Icon = "⚪" },
+                new SideMenuItemViewModel { Header = "ToggleButton",    Icon = "⏯️" },
                 new SideMenuItemViewModel { Header = "SwitchButton",    Icon = "🎚" },
                 new SideMenuItemViewModel { Header = "SplitButton",     Icon = "🔀" },
                 new SideMenuItemViewModel { Header = "HyperlinkButton", Icon = "🔗" },
             ]
         });
 
-        // ② Input
+        // ② Text & Number
         Items.Add(new SideMenuItemViewModel
         {
             Header = "Input",
             Icon = "✏️",
             Items =
             [
-                new SideMenuItemViewModel { Header = "TextBox",            Icon = "📝" },
-                new SideMenuItemViewModel { Header = "NumberBox",          Icon = "🔢" },
-                new SideMenuItemViewModel { Header = "Input",              Icon = "⌨️" },
-                new SideMenuItemViewModel { Header = "HintBox",            Icon = "💡" },
-                new SideMenuItemViewModel { Header = "HighlightTextBlock", Icon = "🖍" },
-                new SideMenuItemViewModel { Header = "FilterBox",          Icon = "🔎" },
+                new SideMenuItemViewModel { Header = "TextBox",   Icon = "📝" },
+                new SideMenuItemViewModel { Header = "NumberBox", Icon = "🔢" },
+                new SideMenuItemViewModel { Header = "PasswordBox",     Icon = "⌨️" },
+                new SideMenuItemViewModel { Header = "HintBox",   Icon = "💡" },
+                new SideMenuItemViewModel { Header = "FilterBox", Icon = "🔎" },
             ]
         });
 
@@ -160,55 +162,52 @@ public partial class SideMenuViewModel : ObservableObject
             [
                 new SideMenuItemViewModel { Header = "ComboBox",      Icon = "⬇️" },
                 new SideMenuItemViewModel { Header = "MultiComboBox", Icon = "📋" },
-                new SideMenuItemViewModel { Header = "CascadePicker", Icon = "📂" },
                 new SideMenuItemViewModel { Header = "EnumSelector",  Icon = "🏷" },
                 new SideMenuItemViewModel { Header = "ColorPicker",   Icon = "🎨" },
                 new SideMenuItemViewModel { Header = "TransferBox",   Icon = "🔄" },
             ]
         });
 
-        // ④ DateTime
+        // ④ Date & Time
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Date & Time",
+            Header = "DateTime",
             Icon = "📅",
             Items =
             [
-                new SideMenuItemViewModel { Header = "DateTime", Icon = "🕐" },
+                new SideMenuItemViewModel { Header = "Calendar",        Icon = "📆" },
+                new SideMenuItemViewModel { Header = "TimePicker",      Icon = "🕐" },
                 new SideMenuItemViewModel { Header = "DateRangePicker", Icon = "📆" },
-                new SideMenuItemViewModel { Header = "TimePicker", Icon = "🕐" },
             ]
         });
 
-        // ⑤ Numeric / Progress
+        // ⑤ Numeric
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Numeric",
+            Header = "Range",
             Icon = "📊",
             Items =
             [
-                new SideMenuItemViewModel { Header = "Slider",      Icon = "🎚" },
-                new SideMenuItemViewModel { Header = "RangeSlider", Icon = "📏" },
-                new SideMenuItemViewModel { Header = "Range",       Icon = "📐" },
-                new SideMenuItemViewModel { Header = "ProgressBar", Icon = "⏳" },
+                new SideMenuItemViewModel { Header = "Slider",         Icon = "🎚" },
+                new SideMenuItemViewModel { Header = "RangeSlider",    Icon = "📏" },
+                new SideMenuItemViewModel { Header = "ProgressBar",    Icon = "⏳" },
                 new SideMenuItemViewModel { Header = "RotationEditor", Icon = "🎲" },
-                new SideMenuItemViewModel { Header = "CircularGaugeSample", Icon = "🎲" },
+                new SideMenuItemViewModel { Header = "CircularGauge",  Icon = "🎛" },
             ]
         });
 
         // ⑥ Collections
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Collections",
+            Header = "Collection",
             Icon = "📚",
             Items =
             [
                 new SideMenuItemViewModel { Header = "ListBox",  Icon = "📋" },
                 new SideMenuItemViewModel { Header = "ListView", Icon = "📃" },
                 new SideMenuItemViewModel { Header = "DataGrid", Icon = "🗂" },
-                new SideMenuItemViewModel { Header = "TreeView", Icon = "🌳" },
                 new SideMenuItemViewModel { Header = "Carousel", Icon = "🎠" },
-                new SideMenuItemViewModel { Header = "Pagination", Icon = "🗂" },
+                new SideMenuItemViewModel { Header = "Pagination", Icon = "📄" },
             ]
         });
 
@@ -219,38 +218,42 @@ public partial class SideMenuViewModel : ObservableObject
             Icon = "🧭",
             Items =
             [
-                new SideMenuItemViewModel { Header = "TabControl",  Icon = "🗒" },
-                new SideMenuItemViewModel { Header = "FluidTab",    Icon = "💧" },
-                new SideMenuItemViewModel { Header = "Stepper",     Icon = "👣" },
-                new SideMenuItemViewModel { Header = "Breadcrumb",  Icon = "🍞" },
+                new SideMenuItemViewModel { Header = "TabControl", Icon = "🗒" },
+                new SideMenuItemViewModel { Header = "FluidTab",   Icon = "💧" },
+                new SideMenuItemViewModel { Header = "Stepper",    Icon = "👣" },
+                new SideMenuItemViewModel { Header = "Breadcrumb", Icon = "🍞" },
+                new SideMenuItemViewModel { Header = "Drawer",       Icon = "🗄" },
+                 new SideMenuItemViewModel { Header = "PopupBox",     Icon = "💭" },
+
             ]
         });
 
         // ⑧ Menu
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Menu",
+            Header = "Hierarchy",
             Icon = "🍔",
             Items =
             [
                 new SideMenuItemViewModel { Header = "Menu", Icon = "📑" },
+                new SideMenuItemViewModel { Header = "TreeView", Icon = "🌳" },
+                new SideMenuItemViewModel { Header = "CascadePicker", Icon = "📂" },
             ]
         });
 
         // ⑨ Containers
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Containers",
+            Header = "Container",
             Icon = "📦",
             Items =
             [
-                new SideMenuItemViewModel { Header = "GroupBox",       Icon = "🗃" },
-                new SideMenuItemViewModel { Header = "Expander",       Icon = "🔽" },
-                new SideMenuItemViewModel { Header = "Card",           Icon = "🃏" },
-                new SideMenuItemViewModel { Header = "Form",           Icon = "📋" },
-                new SideMenuItemViewModel { Header = "SettingItem",    Icon = "⚙️" },
-                new SideMenuItemViewModel { Header = "TransitionBox",  Icon = "🎬" },
-                new SideMenuItemViewModel { Header = "Drawer",         Icon = "🗄" },
+                new SideMenuItemViewModel { Header = "GroupBox",      Icon = "🗃" },
+                new SideMenuItemViewModel { Header = "Expander",      Icon = "🔽" },
+                new SideMenuItemViewModel { Header = "Card",          Icon = "🃏" },
+                new SideMenuItemViewModel { Header = "Form",          Icon = "📋" },
+                new SideMenuItemViewModel { Header = "SettingItem",   Icon = "⚙️" },
+                new SideMenuItemViewModel { Header = "TransitionBox", Icon = "🎬" },
             ]
         });
 
@@ -264,43 +267,56 @@ public partial class SideMenuViewModel : ObservableObject
                 new SideMenuItemViewModel { Header = "Notification", Icon = "🔔" },
                 new SideMenuItemViewModel { Header = "Alert",        Icon = "⚠️" },
                 new SideMenuItemViewModel { Header = "LoadingBox",   Icon = "⏱" },
-                new SideMenuItemViewModel { Header = "PopupBox",     Icon = "💭" },
+
             ]
         });
 
         // ⑪ Panels
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Panels",
+            Header = "Panel",
             Icon = "🧱",
             Items =
             [
                 new SideMenuItemViewModel { Header = "CyclicPanel",        Icon = "🔁" },
                 new SideMenuItemViewModel { Header = "SpacingUniformGrid", Icon = "🔲" },
                 new SideMenuItemViewModel { Header = "SpacingStackPanel",  Icon = "🧮" },
-                new SideMenuItemViewModel { Header = "FisheyePanel",       Icon = "🐟" },
                 new SideMenuItemViewModel { Header = "WaterfallPanel",     Icon = "🌊" },
                 new SideMenuItemViewModel { Header = "TilePanel",          Icon = "🀄" },
             ]
         });
 
-        // ⑫ Other
+        // ⑫ Display
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Other",
-            Icon = "✨",
+            Header = "Display",
             Items =
             [
-                new SideMenuItemViewModel { Header = "IconBox", Icon = "🎯" },
-                new SideMenuItemViewModel { Header = "SectionHeader",  Icon = "📌" },
+                new SideMenuItemViewModel { Header = "SectionHeader", Icon = "📌" },
+                new SideMenuItemViewModel { Header = "HighlightTextBlock", Icon = "🖍" },
+                new SideMenuItemViewModel { Header = "IconBox",            Icon = "🎯" },
             ]
         });
 
         // 顶层 Test 项(无子项)
         Items.Add(new SideMenuItemViewModel
         {
-            Header = "Test",
+            Header = "Test1",
             Icon = "🧪",
+            Items =
+            [
+                new SideMenuItemViewModel
+                {
+                    Header = "Test2",
+                    Icon = "🧪",
+                    Items =
+                    [
+                        new SideMenuItemViewModel { Header = "Test3", Icon = "🧪" },
+                        new SideMenuItemViewModel { Header = "Test4", Icon = "🧪" },
+                    ]
+                },
+
+            ]
         });
     }
 }
