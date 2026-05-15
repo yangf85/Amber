@@ -209,7 +209,10 @@
                                     VerticalAlignment="Center"
                                     Style="{StaticResource ValueLabelStyle}">
                                     <Run Text="IsOpen =" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding IsBasicDrawerOpen, Mode=OneWay}" />
+                                    <Run
+                                        FontWeight="Bold"
+                                        Foreground="{DynamicResource Foreground.Link}"
+                                        Text="{Binding IsBasicDrawerOpen, Mode=OneWay}" />
                                 </TextBlock>
                             </Grid>
 
@@ -288,11 +291,12 @@
                                     Tag="{x:Static cy:DrawerPlacement.Bottom}" />
                             </UniformGrid>
 
-                            <TextBlock
-                                Margin="0,0,0,8"
-                                Style="{StaticResource ValueLabelStyle}">
+                            <TextBlock Margin="0,0,0,8" Style="{StaticResource ValueLabelStyle}">
                                 <Run Text="当前 Placement =" />
-                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CurrentPlacement, Mode=OneWay}" />
+                                <Run
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding CurrentPlacement, Mode=OneWay}" />
                             </TextBlock>
 
                             <Border Height="280" Style="{StaticResource DrawerHostStyle}">
@@ -308,7 +312,10 @@
                                             <TextBlock Style="{StaticResource DrawerInnerTextStyle}" Text="Placement 改变后，下次打开会从新方向滑入。" />
                                             <TextBlock Style="{StaticResource DrawerInnerTextStyle}">
                                                 <Run Text="当前：" />
-                                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding CurrentPlacement, Mode=OneWay}" />
+                                                <Run
+                                                    FontWeight="Bold"
+                                                    Foreground="{DynamicResource Foreground.Link}"
+                                                    Text="{Binding CurrentPlacement, Mode=OneWay}" />
                                             </TextBlock>
                                         </StackPanel>
                                     </cy:Drawer.DrawerContent>
@@ -433,19 +440,31 @@
                                     Columns="4">
                                     <TextBlock Style="{StaticResource ValueLabelStyle}">
                                         <Run Text="Opening:" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding OpeningCount, Mode=OneWay}" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding OpeningCount, Mode=OneWay}" />
                                     </TextBlock>
                                     <TextBlock Style="{StaticResource ValueLabelStyle}">
                                         <Run Text="Opened:" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Success}" Text="{Binding OpenedCount, Mode=OneWay}" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Success}"
+                                            Text="{Binding OpenedCount, Mode=OneWay}" />
                                     </TextBlock>
                                     <TextBlock Style="{StaticResource ValueLabelStyle}">
                                         <Run Text="Closing:" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding ClosingCount, Mode=OneWay}" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Link}"
+                                            Text="{Binding ClosingCount, Mode=OneWay}" />
                                     </TextBlock>
                                     <TextBlock Style="{StaticResource ValueLabelStyle}">
                                         <Run Text="Closed:" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Success}" Text="{Binding ClosedCount, Mode=OneWay}" />
+                                        <Run
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Foreground.Success}"
+                                            Text="{Binding ClosedCount, Mode=OneWay}" />
                                     </TextBlock>
                                 </UniformGrid>
                             </Grid>
@@ -668,41 +687,149 @@
                                 VerticalAlignment="Bottom"
                                 Background="{DynamicResource Border.Default}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsOpen" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (TwoWay)" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉是否打开。默认 false。" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="IsOpen" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool (TwoWay)" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="抽屉是否打开。默认 false。" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DrawerContent" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉面板内容（滑入的部分）。Drawer.Content 是被覆盖的主内容。" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="DrawerContent" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="object" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="抽屉面板内容（滑入的部分）。Drawer.Content 是被覆盖的主内容。" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Placement" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DrawerPlacement" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="滑入方向：Left / Right / Top / Bottom。默认 Left。" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Placement" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="DrawerPlacement" />
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="滑入方向：Left / Right / Top / Bottom。默认 Left。" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DrawerWidth / DrawerHeight" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="抽屉尺寸。Left/Right 用 Width（默认 300），Top/Bottom 用 Height（NaN 时回退 300）。" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="DrawerWidth / DrawerHeight" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="double" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="抽屉尺寸。Left/Right 用 Width（默认 300），Top/Bottom 用 Height（NaN 时回退 300）。" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AnimationDuration" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Duration" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="打开 / 关闭动画时长。默认 300ms。同时控制遮罩淡入淡出。" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="AnimationDuration" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="Duration" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="打开 / 关闭动画时长。默认 300ms。同时控制遮罩淡入淡出。" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseOnOverlayClick" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="点击遮罩层是否关闭。默认 true。运行时切换立即生效。" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="CloseOnOverlayClick" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="点击遮罩层是否关闭。默认 true。运行时切换立即生效。" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseOnEscape / FocusOnOpen" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool / bool" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="ESC 关闭 / 打开后自动聚焦到抽屉首个可聚焦元素。默认均为 true。" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="CloseOnEscape / FocusOnOpen" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="bool / bool" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="ESC 关闭 / 打开后自动聚焦到抽屉首个可聚焦元素。默认均为 true。" />
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="OpenCommand / CloseCommand / ToggleCommand" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="路由命令。CanExecute 自动随 IsOpen 同步。通过 CommandTarget 指向 Drawer 实例。" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="OpenCommand / CloseCommand / ToggleCommand" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedCommand" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="路由命令。CanExecute 自动随 IsOpen 同步。通过 CommandTarget 指向 Drawer 实例。" />
 
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Opening / Opened / Closing / Closed" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="生命周期路由事件，Bubble 策略。-ing 在动画开始时触发，-ed 在动画完成时触发。" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="0"
+                                Style="{StaticResource PropTableNameStyle}"
+                                Text="Opening / Opened / Closing / Closed" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="1"
+                                Style="{StaticResource PropTableTypeStyle}"
+                                Text="RoutedEvent" />
+                            <TextBlock
+                                Grid.Row="9"
+                                Grid.Column="2"
+                                Style="{StaticResource PropTableCellStyle}"
+                                Text="生命周期路由事件，Bubble 策略。-ing 在动画开始时触发，-ed 在动画完成时触发。" />
                         </Grid>
                     </Border>
                 </cy:Card>

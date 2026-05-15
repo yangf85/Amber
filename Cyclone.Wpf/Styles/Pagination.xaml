@@ -1,12 +1,12 @@
 <!--
     ============================================================================
     Pagination 样式
-    
+
     架构:
     - 页码区域: ItemsControl + Button (每个 PageItem 一个按钮)
     - 三段式命名: Pagination.Style.Basic / Pagination.Button.Style.Basic / Pagination.PageItem.Style.Basic
     - 删除旧版冗余:空 Style alias / 重复 ResourceDictionary 合并
-    
+
     PageItem 样式逻辑:
     - 通过 DataTrigger 监听 IsEllipsis 切换"省略号"视觉(不再做字符串 "···" 比较)
     - 通过 MultiBinding 比较 PageNumber == 父 Pagination.PageIndex 决定是否高亮
@@ -293,7 +293,8 @@
                         x:Name="PART_GotoNumberBox"
                         MinWidth="64"
                         Maximum="{Binding PageCount, RelativeSource={RelativeSource TemplatedParent}}"
-                        Minimum="1">
+                        Minimum="1"
+                        NumberMode="Integer">
                         <ctl:NumberBox.InputBindings>
                             <KeyBinding
                                 Key="Enter"
