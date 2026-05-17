@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cyclone.Wpf.Themes;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -23,10 +24,8 @@ public class AlertWindow : Window
 
     public AlertWindow()
     {
+        this.AttachThemeManager();
         InitializeCommandBindings();
-
-        // CLR 属性（不是 DP），不能在 Style 里 Setter——构造时设兜底，
-        // AlertService.ConfigureOwnership 会按 owner 情况覆盖（CenterOwner / Manual / CenterScreen）
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
     }
 
@@ -148,18 +147,15 @@ public class AlertWindow : Window
 
     #region Validation Callbacks (普通 .NET 属性，不是 DP——这些是回调而非数据)
 
-    /// <summary>同步验证回调：返回 false 阻止关闭，窗口保持打开。</summary>
-    public Func<bool> ValidationCallback { get; set; }
-
     /// <summary>异步验证回调：返回 false 阻止关闭。验证期间 IsLoading=true。</summary>
     public Func<Task<bool>> AsyncValidationCallback { get; set; }
+
+    /// <summary>同步验证回调：返回 false 阻止关闭，窗口保持打开。</summary>
+    public Func<bool> ValidationCallback { get; set; }
 
     #endregion Validation Callbacks (普通 .NET 属性，不是 DP——这些是回调而非数据)
 
     #region Commands
-
-    /// <summary>"确定"按钮命令——经过验证回调（如有）后设置 DialogResult=true。</summary>
-    public static readonly RoutedCommand OkCommand = new RoutedCommand(nameof(OkCommand), typeof(AlertWindow));
 
     /// <summary>"取消"按钮命令——直接 DialogResult=false 并关闭。</summary>
     public static readonly RoutedCommand CancelCommand = new RoutedCommand(nameof(CancelCommand), typeof(AlertWindow));
@@ -167,20 +163,8 @@ public class AlertWindow : Window
     /// <summary>"X"关闭按钮命令——DialogResult=null 并关闭。</summary>
     public static readonly RoutedCommand CloseCommand = new RoutedCommand(nameof(CloseCommand), typeof(AlertWindow));
 
-    private void InitializeCommandBindings()
-    {
-        CommandBindings.Add(new CommandBinding(OkCommand, async (_, _) => await HandleOkAsync()));
-        CommandBindings.Add(new CommandBinding(CancelCommand, (_, _) =>
-        {
-            DialogResult = false;
-            Close();
-        }));
-        CommandBindings.Add(new CommandBinding(CloseCommand, (_, _) =>
-        {
-            DialogResult = null;
-            Close();
-        }));
-    }
+    /// <summary>"确定"按钮命令——经过验证回调（如有）后设置 DialogResult=true。</summary>
+    public static readonly RoutedCommand OkCommand = new RoutedCommand(nameof(OkCommand), typeof(AlertWindow));
 
     private async Task HandleOkAsync()
     {
@@ -235,6 +219,21 @@ public class AlertWindow : Window
         // 无验证：直接关
         DialogResult = true;
         Close();
+    }
+
+    private void InitializeCommandBindings()
+    {
+        CommandBindings.Add(new CommandBinding(OkCommand, async (_, _) => await HandleOkAsync()));
+        CommandBindings.Add(new CommandBinding(CancelCommand, (_, _) =>
+        {
+            DialogResult = false;
+            Close();
+        }));
+        CommandBindings.Add(new CommandBinding(CloseCommand, (_, _) =>
+        {
+            DialogResult = null;
+            Close();
+        }));
     }
 
     #endregion Commands

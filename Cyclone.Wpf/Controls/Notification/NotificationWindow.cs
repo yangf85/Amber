@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cyclone.Wpf.Themes;
+using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -17,16 +18,22 @@ namespace Cyclone.Wpf.Controls;
 internal class NotificationWindow : Window
 {
     private DispatcherTimer _autoCloseTimer;
-    private double _originalLeft;
-    private double _originalTop;
 
     /// <summary>正在关闭：0 = 否，1 = 是。Interlocked 操作保证唯一关闭路径。</summary>
     private int _isClosing;
+
+    private double _originalLeft;
+
+    private double _originalTop;
 
     public NotificationWindow()
     {
         CommandBindings.Add(new CommandBinding(CloseWindowCommand, OnExecuteCloseWindow));
 
+        // 1. 主题挂接 —— 把 CurrentTheme(BasicTheme/DarkTheme...)merge 到 this.Resources[0]
+        this.AttachThemeManager();
+
+        // 2. 再合并本控件专属样式字典 —— 它的模板里 DynamicResource 会通过 [0] 的主题解析
         try
         {
             var dict = new ResourceDictionary
@@ -35,9 +42,9 @@ internal class NotificationWindow : Window
             };
             Resources.MergedDictionaries.Add(dict);
         }
-        catch
+        catch (Exception ex)
         {
-            // 资源不存在时不阻塞窗口创建——用户可能没合并这个字典
+            System.Diagnostics.Debug.WriteLine($"[NotificationWindow] 合并 Notification.xaml 失败: {ex.Message}");
         }
 
         Loaded += OnNotificationLoaded;
@@ -144,21 +151,6 @@ internal class NotificationWindow : Window
     #region Public Close Methods
 
     /// <summary>
-    /// 带滑出动画的关闭。重复调用幂等。用于：
-    /// 用户主动关（点 X 按钮 / handle.Close()）、自动关闭计时器到期。
-    /// </summary>
-    public void CloseWithAnimation()
-    {
-        if (Interlocked.Exchange(ref _isClosing, 1) != 0)
-        {
-            return;
-        }
-
-        StopAutoCloseTimer();
-        PlayCloseAnimation(() => base.Close());
-    }
-
-    /// <summary>
     /// 立即关闭（无动画）。用于：
     /// MaxCount 淘汰最老一条、Service.Dispose 关全部。
     /// 重复调用幂等。
@@ -174,9 +166,48 @@ internal class NotificationWindow : Window
         base.Close();
     }
 
+    /// <summary>
+    /// 带滑出动画的关闭。重复调用幂等。用于：
+    /// 用户主动关（点 X 按钮 / handle.Close()）、自动关闭计时器到期。
+    /// </summary>
+    public void CloseWithAnimation()
+    {
+        if (Interlocked.Exchange(ref _isClosing, 1) != 0)
+        {
+            return;
+        }
+
+        StopAutoCloseTimer();
+        PlayCloseAnimation(() => base.Close());
+    }
+
     #endregion Public Close Methods
 
     #region Override Methods
+
+    /// <inheritdoc />
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        CleanupResources();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(MouseEventArgs e)
+    {
+        base.OnMouseEnter(e);
+        StopAutoCloseTimer();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        if (DisplayDuration > TimeSpan.Zero)
+        {
+            StartAutoCloseTimer();
+        }
+    }
 
     /// <inheritdoc />
     protected override void OnPreviewMouseLeftButtonUp(MouseButtonEventArgs e)
@@ -198,23 +229,6 @@ internal class NotificationWindow : Window
     }
 
     /// <inheritdoc />
-    protected override void OnMouseEnter(MouseEventArgs e)
-    {
-        base.OnMouseEnter(e);
-        StopAutoCloseTimer();
-    }
-
-    /// <inheritdoc />
-    protected override void OnMouseLeave(MouseEventArgs e)
-    {
-        base.OnMouseLeave(e);
-        if (DisplayDuration > TimeSpan.Zero)
-        {
-            StartAutoCloseTimer();
-        }
-    }
-
-    /// <inheritdoc />
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
@@ -224,13 +238,6 @@ internal class NotificationWindow : Window
         {
             InvalidateMeasure();
         }
-    }
-
-    /// <inheritdoc />
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        CleanupResources();
     }
 
     #endregion Override Methods
@@ -250,52 +257,6 @@ internal class NotificationWindow : Window
         {
             StartAutoCloseTimer();
         }
-    }
-
-    private void SetInitialPositionForAnimation()
-    {
-        switch (AnimationDirection)
-        {
-            case NotificationAnimationDirection.FromLeft:
-                Left = _originalLeft - ActualWidth;
-                break;
-
-            case NotificationAnimationDirection.FromRight:
-                Left = _originalLeft + ActualWidth;
-                break;
-        }
-    }
-
-    private void PlayOpenAnimation()
-    {
-        var positionAnim = AnimationDirection switch
-        {
-            NotificationAnimationDirection.FromLeft => new DoubleAnimation
-            {
-                From = _originalLeft - ActualWidth,
-                To = _originalLeft,
-                Duration = TimeSpan.FromMilliseconds(200),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
-            },
-            _ => new DoubleAnimation
-            {
-                From = _originalLeft + ActualWidth,
-                To = _originalLeft,
-                Duration = TimeSpan.FromMilliseconds(200),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
-            },
-        };
-
-        var opacityAnim = new DoubleAnimation
-        {
-            From = 0.0,
-            To = 1.0,
-            Duration = TimeSpan.FromMilliseconds(200),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
-        };
-
-        BeginAnimation(LeftProperty, positionAnim);
-        BeginAnimation(OpacityProperty, opacityAnim);
     }
 
     private void PlayCloseAnimation(Action onCompleted)
@@ -332,9 +293,70 @@ internal class NotificationWindow : Window
         BeginAnimation(OpacityProperty, opacityAnim);
     }
 
+    private void PlayOpenAnimation()
+    {
+        var positionAnim = AnimationDirection switch
+        {
+            NotificationAnimationDirection.FromLeft => new DoubleAnimation
+            {
+                From = _originalLeft - ActualWidth,
+                To = _originalLeft,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            },
+            _ => new DoubleAnimation
+            {
+                From = _originalLeft + ActualWidth,
+                To = _originalLeft,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            },
+        };
+
+        var opacityAnim = new DoubleAnimation
+        {
+            From = 0.0,
+            To = 1.0,
+            Duration = TimeSpan.FromMilliseconds(200),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        };
+
+        BeginAnimation(LeftProperty, positionAnim);
+        BeginAnimation(OpacityProperty, opacityAnim);
+    }
+
+    private void SetInitialPositionForAnimation()
+    {
+        switch (AnimationDirection)
+        {
+            case NotificationAnimationDirection.FromLeft:
+                Left = _originalLeft - ActualWidth;
+                break;
+
+            case NotificationAnimationDirection.FromRight:
+                Left = _originalLeft + ActualWidth;
+                break;
+        }
+    }
+
     #endregion Private - Animation
 
     #region Private - Timer
+
+    private void OnAutoCloseTick(object sender, EventArgs e)
+    {
+        StopAutoCloseTimer();
+        CloseWithAnimation();
+    }
+
+    private void ResetAutoCloseTimer()
+    {
+        StopAutoCloseTimer();
+        if (DisplayDuration > TimeSpan.Zero)
+        {
+            StartAutoCloseTimer();
+        }
+    }
 
     private void StartAutoCloseTimer()
     {
@@ -359,21 +381,6 @@ internal class NotificationWindow : Window
         {
             _autoCloseTimer.Stop();
         }
-    }
-
-    private void ResetAutoCloseTimer()
-    {
-        StopAutoCloseTimer();
-        if (DisplayDuration > TimeSpan.Zero)
-        {
-            StartAutoCloseTimer();
-        }
-    }
-
-    private void OnAutoCloseTick(object sender, EventArgs e)
-    {
-        StopAutoCloseTimer();
-        CloseWithAnimation();
     }
 
     #endregion Private - Timer
