@@ -6,15 +6,15 @@
     - Unchecked: 白底 + 灰边框 + 灰字 (跟 Button 默认态一致)
     - Checked: 主色实心 + 主色边框 + 白字 (跟 CheckBox/Pagination 选中态一致)
     - Hover:
-      - Unchecked: 边框变主色淡边
-      - Checked: 背景颜色稍微变深 (Background.Highlighted)
+    - Unchecked: 边框变主色淡边
+    - Checked: 背景颜色稍微变深 (Background.Highlighted)
     - Pressed: 整体 Opacity 0.85
     - IsKeyboardFocused: 边框变 Border.Focused (Button 风格一致)
     - Disabled: 整体 Opacity 0.5
     
     改动 (vs 旧版):
     - 删 AccentToggleButton — 引用全是不存在的 token (AccentBrush/CheckedBackgroundBrush/...)
-      实际 fallback 到 null,从未真正生效
+    实际 fallback 到 null,从未真正生效
     - Setter Property 显式 TargetName="RootBorder" (旧版有些 Setter 不写 TargetName,改的是控件 DP)
     - 加 IsKeyboardFocused trigger
     - Hover-Checked 多触发器:背景变 Background.Highlighted (旧版变 Hover 灰色,Checked 态视觉退化)

@@ -8,26 +8,26 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:TextBoxViewModel}}"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3000"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ButtonSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -36,14 +36,18 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
         <Style x:Key="FieldLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="12" />
@@ -51,19 +55,7 @@
             <Setter Property="Margin" Value="0,0,12,0" />
         </Style>
 
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-            <Setter Property="hp:TextBoxHelper.HasClearButton" Value="False" />
-        </Style>
-
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -94,31 +86,27 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
                         <Path
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Data="M4,7 L20,7 L20,17 L4,17 Z M7,11 L13,11"
+                            Data="M6,6 L18,6 M6,18 L18,18 M12,6 L12,18 M9,6 L15,6 M9,18 L15,18"
                             Stretch="None"
-                            Stroke="White"
-                            StrokeEndLineCap="Round"
+                            Stroke="{DynamicResource Text.Invert}"
                             StrokeLineJoin="Round"
-                            StrokeStartLineCap="Round"
                             StrokeThickness="2" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -136,597 +124,799 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="附加属性增强" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="单/多行文本输入框——WinUI 3 风格无圆角,默认带水印 + 清除按钮。支持 Watermark 附加属性、HasClearButton 控制、只读 / 禁用 / 多行 / 字符计数等常见模式。" />
+                            Text="文本输入框 — 通过 TextBoxHelper 附加属性为原生 TextBox 增加 Watermark / Clear 按钮等能力,不替换控件,完整状态(Hover / Focused / ReadOnly / Disabled)主题化。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== 全局状态条 ==========  -->
+            <Border
+                Margin="0,16,0,0"
+                Padding="14,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="最后变更:" />
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding LastChange}" />
+                        <TextBlock
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="UserName 长度:" />
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding UserNameLength}" />
+                    </StackPanel>
+                    <Button
+                        Grid.Column="1"
+                        Padding="10,4"
+                        Command="{Binding ResetCommand}"
+                        Content="清零"
+                        Style="{DynamicResource Button.Style.Subtle}" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ① 基础用法 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础用法"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Watermark · 默认 Clear 按钮 · 双向绑定" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="默认隐式样式无需指定 Style。TextBoxHelper.HasClearButton 默认为 True,有内容且非只读时显示叉号清除按钮。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="带 Watermark 的输入框" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="请输入用户名"
+                Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="无 Watermark 的纯输入框" />
+            <TextBox Width="320" HorizontalAlignment="Left" />
+
+            <!--  ========== ② Watermark 与 Clear 按钮控制 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② Watermark 与 Clear 按钮"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="hp:TextBoxHelper.Watermark / HasClearButton" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Watermark 在 Text 为空且未获焦时显示。HasClearButton 控制清除按钮显隐, 搜索框 / 表单字段建议保留, 纯展示场景可关闭。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="HasClearButton = True (默认)" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="输入后右侧出现叉号"
+                Text="试试这里" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="HasClearButton = False" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.HasClearButton="False"
+                hp:TextBoxHelper.Watermark="不显示清除按钮"
+                Text="试试这里" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="搜索框 — Watermark 提示作用域" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="搜索文档、控件、API…"
+                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+            <!--  ========== ③ 状态对比 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 状态对比"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Normal / Hover / Focused / ReadOnly / Disabled" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="鼠标悬停看 Hover 边框, Tab 聚焦看 Focused 主色边框。ReadOnly 用 Background.Header 区分, Disabled 走完整 Disabled token 组。" />
+
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  ① 基础用法 + Watermark + Clear  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础用法" Subtitle="Watermark · 默认带清除按钮">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="默认隐式样式自带:Watermark 附加属性显示提示文本、HasClearButton=True 显示清除按钮(有文字时才出现)。" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="带水印的输入框" />
-                            <TextBox
-                                Margin="0,0,0,12"
-                                hp:TextBoxHelper.Watermark="请输入用户名"
-                                Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBox
-                                Margin="0,0,0,12"
-                                hp:TextBoxHelper.Watermark="example@domain.com"
-                                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <Border
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <UniformGrid Columns="2">
-                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                        <Run Text="UserName =" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding UserName, Mode=OneWay}" />
-                                    </TextBlock>
-                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                        <Run Text="Email =" />
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding Email, Mode=OneWay}" />
-                                    </TextBlock>
-                                </UniformGrid>
-                            </Border>
-
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="提示:有文字时清除按钮出现,点击清空并把焦点保留在输入框。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 状态  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="状态" Subtitle="ReadOnly / Disabled / 不带清除按钮">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsReadOnly=True — 灰底,无清除按钮" />
-                            <TextBox
-                                Margin="0,0,0,12"
-                                IsReadOnly="True"
-                                Text="这是只读文本,可以选中复制但不能编辑" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="IsEnabled=False — 整体禁用样式" />
-                            <TextBox
-                                Margin="0,0,0,12"
-                                IsEnabled="False"
-                                Text="禁用的输入框" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="HasClearButton=False — 隐藏清除按钮" />
-                            <TextBox
-                                hp:TextBoxHelper.HasClearButton="False"
-                                hp:TextBoxHelper.Watermark="搜索类输入框可能不需要清除按钮"
-                                Text="即使有文字,清除按钮也不显示" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 多行 + 字符计数  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="多行文本" Subtitle="AcceptsReturn · TextWrapping · 字符计数">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="多行输入设 AcceptsReturn=True + TextWrapping=Wrap + Height='Auto' 让高度自适应。MaxLength 限制最大字符数。" />
-
-                            <TextBox
-                                Height="100"
-                                Margin="0,0,0,8"
-                                AcceptsReturn="True"
-                                hp:TextBoxHelper.HasClearButton="False"
-                                hp:TextBoxHelper.Watermark="描述一下这个项目..."
-                                MaxLength="{Binding DescriptionLimit}"
-                                Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                TextWrapping="Wrap"
-                                VerticalContentAlignment="Top"
-                                VerticalScrollBarVisibility="Auto" />
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    FontSize="11"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="支持回车换行" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    FontFamily="Consolas"
-                                    FontSize="11"
-                                    Foreground="{DynamicResource Foreground.Caption}">
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding DescriptionLength, Mode=OneWay}" />
-                                    <Run Text=" /" />
-                                    <Run Text="{Binding DescriptionLimit, Mode=OneWay}" />
-                                </TextBlock>
-                            </Grid>
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ 搜索框场景  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="搜索框" Subtitle="水印 + 清除按钮的经典组合">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="搜索场景:实时输入 + 一键清空,UpdateSourceTrigger=PropertyChanged 让输入即时反映到 ViewModel。" />
-
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Path
-                                    Grid.Column="0"
-                                    Width="14"
-                                    Height="14"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Data="M10,4 A6,6 0 1,1 10,16 A6,6 0 0,1 10,4 M14.5,14.5 L20,20"
-                                    Stretch="Uniform"
-                                    Stroke="{DynamicResource Icon.Foreground.Default}"
-                                    StrokeLineJoin="Round"
-                                    StrokeThickness="1.5" />
-                                <TextBox
-                                    Grid.Column="1"
-                                    Padding="8,0"
-                                    hp:TextBoxHelper.Watermark="搜索文件、文档、设置..."
-                                    Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-
-                            <Border
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                        <Run Text="实时关键词:" />
-                                    </TextBlock>
-                                    <TextBlock Margin="0,4,0,0" Style="{StaticResource ValueLabelStyle}">
-                                        <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding SearchKeyword, Mode=OneWay, TargetNullValue=(空), FallbackValue=(空)}" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ 验证 — 手机号  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="校验反馈" Subtitle="实时格式验证">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ViewModel 计算属性 IsPhoneValid 实时校验。输入框下方提示文字根据校验结果切换。" />
-
-                            <TextBox
-                                Margin="0,0,0,4"
-                                hp:TextBoxHelper.Watermark="手机号 (11 位数字)"
-                                MaxLength="11"
-                                Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <Grid>
-                                <!--  验证通过的提示  -->
-                                <TextBlock
-                                    FontSize="11"
-                                    Foreground="{DynamicResource Foreground.Success}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsPhoneValid}" Value="True" />
-                                                        <Condition Binding="{Binding PhoneNumber.Length}" Value="11" />
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                    <Run Text="✓ 格式正确" />
-                                </TextBlock>
-                                <!--  验证失败的提示  -->
-                                <TextBlock
-                                    FontSize="11"
-                                    Foreground="{DynamicResource Foreground.Error}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPhoneValid}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                    <Run Text="✕ 手机号必须为 11 位" />
-                                </TextBlock>
-                            </Grid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ 联动控制  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="联动控制" Subtitle="ReadOnly / Enabled 切换演示">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="用 CheckBox 控制下面表单的 IsReadOnly 和 IsEnabled,观察视觉变化。Fill/Clear 按钮验证 Command 绑定与 ViewModel 互操作。" />
-
-                            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                                <CheckBox
-                                    Margin="0,0,16,0"
-                                    Content="只读模式"
-                                    IsChecked="{Binding IsFormReadOnly}" />
-                                <CheckBox Content="禁用模式" IsChecked="{Binding IsFormDisabled}" />
-                            </StackPanel>
-
-                            <TextBox
-                                Margin="0,0,0,8"
-                                hp:TextBoxHelper.Watermark="姓名"
-                                IsEnabled="{Binding IsFormEnabled}"
-                                IsReadOnly="{Binding IsFormReadOnly}"
-                                Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <TextBox
-                                Margin="0,0,0,12"
-                                hp:TextBoxHelper.Watermark="邮箱"
-                                IsEnabled="{Binding IsFormEnabled}"
-                                IsReadOnly="{Binding IsFormReadOnly}"
-                                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                                <Button
-                                    Padding="14,8"
-                                    Command="{Binding FillSampleCommand}"
-                                    Content="填充示例数据" />
-                                <Button
-                                    Margin="8,0,0,0"
-                                    Padding="14,8"
-                                    Command="{Binding ClearAllCommand}"
-                                    Content="清空所有"
-                                    Style="{DynamicResource Button.Style.Subtle}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-            </Grid>
-
-            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="TextBox + 附加属性 + 命令">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="Normal" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,8,12"
+                    hp:TextBoxHelper.Watermark="未获焦时" />
 
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="8,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="Normal (已有内容)" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="8,0,0,12"
+                    Text="已经输入了一些内容" />
 
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性 / 命令" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="ReadOnly — 背景换 Header 色, 隐藏 Clear" />
+                <TextBox
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,0,8,12"
+                    IsReadOnly="True"
+                    Text="只读内容, 不可编辑" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Text" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="文本内容。常用 UpdateSourceTrigger=PropertyChanged 实时更新 ViewModel。" />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="8,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="Disabled — Foreground/Border/Background 全套 Disabled token" />
+                <TextBox
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="8,0,0,12"
+                    IsEnabled="False"
+                    Text="禁用内容" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsReadOnly" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (false)" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="只读模式 — 背景灰底,可选中复制但不可编辑,清除按钮自动隐藏。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsEnabled" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (true)" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="禁用 — 边框 + 背景 + 前景全部变 Disabled 颜色,不响应输入。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AcceptsReturn / TextWrapping" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool / enum" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="多行输入:AcceptsReturn=True 允许回车,TextWrapping=Wrap 自动换行。" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaxLength" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (0)" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="最大字符数。0 表示无限制。配合 Text.Length 显示字符计数。" />
-
-                            <Border
-                                Grid.Row="6"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="附加属性 (hp:TextBoxHelper)" />
-
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TextBoxHelper.Watermark" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="string" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="水印提示文本。Text 为空且未获焦时显示,Foreground.Placeholder 灰色。" />
-
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TextBoxHelper.HasClearButton" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="默认样式 Setter 已设 True。设 False 显式隐藏(密码框、搜索框某些场景)。" />
-
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TextBoxHelper.ClearCommand" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="清空文本的路由命令。样式里的 ClearButton 绑定到这个,所有 TextBox 自动响应(类级别 CommandBinding)。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <Grid Grid.Row="1">
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    Margin="0,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="可切换 ReadOnly" />
+                <Grid Grid.Row="5" Grid.Column="0" Margin="0,0,8,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
+                    <TextBox
+                        hp:TextBoxHelper.Watermark="切到 ReadOnly 看背景变化"
+                        IsReadOnly="{Binding IsReadOnlyDemo}"
+                        Text="可编辑文本" />
+                    <Button
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Padding="10,0"
+                        Command="{Binding ToggleReadOnlyCommand}"
+                        Content="切换"
+                        Style="{DynamicResource Button.Style.Subtle}" />
+                </Grid>
 
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 基础(隐式样式自带水印 + 清除按钮)-->
-<TextBox
-    hp:TextBoxHelper.Watermark="请输入用户名"
-    Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
-
-<!-- 隐藏清除按钮 -->
-<TextBox
-    hp:TextBoxHelper.HasClearButton="False"
-    hp:TextBoxHelper.Watermark="不需要清除按钮"
-    Text="{Binding ...}" />
-
-<!-- 只读 -->
-<TextBox IsReadOnly="True" Text="不可编辑" />
-
-<!-- 禁用 -->
-<TextBox IsEnabled="False" Text="禁用" />
-
-<!-- 多行 + 字符限制 -->
-<TextBox
-    Height="100"
-    AcceptsReturn="True"
-    TextWrapping="Wrap"
-    VerticalScrollBarVisibility="Auto"
-    MaxLength="200"
-    hp:TextBoxHelper.Watermark="描述..."
-    Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
-
-<!-- 字符计数显示 -->
-<TextBlock>
-    <Run Text="{Binding Description.Length, Mode=OneWay}" />
-    <Run Text=" / 200" />
-</TextBlock>]]>
-                        </TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="水印 + 清除按钮" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="默认样式自带,通过 TextBoxHelper 附加属性控制 — 现代输入框标配"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="类级别 CommandBinding" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="CommandManager.RegisterClassCommandBinding 给所有 TextBox 实例注册,不需要每实例单独绑定"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="边框颜色三态" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="默认 / Hover 蓝灰 / Focused 主色,直观反馈交互态"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="ReadOnly 灰底" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="跟 Disabled 区分 — ReadOnly 可选中复制,Disabled 完全不响应"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    Margin="8,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="批量 Busy 联动" />
+                <Grid Grid.Row="5" Grid.Column="1" Margin="8,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        hp:TextBoxHelper.Watermark="Busy 时禁用"
+                        IsEnabled="{Binding CanInteract}" />
+                    <Button
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Padding="10,0"
+                        Command="{Binding ToggleBusyCommand}"
+                        Content="切换 Busy"
+                        Style="{DynamicResource Button.Style.Subtle}" />
                 </Grid>
             </Grid>
-        </Grid>
+
+            <!--  ========== ④ 数据验证 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 数据验证"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="ObservableValidator + [NotifyDataErrorInfo] + 默认 ValidationError 模板" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ViewModel 继承 ObservableValidator, 属性上加 [NotifyDataErrorInfo] + 标准验证特性 ([EmailAddress] / [MaxLength] / [Required] 等), 控件样式自带的 Validation.ErrorTemplate 自动渲染错误。完全无须手写 DataTrigger 或错误 TextBlock。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="邮箱字段 — [EmailAddress]" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="name@example.com"
+                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Margin="0,20,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="备注字段 — [MaxLength(200)] (输入超过 200 字后报错)" />
+            <TextBox
+                Width="480"
+                Height="80"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="最多 200 字"
+                AcceptsReturn="True"
+                Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap"
+                VerticalContentAlignment="Top" />
+
+            <!--  ========== ⑤ 多行 / 受限输入 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 多行 / 受限输入"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="AcceptsReturn · MaxLength · CharacterCasing" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="多行用 AcceptsReturn=True + TextWrapping=Wrap + Height/MaxHeight。控件层的 MaxLength 是硬限制(超出无法输入), 不同于 ④ 节的 [MaxLength] 验证(允许输入但报错)。CharacterCasing 自动转大小写。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="多行文本(AcceptsReturn + TextWrapping)" />
+            <TextBox
+                Width="480"
+                Height="100"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="多行输入, Enter 换行..."
+                AcceptsReturn="True"
+                TextWrapping="Wrap"
+                VerticalContentAlignment="Top" />
+
+            <TextBlock
+                Margin="0,20,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="MaxLength = 10 (控件层硬限制)" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="最多 10 个字符"
+                MaxLength="10" />
+
+            <TextBlock
+                Margin="0,20,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="CharacterCasing = Upper" />
+            <TextBox
+                Width="320"
+                HorizontalAlignment="Left"
+                hp:TextBoxHelper.Watermark="自动转大写"
+                CharacterCasing="Upper" />
+
+            <!--  ========== ⑥ 数据双向绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 数据双向绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="UpdateSourceTrigger=PropertyChanged 实时同步" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="默认 Text 绑定在 LostFocus 才回写。需要实时同步时显式指定 UpdateSourceTrigger=PropertyChanged, 适合搜索过滤、字数统计等场景。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="边输边同步" />
+                    <TextBox
+                        hp:TextBoxHelper.Watermark="试着键入"
+                        Text="{Binding LiveSyncText, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <Border
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    Padding="14,10"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="ViewModel 当前值:" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding LiveSyncText}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!--  ========== ⑦ 派生属性自动通知(NotifyPropertyChangedFor) ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 派生属性自动通知"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="[NotifyPropertyChangedFor] · 源属性变更联动派生属性" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="在 [ObservableProperty] 上加 [NotifyPropertyChangedFor(nameof(派生属性))], 源属性变更时自动 raise 派生属性的 PropertyChanged 事件。一对多派生时叠加多个特性即可, 替代手写 partial void OnXxxChanged → OnPropertyChanged(...)。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="一对多 — SourceText 同时驱动三个派生属性" />
+            <Border
+                Padding="16"
+                Background="{DynamicResource Background.Container}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBox
+                        hp:TextBoxHelper.Watermark="试着键入或修改"
+                        Text="{Binding SourceText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Margin="0,0,4,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Background.Header}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="SourceTextLength" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="22"
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding SourceTextLength}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Column="1"
+                            Margin="4,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Background.Header}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="SourceTextUpper" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding SourceTextUpper}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Column="2"
+                            Margin="4,0,0,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Background.Header}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="SourceTextReversed" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding SourceTextReversed}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <TextBlock
+                        Margin="0,12,0,0"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="↑ 三个派生属性都是计算属性(无 setter), [NotifyPropertyChangedFor] 让 SourceText 一变, 三者的 Binding 同时刷新。"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ⑧ 实战 · 表单 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 实战 · 表单"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="字段标签 + 输入 + 验证 + 提交" />
+
+            <Border
+                Padding="20"
+                Background="{DynamicResource Background.Container}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Margin="0,8,0,8"
+                        Style="{StaticResource FieldLabelStyle}"
+                        Text="用户名" />
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="0,4,0,4"
+                        hp:TextBoxHelper.Watermark="2-20 个字符"
+                        MaxLength="20"
+                        Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="0,8,0,8"
+                        Style="{StaticResource FieldLabelStyle}"
+                        Text="邮箱" />
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,4,0,4"
+                        hp:TextBoxHelper.Watermark="name@example.com"
+                        Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="0,8,0,8"
+                        Style="{StaticResource FieldLabelStyle}"
+                        Text="备注" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Height="80"
+                        Margin="0,4,0,4"
+                        hp:TextBoxHelper.Watermark="可选, 最多 200 字"
+                        AcceptsReturn="True"
+                        Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap"
+                        VerticalContentAlignment="Top" />
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Margin="0,16,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            Padding="14,8"
+                            Command="{Binding ResetCommand}"
+                            Content="重置" />
+                        <Button
+                            Margin="8,0,0,0"
+                            Padding="14,8"
+                            Content="提交"
+                            IsDefault="True"
+                            Style="{DynamicResource Button.Style.Primary}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑨ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑨ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="附加属性 + 常用原生属性" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型 (默认)" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:TextBoxHelper.Watermark" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="string (&quot;&quot;)" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="占位提示文字, Text 为空且未获焦时显示, Foreground.Placeholder 色。" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:TextBoxHelper.HasClearButton" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool (true)" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="是否显示清除按钮。Text 为空 / IsReadOnly=True 时自动隐藏。" />
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="hp:TextBoxHelper.ClearCommand" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="RoutedCommand" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="类级别 CommandBinding 已注册, 模板内 Clear 按钮通过 {x:Static} 引用即可。" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Text" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="string" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="文本内容。绑定建议加 UpdateSourceTrigger=PropertyChanged 实时同步。" />
+
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="IsReadOnly" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool (false)" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="只读模式。背景换 Background.Header, 隐藏 Clear 按钮, 仍可聚焦 / 选中复制。" />
+
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="MaxLength" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="int (0)" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="字符上限, 0 = 无限制。控件层硬限制, 超出无法输入。" />
+
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="AcceptsReturn" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool (false)" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="是否允许 Enter 换行。多行输入需配合 TextWrapping=Wrap + Height/MaxHeight。" />
+
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Validation.ErrorTemplate" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="ControlTemplate" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="默认样式已套用 ValidationError.ControlTemplate, 配合 ObservableValidator 自动渲染错误。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑩ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑩ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="TextBox 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="附加属性增强, 不替换原生控件" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Watermark / HasClearButton 是 TextBoxHelper 的附加属性, 原生 TextBox 即可使用, 第三方控件 / 旧代码无需迁移"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Clear 按钮的三个隐藏条件" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="HasClearButton=False / Text=&quot;&quot; / IsReadOnly=True 任意一个成立都隐藏, 避免空内容或只读时出现无意义按钮"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="ReadOnly 不等于 Disabled" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ReadOnly 内容仍可聚焦 / 选中 / 复制, 仅背景换色提示; Disabled 是整个交互链路关闭, 视觉对比强烈"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="标准 INotifyDataErrorInfo 验证流" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ViewModel 继承 ObservableValidator, 属性加 [NotifyDataErrorInfo] + [EmailAddress]/[MinLength]/[CustomValidation] 等, 控件样式自带的 Validation.ErrorTemplate 自动消费, 零模板修改"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

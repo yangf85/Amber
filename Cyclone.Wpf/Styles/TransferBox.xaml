@@ -4,21 +4,21 @@
     
     核心改动:
     - 删掉重复实现的 TransferBox.ListBoxItemStyle / TransferBox.ListBoxStyle
-      直接复用 ListBox.xaml 的默认样式——视觉、ScrollViewer、左 3px 竖条 indicator、
-      整行浅底,全部白送
+    直接复用 ListBox.xaml 的默认样式——视觉、ScrollViewer、左 3px 竖条 indicator、
+    整行浅底,全部白送
     - 两侧 ListBox 标准多选(单击 / Ctrl+Click / Shift+Click),无 CheckBox
     - BorderThickness=0 + Background=Transparent — 避免与外层 Border 重边框
     
     修复:
     - Header 行高用子元素 Border.Height 撑起 (Header 为 null 时不再塌缩,
-      RowDefinition.Height 是 GridLength 不能直接绑 double 主题资源)
+    RowDefinition.Height 是 GridLength 不能直接绑 double 主题资源)
     - Button container 只占 Row 2 — Header 横向连贯,不被 button column 截断
     - RepeatButton 加 FocusVisualStyle=Null + IsKeyboardFocused 反馈
     
     标题字重 Medium + 主题前景色,跟正文区分。
     
     注:hp 命名空间已不再使用,可以删除——保留只是以防用户在 ItemsPanel/
-       ItemContainerStyle 等自定义场景里需要。
+    ItemContainerStyle 等自定义场景里需要。
     ============================================================================
 -->
 <ResourceDictionary
@@ -82,7 +82,7 @@
                     <!--
                         Header 行 — Auto:由子元素 Border 的 Height 决定行高
                         (RowDefinition.Height 是 GridLength,而主题资源 Height.Horizontal.Header 是 double,
-                         不能直接绑,所以放到 Border 上)
+                        不能直接绑,所以放到 Border 上)
                     -->
                     <RowDefinition Height="Auto" />
                     <!--  横向分隔线  -->

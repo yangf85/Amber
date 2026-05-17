@@ -32,7 +32,7 @@ public partial class MainViewModel : ObservableObject
             // Text & Number
             "TextBox" => new TextBoxSample(),
             "NumberBox" => new NumberBoxSample(),
-            "Input" => new PasswordBoxSample(),
+            "PasswordBox" => new PasswordBoxSample(),
             "HintBox" => new HintBoxSample(),
             "FilterBox" => new FilterBoxSample(),
 

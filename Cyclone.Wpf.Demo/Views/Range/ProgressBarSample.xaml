@@ -7,26 +7,26 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:ProgressBarViewModel}}"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3000"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 TextBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -35,7 +35,12 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
@@ -43,18 +48,7 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
-
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -85,30 +79,30 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
-                        <Grid>
-                            <Path
-                                Width="32"
-                                Height="32"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Data="M3,11 L21,11 L21,13 L3,13 Z M3,11 L13,11 L13,13 L3,13 Z"
-                                Fill="White"
-                                Stretch="None" />
-                        </Grid>
+                        <!--  Icon: 三条进度横线  -->
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M3,7 H21 M3,12 H14 M3,17 H10"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2.5" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
@@ -125,696 +119,538 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="原生 + 主题变体" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="进度条——WinUI 3 风格,无圆角 4px 主色填充。支持确定进度 (Determinate)、不确定动画 (Indeterminate 双段扫描)、带百分比文字、状态色变体 (Success / Warning / Error)、垂直方向。" />
+                            Text="WPF 原生 ProgressBar 的主题扩展 — 6px 细条 / WithText 带文字 / Success · Warning · Error 三种状态色变体, 支持 IsIndeterminate 双段扫描动画与 Vertical 方向。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== ① 基础进度 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础进度"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Value · Minimum · Maximum 三件套" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="6px 厚度, Value 双向绑定。配合下方 Slider 调试观察 Indicator 宽度实时变化。默认 Maximum=100(注意与 Slider 默认 10 不同)。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="进度值(BasicProgress)" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Value="{Binding BasicProgress, Mode=OneWay}" />
+            <Slider
+                Margin="0,0,0,8"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding BasicProgress, Mode=TwoWay}" />
+            <TextBlock Style="{StaticResource ValueLabelStyle}">
+                <Run Text="BasicProgress =" />
+                <Run
+                    FontWeight="Bold"
+                    Foreground="{DynamicResource Foreground.Link}"
+                    Text="{Binding BasicProgress, StringFormat={}{0:F0}%, Mode=OneWay}" />
+            </TextBlock>
+
+            <!--  ========== ② 带百分比文字 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 带百分比文字"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="ProgressBar.Style.WithText 变体" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="使用 WithText 变体, Height 加大到 18px, 在条带中央显示百分比文字。" />
+
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.WithText}"
+                Value="25" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.WithText}"
+                Value="65" />
+            <ProgressBar
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.WithText}"
+                Value="90" />
+
+            <!--  ========== ③ 状态色变体 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 状态色变体"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Success / Warning / Error · 直接覆盖 Foreground" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="预定义的语义色变体, 直接通过 Style 切换, 仅覆盖 Foreground。也可以直接覆盖 Foreground 自定义颜色。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Success — 任务完成" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.Success}"
+                Value="100" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Warning — 接近上限" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.Warning}"
+                Value="85" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Error — 失败 / 超出限制" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Style="{DynamicResource ProgressBar.Style.Error}"
+                Value="95" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="自定义 Foreground — 紫色" />
+            <ProgressBar
+                Foreground="#9C27B0"
+                Maximum="100"
+                Value="55" />
+
+            <!--  ========== ④ 不确定动画 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 不确定动画"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="IsIndeterminate=True · 双段扫描" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="不知道总进度时(网络请求、长任务等)用 Indeterminate 模式。两段错位光带循环移动, 模拟 WinUI 3 扫描条效果。完成后切回 false 显示具体进度。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="可切换" />
+            <ProgressBar
+                Margin="0,0,0,12"
+                IsIndeterminate="{Binding IsLoading}"
+                Value="60" />
+            <Grid Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ValueLabelStyle}">
+                    <Run Text="IsIndeterminate =" />
+                    <Run
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="{Binding IsLoading, Mode=OneWay}" />
+                </TextBlock>
+                <Button
+                    Grid.Column="1"
+                    Padding="14,6"
+                    Command="{Binding ToggleLoadingCommand}"
+                    Content="切换" />
+            </Grid>
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="持续运行示例(各状态色)" />
+            <ProgressBar
+                Margin="0,0,0,8"
+                IsIndeterminate="True"
+                Style="{DynamicResource ProgressBar.Style.Success}" />
+            <ProgressBar
+                Margin="0,0,0,8"
+                IsIndeterminate="True"
+                Style="{DynamicResource ProgressBar.Style.Warning}" />
+            <ProgressBar IsIndeterminate="True" Style="{DynamicResource ProgressBar.Style.Error}" />
 
-                    <!--  ① 基础 Determinate  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础进度" Subtitle="Value · Minimum · Maximum">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <!--  ========== ⑤ 实战 · 模拟下载 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 实战 · 模拟下载"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="DispatcherTimer 驱动进度 · 文件下载场景" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="6px 厚度,Value 双向绑定。配合 Slider 调试观察 Indicator 宽度实时变化。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ViewModel 用 DispatcherTimer 模拟下载 — 前期快、接近 100% 时变慢。完成后状态自动切换, 按钮可用性 (CanStartDownload) 联动。" />
 
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="进度值" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Value="{Binding BasicProgress, Mode=OneWay}" />
-                            <Slider
-                                Margin="0,0,0,8"
-                                Maximum="100"
-                                Minimum="0"
-                                Value="{Binding BasicProgress, Mode=TwoWay}" />
-                            <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                <Run Text="BasicProgress =" />
-                                <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding BasicProgress, StringFormat={}{0:F0}%, Mode=OneWay}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </cy:Card>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    FontWeight="Medium"
+                    Foreground="{DynamicResource Foreground.Default}"
+                    Text="installer-2026.05.zip" />
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="12"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="{Binding DownloadProgress, StringFormat={}{0:F1}%, Mode=OneWay}" />
+            </Grid>
 
-                    <!--  ② 带文字  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="带百分比文字" Subtitle="Style=WithText 变体">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <ProgressBar
+                Margin="0,0,0,12"
+                Maximum="100"
+                Value="{Binding DownloadProgress, Mode=OneWay}" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="使用 ProgressBar.Style.WithText 变体,Height 加大到 18px,在中间显示百分比文字。" />
-
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.WithText}"
-                                Value="25" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.WithText}"
-                                Value="65" />
-                            <ProgressBar
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.WithText}"
-                                Value="90" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 状态色变体  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="状态色变体" Subtitle="Success / Warning / Error">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="预定义的语义色变体,直接通过 Style 切换。也可以直接覆盖 Foreground 自定义颜色。" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Success — 任务完成" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.Success}"
-                                Value="100" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Warning — 接近上限" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.Warning}"
-                                Value="85" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Error — 失败 / 超出限制" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Style="{DynamicResource ProgressBar.Style.Error}"
-                                Value="95" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="自定义 Foreground — 紫色" />
-                            <ProgressBar
-                                Foreground="#9C27B0"
-                                Maximum="100"
-                                Value="55" />
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ Indeterminate  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="不确定动画" Subtitle="IsIndeterminate=True 双段扫描">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="不知道总进度时(网络请求、长任务等)用 Indeterminate 模式。两段错位光带循环移动,模拟 WinUI 3 扫描条效果。" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="可切换" />
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                IsIndeterminate="{Binding IsLoading}"
-                                Value="60" />
-
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}">
-                                    <Run Text="IsIndeterminate =" />
-                                    <Run FontWeight="Bold" Foreground="{DynamicResource Foreground.Link}" Text="{Binding IsLoading, Mode=OneWay}" />
-                                </TextBlock>
-                                <Button
-                                    Grid.Column="1"
-                                    Padding="14,6"
-                                    Command="{Binding ToggleLoadingCommand}"
-                                    Content="切换" />
-                            </Grid>
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="持续运行示例" />
-                            <ProgressBar
-                                Margin="0,0,0,8"
-                                IsIndeterminate="True"
-                                Style="{DynamicResource ProgressBar.Style.Success}" />
-                            <ProgressBar
-                                Margin="0,0,0,8"
-                                IsIndeterminate="True"
-                                Style="{DynamicResource ProgressBar.Style.Warning}" />
-                            <ProgressBar IsIndeterminate="True" Style="{DynamicResource ProgressBar.Style.Error}" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ 实战:模拟下载  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="实战:模拟下载" Subtitle="DispatcherTimer 驱动进度">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ViewModel 用 DispatcherTimer 模拟下载——前期快,接近 100% 时变慢。完成后状态自动切换。" />
-
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Text="installer-2026.05.zip" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="{Binding DownloadProgress, StringFormat={}{0:F1}%, Mode=OneWay}" />
-                            </Grid>
-
-                            <ProgressBar
-                                Margin="0,0,0,12"
-                                Maximum="100"
-                                Value="{Binding DownloadProgress, Mode=OneWay}" />
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="{Binding DownloadStatus}" />
-                                <StackPanel
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                                    <Button
-                                        Padding="14,6"
-                                        Command="{Binding StartDownloadCommand}"
-                                        Content="开始下载"
-                                        IsEnabled="{Binding CanStartDownload}" />
-                                    <Button
-                                        Margin="8,0,0,0"
-                                        Padding="14,6"
-                                        Command="{Binding ResetDownloadCommand}"
-                                        Content="重置" />
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ 任务列表 + 垂直  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="任务列表 + 垂直" Subtitle="多任务并列 / Vertical 方向">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="任务列表" />
-                            <Grid Margin="0,0,0,16">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.Row="0" Margin="0,0,0,10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="40" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="代码编译" />
-                                    <ProgressBar
-                                        Grid.Column="1"
-                                        Margin="0,0,12,0"
-                                        Style="{DynamicResource ProgressBar.Style.Success}"
-                                        Value="{Binding TaskProgress1, Mode=OneWay}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Consolas"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="{Binding TaskProgress1, StringFormat={}{0:F0}%}" />
-                                </Grid>
-
-                                <Grid Grid.Row="1" Margin="0,0,0,10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="40" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="单元测试" />
-                                    <ProgressBar
-                                        Grid.Column="1"
-                                        Margin="0,0,12,0"
-                                        Value="{Binding TaskProgress2, Mode=OneWay}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Consolas"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="{Binding TaskProgress2, StringFormat={}{0:F0}%}" />
-                                </Grid>
-
-                                <Grid Grid.Row="2" Margin="0,0,0,10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="40" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="代码扫描" />
-                                    <ProgressBar
-                                        Grid.Column="1"
-                                        Margin="0,0,12,0"
-                                        IsIndeterminate="True" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Consolas"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="..." />
-                                </Grid>
-
-                                <Grid Grid.Row="3">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="40" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="部署" />
-                                    <ProgressBar
-                                        Grid.Column="1"
-                                        Margin="0,0,12,0"
-                                        Value="{Binding TaskProgress4, Mode=OneWay}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Consolas"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="{Binding TaskProgress4, StringFormat={}{0:F0}%}" />
-                                </Grid>
-                            </Grid>
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="垂直方向 — Orientation=Vertical" />
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                <StackPanel Margin="0,0,16,0">
-                                    <ProgressBar
-                                        Width="6"
-                                        Height="100"
-                                        Orientation="Vertical"
-                                        Value="30" />
-                                    <TextBlock
-                                        Margin="0,8,0,0"
-                                        HorizontalAlignment="Center"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="30%" />
-                                </StackPanel>
-                                <StackPanel Margin="0,0,16,0">
-                                    <ProgressBar
-                                        Width="6"
-                                        Height="100"
-                                        Orientation="Vertical"
-                                        Style="{DynamicResource ProgressBar.Style.Success}"
-                                        Value="75" />
-                                    <TextBlock
-                                        Margin="0,8,0,0"
-                                        HorizontalAlignment="Center"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="75%" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <ProgressBar
-                                        Width="6"
-                                        Height="100"
-                                        Orientation="Vertical"
-                                        Style="{DynamicResource ProgressBar.Style.Warning}"
-                                        Value="60" />
-                                    <TextBlock
-                                        Margin="0,8,0,0"
-                                        HorizontalAlignment="Center"
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="60%" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{DynamicResource Foreground.Link}"
+                    Text="{Binding DownloadStatus}" />
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Padding="14,6"
+                        Command="{Binding StartDownloadCommand}"
+                        Content="开始下载"
+                        IsEnabled="{Binding CanStartDownload}" />
+                    <Button
+                        Margin="8,0,0,0"
+                        Padding="14,6"
+                        Command="{Binding ResetDownloadCommand}"
+                        Content="重置" />
                 </StackPanel>
             </Grid>
 
-            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
+            <!--  ========== ⑥ 任务列表 + 垂直方向 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 任务列表 + 垂直方向"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="多任务并列 · Orientation=Vertical" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="多任务场景下并列展示进度条; 第三行任务用 Indeterminate 表示进度未知。垂直方向通过 Orientation=Vertical, Indicator 从底向顶。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="任务列表" />
+            <Grid Margin="0,0,0,20">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="ProgressBar 主要属性 + Style 变体">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
-
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性 / Style" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型 (默认)" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Value" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0)" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前进度值。WPF 框架根据 (Value-Min)/(Max-Min) 计算 Indicator 宽度。" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Minimum / Maximum" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0 / 100)" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数值范围。默认 Maximum=100,跟 Slider 不同(Slider 默认 10)。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsIndeterminate" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (false)" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="True 时切换为扫描动画,Value 失效。完成后切回 false 显示具体进度。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Orientation" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Orientation (Horizontal)" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Horizontal / Vertical。Vertical 通过 LayoutTransform 旋转 -90°,Indicator 从底向顶。" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Background / Foreground" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Background 是轨道底色 (默认 Background.Inactive),Foreground 是 Indicator 填充色 (默认 Background.Selected)。" />
-
-                            <Border
-                                Grid.Row="6"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="Style 变体" />
-
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.Basic" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="默认隐式样式 — 6px 主色填充,无文字。" />
-
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.WithText" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="18px 厚度,中心显示百分比文字。" />
-
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.Success / Warning / Error" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="状态色变体,继承 Basic,仅覆盖 Foreground 为 Background.Success / Warning / Error。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="0" Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
+                        <ColumnDefinition Width="40" />
                     </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="代码编译" />
+                    <ProgressBar
+                        Grid.Column="1"
+                        Margin="0,0,12,0"
+                        Style="{DynamicResource ProgressBar.Style.Success}"
+                        Value="{Binding TaskProgress1, Mode=OneWay}" />
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="{Binding TaskProgress1, StringFormat={}{0:F0}%}" />
+                </Grid>
 
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 基础确定进度 -->
-<ProgressBar
-    Maximum="100"
-    Value="{Binding DownloadProgress}" />
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="40" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="单元测试" />
+                    <ProgressBar
+                        Grid.Column="1"
+                        Margin="0,0,12,0"
+                        Value="{Binding TaskProgress2, Mode=OneWay}" />
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="{Binding TaskProgress2, StringFormat={}{0:F0}%}" />
+                </Grid>
 
-<!-- 带百分比文字 -->
-<ProgressBar
-    Style="{StaticResource ProgressBar.Style.WithText}"
-    Maximum="100"
-    Value="65" />
+                <Grid Grid.Row="2" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="40" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="代码扫描" />
+                    <ProgressBar
+                        Grid.Column="1"
+                        Margin="0,0,12,0"
+                        IsIndeterminate="True" />
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="..." />
+                </Grid>
 
-<!-- 状态色变体 -->
-<ProgressBar
-    Style="{StaticResource ProgressBar.Style.Success}"
-    Value="100" />
-
-<!-- 不确定动画 -->
-<ProgressBar IsIndeterminate="True" />
-
-<!-- 切换确定 / 不确定 -->
-<ProgressBar
-    IsIndeterminate="{Binding IsLoading}"
-    Value="{Binding Progress}" />
-
-<!-- 垂直 -->
-<ProgressBar
-    Orientation="Vertical"
-    Width="6"
-    Height="100"
-    Value="75" />
-
-<!-- 自定义颜色 -->
-<ProgressBar
-    Foreground="#9C27B0"
-    Value="55" />]]>
-                        </TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="无圆角 6px Track" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="对齐项目 Win10 视觉规约,纤细不抢戏"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="双段扫描" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Indeterminate 用 TranslateTransform 真实平移,WinUI 3 扫描条视觉"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="状态色变体" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Success / Warning / Error 三个预制 Style,直接切换即得语义色"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="按需运行动画" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="仅 IsIndeterminate=True 时启动 Storyboard,Determinate 模式 0 CPU 消耗"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="40" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="部署" />
+                    <ProgressBar
+                        Grid.Column="1"
+                        Margin="0,0,12,0"
+                        Value="{Binding TaskProgress4, Mode=OneWay}" />
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="{Binding TaskProgress4, StringFormat={}{0:F0}%}" />
                 </Grid>
             </Grid>
-        </Grid>
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="垂直方向 — Orientation=Vertical" />
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <StackPanel Margin="0,0,16,0">
+                    <ProgressBar
+                        Width="6"
+                        Height="100"
+                        Orientation="Vertical"
+                        Value="30" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="30%" />
+                </StackPanel>
+                <StackPanel Margin="0,0,16,0">
+                    <ProgressBar
+                        Width="6"
+                        Height="100"
+                        Orientation="Vertical"
+                        Style="{DynamicResource ProgressBar.Style.Success}"
+                        Value="75" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="75%" />
+                </StackPanel>
+                <StackPanel>
+                    <ProgressBar
+                        Width="6"
+                        Height="100"
+                        Orientation="Vertical"
+                        Style="{DynamicResource ProgressBar.Style.Warning}"
+                        Value="60" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="60%" />
+                </StackPanel>
+            </StackPanel>
+
+            <!--  ========== ⑦ 主要 API + Style 变体 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 主要 API + Style 变体"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="原生 ProgressBar 成员 + Cyclone 主题变体" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性 / Style" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型 (默认)" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Value" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0)" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前进度值。WPF 框架根据 (Value − Min) / (Max − Min) 计算 Indicator 宽度。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Minimum / Maximum" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0 / 100)" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数值范围。默认 Maximum=100, 与 Slider 默认 10 不同。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsIndeterminate" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (false)" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="True 时切换为扫描动画, Value 失效。完成后切回 false 显示具体进度。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Orientation" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (Horizontal)" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Horizontal / Vertical。Vertical 通过 LayoutTransform 旋转 -90°, Indicator 从底向顶。" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Background / Foreground" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Background 是轨道底色 (Background.Inactive), Foreground 是 Indicator 填充色 (Background.Selected)。" />
+
+                    <Border
+                        Grid.Row="6"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="Style 变体" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.Basic" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="默认隐式样式 — 6px 主色填充, 无文字。" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.WithText" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
+                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="18px 厚度, 中心显示百分比文字。" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ProgressBar.Style.Success / Warning / Error" />
+                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
+                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="状态色变体, 继承 Basic, 仅覆盖 Foreground 为 Background.Success / Warning / Error。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑧ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="ProgressBar 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="基于原生 ProgressBar 的隐式样式" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="不引入新 DP, 完全复用 WPF ProgressBar 的 Value / IsIndeterminate / Orientation。VisualState 改写实现现代主题"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="状态色 = 仅覆盖 Foreground" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Success / Warning / Error 三个变体都继承 Basic 并通过 Setter 覆盖 Foreground, 业务侧也可以直接 Foreground={Binding} 自定义"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Indeterminate 双段错位扫描" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="两段光带按不同节奏循环移动, 视觉节奏对齐 WinUI 3。Value 被忽略不会引起误读"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Vertical 模板自动调整" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Orientation=Vertical 时模板 LayoutTransform 旋转 -90°, Indicator 自底向顶, 视觉与 iOS 风格一致"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

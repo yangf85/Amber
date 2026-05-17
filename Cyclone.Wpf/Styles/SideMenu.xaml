@@ -13,11 +13,11 @@
     - PART_HeaderRoot 提供给代码侧绑事件——使 Header 内的可交互子控件 (Button、Hyperlink) 不受影响
     
     SideMenuItem 模板列结构:
-      ① 选中竖条指示器 (6px 列, 内含 3x16 pill)
-      ② 缩进留白 (绑定 Indent = Level * SideMenu.Indent)
-      ③ Icon (Auto)
-      ④ Header (*)
-      ⑤ 展开箭头 (Auto)
+    ① 选中竖条指示器 (6px 列, 内含 3x16 pill)
+    ② 缩进留白 (绑定 Indent = Level * SideMenu.Indent)
+    ③ Icon (Auto)
+    ④ Header (*)
+    ⑤ 展开箭头 (Auto)
     ============================================================================
 -->
 <ResourceDictionary

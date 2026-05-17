@@ -1,127 +1,160 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Cyclone.Wpf.Controls;
-using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Windows.Controls;
+
+// 消歧义:System.Windows.Controls.ValidationResult 与 System.ComponentModel.DataAnnotations.ValidationResult 同名,
+// CustomValidation 用的是后者
+using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace Cyclone.Wpf.Demo.Views;
 
-/// <summary>
-/// InputView.xaml 的交互逻辑
-/// </summary>
 public partial class PasswordBoxSample : UserControl
 {
     public PasswordBoxSample()
     {
         InitializeComponent();
-        DataContext = new InputViewModel();
+        DataContext = new PasswordBoxViewModel();
     }
 }
 
-public partial class InputViewModel : ObservableValidator
+public partial class PasswordBoxViewModel : ObservableValidator
 {
-    public InputViewModel()
-    {
-        this.ErrorsChanged += (s, e) => OnPropertyChanged(nameof(IsValid));
-    }
-
-    #region 基础属性
-
+    // 密码 — MinLength 验证(空字符串合法,以保证初始无错误状态;输入但短于 8 位报错)
     [ObservableProperty]
-    public partial string ApiKey { get; set; } = "sk-1234567890abcdef";
+    [NotifyDataErrorInfo]
+    [MinLength(8, ErrorMessage = "密码至少 8 位")]
+    public partial string Password { get; set; } = "";
 
+    // 确认密码 — 用 [CustomValidation] 引用静态验证方法,做跨字段比较。
+    // Password 变化时通过 OnPasswordChanged 手动触发本属性的重新校验。
     [ObservableProperty]
-    public partial string ConfigPath { get; set; } = @"C:\Config\app.json";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPasswordMatch))]
+    [NotifyDataErrorInfo]
+    [CustomValidation(typeof(PasswordBoxViewModel), nameof(ValidateConfirmPassword))]
     public partial string ConfirmPassword { get; set; } = "";
 
     [ObservableProperty]
-    public partial string EditableDescription { get; set; } = "描述";
+    public partial string LoginAccount { get; set; } = "";
 
     [ObservableProperty]
-    public partial string EditableQuantity { get; set; } = "数量: 10";
+    public partial string LoginPassword { get; set; } = "";
 
     [ObservableProperty]
-    public partial string EditableTitle { get; set; } = "标题";
+    public partial string LastEvent { get; set; } = "(尚未输入)";
 
     [ObservableProperty]
-    public partial string HighlightText { get; set; } = "这是一段演示文本高亮功能的内容。The quick brown fox jumps over the lazy dog. 支持中英文搜索高亮显示。";
+    public partial bool IsBusy { get; set; }
 
-    [ObservableProperty]
-    public partial string MultilineText { get; set; } = "这是多行文本\n可以换行输入";
+    public bool CanInteract => !IsBusy;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalValue))]
-    public partial double NumberDouble { get; set; } = 10.5;
+    public int PasswordLength => Password?.Length ?? 0;
 
-    [NotifyDataErrorInfo]
-    [ObservableProperty]
-    [Range(1, 100, ErrorMessage = "数量必须在1-100之间")]
-    [NotifyPropertyChangedFor(nameof(TotalValue))]
-    public partial int NumberInt { get; set; } = 100;
+    public string PasswordStrength => GetStrength(Password);
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPasswordMatch))]
-    public partial string Password { get; set; } = "";
-
-    [ObservableProperty]
-    public partial double Percentage { get; set; } = 75.0;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalValue))]
-    public partial double Price { get; set; } = 299.99;
-
-    [ObservableProperty]
-    public partial string SearchText { get; set; } = "";
-
-    [ObservableProperty]
-    [Required(ErrorMessage = "文本不能为空")]
-    [NotifyDataErrorInfo]
-    [NotifyPropertyChangedFor(nameof(TextLength))]
-    public partial string Text { get; set; } = "";
-
-    #endregion 基础属性
-
-    #region 计算属性
-
-    /// <summary>
-    /// 密码匹配
-    /// </summary>
-    public bool IsPasswordMatch => !string.IsNullOrEmpty(Password) && Password == ConfirmPassword;
-
-    /// <summary>
-    /// 验证状态
-    /// </summary>
-    public bool IsValid => !HasErrors && !string.IsNullOrWhiteSpace(Text);
-
-    /// <summary>
-    /// 文本长度
-    /// </summary>
-    public int TextLength => Text?.Length ?? 0;
-
-    /// <summary>
-    /// 总价值
-    /// </summary>
-    public double TotalValue => Price + NumberDouble + NumberInt;
-
-    #endregion 计算属性
-
-    #region 命令
-
-    [RelayCommand]
-    private void ShowPassword()
+    private static string GetStrength(string pwd)
     {
-        if (string.IsNullOrEmpty(Password))
+        if (string.IsNullOrEmpty(pwd))
         {
-            NotificationService.Instance.Warning("密码为空");
-            return;
+            return "—";
         }
-
-        NotificationService.Instance.Information($"当前密码: {Password}");
+        int score = 0;
+        if (pwd.Length >= 8)
+        {
+            score++;
+        }
+        if (pwd.Any(char.IsUpper) && pwd.Any(char.IsLower))
+        {
+            score++;
+        }
+        if (pwd.Any(char.IsDigit))
+        {
+            score++;
+        }
+        if (pwd.Any(c => !char.IsLetterOrDigit(c)))
+        {
+            score++;
+        }
+        return score switch
+        {
+            <= 1 => "弱",
+            2 => "中",
+            _ => "强",
+        };
     }
 
-    #endregion 命令
+    partial void OnIsBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanInteract));
+    }
+
+    partial void OnPasswordChanged(string value)
+    {
+        OnPropertyChanged(nameof(PasswordLength));
+        OnPropertyChanged(nameof(PasswordStrength));
+        LastEvent = $"Password → 长度 {value?.Length ?? 0}";
+
+        // Password 一变,ConfirmPassword 的校验结果可能跟着失效(原本相等的现在可能不等了),
+        // 手动触发其重新校验
+        if (!string.IsNullOrEmpty(ConfirmPassword))
+        {
+            ValidateProperty(ConfirmPassword, nameof(ConfirmPassword));
+        }
+    }
+
+    partial void OnConfirmPasswordChanged(string value)
+    {
+        LastEvent = $"Confirm → 长度 {value?.Length ?? 0}";
+    }
+
+    partial void OnLoginPasswordChanged(string value)
+    {
+        LastEvent = $"LoginPwd → 长度 {value?.Length ?? 0}";
+    }
+
+    [RelayCommand]
+    private void Login()
+    {
+        if (string.IsNullOrEmpty(LoginAccount) || string.IsNullOrEmpty(LoginPassword))
+        {
+            LastEvent = "[登录] 账号或密码为空";
+            return;
+        }
+        LastEvent = $"[登录] {LoginAccount} 用 {LoginPassword.Length} 位密码尝试登录";
+    }
+
+    [RelayCommand]
+    private void ToggleBusy()
+    {
+        IsBusy = !IsBusy;
+    }
+
+    [RelayCommand]
+    private void Reset()
+    {
+        Password = "";
+        ConfirmPassword = "";
+        LoginAccount = "";
+        LoginPassword = "";
+        LastEvent = "(已重置)";
+        ClearErrors();
+    }
+
+    /// <summary>
+    /// ConfirmPassword 的跨字段验证 — CustomValidationAttribute 调用此静态方法。
+    /// 空值视为合法(避免初始空状态报错),非空时与当前 Password 做比较。
+    /// </summary>
+    public static ValidationResult ValidateConfirmPassword(string value, ValidationContext context)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return ValidationResult.Success;
+        }
+        var vm = (PasswordBoxViewModel)context.ObjectInstance;
+        if (value != vm.Password)
+        {
+            return new ValidationResult("两次输入的密码不一致");
+        }
+        return ValidationResult.Success;
+    }
 }

@@ -37,17 +37,23 @@
                         Height="24"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
+                        SnapsToDevicePixels="True"
                         Stroke="{DynamicResource Border.Focused}"
-                        StrokeThickness="2"
-                        SnapsToDevicePixels="True" />
+                        StrokeThickness="2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <ControlTemplate x:Key="RadioButton.ControlTemplate.Basic" TargetType="{x:Type RadioButton}">
-        <StackPanel Background="Transparent" Orientation="Horizontal" SnapsToDevicePixels="True">
-            <Grid Width="18" Height="18" VerticalAlignment="Center">
+        <StackPanel
+            Background="Transparent"
+            Orientation="Horizontal"
+            SnapsToDevicePixels="True">
+            <Grid
+                Width="18"
+                Height="18"
+                VerticalAlignment="Center">
                 <!--  Outer — 外圈圆,Checked 时变主色实心  -->
                 <Ellipse
                     x:Name="OuterEllipse"

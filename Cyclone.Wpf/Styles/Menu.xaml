@@ -1,7 +1,7 @@
 <!--
     ============================================================================
     Menu 样式 (WinUI 3 风格 · 无圆角)
-
+    
     修复:
     - 硬编码颜色全部移除——Separator/SubmenuItem 的 Background="White"、
     滚动箭头的 #FF212121、disabled+highlighted 的 #0A000000 / #21000000
@@ -11,7 +11,7 @@
     - 删除冗余的 BorderHelper(跟 TemplateRoot 完全重叠,无视觉差异)
     - 删除 Office 2003 风格的图标区竖线分隔条
     - InputGestureText 改用 Foreground.Caption (替代 Opacity=0.7)
-
+    
     保留 ComponentResourceKey 和 MenuItem.SeparatorStyleKey 不变——
     WPF 框架按这些 key 查模板,改了会崩。
     ============================================================================

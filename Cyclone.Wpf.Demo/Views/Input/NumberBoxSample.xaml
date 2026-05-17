@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.NumberBoxSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,48 +6,54 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="2000"
-    d:DesignWidth="1400"
+    d:DesignHeight="2800"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--  ============ 章节编号小圆圈 ============  -->
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 TextBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <!--  ============ 演示项标题（每个 NumberBox 上方那条小标题） ============  -->
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
-        <Style x:Key="DemoItemSubtitleStyle" TargetType="{x:Type TextBlock}">
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <!--  ============ 属性表的列样式 ============  -->
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Padding" Value="12,10" />
         </Style>
-
         <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
@@ -55,59 +61,45 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
-
-        <Style x:Key="PropTableNameStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PropTableCellStyle}">
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
         </Style>
-
-        <Style x:Key="PropTableTypeStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PropTableCellStyle}">
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
-        </Style>
-
-        <!--  ============ 代码块样式 ============  -->
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <!--  Header  -->
-                <RowDefinition Height="Auto" />
-                <!--  主体两列  -->
-                <RowDefinition Height="Auto" />
-                <!--  Tip  -->
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
-                        Background="{DynamicResource Background.Info}"
-                        CornerRadius="0">
+                        Background="{DynamicResource Background.Info}">
                         <Path
                             Width="28"
                             Height="28"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M2,12 L22,12 M7,7 L17,7 M9,17 L15,17"
-                            Stroke="{DynamicResource Foreground.Link}"
-                            StrokeStartLineCap="Round"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
                             StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
                             StrokeThickness="2.5" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -121,594 +113,520 @@
                                 Margin="12,4,0,0"
                                 Padding="10,4"
                                 VerticalAlignment="Center"
-                                Background="{DynamicResource Background.Info}"
-                                CornerRadius="0">
+                                Background="{DynamicResource Background.Info}">
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="继承 RangeBase" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="带步进按钮的数字输入框，支持整数/小数模式、前后缀、键盘步进、滚轮调节、横竖向布局，常用于表单字段、设置项、参数配置等场景。" />
+                            Text="带步进按钮的数字输入框, 支持整数 / 小数模式、前后缀、键盘 ↑↓ 与 PgUp/PgDn 步进、滚轮调节、横竖向布局。常用于表单字段、设置项、参数配置等场景。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体：两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== ① 基础用法 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础用法"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Minimum · Maximum · Value 三件套" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="设置 Minimum / Maximum 限制范围, Value 是当前值。右侧实时显示 NumberBox 的属性状态, 用鼠标滚轮、键盘 ↑↓、或步进按钮调整。" />
+
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
                 </Grid.ColumnDefinitions>
-
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  ① 基础用法  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础用法">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="200" />
-                                </Grid.ColumnDefinitions>
-                                <cy:NumberBox
-                                    x:Name="BasicNumberBox"
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Maximum="100"
-                                    Minimum="0"
-                                    Value="42" />
-                                <Border
-                                    Grid.Column="1"
-                                    Margin="20,0,0,0"
-                                    Padding="14,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    CornerRadius="0">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock
-                                                Width="80"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="Minimum:" />
-                                            <TextBlock
-                                                FontFamily="Consolas"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Default}"
-                                                Text="{Binding Minimum, ElementName=BasicNumberBox}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                            <TextBlock
-                                                Width="80"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="Maximum:" />
-                                            <TextBlock
-                                                FontFamily="Consolas"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Default}"
-                                                Text="{Binding Maximum, ElementName=BasicNumberBox}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                            <TextBlock
-                                                Width="80"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="Value:" />
-                                            <TextBlock
-                                                FontFamily="Consolas"
-                                                FontSize="12"
-                                                FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground.Link}"
-                                                Text="{Binding Value, ElementName=BasicNumberBox}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
+                <cy:NumberBox
+                    x:Name="BasicNumberBox"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="42" />
+                <Border
+                    Grid.Column="1"
+                    Margin="20,0,0,0"
+                    Padding="14,10"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                Width="76"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Minimum:" />
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="{Binding Minimum, ElementName=BasicNumberBox}" />
                         </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 其他样式示例  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="其他样式示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <!--  整数模式  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="整数模式 (NumberMode = Integer)" />
-                                <cy:NumberBox
-                                    Maximum="999"
-                                    Minimum="0"
-                                    NumberMode="Integer"
-                                    SmallChange="1"
-                                    Value="25" />
-                            </StackPanel>
-
-                            <!--  小数 + 自定义位数  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="小数模式 (DecimalPlaces = 4，SmallChange = 0.001)" />
-                                <cy:NumberBox
-                                    DecimalPlaces="4"
-                                    Maximum="10"
-                                    Minimum="-10"
-                                    SmallChange="0.001"
-                                    Value="3.1415" />
-                            </StackPanel>
-
-                            <!--  前缀（货币）  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="前缀 (Prefix = ¥)" />
-                                <cy:NumberBox
-                                    DecimalPlaces="2"
-                                    Maximum="100000"
-                                    Minimum="0"
-                                    Prefix="¥"
-                                    SmallChange="10"
-                                    Value="299.00" />
-                            </StackPanel>
-
-                            <!--  后缀（百分比）  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="后缀 (Suffix = %)" />
-                                <cy:NumberBox
-                                    DecimalPlaces="0"
-                                    Maximum="100"
-                                    Minimum="0"
-                                    NumberMode="Integer"
-                                    Suffix="%"
-                                    Value="80" />
-                            </StackPanel>
-
-                            <!--  横向布局  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="横向布局 (SpinButtonOrientation = Horizontal)" />
-                                <cy:NumberBox
-                                    Maximum="100"
-                                    Minimum="0"
-                                    SpinButtonOrientation="Horizontal"
-                                    Value="50" />
-                            </StackPanel>
-
-                            <!--  Clear 按钮  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="清空按钮 (IsClearButtonVisible = True)" />
-                                <cy:NumberBox
-                                    IsClearButtonVisible="True"
-                                    Maximum="1000"
-                                    Minimum="-100"
-                                    Value="42" />
-                            </StackPanel>
-
-                            <!--  隐藏 Spin  -->
-                            <StackPanel Margin="0,0,0,16">
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="隐藏步进按钮 (IsSpinButtonVisible = False)" />
-                                <cy:NumberBox
-                                    IsSpinButtonVisible="False"
-                                    Maximum="100"
-                                    Minimum="0"
-                                    Value="60" />
-                            </StackPanel>
-
-                            <!--  只读  -->
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="只读 (IsReadOnly = True)" />
-                                <cy:NumberBox
-                                    IsReadOnly="True"
-                                    Maximum="100"
-                                    Minimum="0"
-                                    Value="33" />
-                            </StackPanel>
+                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                Width="76"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Maximum:" />
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="{Binding Maximum, ElementName=BasicNumberBox}" />
                         </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 常见使用场景  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="常见使用场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <UniformGrid Columns="4" Rows="1">
-                                <UniformGrid.Resources>
-                                    <Style TargetType="{x:Type cy:Card}">
-                                        <Setter Property="Margin" Value="6,0" />
-                                    </Style>
-                                </UniformGrid.Resources>
-
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M4,6 L20,6 L14,12 L14,19 L10,17 L10,12 Z"
-                                            Stroke="{DynamicResource Foreground.Link}"
-                                            StrokeLineJoin="Round"
-                                            StrokeThickness="2" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="表单字段" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="年龄、数量、库存等结构化字段输入"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M12,2 L12,22 M5,8 L19,8 M5,16 L19,16"
-                                            Stroke="{DynamicResource Foreground.Success}"
-                                            StrokeStartLineCap="Round"
-                                            StrokeEndLineCap="Round"
-                                            StrokeThickness="2" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="价格输入" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="货币、价格、金额等带前缀的小数输入"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M3,12 L8,12 L10,7 L14,17 L16,12 L21,12"
-                                            Stroke="{DynamicResource Foreground.Warning}"
-                                            StrokeLineJoin="Round"
-                                            StrokeStartLineCap="Round"
-                                            StrokeEndLineCap="Round"
-                                            StrokeThickness="2" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="百分比配置" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="阈值、占比、比率等带后缀的整数输入"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                                <cy:Card>
-                                    <StackPanel>
-                                        <Path
-                                            Width="22"
-                                            Height="22"
-                                            HorizontalAlignment="Left"
-                                            Data="M3,7 L21,7 M3,12 L17,12 M3,17 L21,17 M14,5 L14,9 M8,10 L8,14 M18,15 L18,19"
-                                            Stroke="#8B5CF6"
-                                            StrokeStartLineCap="Round"
-                                            StrokeEndLineCap="Round"
-                                            StrokeThickness="2" />
-                                        <TextBlock
-                                            Margin="0,10,0,0"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="设置项" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="超时秒数、缓存大小、并发数等系统配置"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:Card>
-                            </UniformGrid>
+                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                Width="76"
+                                FontSize="12"
+                                Foreground="{DynamicResource Foreground.Caption}"
+                                Text="Value:" />
+                            <TextBlock
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding Value, ElementName=BasicNumberBox}" />
                         </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ 主要属性  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="主要属性">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <StackPanel>
-
-                            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1" CornerRadius="0">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="2*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <!--  Header  -->
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <!--  Header 行背景  -->
-                                    <Border
-                                        Grid.Row="0"
-                                        Grid.ColumnSpan="4"
-                                        Background="{DynamicResource Background.Header}"
-                                        CornerRadius="0" />
-
-                                    <!--  Header  -->
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="属性" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="类型" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="2"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="默认值" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PropTableHeaderStyle}"
-                                        Text="说明" />
-
-                                    <!--  分隔线  -->
-                                    <Border
-                                        Grid.Row="0"
-                                        Grid.ColumnSpan="4"
-                                        VerticalAlignment="Bottom"
-                                        Background="{DynamicResource Border.Default}"
-                                        Height="1" />
-
-                                    <!--  Value  -->
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Value" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="0" />
-                                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="当前数值" />
-
-                                    <!--  Minimum  -->
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Minimum" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="MinValue" />
-                                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="允许的最小值" />
-
-                                    <!--  Maximum  -->
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Maximum" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="MaxValue" />
-                                    <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="允许的最大值" />
-
-                                    <!--  SmallChange  -->
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SmallChange" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="1" />
-                                    <TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="±按钮 / Up·Down 步长" />
-
-                                    <!--  LargeChange  -->
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LargeChange" />
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="10" />
-                                    <TextBlock Grid.Row="5" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="PgUp / PgDn 步长" />
-
-                                    <!--  DecimalPlaces  -->
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DecimalPlaces" />
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int" />
-                                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="2" />
-                                    <TextBlock Grid.Row="6" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="允许的小数位数" />
-
-                                    <!--  NumberMode  -->
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="NumberMode" />
-                                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
-                                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="Decimal" />
-                                    <TextBlock Grid.Row="7" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="Integer / Decimal" />
-
-                                    <!--  Prefix  -->
-                                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Prefix" />
-                                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
-                                    <TextBlock Grid.Row="8" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="输入框前缀（如 ¥）" />
-
-                                    <!--  Suffix  -->
-                                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Suffix" />
-                                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="null" />
-                                    <TextBlock Grid.Row="9" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="输入框后缀（如 %）" />
-
-                                    <!--  SpinButtonOrientation  -->
-                                    <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SpinButtonOrientation" />
-                                    <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum" />
-                                    <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="Vertical" />
-                                    <TextBlock Grid.Row="10" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="步进按钮方向" />
-
-                                    <!--  IsReadOnly  -->
-                                    <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsReadOnly" />
-                                    <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                                    <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableTypeStyle}" Text="False" />
-                                    <TextBlock Grid.Row="11" Grid.Column="3" Style="{StaticResource PropTableCellStyle}" Text="是否只读" />
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ XAML 示例 + ⑥ 事件 (并排)  -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="240" />
-                        </Grid.ColumnDefinitions>
-
-                        <!--  ⑤ XAML 示例  -->
-                        <cy:Card Grid.Column="0">
-                            <cy:Card.Header>
-                                <cy:CardHeader Title="XAML 示例">
-                                    <cy:CardHeader.Icon>
-                                        <Border Style="{StaticResource SectionNumberStyle}">
-                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                        </Border>
-                                    </cy:CardHeader.Icon>
-                                </cy:CardHeader>
-                            </cy:Card.Header>
-                            <StackPanel>
-                                <TextBox
-                                    AcceptsReturn="True"
-                                    Style="{StaticResource CodeBlockStyle}">
-                                    <![CDATA[<cy:NumberBox
-    Minimum="0"
-    Maximum="100000"
-    Value="299.00"
-    DecimalPlaces="2"
-    SmallChange="10"
-    Prefix="¥"
-    Suffix="USD"
-    SpinButtonOrientation="Vertical"
-    IsClearButtonVisible="True" />]]>
-                                </TextBox>
-                            </StackPanel>
-                        </cy:Card>
-
-                        <!--  ⑥ 事件  -->
-                        <cy:Card Grid.Column="2">
-                            <cy:Card.Header>
-                                <cy:CardHeader Title="事件">
-                                    <cy:CardHeader.Icon>
-                                        <Border Style="{StaticResource SectionNumberStyle}">
-                                            <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                        </Border>
-                                    </cy:CardHeader.Icon>
-                                </cy:CardHeader>
-                            </cy:Card.Header>
-                            <StackPanel>
-
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="ValueChanged" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="Value 发生变化时触发（继承自 RangeBase 的路由事件）"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <TextBlock
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Placeholder}"
-                                    Text="提示：用户输入过程中不会触发；失焦或按 Enter 时统一结算。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </cy:Card>
-                    </Grid>
-                </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
 
-            <!--  ============ 底部 Tip ============  -->
-            <Border
-                Grid.Row="2"
-                Margin="0,20,0,0"
-                Padding="16,12"
-                Background="{DynamicResource Background.Info}"
-                BorderBrush="{DynamicResource Border.Info}"
-                BorderThickness="1"
-                CornerRadius="0">
-                <StackPanel Orientation="Horizontal">
+            <!--  ========== ② 数字模式与精度 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 数字模式与精度"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="NumberMode · DecimalPlaces · SmallChange" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="NumberMode 切换 Integer / Decimal 模式。Decimal 模式下 DecimalPlaces 控制显示精度, SmallChange 控制步长。键盘 ↑↓ 与 ± 按钮按 SmallChange 增减, PgUp/PgDn 按 LargeChange 增减。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="整数模式(NumberMode = Integer)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                Maximum="999"
+                Minimum="0"
+                NumberMode="Integer"
+                SmallChange="1"
+                Value="25" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="小数模式(DecimalPlaces = 4, SmallChange = 0.001)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                DecimalPlaces="4"
+                Maximum="10"
+                Minimum="-10"
+                SmallChange="0.001"
+                Value="3.1415" />
+
+            <!--  ========== ③ 前后缀 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 前后缀"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Prefix · Suffix" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Prefix / Suffix 接受任意 object, 字符串、图标、任何 UIElement 都可以。用于货币、百分比、单位等场景, 视觉上紧贴输入区, 不占字符位置。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="前缀(货币 ¥)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                DecimalPlaces="2"
+                Maximum="100000"
+                Minimum="0"
+                Prefix="¥"
+                SmallChange="10"
+                Value="299.00" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="后缀(百分比 %)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                Maximum="100"
+                Minimum="0"
+                NumberMode="Integer"
+                Suffix="%"
+                Value="80" />
+
+            <!--  ========== ④ 步进按钮与清除 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 步进按钮与清除"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SpinButtonOrientation · IsSpinButtonVisible · IsClearButtonVisible" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="SpinButtonOrientation 切换 ± 按钮的横竖向。IsSpinButtonVisible=False 完全隐藏步进按钮, 留给纯键盘 / 滚轮交互。IsClearButtonVisible=True 显示清除按钮, 一键归零。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="横向布局(SpinButtonOrientation = Horizontal)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                Maximum="100"
+                Minimum="0"
+                SpinButtonOrientation="Horizontal"
+                Value="50" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="隐藏步进按钮(IsSpinButtonVisible = False)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                IsSpinButtonVisible="False"
+                Maximum="100"
+                Minimum="0"
+                Value="60" />
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="清除按钮(IsClearButtonVisible = True)" />
+            <cy:NumberBox
+                Width="320"
+                HorizontalAlignment="Left"
+                IsClearButtonVisible="True"
+                Maximum="1000"
+                Minimum="-100"
+                Value="42" />
+
+            <!--  ========== ⑤ 状态对比 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 状态对比"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Normal / ReadOnly / Disabled" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ReadOnly 仅禁止编辑, 步进按钮也禁用, 仍可聚焦 / 复制; Disabled 是完全禁用, 走 Disabled token 组置灰。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="Normal" />
+                <cy:NumberBox
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,8,0"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="33" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="8,0,8,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="ReadOnly" />
+                <cy:NumberBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="8,0,8,0"
+                    IsReadOnly="True"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="33" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Margin="8,0,0,6"
+                    FontSize="11"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="Disabled" />
+                <cy:NumberBox
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    IsEnabled="False"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="33" />
+            </Grid>
+
+            <!--  ========== ⑥ 实战场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 实战场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="表单字段 / 价格 / 百分比 / 设置项" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,4,8"
+                    Padding="14"
+                    Background="{DynamicResource Background.Container}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground.Default}" Text="表单字段 — 年龄" />
+                        <TextBlock Margin="0,6,0,12" FontSize="12" Foreground="{DynamicResource Foreground.Caption}" Text="整数模式, 0-150 范围" TextWrapping="Wrap" />
+                        <cy:NumberBox Maximum="150" Minimum="0" NumberMode="Integer" Suffix="岁" Value="28" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="4,0,0,8"
+                    Padding="14"
+                    Background="{DynamicResource Background.Container}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground.Default}" Text="价格 — 商品定价" />
+                        <TextBlock Margin="0,6,0,12" FontSize="12" Foreground="{DynamicResource Foreground.Caption}" Text="货币前缀, 两位小数" TextWrapping="Wrap" />
+                        <cy:NumberBox
+                            DecimalPlaces="2"
+                            Maximum="100000"
+                            Minimum="0"
+                            Prefix="¥"
+                            SmallChange="10"
+                            Value="299.00" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,4,0"
+                    Padding="14"
+                    Background="{DynamicResource Background.Container}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground.Default}" Text="百分比 — 阈值配置" />
+                        <TextBlock Margin="0,6,0,12" FontSize="12" Foreground="{DynamicResource Foreground.Caption}" Text="0-100 整数, 后缀单位" TextWrapping="Wrap" />
+                        <cy:NumberBox
+                            Maximum="100"
+                            Minimum="0"
+                            NumberMode="Integer"
+                            Suffix="%"
+                            Value="80" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="4,0,0,0"
+                    Padding="14"
+                    Background="{DynamicResource Background.Container}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground.Default}" Text="设置项 — 超时秒数" />
+                        <TextBlock Margin="0,6,0,12" FontSize="12" Foreground="{DynamicResource Foreground.Caption}" Text="正整数, 默认 30 秒" TextWrapping="Wrap" />
+                        <cy:NumberBox
+                            Maximum="3600"
+                            Minimum="1"
+                            NumberMode="Integer"
+                            Suffix="秒"
+                            Value="30" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!--  ========== ⑦ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="RangeBase 继承属性 + NumberBox 扩展" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
                     <Border
-                        Width="20"
-                        Height="20"
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource Background.Highlighted}"
-                        CornerRadius="999">
-                        <TextBlock
-                            FontSize="13"
-                            FontWeight="Bold"
-                            Foreground="White"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Text="i" />
-                    </Border>
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
                     <TextBlock
-                        Margin="10,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Foreground="{DynamicResource Foreground.Default}">
-                        <Run Text="NumberBox 继承自" />
-                        <Run FontFamily="Consolas" Foreground="{DynamicResource Foreground.Link}" Text="RangeBase" />
-                        <Run Text="，可像原生 Slider 一样使用 Value / Minimum / Maximum / SmallChange / LargeChange / ValueChanged 等成员，配合双向绑定无缝接入 MVVM。" />
-                    </TextBlock>
-                </StackPanel>
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型 (默认)" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Value" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0)" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前数值, 继承自 RangeBase, 默认 TwoWay 绑定。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Minimum / Maximum" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数值范围, 继承自 RangeBase。输入超出范围会被强制夹紧到边界。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SmallChange" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (1)" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="步进按钮 / 键盘 ↑↓ / 鼠标滚轮 的步长。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LargeChange" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (10)" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="PgUp / PgDn 步长。" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="NumberMode" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (Decimal)" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Integer / Decimal。Integer 模式拒绝输入小数点。" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="DecimalPlaces" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (2)" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Decimal 模式下的小数位数, 显示与四舍五入都按此精度。" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Prefix / Suffix" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object (null)" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="输入框前 / 后的展示元素, 可为任意 UIElement (字符串、Path、Image 等)。" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SpinButtonOrientation" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (Vertical)" />
+                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="步进按钮的排列方向。" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsSpinButtonVisible" />
+                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (true)" />
+                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否显示步进按钮。隐藏后只能通过键盘 / 滚轮调整。" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsClearButtonVisible" />
+                    <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (false)" />
+                    <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否显示清除按钮 (一键归零)。" />
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ValueChanged" />
+                    <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
+                    <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Value 变更时触发(继承自 RangeBase)。用户输入过程中不触发, 失焦或回车统一结算。" />
+                </Grid>
             </Border>
-        </Grid>
+
+            <!--  ========== ⑧ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="NumberBox 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="继承 RangeBase, 与 Slider 共享语义" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Value / Minimum / Maximum / SmallChange / LargeChange / ValueChanged 全部沿用 RangeBase, 任何熟悉 Slider 的开发者无学习成本"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="输入过程不更新 Value" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="键入中间状态(如 &quot;-&quot;、&quot;3.&quot;)不会回写 Value, 避免触发 ValueChanged 风暴; 失焦 / 回车 / 步进时统一结算"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Prefix / Suffix 是 object 而非 string" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="既可以放字符串, 也可以放 Path / Image / 任意控件 — 例如自定义图标货币符号或带 Tooltip 的单位说明"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="ReadOnly 与 Disabled 区分" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ReadOnly 只禁用编辑和步进, 视觉上仍是正常输入框; Disabled 整体置灰, 不可聚焦, 走 Disabled token 组"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

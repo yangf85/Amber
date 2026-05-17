@@ -4,11 +4,11 @@
     
     v4 改动 (vs v3):
     - 删除 ListBoxItem 模板里的行内 CheckBox 列
-      · 多选改为标准 ListBox 交互(单击 / Ctrl+Click / Shift+Click)
-      · 视觉对齐 WinUI NavigationView,行内更简洁
+    · 多选改为标准 ListBox 交互(单击 / Ctrl+Click / Shift+Click)
+    · 视觉对齐 WinUI NavigationView,行内更简洁
     - 顶部"选择全部" CheckBox 保留(通过 hp:ListBoxHelper.IsSelectAllEnabled 启用)
-      · 默认 IsSelectAllEnabled=false,顶部 CheckBox 不显示
-      · 启用后顶部 CheckBox 显示,点击全选/取消全选所有项
+    · 默认 IsSelectAllEnabled=false,顶部 CheckBox 不显示
+    · 启用后顶部 CheckBox 显示,点击全选/取消全选所有项
     - 删除 Grid.IsSharedSizeScope (行内 SharedSizeGroup 已删,Scope 不再需要)
     
     保留功能 (v3 同):

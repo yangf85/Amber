@@ -30,9 +30,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
-                    <!--  用 Grid 替换 BulletDecorator: BulletDecorator 强制 baseline 对齐,
-                          Box 底边会贴到文字基线, 导致 Box 比文字视觉中心高 ~5px;
-                          改用 Grid + VerticalAlignment=Center, 严格几何居中  -->
+                    <!--
+                        用 Grid 替换 BulletDecorator: BulletDecorator 强制 baseline 对齐,
+                        Box 底边会贴到文字基线, 导致 Box 比文字视觉中心高 ~5px;
+                        改用 Grid + VerticalAlignment=Center, 严格几何居中
+                    -->
                     <Grid Background="Transparent" SnapsToDevicePixels="True">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />

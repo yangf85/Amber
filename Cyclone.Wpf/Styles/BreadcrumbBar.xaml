@@ -7,10 +7,10 @@
     - 默认 > 分隔符 (最后一项隐藏)
     - Icon=null 时图标列彻底隐藏 (不占空间)
     - 三种状态视觉:
-      · 默认  — Foreground.Caption (灰色)
-      · Hover — Background.Hover + Foreground.Default 强调
-      · Last  — Foreground.Default 自动强调最后一项(当前位置)
-      · Selected — Background.Hover + Foreground.Default (键盘焦点 / 程序选中)
+    · 默认  — Foreground.Caption (灰色)
+    · Hover — Background.Hover + Foreground.Default 强调
+    · Last  — Foreground.Default 自动强调最后一项(当前位置)
+    · Selected — Background.Hover + Foreground.Default (键盘焦点 / 程序选中)
     
     Indicator (分隔符) 通过 DP 暴露,用户可自定义:
     - 默认 ">" (TextBlock)

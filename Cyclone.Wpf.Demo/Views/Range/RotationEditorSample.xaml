@@ -2,32 +2,32 @@
     x:Class="Cyclone.Wpf.Demo.Views.RotationEditorSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cy="https://www.cyclone/wpf"
     xmlns:ctl="clr-namespace:Cyclone.Wpf.Controls;assembly=Cyclone.Wpf"
+    xmlns:cy="https://www.cyclone/wpf"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:RotationEditorViewModel}}"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3400"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 TextBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -36,7 +36,12 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
@@ -44,18 +49,7 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
-
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -86,32 +80,38 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
-                        <Path
+                        <!--  Icon: 三轴坐标系  -->
+                        <Grid
                             Width="32"
                             Height="32"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Data="M12,4 A8,8 0 1,1 11.99,4 M12,7 L12,12 L16,14"
-                            Stretch="None"
-                            Stroke="White"
-                            StrokeEndLineCap="Round"
-                            StrokeLineJoin="Round"
-                            StrokeStartLineCap="Round"
-                            StrokeThickness="2.5" />
+                            VerticalAlignment="Center">
+                            <Path
+                                Data="M16,28 L16,4 M16,28 L4,22 M16,28 L28,22"
+                                Stretch="None"
+                                Stroke="{DynamicResource Text.Invert}"
+                                StrokeEndLineCap="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="2.5" />
+                            <Ellipse
+                                Width="5"
+                                Height="5"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Fill="{DynamicResource Text.Invert}" />
+                        </Grid>
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
@@ -128,742 +128,556 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="自定义控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="3D 三轴旋转" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="三轴旋转角度编辑器——XYZ 三条 Slider 用经典红绿蓝色彩约定(Blender / Unity 通用)。支持 Step 步长、SnapToTick 整数吸附、AutoToolTip 拖动数值提示、AngleChanged 路由事件、ResetCommand 一键重置。" />
+                            Text="3D 三轴旋转编辑器 — 红绿蓝代表 X/Y/Z 三轴(行业约定)。Slider 双向绑定角度, 自动归一化到 [0, 360), 内置 ResetCommand 类级 CommandBinding。常用于 3D 视图操控、模型变换、产品展示。"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== ① 3D 立方体预览 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 3D 立方体预览"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="实时联动 XYZ 三轴旋转 · TwoWay 双向" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="拖动下方 RotationEditor 三条 Slider 实时旋转立方体。AngleX/Y/Z 是 TwoWay binding, 所以预设按钮(Front / Isometric / Top / 45° 全转)也能反向控制 Slider。" />
+
+            <!--  3D 立方体预览区  -->
+            <Border
+                Height="240"
+                Margin="0,0,0,16"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1"
+                ClipToBounds="True">
+                <Viewport3D>
+                    <Viewport3D.Camera>
+                        <PerspectiveCamera
+                            FieldOfView="50"
+                            LookDirection="0,0,-1"
+                            Position="0,0,5"
+                            UpDirection="0,1,0" />
+                    </Viewport3D.Camera>
+
+                    <ModelVisual3D>
+                        <ModelVisual3D.Content>
+                            <Model3DGroup>
+                                <AmbientLight Color="#444444" />
+                                <DirectionalLight Color="#CCCCCC" Direction="-0.5,-0.8,-1" />
+
+                                <GeometryModel3D>
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D
+                                            Positions="
+                                                -1,-1, 1   1,-1, 1   1, 1, 1  -1, 1, 1
+                                                -1,-1,-1   1,-1,-1   1, 1,-1  -1, 1,-1
+                                                -1,-1,-1  -1,-1, 1  -1, 1, 1  -1, 1,-1
+                                                 1,-1,-1   1,-1, 1   1, 1, 1   1, 1,-1
+                                                -1, 1, 1   1, 1, 1   1, 1,-1  -1, 1,-1
+                                                -1,-1, 1   1,-1, 1   1,-1,-1  -1,-1,-1"
+                                            TextureCoordinates="
+                                                0,0   0.25,0   0.25,1   0,1
+                                                0.25,0   0.5,0   0.5,1   0.25,1
+                                                0.5,0   0.75,0   0.75,1   0.5,1
+                                                0.75,0   1,0   1,1   0.75,1
+                                                0,0   0.25,0   0.25,1   0,1
+                                                0.25,0   0.5,0   0.5,1   0.25,1"
+                                            TriangleIndices="
+                                                0,1,2  0,2,3
+                                                5,4,7  5,7,6
+                                                8,9,10  8,10,11
+                                                13,12,15  13,15,14
+                                                16,17,18  16,18,19
+                                                21,20,23  21,23,22" />
+                                    </GeometryModel3D.Geometry>
+                                    <GeometryModel3D.Material>
+                                        <DiffuseMaterial>
+                                            <DiffuseMaterial.Brush>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Offset="0" Color="#4FC3F7" />
+                                                    <GradientStop Offset="0.5" Color="#1976D2" />
+                                                    <GradientStop Offset="1" Color="#0D47A1" />
+                                                </LinearGradientBrush>
+                                            </DiffuseMaterial.Brush>
+                                        </DiffuseMaterial>
+                                    </GeometryModel3D.Material>
+                                    <GeometryModel3D.BackMaterial>
+                                        <DiffuseMaterial Brush="#0D47A1" />
+                                    </GeometryModel3D.BackMaterial>
+                                    <GeometryModel3D.Transform>
+                                        <Transform3DGroup>
+                                            <RotateTransform3D>
+                                                <RotateTransform3D.Rotation>
+                                                    <AxisAngleRotation3D Angle="{Binding AngleX}" Axis="1,0,0" />
+                                                </RotateTransform3D.Rotation>
+                                            </RotateTransform3D>
+                                            <RotateTransform3D>
+                                                <RotateTransform3D.Rotation>
+                                                    <AxisAngleRotation3D Angle="{Binding AngleY}" Axis="0,1,0" />
+                                                </RotateTransform3D.Rotation>
+                                            </RotateTransform3D>
+                                            <RotateTransform3D>
+                                                <RotateTransform3D.Rotation>
+                                                    <AxisAngleRotation3D Angle="{Binding AngleZ}" Axis="0,0,1" />
+                                                </RotateTransform3D.Rotation>
+                                            </RotateTransform3D>
+                                        </Transform3DGroup>
+                                    </GeometryModel3D.Transform>
+                                </GeometryModel3D>
+                            </Model3DGroup>
+                        </ModelVisual3D.Content>
+                    </ModelVisual3D>
+                </Viewport3D>
+            </Border>
+
+            <!--  主控件 + 预设视角按钮  -->
+            <ctl:RotationEditor
+                Margin="0,0,0,16"
+                AngleX="{Binding AngleX, Mode=TwoWay}"
+                AngleY="{Binding AngleY, Mode=TwoWay}"
+                AngleZ="{Binding AngleZ, Mode=TwoWay}" />
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="预设视角:" />
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="10,6"
+                    Command="{Binding PresetFrontCommand}"
+                    Content="正面" />
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="10,6"
+                    Command="{Binding PresetIsometricCommand}"
+                    Content="等距" />
+                <Button
+                    Margin="0,0,8,0"
+                    Padding="10,6"
+                    Command="{Binding PresetTopCommand}"
+                    Content="俯视" />
+                <Button
+                    Padding="10,6"
+                    Command="{Binding Preset45Command}"
+                    Content="45° 全转" />
+            </StackPanel>
+
+            <!--  ========== ② 当前角度 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 当前角度"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="X · Y · Z 实时绑定显示" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="三轴使用经典的红 / 绿 / 蓝(行业约定: Blender / Unity / 3ds Max)。背景色硬编码不跟随主题, 保持跨工具语义一致。" />
+
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  ① 基础用法 + 3D 立方体预览  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="3D 立方体预览" Subtitle="实时联动 XYZ 三轴旋转">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="拖动下方三条 Slider 实时旋转立方体。AngleX/Y/Z 是 TwoWay binding,所以预设按钮也能反向控制 Slider。" />
-
-                            <!--  3D 立方体预览区  -->
-                            <Border
-                                Height="240"
-                                Margin="0,0,0,16"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1"
-                                ClipToBounds="True">
-                                <Viewport3D>
-                                    <Viewport3D.Camera>
-                                        <PerspectiveCamera
-                                            FieldOfView="50"
-                                            LookDirection="0,0,-1"
-                                            Position="0,0,5"
-                                            UpDirection="0,1,0" />
-                                    </Viewport3D.Camera>
-
-                                    <ModelVisual3D>
-                                        <ModelVisual3D.Content>
-                                            <Model3DGroup>
-                                                <!--  环境光 + 方向光  -->
-                                                <AmbientLight Color="#444444" />
-                                                <DirectionalLight Color="#CCCCCC" Direction="-0.5,-0.8,-1" />
-
-                                                <!--  立方体 (6 个面分色,直观看清旋转)  -->
-                                                <GeometryModel3D>
-                                                    <GeometryModel3D.Geometry>
-                                                        <MeshGeometry3D
-                                                            Positions="
-                                                                -1,-1, 1   1,-1, 1   1, 1, 1  -1, 1, 1
-                                                                -1,-1,-1   1,-1,-1   1, 1,-1  -1, 1,-1
-                                                                -1,-1,-1  -1,-1, 1  -1, 1, 1  -1, 1,-1
-                                                                 1,-1,-1   1,-1, 1   1, 1, 1   1, 1,-1
-                                                                -1, 1, 1   1, 1, 1   1, 1,-1  -1, 1,-1
-                                                                -1,-1, 1   1,-1, 1   1,-1,-1  -1,-1,-1"
-                                                            TextureCoordinates="
-                                                                0,0   0.25,0   0.25,1   0,1
-                                                                0.25,0   0.5,0   0.5,1   0.25,1
-                                                                0.5,0   0.75,0   0.75,1   0.5,1
-                                                                0.75,0   1,0   1,1   0.75,1
-                                                                0,0   0.25,0   0.25,1   0,1
-                                                                0.25,0   0.5,0   0.5,1   0.25,1"
-                                                            TriangleIndices="
-                                                                0,1,2  0,2,3
-                                                                5,4,7  5,7,6
-                                                                8,9,10  8,10,11
-                                                                13,12,15  13,15,14
-                                                                16,17,18  16,18,19
-                                                                21,20,23  21,23,22" />
-                                                    </GeometryModel3D.Geometry>
-                                                    <GeometryModel3D.Material>
-                                                        <DiffuseMaterial>
-                                                            <DiffuseMaterial.Brush>
-                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                                    <GradientStop Offset="0" Color="#4FC3F7" />
-                                                                    <GradientStop Offset="0.5" Color="#1976D2" />
-                                                                    <GradientStop Offset="1" Color="#0D47A1" />
-                                                                </LinearGradientBrush>
-                                                            </DiffuseMaterial.Brush>
-                                                        </DiffuseMaterial>
-                                                    </GeometryModel3D.Material>
-                                                    <GeometryModel3D.BackMaterial>
-                                                        <DiffuseMaterial Brush="#0D47A1" />
-                                                    </GeometryModel3D.BackMaterial>
-                                                    <GeometryModel3D.Transform>
-                                                        <Transform3DGroup>
-                                                            <RotateTransform3D>
-                                                                <RotateTransform3D.Rotation>
-                                                                    <AxisAngleRotation3D Angle="{Binding AngleX}" Axis="1,0,0" />
-                                                                </RotateTransform3D.Rotation>
-                                                            </RotateTransform3D>
-                                                            <RotateTransform3D>
-                                                                <RotateTransform3D.Rotation>
-                                                                    <AxisAngleRotation3D Angle="{Binding AngleY}" Axis="0,1,0" />
-                                                                </RotateTransform3D.Rotation>
-                                                            </RotateTransform3D>
-                                                            <RotateTransform3D>
-                                                                <RotateTransform3D.Rotation>
-                                                                    <AxisAngleRotation3D Angle="{Binding AngleZ}" Axis="0,0,1" />
-                                                                </RotateTransform3D.Rotation>
-                                                            </RotateTransform3D>
-                                                        </Transform3DGroup>
-                                                    </GeometryModel3D.Transform>
-                                                </GeometryModel3D>
-                                            </Model3DGroup>
-                                        </ModelVisual3D.Content>
-                                    </ModelVisual3D>
-                                </Viewport3D>
-                            </Border>
-
-                            <!--  RotationEditor 主控件  -->
-                            <ctl:RotationEditor
-                                Margin="0,0,0,16"
-                                AngleX="{Binding AngleX, Mode=TwoWay}"
-                                AngleY="{Binding AngleY, Mode=TwoWay}"
-                                AngleZ="{Binding AngleZ, Mode=TwoWay}" />
-
-                            <!--  预设视角按钮  -->
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock
-                                    Margin="0,0,12,0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="预设视角:" />
-                                <Button
-                                    Margin="0,0,8,0"
-                                    Padding="10,6"
-                                    Command="{Binding PresetFrontCommand}"
-                                    Content="正面" />
-                                <Button
-                                    Margin="0,0,8,0"
-                                    Padding="10,6"
-                                    Command="{Binding PresetIsometricCommand}"
-                                    Content="等距" />
-                                <Button
-                                    Margin="0,0,8,0"
-                                    Padding="10,6"
-                                    Command="{Binding PresetTopCommand}"
-                                    Content="俯视" />
-                                <Button
-                                    Padding="10,6"
-                                    Command="{Binding Preset45Command}"
-                                    Content="45° 全转" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② 当前值显示  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="当前角度" Subtitle="实时绑定显示">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <Border
-                                Grid.Column="0"
-                                Padding="16,12"
-                                Background="#D44040">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="11"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="X 轴" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="24"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="{Binding AngleX, StringFormat={}{0:F1}°}" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Grid.Column="1"
-                                Margin="8,0"
-                                Padding="16,12"
-                                Background="#3AAA5C">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="11"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="Y 轴" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="24"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="{Binding AngleY, StringFormat={}{0:F1}°}" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Grid.Column="2"
-                                Padding="16,12"
-                                Background="#3A7AD4">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="11"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="Z 轴" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="24"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="{Binding AngleZ, StringFormat={}{0:F1}°}" />
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </cy:Card>
-
-                    <!--  ③ Step / Precision 联动  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="Step + AutoToolTipPrecision" Subtitle="步长 / 精度联动">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="下方 RotationEditor 的 Step 和 AutoToolTipPrecision 通过 Slider 控制。拖动 RotationEditor 的 Thumb 观察 ToolTip 数值精度。" />
-
-                            <!--  Step 控制  -->
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="60" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="Step" />
-                                <Slider
-                                    Grid.Column="1"
-                                    IsSnapToTickEnabled="True"
-                                    Maximum="10"
-                                    Minimum="0.1"
-                                    TickFrequency="0.1"
-                                    Value="{Binding Step, Mode=TwoWay}" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Margin="8,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="{Binding Step, StringFormat={}{0:F1}°}" />
-                            </Grid>
-
-                            <!--  Precision 控制  -->
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="60" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource ValueLabelStyle}"
-                                    Text="Precision" />
-                                <Slider
-                                    Grid.Column="1"
-                                    IsSnapToTickEnabled="True"
-                                    Maximum="4"
-                                    Minimum="0"
-                                    TickFrequency="1"
-                                    TickPlacement="BottomRight"
-                                    Value="{Binding Precision, Mode=TwoWay}" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Margin="8,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="{Binding Precision, StringFormat={}{0} 位}" />
-                            </Grid>
-
-                            <ctl:RotationEditor
-                                AngleX="{Binding AngleX, Mode=TwoWay}"
-                                AngleY="{Binding AngleY, Mode=TwoWay}"
-                                AngleZ="{Binding AngleZ, Mode=TwoWay}"
-                                AutoToolTipPrecision="{Binding Precision}"
-                                Step="{Binding Step}" />
-
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Step=0.1 + Precision=1 — 精细调整;Step=1 + Precision=0 — 整数(默认)。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <!--  ④ 2D 图标旋转 (实战场景)  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="2D 图标旋转" Subtitle="只用 Z 轴的简化场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="实际项目里常常只需要 2D 平面旋转(只用 Z 轴),把 X/Y 隐藏并设为 0 即可。或者直接用单个 Slider。" />
-
-                            <!--  2D 旋转预览  -->
-                            <Border
-                                Height="160"
-                                Margin="0,0,0,16"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <Path
-                                    Width="80"
-                                    Height="80"
-                                    Data="M50,10 L60,40 L90,40 L66,58 L74,88 L50,70 L26,88 L34,58 L10,40 L40,40 Z"
-                                    Fill="{DynamicResource Background.Selected}"
-                                    RenderTransformOrigin="0.5,0.5"
-                                    Stretch="Uniform">
-                                    <Path.RenderTransform>
-                                        <RotateTransform Angle="{Binding IconRotation}" />
-                                    </Path.RenderTransform>
-                                </Path>
-                            </Border>
-
-                            <!--  单 Z 轴 Slider — 用 RotationEditor 隐藏 X/Y 也行,这里用普通 Slider 演示替代方案  -->
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="60" />
-                                </Grid.ColumnDefinitions>
-                                <Border
-                                    Grid.Column="0"
-                                    Width="22"
-                                    Height="22"
-                                    Margin="0,0,10,0"
-                                    Background="#3A7AD4">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        FontWeight="SemiBold"
-                                        Foreground="White"
-                                        Text="∠" />
-                                </Border>
-                                <Slider
-                                    Grid.Column="1"
-                                    AutoToolTipPlacement="TopLeft"
-                                    AutoToolTipPrecision="0"
-                                    Maximum="359.99"
-                                    Minimum="0"
-                                    Value="{Binding IconRotation, Mode=TwoWay}" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Margin="8,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    FontWeight="Bold"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="{Binding IconRotation, StringFormat={}{0:F0}°}" />
-                            </Grid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ 自定义轴标签  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="自定义轴标签" Subtitle="LabelX / LabelY / LabelZ">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="LabelX/Y/Z 是 object 类型,可以传中文、缩写、emoji 等。背景色保留 XYZ 经典红绿蓝(语义不能改)。" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="中文俯仰偏航" />
-                            <ctl:RotationEditor
-                                Margin="0,0,0,16"
-                                AngleX="{Binding AngleX, Mode=TwoWay}"
-                                AngleY="{Binding AngleY, Mode=TwoWay}"
-                                AngleZ="{Binding AngleZ, Mode=TwoWay}"
-                                LabelX="俯"
-                                LabelY="偏"
-                                LabelZ="滚" />
-
-                            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="角度符号" />
-                            <ctl:RotationEditor
-                                AngleX="{Binding AngleX, Mode=TwoWay}"
-                                AngleY="{Binding AngleY, Mode=TwoWay}"
-                                AngleZ="{Binding AngleZ, Mode=TwoWay}"
-                                LabelX="α"
-                                LabelY="β"
-                                LabelZ="γ" />
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ Reset 命令 + 当前状态  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="ResetCommand 一键重置" Subtitle="类级 CommandBinding,无需 ViewModel 介入">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ResetCommand 是 RoutedCommand,通过类级别 CommandBinding 注册,所有 RotationEditor 实例自动响应。Button 直接绑命令即可。" />
-
-                            <ctl:RotationEditor
-                                x:Name="ResetTarget"
-                                Margin="0,0,0,16"
-                                AngleX="{Binding AngleX, Mode=TwoWay}"
-                                AngleY="{Binding AngleY, Mode=TwoWay}"
-                                AngleZ="{Binding AngleZ, Mode=TwoWay}" />
-
-                            <Button
-                                HorizontalAlignment="Left"
-                                Padding="14,8"
-                                Command="{x:Static ctl:RotationEditor.ResetCommand}"
-                                CommandTarget="{Binding ElementName=ResetTarget}"
-                                Content="一键重置三轴"
-                                Style="{DynamicResource Button.Style.Primary}" />
-
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="提示:CommandTarget 指定哪个 RotationEditor 响应,确保多个实例并存时命令路由正确。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
+                <Border
+                    Grid.Column="0"
+                    Padding="16,12"
+                    Background="#D44040">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="X 轴" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontFamily="Consolas"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="{Binding AngleX, StringFormat={}{0:F1}°}" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Grid.Column="1"
+                    Margin="8,0"
+                    Padding="16,12"
+                    Background="#3AAA5C">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="Y 轴" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontFamily="Consolas"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="{Binding AngleY, StringFormat={}{0:F1}°}" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Grid.Column="2"
+                    Padding="16,12"
+                    Background="#3A7AD4">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="Z 轴" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontFamily="Consolas"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="{Binding AngleZ, StringFormat={}{0:F1}°}" />
+                    </StackPanel>
+                </Border>
             </Grid>
 
-            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <!--  ========== ③ Step + AutoToolTipPrecision ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ Step + AutoToolTipPrecision"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="步长 / 精度联动 · 精细 vs 整数" />
 
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="RotationEditor 主要属性 + 命令 + 事件">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="下方 RotationEditor 的 Step 和 AutoToolTipPrecision 通过上方 Slider 控制。拖动 RotationEditor 的 Thumb 观察 ToolTip 数值精度的实时变化。Step=0.1 + Precision=1 适合精细调整; Step=1 + Precision=0 是默认整数模式。" />
 
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="Step" />
+                <Slider
+                    Grid.Column="1"
+                    IsSnapToTickEnabled="True"
+                    Maximum="10"
+                    Minimum="0.1"
+                    TickFrequency="0.1"
+                    Value="{Binding Step, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    Foreground="{DynamicResource Foreground.Link}"
+                    Text="{Binding Step, StringFormat={}{0:F1}°}" />
+            </Grid>
 
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性 / 命令 / 事件" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    Style="{StaticResource ValueLabelStyle}"
+                    Text="Precision" />
+                <Slider
+                    Grid.Column="1"
+                    IsSnapToTickEnabled="True"
+                    Maximum="4"
+                    Minimum="0"
+                    TickFrequency="1"
+                    TickPlacement="BottomRight"
+                    Value="{Binding Precision, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    Foreground="{DynamicResource Foreground.Link}"
+                    Text="{Binding Precision, StringFormat={}{0} 位}" />
+            </Grid>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AngleX / AngleY / AngleZ" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0)" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三轴角度(度),自动归一化到 [0, 360)。TwoWay 双向绑定。" />
+            <ctl:RotationEditor
+                AngleX="{Binding AngleX, Mode=TwoWay}"
+                AngleY="{Binding AngleY, Mode=TwoWay}"
+                AngleZ="{Binding AngleZ, Mode=TwoWay}"
+                AutoToolTipPrecision="{Binding Precision}"
+                Step="{Binding Step}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Step" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (1.0)" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="调整步长。同时控制内部 Slider 的 SmallChange / LargeChange / TickFrequency,鼠标拖动也吸附到该步长。" />
+            <!--  ========== ④ 2D 图标旋转 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 2D 图标旋转"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="只用 Z 轴的简化场景" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LabelX / LabelY / LabelZ" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object (X/Y/Z)" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三轴左侧的标签内容。可以是字符串(中文/缩写/符号)或任意 UIElement。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="实际项目里常常只需要 2D 平面旋转(只用 Z 轴)。这种场景下用单个 Slider 直接绑 RotateTransform.Angle 比 RotationEditor 更简洁; RotationEditor 适合需要三轴联动的 3D 场景。" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AutoToolTipPlacement" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (TopLeft)" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="拖动 Thumb 时数值 ToolTip 位置。语义跟 Slider.AutoToolTipPlacement 一致,None 关闭。" />
+            <!--  2D 旋转预览  -->
+            <Border
+                Height="160"
+                Margin="0,0,0,16"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Path
+                    Width="80"
+                    Height="80"
+                    Data="M50,10 L60,40 L90,40 L66,58 L74,88 L50,70 L26,88 L34,58 L10,40 L40,40 Z"
+                    Fill="{DynamicResource Background.Selected}"
+                    RenderTransformOrigin="0.5,0.5"
+                    Stretch="Uniform">
+                    <Path.RenderTransform>
+                        <RotateTransform Angle="{Binding IconRotation}" />
+                    </Path.RenderTransform>
+                </Path>
+            </Border>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AutoToolTipPrecision" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (0)" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="ToolTip 显示角度的小数位数。0=整数,2=两位小数,等。" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="22" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.Column="0"
+                    Width="22"
+                    Height="22"
+                    Margin="0,0,10,0"
+                    Background="#3A7AD4">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Text="∠" />
+                </Border>
+                <Slider
+                    Grid.Column="1"
+                    AutoToolTipPlacement="TopLeft"
+                    AutoToolTipPrecision="0"
+                    Maximum="359.99"
+                    Minimum="0"
+                    Value="{Binding IconRotation, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontWeight="Bold"
+                    Foreground="{DynamicResource Foreground.Link}"
+                    Text="{Binding IconRotation, StringFormat={}{0:F0}°}" />
+            </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ResetCommand" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="重置三轴为 0。类级 CommandBinding 自动响应,无需 ViewModel 介入。配合 CommandTarget 路由到具体实例。" />
+            <!--  ========== ⑤ 自定义轴标签 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 自定义轴标签"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="LabelX / LabelY / LabelZ · object 类型" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AngleChanged" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="任一轴变化时触发,EventArgs 携带 Axis(&quot;X&quot;/&quot;Y&quot;/&quot;Z&quot;)、OldValue、NewValue。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="LabelX / LabelY / LabelZ 是 object 类型, 可以传中文 / 缩写 / 希腊字母 / emoji 甚至任意 UIElement。背景色保留 XYZ 经典红绿蓝(语义不能改)。" />
 
-                <Grid Grid.Row="1">
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="航空姿态: 俯仰 / 偏航 / 横滚" />
+            <ctl:RotationEditor
+                Margin="0,0,0,20"
+                AngleX="{Binding AngleX, Mode=TwoWay}"
+                AngleY="{Binding AngleY, Mode=TwoWay}"
+                AngleZ="{Binding AngleZ, Mode=TwoWay}"
+                LabelX="俯"
+                LabelY="偏"
+                LabelZ="滚" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="数学符号: α / β / γ" />
+            <ctl:RotationEditor
+                AngleX="{Binding AngleX, Mode=TwoWay}"
+                AngleY="{Binding AngleY, Mode=TwoWay}"
+                AngleZ="{Binding AngleZ, Mode=TwoWay}"
+                LabelX="α"
+                LabelY="β"
+                LabelZ="γ" />
+
+            <!--  ========== ⑥ ResetCommand 一键重置 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ ResetCommand 一键重置"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="类级 CommandBinding · 无需 ViewModel 介入" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="ResetCommand 是 RoutedCommand, 通过类级别 CommandBinding 注册, 所有 RotationEditor 实例自动响应。Button 直接绑 {x:Static ctl:RotationEditor.ResetCommand} 即可, CommandTarget 指定哪个 RotationEditor 响应 — 多个实例并存时命令路由也不出错。" />
+
+            <ctl:RotationEditor
+                x:Name="ResetTarget"
+                Margin="0,0,0,16"
+                AngleX="{Binding AngleX, Mode=TwoWay}"
+                AngleY="{Binding AngleY, Mode=TwoWay}"
+                AngleZ="{Binding AngleZ, Mode=TwoWay}" />
+
+            <Button
+                HorizontalAlignment="Left"
+                Padding="14,8"
+                Command="{x:Static ctl:RotationEditor.ResetCommand}"
+                CommandTarget="{Binding ElementName=ResetTarget}"
+                Content="一键重置三轴"
+                Style="{DynamicResource Button.Style.Primary}" />
+
+            <!--  ========== ⑦ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="属性 · 命令 · 事件" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 基础三轴 -->
-<ctl:RotationEditor
-    AngleX="{Binding AngleX, Mode=TwoWay}"
-    AngleY="{Binding AngleY, Mode=TwoWay}"
-    AngleZ="{Binding AngleZ, Mode=TwoWay}" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性 / 命令 / 事件" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型 (默认)" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
 
-<!-- 精细调整(0.1° 步长 + 1 位小数) -->
-<ctl:RotationEditor
-    Step="0.1"
-    AutoToolTipPrecision="1"
-    AngleX="{Binding ...}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AngleX / AngleY / AngleZ" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (0)" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三轴角度 (度), 自动归一化到 [0, 360)。TwoWay 双向绑定, 无 360° wrap 问题。" />
 
-<!-- 自定义标签 -->
-<ctl:RotationEditor
-    LabelX="俯" LabelY="偏" LabelZ="滚"
-    AngleX="{Binding ...}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Step" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double (1.0)" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="调整步长, 同时控制内部 Slider 的 SmallChange / LargeChange / TickFrequency, 鼠标拖动也吸附到该步长。" />
 
-<!-- 重置按钮 -->
-<ctl:RotationEditor x:Name="MyEditor" ... />
-<Button
-    Command="{x:Static ctl:RotationEditor.ResetCommand}"
-    CommandTarget="{Binding ElementName=MyEditor}"
-    Content="重置" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="LabelX / LabelY / LabelZ" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object (X / Y / Z)" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="三轴左侧的标签内容, 字符串或任意 UIElement 均可。" />
 
-<!-- 监听变化事件 -->
-<ctl:RotationEditor
-    AngleChanged="OnRotationChanged"
-    AngleX="{Binding ...}" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AutoToolTipPlacement" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (TopLeft)" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="拖动 Thumb 时数值 ToolTip 位置。语义与 Slider.AutoToolTipPlacement 一致, None 关闭。" />
 
-// .cs 中
-private void OnRotationChanged(object sender, AngleChangedEventArgs e)
-{
-    Debug.WriteLine($"{e.Axis}: {e.OldValue} -> {e.NewValue}");
-}]]>
-                        </TextBox>
-                    </cy:Card>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AutoToolTipPrecision" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="int (0)" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="ToolTip 显示角度的小数位数。0 = 整数, 2 = 两位小数, 以此类推。" />
 
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ResetCommand" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedCommand" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="重置三轴为 0。类级 CommandBinding 自动响应, 无需 ViewModel 介入。配合 CommandTarget 路由到具体实例。" />
 
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="XYZ 经典色彩" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="红绿蓝是行业约定(Blender / Unity / 3ds Max),硬编码不跟随主题"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="自动归一化" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="CoerceAngle 把任意输入(负数/超 360)折叠到 [0, 360),无 360° wrap 问题"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="Slider 透传 ToolTip" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="AutoToolTip* 委托给内部 Slider,不自己实现 ToolTip 逻辑,免维护"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="类级 CommandBinding" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="ResetCommand 通过 RegisterClassCommandBinding 全局注册,任意 Button 配 CommandTarget 即可触发"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="AngleChanged" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEvent" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="任一轴变化时触发, EventArgs 携带 Axis (X / Y / Z) 、OldValue、NewValue。" />
                 </Grid>
-            </Grid>
-        </Grid>
+            </Border>
+
+            <!--  ========== ⑧ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="RotationEditor 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="XYZ 经典红绿蓝(行业约定)" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="红 / 绿 / 蓝是 Blender / Unity / 3ds Max 等 3D 工具的统一约定, 硬编码不跟随主题 — 保持跨工具的认知一致性"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="自动归一化 [0, 360)" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="CoerceAngle 把任意输入(负数 / 超 360)折叠到 [0, 360), 业务侧不用自己处理 360° wrap 边界"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Slider 透传 AutoToolTip" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="AutoToolTipPlacement / Precision 委托给内部 Slider, 不自己实现 ToolTip 逻辑, 减少维护面"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="类级 CommandBinding 实现 Reset" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ResetCommand 通过 RegisterClassCommandBinding 全局注册, 任意 Button 配 CommandTarget 即可触发, 不需要 ViewModel 暴露重置命令"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

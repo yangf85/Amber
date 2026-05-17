@@ -6,15 +6,13 @@
     
     全部变体共有:
     - 键盘焦点反馈 — 通过 FocusVisualStyle (WPF 系统机制)
-      仅 Tab 键导航时显示焦点框,鼠标点击不显示(类似 Web :focus-visible)
+    仅 Tab 键导航时显示焦点框,鼠标点击不显示(类似 Web :focus-visible)
     - IsDefault=True 时(Enter 触发的默认按钮)Basic 变 Primary 视觉强调
     - Disabled 整体 Opacity 0.5
     - 无圆角
     ============================================================================
 -->
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />

@@ -5,9 +5,9 @@
     架构:
     - 控件 OnRender 画底层:背景圆 + 边框 + 分段染色 + 刻度 + 标签
     - 模板只放交互/动态元素:
-      1. PART_PointerRotation: 指针 + RotateTransform (cs 动画驱动)
-      2. 中心 cap 圆点
-      3. 数值文本 (binding DisplayText) + 单位文本
+    1. PART_PointerRotation: 指针 + RotateTransform (cs 动画驱动)
+    2. 中心 cap 圆点
+    3. 数值文本 (binding DisplayText) + 单位文本
     
     渲染顺序 (从下到上): Control.OnRender → Template 内容
     所以模板里不能放背景 Ellipse,否则把 OnRender 画的刻度全盖住

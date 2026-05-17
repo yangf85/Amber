@@ -6,9 +6,9 @@
     - Seperater* → Separator* (拼写修正,4 个 DP 重命名)
     - SeperaterColor → SeparatorBrush (Brush 类型用 Brush 命名)
     - Setter 设主题 token (DynamicResource) 替代 cs 默认值的硬编码颜色:
-      - MainTitleForeground → Foreground.Default
-      - SubTitleForeground  → Foreground.Inactive (标准次要灰)
-      - SeparatorBrush      → Border.Default
+    - MainTitleForeground → Foreground.Default
+    - SubTitleForeground  → Foreground.Inactive (标准次要灰)
+    - SeparatorBrush      → Border.Default
     - 模板里 Separator 三个 TemplateBinding 跟着新名走
     ============================================================================
 -->

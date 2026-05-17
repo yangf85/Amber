@@ -4,9 +4,9 @@
     
     改动 (vs 旧版):
     - Checked 颜色 Background.Checked (浅蓝) → Background.Selected (主蓝)
-      跟项目其他控件 (CheckBox/RadioButton/ToggleButton) 选中态统一
+    跟项目其他控件 (CheckBox/RadioButton/ToggleButton) 选中态统一
     - Hover MultiTrigger 分 Checked/Unchecked 两态 (旧版统一变 Background.Hover 浅灰,
-      Checked 态 thumb 从白变浅灰反而像"褪色")
+    Checked 态 thumb 从白变浅灰反而像"褪色")
     - ContentPresenter 显式 TemplateBinding Content/ContentTemplate/Foreground
     - 焦点 ring CornerRadius 跟随 TrackCornerRadius (旧版写死 13)
     - 加 Cursor=Hand + Disabled Cursor=Arrow

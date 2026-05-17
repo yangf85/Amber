@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cy="https://www.cyclone/wpf"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hp="clr-namespace:Cyclone.Wpf.Helpers;assembly=Cyclone.Wpf"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:ButtonViewModel}}"
@@ -626,9 +627,170 @@
                 </StackPanel>
             </Border>
 
-            <!--  ========== ⑥ 使用场景指南 ==========  -->
+            <!--  ========== ⑥ 命令联动(NotifyCanExecuteChangedFor) ==========  -->
             <cy:SectionHeader
-                MainTitle="⑥ 使用场景指南"
+                MainTitle="⑥ 命令联动"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="[NotifyCanExecuteChangedFor] · 属性变更自动刷新 CanExecute" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="ViewModel 属性变化时, 自动通知关联的 RelayCommand 重新评估 CanExecute, 按钮 IsEnabled 跟着切换。下方 TextBox 为空时提交按钮禁用, 输入内容后亮起 — 全程无需手写 SubmitFormCommand.NotifyCanExecuteChanged()。" />
+
+            <Border
+                Padding="16"
+                Background="{DynamicResource Background.Container}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock
+                        FontWeight="Medium"
+                        Text="表单字段(非空才可提交)"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,4,0,12"
+                        FontSize="11"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="FormInput 上标注了 [NotifyCanExecuteChangedFor(nameof(SubmitFormCommand))], CanSubmitForm 检查非空。"
+                        TextWrapping="Wrap" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            hp:TextBoxHelper.Watermark="试着输入内容看右侧按钮变化"
+                            Text="{Binding FormInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            Padding="14,8"
+                            Command="{Binding SubmitFormCommand}"
+                            Content="提交"
+                            Style="{DynamicResource Button.Style.Primary}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ⑦ 消息广播(NotifyPropertyChangedRecipients) ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 消息广播"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="[NotifyPropertyChangedRecipients] + ObservableRecipient 跨 VM 通信" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="ViewModel 继承 ObservableRecipient 并在属性上加 [NotifyPropertyChangedRecipients], 变更时自动通过默认 IMessenger 广播 PropertyChangedMessage&lt;T&gt;。接收端独立 VM 实现 IRecipient&lt;PropertyChangedMessage&lt;int&gt;&gt; 接口并 IsActive=true 即自动订阅, 完全解耦。" />
+
+            <Border
+                Padding="16"
+                Background="{DynamicResource Background.Container}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  发送端 — 主 VM, ClickCount 上有 [NotifyPropertyChangedRecipients]  -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock
+                            FontWeight="Medium"
+                            Text="发送端" />
+                        <TextBlock
+                            Margin="0,4,0,12"
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="ButtonViewModel : ObservableRecipient"
+                            TextWrapping="Wrap" />
+                        <Button
+                            HorizontalAlignment="Left"
+                            Padding="14,8"
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="广播测试"
+                            Content="发送广播"
+                            Style="{DynamicResource Button.Style.Primary}" />
+                        <TextBlock Margin="0,12,0,0" Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="ClickCount =" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding ClickCount, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!--  箭头  -->
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="20,0"
+                        VerticalAlignment="Center">
+                        <Path
+                            Width="32"
+                            Height="16"
+                            Data="M0,8 L26,8 M20,2 L26,8 L20,14"
+                            Stretch="None"
+                            Stroke="{DynamicResource Icon.Foreground.Default}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            HorizontalAlignment="Center"
+                            FontFamily="Consolas"
+                            FontSize="10"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="PropertyChangedMessage" />
+                    </StackPanel>
+
+                    <!--  接收端 — 独立 VM, DataContext 切到 Listener  -->
+                    <StackPanel Grid.Column="2" DataContext="{Binding Listener}">
+                        <TextBlock
+                            FontWeight="Medium"
+                            Text="接收端" />
+                        <TextBlock
+                            Margin="0,4,0,12"
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="ButtonListenerViewModel : IRecipient&lt;...&gt;"
+                            TextWrapping="Wrap" />
+                        <Border
+                            Padding="10"
+                            Background="{DynamicResource Background.Header}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="最新广播:" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontFamily="Consolas"
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Link}"
+                                    Text="{Binding LastBroadcast}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Margin="0,8,0,0" Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="累计接收:" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding BroadcastCount, Mode=OneWay}" />
+                            <Run Text="条" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑧ 使用场景指南 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 使用场景指南"
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="什么时候用哪个 Style 变体" />
 
@@ -709,9 +871,9 @@
                 </StackPanel>
             </StackPanel>
 
-            <!--  ========== ⑦ Button 属性 + Style 变体 ==========  -->
+            <!--  ========== ⑨ Button 属性 + Style 变体 ==========  -->
             <cy:SectionHeader
-                MainTitle="⑦ 主要 API"
+                MainTitle="⑨ 主要 API"
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="核心属性 + Style 变体一览表" />
 
@@ -902,9 +1064,9 @@
                 </Grid>
             </Border>
 
-            <!--  ========== ⑧ 设计要点 ==========  -->
+            <!--  ========== ⑩ 设计要点 ==========  -->
             <cy:SectionHeader
-                MainTitle="⑧ 设计要点"
+                MainTitle="⑩ 设计要点"
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="WinUI 3 风格下的 Button 关键决策" />
 
@@ -966,7 +1128,6 @@
                         TextWrapping="Wrap" />
                 </StackPanel>
             </StackPanel>
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>

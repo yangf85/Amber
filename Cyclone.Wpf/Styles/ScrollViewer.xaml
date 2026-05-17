@@ -4,7 +4,7 @@
     
     设计要点:
     - 无箭头按钮。现代滚动条都没有箭头,
-      用户用滚轮 / 拖动 Thumb / 触摸板
+    用户用滚轮 / 拖动 Thumb / 触摸板
     - Thumb 4px 默认,鼠标进入 ScrollBar 时扩展到 8px
     - 轨道默认透明,鼠标进入显示浅灰底
     - 无圆角(整体跟项目设计语言一致)
@@ -14,7 +14,7 @@
     - 删除 IndicateButtonStyle (箭头按钮) 和 4 个 ArrowXxx Geometry — 130+ 行冗余
     - 合并 VerticalThumbStyle + HorizontalThumbStyle → 单一 ScrollBar.Thumb.Style.Basic
     - 合并 ScrollBar.VerticalStyle + HorizontalStyle → 单一 ScrollBar.Style.Basic
-      (Orientation trigger 切换模板,VerticalScrollBar 和 HorizontalScrollBar 用同一 Style)
+    (Orientation trigger 切换模板,VerticalScrollBar 和 HorizontalScrollBar 用同一 Style)
     - Paging RepeatButton 用 Border 替代 Rectangle (点击响应可靠)
     - Corner 用主题 token 替代 SystemColors.ControlBrushKey
     ============================================================================
