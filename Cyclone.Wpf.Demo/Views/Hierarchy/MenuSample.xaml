@@ -7,26 +7,26 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:MenuViewModel}}"
-    d:DesignHeight="2400"
-    d:DesignWidth="1400"
+    d:DesignHeight="3200"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!--  ========== 与 ButtonSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
         </Style>
 
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
@@ -35,14 +35,20 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-
         <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
 
+        <!--  代码块样式  -->
         <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="{DynamicResource Background.Header}" />
             <Setter Property="BorderThickness" Value="0" />
@@ -55,6 +61,7 @@
             <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
 
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -83,15 +90,10 @@
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
 
-        <!--  MenuItem.Icon 用的小 Path 样式 — stroke 风格,跟 Icon.Foreground 主题 token 联动  -->
+        <!--  MenuItem.Icon 用的小 Path 样式 — stroke 风格, 跟 Icon.Foreground 主题 token 联动  -->
         <Style x:Key="MenuIconPathStyle" TargetType="{x:Type Path}">
             <Setter Property="Width" Value="14" />
             <Setter Property="Height" Value="14" />
-            <!--
-                关键:Path 默认 Stretch=None,Data 按原始坐标系画(图标 Data 是 24×24 坐标)
-                Width/Height 只是元素边界框,不会缩放 Data——内容会被裁掉。
-                Stretch=Uniform 让 Data 等比缩放到 Width×Height,完整显示。
-            -->
             <Setter Property="Stretch" Value="Uniform" />
             <Setter Property="Stroke" Value="{DynamicResource Icon.Foreground.Default}" />
             <Setter Property="StrokeThickness" Value="1.5" />
@@ -102,32 +104,29 @@
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
                         Height="56"
                         Background="{DynamicResource Background.Info}">
-                        <Grid>
-                            <Path
-                                Width="28"
-                                Height="28"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Data="M4,6 L20,6 M4,12 L20,12 M4,18 L14,18"
-                                Stroke="White"
-                                StrokeEndLineCap="Round"
-                                StrokeStartLineCap="Round"
-                                StrokeThickness="2" />
-                        </Grid>
+                        <Path
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M4,6 L20,6 M4,12 L20,12 M4,18 L14,18"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2.5" />
                     </Border>
                     <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
@@ -144,7 +143,7 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
+                                    Foreground="{DynamicResource Text.Invert}"
                                     Text="WPF 控件" />
                             </Border>
                         </StackPanel>
@@ -152,15 +151,14 @@
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="经典菜单栏与右键上下文菜单。MenuItem 按 Role(TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem)自动切换四种模板,支持 Icon、快捷键文字、IsCheckable、嵌套子菜单、AccessKey、Command 路由。" />
+                            Text="经典菜单栏与右键上下文菜单。MenuItem 按 Role(TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem) 自动切换四种模板, 支持 Icon、快捷键文字、IsCheckable、嵌套子菜单、AccessKey、Command 路由。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 操作日志(放头部下方,全宽,任何 section 触发都能看到) ============  -->
+            <!--  ========== 全局操作日志(贴在 Header 下方) ==========  -->
             <Border
-                Grid.Row="0"
-                Margin="0,80,0,0"
+                Margin="0,16,0,0"
                 Padding="14,10"
                 Background="{DynamicResource Background.Header}"
                 BorderBrush="{DynamicResource Border.Default}"
@@ -182,792 +180,704 @@
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1" Margin="0,16,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  ========== ① 经典菜单栏 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 经典菜单栏"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Icon · 快捷键 · Separator · AccessKey" />
 
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="文件 / 编辑 / 帮助 — Header 中 _F 是 AccessKey(Alt+F 触发), InputGestureText 显示快捷键(仅显示, 不响应)。Command 绑定 ExecuteCommand, 点击会更新顶部 最后操作。" />
 
-                    <!--  ① 经典 Menu 栏  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="经典菜单栏" Subtitle="Icon · 快捷键 · Separator · AccessKey">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <Menu
+                Padding="0"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <MenuItem Header="文件(_F)">
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="文件 → 新建"
+                        Header="新建"
+                        InputGestureText="Ctrl+N">
+                        <MenuItem.Icon>
+                            <Path Data="M12,5 L12,19 M5,12 L19,12" Style="{StaticResource MenuIconPathStyle}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="文件 → 打开"
+                        Header="打开..."
+                        InputGestureText="Ctrl+O">
+                        <MenuItem.Icon>
+                            <Path Data="M3,7 L9,7 L11,9 L21,9 L21,19 L3,19 Z" Style="{StaticResource MenuIconPathStyle}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="文件 → 保存"
+                        Header="保存"
+                        InputGestureText="Ctrl+S">
+                        <MenuItem.Icon>
+                            <Path Data="M5,4 L17,4 L20,7 L20,20 L4,20 L4,5 Z M7,4 L7,10 L15,10 L15,4" Style="{StaticResource MenuIconPathStyle}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="文件 → 另存为"
+                        Header="另存为..."
+                        InputGestureText="Ctrl+Shift+S" />
+                    <Separator />
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="文件 → 退出"
+                        Header="退出"
+                        InputGestureText="Alt+F4" />
+                </MenuItem>
+                <MenuItem Header="编辑(_E)">
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="编辑 → 撤销"
+                        Header="撤销"
+                        InputGestureText="Ctrl+Z" />
+                    <MenuItem
+                        Header="重做"
+                        InputGestureText="Ctrl+Y"
+                        IsEnabled="False" />
+                    <Separator />
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="编辑 → 剪切"
+                        Header="剪切"
+                        InputGestureText="Ctrl+X">
+                        <MenuItem.Icon>
+                            <Path Data="M6,4 L18,16 M6,16 L11,11 M13,9 L18,4 M7,7 A2.5,2.5 0 1,1 5,9 A2.5,2.5 0 0,1 7,7 M7,17 A2.5,2.5 0 1,1 5,15 A2.5,2.5 0 0,1 7,17" Style="{StaticResource MenuIconPathStyle}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="编辑 → 复制"
+                        Header="复制"
+                        InputGestureText="Ctrl+C">
+                        <MenuItem.Icon>
+                            <Path Data="M8,4 L18,4 L18,16 L8,16 Z M5,8 L5,20 L15,20" Style="{StaticResource MenuIconPathStyle}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="编辑 → 粘贴"
+                        Header="粘贴"
+                        InputGestureText="Ctrl+V" />
+                </MenuItem>
+                <MenuItem Header="帮助(_H)">
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="帮助 → 文档"
+                        Header="查看文档"
+                        InputGestureText="F1" />
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="帮助 → 关于"
+                        Header="关于" />
+                </MenuItem>
+            </Menu>
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="文件 / 编辑 / 帮助 — Header 中 _F 是 AccessKey(Alt+F 触发),InputGestureText 显示快捷键(仅显示,不响应)。Command 绑定 ExecuteCommand,点击会更新顶部 最后操作 。" />
+            <TextBlock
+                Margin="0,12,0,0"
+                FontSize="11"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="提示: 按 Alt 键激活 AccessKey, Alt+F 直接打开文件菜单。 重做 项 IsEnabled=False 演示禁用态。" />
 
-                            <Menu
-                                Padding="0"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <MenuItem Header="文件(_F)">
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="文件 → 新建"
-                                        Header="新建"
-                                        InputGestureText="Ctrl+N">
-                                        <MenuItem.Icon>
-                                            <Path Data="M12,5 L12,19 M5,12 L19,12" Style="{StaticResource MenuIconPathStyle}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="文件 → 打开"
-                                        Header="打开..."
-                                        InputGestureText="Ctrl+O">
-                                        <MenuItem.Icon>
-                                            <Path Data="M3,7 L9,7 L11,9 L21,9 L21,19 L3,19 Z" Style="{StaticResource MenuIconPathStyle}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator />
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="文件 → 保存"
-                                        Header="保存"
-                                        InputGestureText="Ctrl+S">
-                                        <MenuItem.Icon>
-                                            <Path Data="M5,4 L17,4 L20,7 L20,20 L4,20 L4,5 Z M7,4 L7,10 L15,10 L15,4" Style="{StaticResource MenuIconPathStyle}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="文件 → 另存为"
-                                        Header="另存为..."
-                                        InputGestureText="Ctrl+Shift+S" />
-                                    <Separator />
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="文件 → 退出"
-                                        Header="退出"
-                                        InputGestureText="Alt+F4" />
-                                </MenuItem>
-                                <MenuItem Header="编辑(_E)">
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="编辑 → 撤销"
-                                        Header="撤销"
-                                        InputGestureText="Ctrl+Z" />
-                                    <MenuItem
-                                        Header="重做"
-                                        InputGestureText="Ctrl+Y"
-                                        IsEnabled="False" />
-                                    <Separator />
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="编辑 → 剪切"
-                                        Header="剪切"
-                                        InputGestureText="Ctrl+X">
-                                        <MenuItem.Icon>
-                                            <Path Data="M6,4 L18,16 M6,16 L11,11 M13,9 L18,4 M7,7 A2.5,2.5 0 1,1 5,9 A2.5,2.5 0 0,1 7,7 M7,17 A2.5,2.5 0 1,1 5,15 A2.5,2.5 0 0,1 7,17" Style="{StaticResource MenuIconPathStyle}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="编辑 → 复制"
-                                        Header="复制"
-                                        InputGestureText="Ctrl+C">
-                                        <MenuItem.Icon>
-                                            <Path Data="M8,4 L18,4 L18,16 L8,16 Z M5,8 L5,20 L15,20" Style="{StaticResource MenuIconPathStyle}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="编辑 → 粘贴"
-                                        Header="粘贴"
-                                        InputGestureText="Ctrl+V" />
-                                </MenuItem>
-                                <MenuItem Header="帮助(_H)">
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="帮助 → 文档"
-                                        Header="查看文档"
-                                        InputGestureText="F1" />
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="帮助 → 关于"
-                                        Header="关于" />
-                                </MenuItem>
-                            </Menu>
+            <!--  ========== ② 勾选项 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 勾选项"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="IsCheckable + IsChecked TwoWay" />
 
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="提示:按 Alt 键激活 AccessKey,Alt+F 直接打开文件菜单。 重做 项 IsEnabled=False 演示禁用态。" />
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="IsCheckable=True 让 MenuItem 像 CheckBox 一样切换。模板里的 GlyphPanel(√ 图标)在 IsChecked=True 时显示在 Icon 位置。" />
 
-                    <!--  ② IsCheckable 勾选项  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="勾选项" Subtitle="IsCheckable + IsChecked TwoWay">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <Menu
+                Padding="0"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <MenuItem Header="视图(_V)">
+                    <MenuItem
+                        Header="显示工具栏"
+                        IsCheckable="True"
+                        IsChecked="{Binding ShowToolbar, Mode=TwoWay}" />
+                    <MenuItem
+                        Header="显示状态栏"
+                        IsCheckable="True"
+                        IsChecked="{Binding ShowStatusBar, Mode=TwoWay}" />
+                    <MenuItem
+                        Header="显示侧边栏"
+                        IsCheckable="True"
+                        IsChecked="{Binding ShowSidebar, Mode=TwoWay}" />
+                    <Separator />
+                    <MenuItem
+                        Header="自动换行"
+                        IsCheckable="True"
+                        IsChecked="{Binding WordWrap, Mode=TwoWay}" />
+                    <Separator />
+                    <MenuItem
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="视图 → 全屏"
+                        Header="全屏模式"
+                        InputGestureText="F11" />
+                </MenuItem>
+            </Menu>
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="IsCheckable=True 让 MenuItem 像 CheckBox 一样切换。模板里的 GlyphPanel(√ 图标)在 IsChecked=True 时显示在 Icon 位置。" />
-
-                            <Menu
-                                Padding="0"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <MenuItem Header="视图(_V)">
-                                    <MenuItem
-                                        Header="显示工具栏"
-                                        IsCheckable="True"
-                                        IsChecked="{Binding ShowToolbar, Mode=TwoWay}" />
-                                    <MenuItem
-                                        Header="显示状态栏"
-                                        IsCheckable="True"
-                                        IsChecked="{Binding ShowStatusBar, Mode=TwoWay}" />
-                                    <MenuItem
-                                        Header="显示侧边栏"
-                                        IsCheckable="True"
-                                        IsChecked="{Binding ShowSidebar, Mode=TwoWay}" />
-                                    <Separator />
-                                    <MenuItem
-                                        Header="自动换行"
-                                        IsCheckable="True"
-                                        IsChecked="{Binding WordWrap, Mode=TwoWay}" />
-                                    <Separator />
-                                    <MenuItem
-                                        Command="{Binding ExecuteCommand}"
-                                        CommandParameter="视图 → 全屏"
-                                        Header="全屏模式"
-                                        InputGestureText="F11" />
-                                </MenuItem>
-                            </Menu>
-
-                            <Border
-                                Margin="0,12,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="12"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="当前勾选状态" />
-                                    <UniformGrid Margin="0,8,0,0" Columns="2">
-                                        <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                            <Run Text="工具栏:" />
-                                            <Run
-                                                FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground.Link}"
-                                                Text="{Binding ShowToolbar}" />
-                                        </TextBlock>
-                                        <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                            <Run Text="状态栏:" />
-                                            <Run
-                                                FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground.Link}"
-                                                Text="{Binding ShowStatusBar}" />
-                                        </TextBlock>
-                                        <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                            <Run Text="侧边栏:" />
-                                            <Run
-                                                FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground.Link}"
-                                                Text="{Binding ShowSidebar}" />
-                                        </TextBlock>
-                                        <TextBlock Style="{StaticResource ValueLabelStyle}">
-                                            <Run Text="自动换行:" />
-                                            <Run
-                                                FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground.Link}"
-                                                Text="{Binding WordWrap}" />
-                                        </TextBlock>
-                                    </UniformGrid>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ 嵌套子菜单  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="嵌套子菜单" Subtitle="SubmenuHeader 模板自动应用">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="MenuItem 嵌套自动触发 SubmenuHeader 模板,右箭头由模板的 RightArrow Path 渲染。子菜单 Popup Placement=Right。" />
-
-                            <Menu
-                                Padding="0"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <MenuItem Header="导出">
-                                    <MenuItem Header="文档">
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 文档 → PDF"
-                                            Header="PDF (.pdf)" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 文档 → Word"
-                                            Header="Word (.docx)" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 文档 → HTML"
-                                            Header="HTML (.html)" />
-                                    </MenuItem>
-                                    <MenuItem Header="图片">
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 图片 → PNG"
-                                            Header="PNG" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 图片 → JPEG"
-                                            Header="JPEG" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 图片 → SVG"
-                                            Header="SVG (矢量)" />
-                                    </MenuItem>
-                                    <MenuItem Header="数据">
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 数据 → CSV"
-                                            Header="CSV (.csv)" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 数据 → JSON"
-                                            Header="JSON (.json)" />
-                                        <MenuItem
-                                            Command="{Binding ExecuteCommand}"
-                                            CommandParameter="导出 → 数据 → XML"
-                                            Header="XML (.xml)" />
-                                    </MenuItem>
-                                </MenuItem>
-                            </Menu>
-                        </StackPanel>
-                    </cy:Card>
+            <Border
+                Margin="0,12,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Background.Header}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="12"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Default}"
+                        Text="当前勾选状态" />
+                    <UniformGrid Margin="0,8,0,0" Columns="2">
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="工具栏:" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding ShowToolbar}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="状态栏:" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding ShowStatusBar}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="侧边栏:" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding ShowSidebar}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource ValueLabelStyle}">
+                            <Run Text="自动换行:" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Link}"
+                                Text="{Binding WordWrap}" />
+                        </TextBlock>
+                    </UniformGrid>
                 </StackPanel>
+            </Border>
 
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
+            <!--  ========== ③ 嵌套子菜单 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ 嵌套子菜单"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="SubmenuHeader 模板自动应用" />
 
-                    <!--  ④ ContextMenu 基础  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="ContextMenu 基础" Subtitle="右键打开">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="MenuItem 嵌套自动触发 SubmenuHeader 模板, 右箭头由模板的 RightArrow Path 渲染。子菜单 Popup Placement=Right。" />
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="把 ContextMenu 直接赋给元素的 ContextMenu 属性,任意 FrameworkElement 都支持。ContextMenu 是独立顶层 Popup,不在 visual tree 里。" />
+            <Menu
+                Padding="0"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <MenuItem Header="导出">
+                    <MenuItem Header="文档">
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 文档 → PDF"
+                            Header="PDF (.pdf)" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 文档 → Word"
+                            Header="Word (.docx)" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 文档 → HTML"
+                            Header="HTML (.html)" />
+                    </MenuItem>
+                    <MenuItem Header="图片">
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 图片 → PNG"
+                            Header="PNG" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 图片 → JPEG"
+                            Header="JPEG" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 图片 → SVG"
+                            Header="SVG (矢量)" />
+                    </MenuItem>
+                    <MenuItem Header="数据">
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 数据 → CSV"
+                            Header="CSV (.csv)" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 数据 → JSON"
+                            Header="JSON (.json)" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="导出 → 数据 → XML"
+                            Header="XML (.xml)" />
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
 
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Button 右键" />
-                                <Button
-                                    Margin="0,0,0,16"
-                                    Padding="14,8"
-                                    HorizontalAlignment="Left"
-                                    Content="右键单击我">
-                                    <Button.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="Button → 操作 A"
-                                                Header="操作 A" />
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="Button → 操作 B"
-                                                Header="操作 B" />
-                                            <Separator />
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="Button → 删除"
-                                                Header="删除" />
-                                        </ContextMenu>
-                                    </Button.ContextMenu>
-                                </Button>
+            <!--  ========== ④ ContextMenu 基础 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ ContextMenu 基础"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="右键打开" />
 
-                                <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="区域 (Border) 右键 — 模拟文本编辑" />
-                                <Border
-                                    Height="100"
-                                    Background="{DynamicResource Background.Default}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="在我身上右键 →" />
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="区域 → 剪切"
-                                                Header="剪切"
-                                                InputGestureText="Ctrl+X" />
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="区域 → 复制"
-                                                Header="复制"
-                                                InputGestureText="Ctrl+C" />
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="区域 → 粘贴"
-                                                Header="粘贴"
-                                                InputGestureText="Ctrl+V" />
-                                            <Separator />
-                                            <MenuItem
-                                                Command="{Binding ExecuteCommand}"
-                                                CommandParameter="区域 → 全选"
-                                                Header="全选"
-                                                InputGestureText="Ctrl+A" />
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="把 ContextMenu 直接赋给元素的 ContextMenu 属性, 任意 FrameworkElement 都支持。ContextMenu 是独立顶层 Popup, 不在 visual tree 里。" />
 
-                    <!--  ⑤ 数据绑定 ContextMenu  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="数据绑定" Subtitle="ItemsSource + Command 跨 DataContext">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Button 右键" />
+            <Button
+                Margin="0,0,0,16"
+                Padding="14,8"
+                HorizontalAlignment="Left"
+                Content="右键单击我">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="Button → 操作 A"
+                            Header="操作 A" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="Button → 操作 B"
+                            Header="操作 B" />
+                        <Separator />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="Button → 删除"
+                            Header="删除" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
 
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,12"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ContextMenu 在 visual tree 之外,DataContext 不会自动继承。常用技巧:通过 PlacementTarget 找到挂载元素并继承它的 DataContext。" />
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="区域 (Border) 右键 — 模拟文本编辑" />
+            <Border
+                Height="100"
+                Background="{DynamicResource Background.Default}"
+                BorderBrush="{DynamicResource Border.Default}"
+                BorderThickness="1">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{DynamicResource Foreground.Caption}"
+                    Text="在我身上右键 →" />
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="区域 → 剪切"
+                            Header="剪切"
+                            InputGestureText="Ctrl+X" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="区域 → 复制"
+                            Header="复制"
+                            InputGestureText="Ctrl+C" />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="区域 → 粘贴"
+                            Header="粘贴"
+                            InputGestureText="Ctrl+V" />
+                        <Separator />
+                        <MenuItem
+                            Command="{Binding ExecuteCommand}"
+                            CommandParameter="区域 → 全选"
+                            Header="全选"
+                            InputGestureText="Ctrl+A" />
+                    </ContextMenu>
+                </Border.ContextMenu>
+            </Border>
 
-                            <Button
-                                Margin="0,0,0,12"
-                                Padding="14,8"
-                                HorizontalAlignment="Left"
-                                Content="最近文件 (右键打开列表)">
-                                <Button.ContextMenu>
-                                    <!--  DataContext 通过 PlacementTarget 取宿主元素的 DataContext  -->
-                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" ItemsSource="{Binding RecentFiles}">
-                                        <ContextMenu.ItemContainerStyle>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="Header" Value="{Binding}" />
-                                                <!--  通过 AncestorType=ContextMenu 找到外层 DataContext,绑 ExecuteCommand  -->
-                                                <Setter Property="Command" Value="{Binding DataContext.ExecuteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-                                                <Setter Property="CommandParameter" Value="{Binding}" />
-                                            </Style>
-                                        </ContextMenu.ItemContainerStyle>
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
+            <!--  ========== ⑤ 数据绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 数据绑定"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="ItemsSource + Command 跨 DataContext" />
 
-                            <TextBlock
-                                FontSize="11"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="ItemContainerStyle 设 Header={Binding} 让每项的 Header 取数据项本身;Command 用 AncestorType=ContextMenu 跳出 ItemContainer 的 DataContext 拿外层。"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </cy:Card>
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="ContextMenu 在 visual tree 之外, DataContext 不会自动继承。常用技巧: 通过 PlacementTarget 找到挂载元素并继承它的 DataContext。" />
 
-                    <!--  ⑥ 常见使用场景  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="常见使用场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <Button
+                Margin="0,0,0,12"
+                Padding="14,8"
+                HorizontalAlignment="Left"
+                Content="最近文件 (右键打开列表)">
+                <Button.ContextMenu>
+                    <!--  DataContext 通过 PlacementTarget 取宿主元素的 DataContext  -->
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" ItemsSource="{Binding RecentFiles}">
+                        <ContextMenu.ItemContainerStyle>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding}" />
+                                <!--  通过 AncestorType=ContextMenu 找到外层 DataContext, 绑 ExecuteCommand  -->
+                                <Setter Property="Command" Value="{Binding DataContext.ExecuteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                <Setter Property="CommandParameter" Value="{Binding}" />
+                            </Style>
+                        </ContextMenu.ItemContainerStyle>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
 
-                        <UniformGrid Columns="2" Rows="2">
+            <TextBlock
+                FontSize="11"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="ItemContainerStyle 设 Header={Binding} 让每项的 Header 取数据项本身; Command 用 AncestorType=ContextMenu 跳出 ItemContainer 的 DataContext 拿外层。"
+                TextWrapping="Wrap" />
 
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M3,3 L21,3 L21,21 L3,21 Z M3,9 L21,9"
-                                        Stroke="{DynamicResource Foreground.Link}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="2" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="桌面应用菜单栏" />
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="文件 / 编辑 / 视图 / 帮助 — 经典桌面应用顶部 Menu,Alt+ 字母 AccessKey 触发"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
+            <!--  ========== ⑥ 常见使用场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 常见使用场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Menu / ContextMenu 的典型应用模式" />
 
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M4,4 L12,4 L12,20 L4,20 Z M14,7 L20,7 L20,11 L14,11 Z M14,14 L20,14 L20,20 L14,20 Z"
-                                        Stroke="{DynamicResource Foreground.Success}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="2" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="右键上下文" />
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="ListBoxItem / DataGridRow / Tree 节点 — 针对当前项的操作集合"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
+            <UniformGrid Columns="2" Rows="2">
+                <Border
+                    Margin="0,0,6,6"
+                    Padding="14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M3,3 L21,3 L21,21 L3,21 Z M3,9 L21,9"
+                            Stroke="{DynamicResource Foreground.Link}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="2" />
+                        <TextBlock
+                            Margin="0,8,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="桌面应用菜单栏" />
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="文件 / 编辑 / 视图 / 帮助 — 经典桌面应用顶部 Menu, Alt+ 字母 AccessKey 触发"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M4,7 L20,7 M4,12 L20,12 M4,17 L20,17"
-                                        Stroke="{DynamicResource Foreground.Warning}"
-                                        StrokeEndLineCap="Round"
-                                        StrokeStartLineCap="Round"
-                                        StrokeThickness="2" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="动态菜单" />
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="最近文件 / 收藏夹 — ItemsSource 绑定动态列表,Command 触发选择"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
+                <Border
+                    Margin="6,0,0,6"
+                    Padding="14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M4,4 L12,4 L12,20 L4,20 Z M14,7 L20,7 L20,11 L14,11 Z M14,14 L20,14 L20,20 L14,20 Z"
+                            Stroke="{DynamicResource Foreground.Success}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="2" />
+                        <TextBlock
+                            Margin="0,8,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="右键上下文" />
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="ListBoxItem / DataGridRow / Tree 节点 — 针对当前项的操作集合"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M4,6 L8,10 L12,6 M4,12 L8,16 L12,12"
-                                        Stroke="{DynamicResource Foreground.Info}"
-                                        StrokeEndLineCap="Round"
-                                        StrokeLineJoin="Round"
-                                        StrokeStartLineCap="Round"
-                                        StrokeThickness="2" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="嵌套层级" />
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="导出 → 文档 → PDF / Word / HTML — 多级菜单分组功能"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-                        </UniformGrid>
-                    </cy:Card>
-                </StackPanel>
-            </Grid>
+                <Border
+                    Margin="0,6,6,0"
+                    Padding="14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M4,7 L20,7 M4,12 L20,12 M4,17 L20,17"
+                            Stroke="{DynamicResource Foreground.Warning}"
+                            StrokeEndLineCap="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2" />
+                        <TextBlock
+                            Margin="0,8,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="动态菜单" />
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="最近文件 / 收藏夹 — ItemsSource 绑定动态列表, Command 触发选择"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
-            <!--  ============ 底部:属性表 + 代码示例 + 设计要点 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+                <Border
+                    Margin="6,6,0,0"
+                    Padding="14"
+                    Background="{DynamicResource Background.Header}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <Path
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            Data="M4,6 L8,10 L12,6 M4,12 L8,16 L12,12"
+                            Stroke="{DynamicResource Foreground.Info}"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2" />
+                        <TextBlock
+                            Margin="0,8,0,4"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="嵌套层级" />
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="导出 → 文档 → PDF / Word / HTML — 多级菜单分组功能"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
 
-                <!--  ⑦ MenuItem / ContextMenu 主要属性  -->
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="MenuItem / ContextMenu 主要属性">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
+            <!--  ========== ⑦ 主要属性 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ 主要属性"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="MenuItem / ContextMenu 属性一览" />
 
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Header" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="object" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="菜单项显示文本。带下划线的 _F 是 AccessKey(Alt+F 触发)。可设为任意 UI 元素(配合 HeaderTemplate)。" />
-
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Icon" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="object" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="左侧图标,通常是 Path 或 Image。IsChecked=True 时被 √ Glyph 替换。" />
-
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="InputGestureText" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="string" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="右侧的快捷键提示文本,仅作显示——快捷键的实际触发要靠 InputBinding / RoutedCommand。" />
-
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="IsCheckable / IsChecked" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="bool / bool" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="IsCheckable=True 让 MenuItem 可勾选(模板里 GlyphPanel 显示 √)。IsChecked 双向绑定到 ViewModel。" />
-
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Command / CommandParameter" />
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="ICommand / object" />
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="点击触发的命令。CanExecute=false 时菜单项自动禁用。" />
-
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="Role" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="MenuItemRole" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="WPF 自动设:TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem。Style.Triggers 按 Role 自动切换四种模板。一般不手动设。" />
-
-                            <TextBlock
-                                Grid.Row="7"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="IsSubmenuOpen" />
-                            <TextBlock
-                                Grid.Row="7"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="bool" />
-                            <TextBlock
-                                Grid.Row="7"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="子菜单 Popup 的打开状态。可读可写——双向绑定可以程序化控制。" />
-
-                            <TextBlock
-                                Grid.Row="8"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="ContextMenu" />
-                            <TextBlock
-                                Grid.Row="8"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="ContextMenu" />
-                            <TextBlock
-                                Grid.Row="8"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="FrameworkElement.ContextMenu — 右键打开。ContextMenu 是独立顶层 Popup,不在 visual tree 内。" />
-
-                            <TextBlock
-                                Grid.Row="9"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableNameStyle}"
-                                Text="ContextMenu.PlacementTarget" />
-                            <TextBlock
-                                Grid.Row="9"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableTypeStyle}"
-                                Text="UIElement" />
-                            <TextBlock
-                                Grid.Row="9"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableCellStyle}"
-                                Text="ContextMenu 弹出时锚定的元素,WPF 自动设。常用于绑定:DataContext=PlacementTarget.DataContext。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <!--  ⑧ XAML 示例 + ⑨ 设计要点  -->
-                <Grid Grid.Row="1">
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 经典 Menu 栏 -->
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Header" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="object" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="菜单项显示文本。带下划线的 _F 是 AccessKey(Alt+F 触发)。可设为任意 UI 元素(配合 HeaderTemplate)。" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Icon" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="object" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="左侧图标, 通常是 Path 或 Image。IsChecked=True 时被 √ Glyph 替换。" />
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="InputGestureText" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="string" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="右侧的快捷键提示文本, 仅作显示 — 快捷键的实际触发要靠 InputBinding / RoutedCommand。" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="IsCheckable / IsChecked" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool / bool" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="IsCheckable=True 让 MenuItem 可勾选(模板里 GlyphPanel 显示 √)。IsChecked 双向绑定到 ViewModel。" />
+
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Command / CommandParameter" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="ICommand / object" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="点击触发的命令。CanExecute=false 时菜单项自动禁用。" />
+
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Role" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="MenuItemRole" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="WPF 自动设: TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem。Style.Triggers 按 Role 自动切换四种模板。一般不手动设。" />
+
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="IsSubmenuOpen" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="子菜单 Popup 的打开状态。可读可写 — 双向绑定可以程序化控制。" />
+
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ContextMenu" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="ContextMenu" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="FrameworkElement.ContextMenu — 右键打开。ContextMenu 是独立顶层 Popup, 不在 visual tree 内。" />
+
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ContextMenu.PlacementTarget" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="UIElement" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="ContextMenu 弹出时锚定的元素, WPF 自动设。常用于绑定: DataContext=PlacementTarget.DataContext。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑧ XAML 示例 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ XAML 示例"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="常见使用模式速查" />
+
+            <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
+                <![CDATA[<!-- 经典 Menu 栏 -->
 <Menu>
     <MenuItem Header="文件(_F)">
         <MenuItem
@@ -1025,84 +935,72 @@
         </ContextMenu.ItemContainerStyle>
     </ContextMenu>
 </Button.ContextMenu>]]>
-                        </TextBox>
-                    </cy:Card>
+            </TextBox>
 
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
+            <!--  ========== ⑨ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑨ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Menu / ContextMenu 关键决策" />
 
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="Role 自动切模板" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Style.Triggers 按 Role 自动切 TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem 四种模板,通过 ComponentResourceKey 引用"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="独立 Popup" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="ContextMenu 不在 visual tree 中,DataContext 不会自动继承——用 PlacementTarget.DataContext 跨过去"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="完整主题 token" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="所有颜色用 DynamicResource,暗色主题切换工作正常(v3 修复)"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="无圆角" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="对齐 Win10 规约,Popup 边框直角,跟项目其他控件一致"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-                </Grid>
-            </Grid>
-        </Grid>
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="Role 自动切模板" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Style.Triggers 按 Role 自动切 TopLevelHeader / TopLevelItem / SubmenuHeader / SubmenuItem 四种模板, 通过 ComponentResourceKey 引用"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="独立 Popup" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="ContextMenu 不在 visual tree 中, DataContext 不会自动继承 — 用 PlacementTarget.DataContext 跨过去"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="完整主题 token" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="所有颜色用 DynamicResource, 暗色主题切换工作正常(v3 修复)"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="无圆角" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="对齐 Win10 规约, Popup 边框直角, 跟项目其他控件一致"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

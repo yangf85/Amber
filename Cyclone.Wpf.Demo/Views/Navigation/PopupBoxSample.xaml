@@ -7,43 +7,48 @@
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:PopupBoxViewModel}}"
-    d:DesignHeight="2800"
-    d:DesignWidth="1400"
+    d:DesignHeight="3800"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <!--  ========== 与 TextBoxSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
+        </Style>
 
-        <Style x:Key="SectionNumberStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource Background.Highlighted}" />
-            <Setter Property="CornerRadius" Value="999" />
-            <Setter Property="Width" Value="26" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style x:Key="SectionNumberTextStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
         <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
-        <Style x:Key="CodeBlockStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="Padding" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!--  API 表样式  -->
         <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
             <Setter Property="FontSize" Value="13" />
@@ -71,18 +76,32 @@
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         </Style>
+
+        <!--  场景小卡样式  -->
+        <Style x:Key="ScenarioCardStyle" TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!--  小指标卡样式  -->
+        <Style x:Key="MetricBoxStyle" TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
     </UserControl.Resources>
 
     <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="40,32">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
 
-            <!--  ============ 顶部 Header ============  -->
-            <Border Grid.Row="0" Margin="0,0,0,24">
+            <!--  ========== Page Header ==========  -->
+            <Border>
                 <StackPanel Orientation="Horizontal">
                     <Border
                         Width="56"
@@ -94,7 +113,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M4,8 L20,8 L20,16 L4,16 Z M4,8 L4,4 L8,4 M16,4 L20,4 L20,8 M4,16 L4,20 L8,20 M16,20 L20,20 L20,16"
-                            Stroke="White"
+                            Stroke="{DynamicResource Text.Invert}"
                             StrokeLineJoin="Round"
                             StrokeThickness="2" />
                     </Border>
@@ -113,1021 +132,766 @@
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="Medium"
-                                    Foreground="White"
-                                    Text="WPF 控件" />
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="浮动弹出框" />
                             </Border>
                         </StackPanel>
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="14"
                             Foreground="{DynamicResource Foreground.Caption}"
-                            Text="浮动弹出框——一个触发按钮 + 一个浮窗。支持 Click / Hover / RightClick / Focus 四种触发方式,完整 MVVM 三件套(Command / CloseCommand / OpenedCommand &amp; ClosedCommand),popup 内 DataContext 自动继承。" />
+                            Text="一个触发按钮 + 一个浮窗。支持 Click / Hover 触发方式, 完整 MVVM 三件套(Command / CloseCommand / OpenedCommand &amp; ClosedCommand), popup 内 DataContext 自动继承。" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!--  ============ 主体两列 ============  -->
-            <Grid Grid.Row="1">
+            <!--  ========== ① 基础用法 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础用法"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Content / PopupContent" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Content 是触发按钮上的标签; PopupContent (XAML 默认内容) 是浮窗内的主体。点击触发按钮展开, 点击外部或按 Esc 关闭。" />
+
+            <StackPanel Orientation="Horizontal">
+                <cy:PopupBox MinWidth="100" Content="点我展开">
+                    <StackPanel Width="220" Margin="4">
+                        <TextBlock
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="这是一个 popup" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="可以放任何 UIElement — 文本、按钮、表单、列表都行。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </cy:PopupBox>
+            </StackPanel>
+
+            <!--  ========== ② 触发方式 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 触发方式"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="TriggerMode: Click / Hover" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="两种触发方式。Hover 模式带 200ms 延迟避免误触, 鼠标进入 popup 时保持打开; 鼠标离开按钮和 popup 后才关闭。" />
+
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Margin="0,0,40,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Click (默认)" />
+                    <cy:PopupBox
+                        MinWidth="100"
+                        Content="点击展开"
+                        TriggerMode="Click">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="左键点击触发" />
+                    </cy:PopupBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Hover" />
+                    <cy:PopupBox
+                        MinWidth="100"
+                        Content="悬停展开"
+                        TriggerMode="Hover">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="鼠标悬停 200ms 后打开" />
+                    </cy:PopupBox>
+                </StackPanel>
+            </StackPanel>
+
+            <!--  ========== ③ MVVM 命令 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ MVVM 命令"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Command / OpenedCommand / ClosedCommand" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Command 是按钮 Click 的附带动作(不影响 popup 开关)。OpenedCommand / ClosedCommand 在 popup 状态变化时执行 — 都不需要 codebehind。" />
+
+            <StackPanel Orientation="Horizontal">
+                <cy:PopupBox
+                    MinWidth="120"
+                    ClosedCommand="{Binding HandleClosedCommand}"
+                    Command="{Binding TriggerCommand}"
+                    Content="点我看回显"
+                    OpenedCommand="{Binding HandleOpenedCommand}">
+                    <StackPanel Width="240" Margin="4">
+                        <TextBlock
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Text="Popup 已打开" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="OpenedCommand 已经被调用 — 看下方回显区。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </cy:PopupBox>
+            </StackPanel>
+
+            <UniformGrid
+                Margin="0,16,0,0"
+                Columns="3"
+                Rows="1">
+                <Border Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="OpenCount" />
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="20"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding OpenCount}" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="8,0" Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="CloseCount" />
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="20"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding CloseCount}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="LastEvent" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontFamily="Consolas"
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="{Binding LastEvent}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!--  ========== ④ CloseCommand + DataContext 继承 ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ CloseCommand 与 DataContext 继承"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="popup 内表单 + 关闭按钮" />
+
+            <StackPanel DataContext="{Binding ContactForm}">
+                <TextBlock Style="{StaticResource CaptionStyle}" Text="一张演示三种 popup 关闭方式: ① 取消按钮用控件自带的 CloseCommand (View 层直接关) ② 提交按钮通过 VM 双向绑定 IsOpen 关闭 — 验证失败时保持打开, 成功才关 ③ Esc 键和 IsOpen 自动同步。这正是 CloseCommand vs IsOpen 双向绑定的语义差别。" />
+
+                <StackPanel Orientation="Horizontal">
+                    <cy:PopupBox
+                        MinWidth="120"
+                        Content="新建联系人"
+                        IsOpen="{Binding IsOpen, Mode=TwoWay}"
+                        StaysOpen="True">
+                        <Border Width="280" Padding="4">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Foreground.Default}"
+                                    Text="新建联系人" />
+                                <TextBlock
+                                    Margin="0,12,0,4"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="姓名" />
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,8,0,4"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="邮箱" />
+                                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                <StackPanel
+                                    Margin="0,16,0,0"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        MinWidth="64"
+                                        Margin="0,0,8,0"
+                                        Padding="12,4"
+                                        Command="{Binding CloseCommand, RelativeSource={RelativeSource AncestorType=cy:PopupBox}}"
+                                        Content="取消" />
+                                    <Button
+                                        MinWidth="64"
+                                        Padding="12,4"
+                                        Background="{DynamicResource Background.Highlighted}"
+                                        Command="{Binding SubmitCommand}"
+                                        Content="提交"
+                                        Foreground="{DynamicResource Text.Invert}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </cy:PopupBox>
+                </StackPanel>
+
+                <Border Margin="0,16,0,0" Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="ContactForm.LastSubmitted:" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="{Binding LastSubmitted}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!--  ========== ⑤ 位置 / 动画 / 阴影 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 位置 / 动画 / 阴影"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Placement · PopupAnimation · HasDropShadow" />
+
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="popup 弹出位置、动画、阴影都可独立配置。HasDropShadow=False 适合 Win10 风格的扁平设计。" />
+
+            <UniformGrid Columns="4" Rows="1">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Top" />
+                    <cy:PopupBox
+                        MinWidth="80"
+                        Content="向上"
+                        Placement="Top"
+                        PopupAnimation="Slide">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="Slide 动画 + Top 弹出" />
+                    </cy:PopupBox>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Right" />
+                    <cy:PopupBox
+                        MinWidth="80"
+                        Content="向右"
+                        Placement="Right"
+                        PopupAnimation="Fade">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="Fade 动画 + Right 弹出" />
+                    </cy:PopupBox>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="MousePoint" />
+                    <cy:PopupBox
+                        MinWidth="80"
+                        Content="跟鼠标"
+                        Placement="MousePoint">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="跟随鼠标位置弹出" />
+                    </cy:PopupBox>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="无阴影" />
+                    <cy:PopupBox
+                        MinWidth="80"
+                        Content="扁平"
+                        HasDropShadow="False"
+                        PopupAnimation="None">
+                        <TextBlock
+                            Margin="8"
+                            FontSize="12"
+                            Text="HasDropShadow=False" />
+                    </cy:PopupBox>
+                </StackPanel>
+            </UniformGrid>
+
+            <!--  ========== ⑥ 实战场景 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑥ 实战场景"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="时间选择器 / 用户菜单 / 通知中心 / 帮助提示" />
+
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-                <!--  ===== 左列 =====  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  ① 基础用法  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="基础用法" Subtitle="Content / PopupContent">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="1" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Content 是触发按钮上的标签;PopupContent (XAML 默认内容) 是浮窗内的主体。点击触发按钮展开,点击外部或按 Esc 关闭。" />
-
-                            <StackPanel Orientation="Horizontal">
-                                <cy:PopupBox MinWidth="100" Content="点我展开">
-                                    <StackPanel Width="220" Margin="4">
-                                        <TextBlock
-                                            FontSize="13"
-                                            FontWeight="Medium"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="这是一个 popup" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="可以放任何 UIElement —— 文本、按钮、表单、列表都行。"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:PopupBox>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ② TriggerMode  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="触发方式" Subtitle="TriggerMode: Click / Hover">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="2" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="两种触发方式。Hover 模式带 200ms 延迟避免误触,鼠标进入 popup 时保持打开;鼠标离开按钮和 popup 后才关闭。" />
-
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel Margin="0,0,40,0">
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Click(默认)" />
-                                    <cy:PopupBox
-                                        MinWidth="100"
-                                        Content="点击展开"
-                                        TriggerMode="Click">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="左键点击触发" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Hover" />
-                                    <cy:PopupBox
-                                        MinWidth="100"
-                                        Content="悬停展开"
-                                        TriggerMode="Hover">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="鼠标悬停 200ms 后打开" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ③ MVVM 命令三件套  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="MVVM 命令" Subtitle="Command / OpenedCommand / ClosedCommand">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="3" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="Command 是按钮 Click 的附带动作(不影响 popup 开关)。OpenedCommand / ClosedCommand 在 popup 状态变化时执行 —— 都不需要 codebehind。" />
-
-                            <StackPanel Orientation="Horizontal">
-                                <cy:PopupBox
-                                    MinWidth="120"
-                                    ClosedCommand="{Binding HandleClosedCommand}"
-                                    Command="{Binding TriggerCommand}"
-                                    Content="点我看回显"
-                                    OpenedCommand="{Binding HandleOpenedCommand}">
-                                    <StackPanel Width="240" Margin="4">
-                                        <TextBlock
-                                            FontSize="13"
-                                            FontWeight="Medium"
-                                            Text="Popup 已打开" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="OpenedCommand 已经被调用 —— 看右上角回显区。"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </cy:PopupBox>
-                            </StackPanel>
-
-                            <UniformGrid
-                                Margin="0,16,0,0"
-                                Columns="3"
-                                Rows="1">
-                                <Border
-                                    Padding="12,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="OpenCount" />
-                                        <TextBlock
-                                            FontFamily="Consolas"
-                                            FontSize="20"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding OpenCount}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border
-                                    Margin="8,0"
-                                    Padding="12,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="CloseCount" />
-                                        <TextBlock
-                                            FontFamily="Consolas"
-                                            FontSize="20"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding CloseCount}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border
-                                    Padding="12,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="LastEvent" />
-                                        <TextBlock
-                                            Margin="0,4,0,0"
-                                            FontFamily="Consolas"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Default}"
-                                            Text="{Binding LastEvent}"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ④ CloseCommand + DataContext 继承  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="CloseCommand 与 DataContext 继承" Subtitle="popup 内表单 + 关闭按钮">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="4" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel DataContext="{Binding ContactForm}">
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="一张卡演示三种 popup 关闭方式: ① &quot;取消&quot; 按钮用控件自带的 CloseCommand(View 层直接关) ② &quot;提交&quot; 按钮通过 VM 双向绑定 IsOpen 关闭——验证失败时保持打开,成功才关 ③ Esc 键和 IsOpen 自动同步。这正是 CloseCommand vs IsOpen 双向绑定的语义差别。"
-                                TextWrapping="Wrap" />
-
-                            <StackPanel Orientation="Horizontal">
-                                <cy:PopupBox
-                                    MinWidth="120"
-                                    Content="新建联系人"
-                                    IsOpen="{Binding IsOpen, Mode=TwoWay}"
-                                    StaysOpen="True">
-                                    <Border Width="280" Padding="4">
-                                        <StackPanel>
-                                            <TextBlock
-                                                FontSize="13"
-                                                FontWeight="Medium"
-                                                Foreground="{DynamicResource Foreground.Default}"
-                                                Text="新建联系人" />
-                                            <TextBlock
-                                                Margin="0,12,0,4"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="姓名" />
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-                                            <TextBlock
-                                                Margin="0,8,0,4"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="邮箱" />
-                                            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-                                            <StackPanel
-                                                Margin="0,16,0,0"
-                                                HorizontalAlignment="Right"
-                                                Orientation="Horizontal">
-                                                <Button
-                                                    MinWidth="64"
-                                                    Margin="0,0,8,0"
-                                                    Padding="12,4"
-                                                    Command="{Binding CloseCommand, RelativeSource={RelativeSource AncestorType=cy:PopupBox}}"
-                                                    Content="取消" />
-                                                <Button
-                                                    MinWidth="64"
-                                                    Padding="12,4"
-                                                    Background="{DynamicResource Background.Highlighted}"
-                                                    Command="{Binding SubmitCommand}"
-                                                    Content="提交"
-                                                    Foreground="White" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Border>
-                                </cy:PopupBox>
-                            </StackPanel>
-
-                            <Border
-                                Margin="0,16,0,0"
-                                Padding="14,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="ContactForm.LastSubmitted:" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="{Binding LastSubmitted}" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑤ Placement / Animation / 阴影  -->
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="位置 / 动画 / 阴影" Subtitle="Placement / PopupAnimation / HasDropShadow">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="5" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontSize="13"
-                                Foreground="{DynamicResource Foreground.Caption}"
-                                Text="popup 弹出位置、动画、阴影都可独立配置。HasDropShadow=False 适合 Win10 风格的扁平设计。" />
-
-                            <UniformGrid Columns="4" Rows="1">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Top" />
-                                    <cy:PopupBox
-                                        MinWidth="80"
-                                        Content="向上"
-                                        Placement="Top"
-                                        PopupAnimation="Slide">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="Slide 动画 + Top 弹出" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Right" />
-                                    <cy:PopupBox
-                                        MinWidth="80"
-                                        Content="向右"
-                                        Placement="Right"
-                                        PopupAnimation="Fade">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="Fade 动画 + Right 弹出" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="MousePoint" />
-                                    <cy:PopupBox
-                                        MinWidth="80"
-                                        Content="跟鼠标"
-                                        Placement="MousePoint">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="跟随鼠标位置弹出" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="无阴影" />
-                                    <cy:PopupBox
-                                        MinWidth="80"
-                                        Content="扁平"
-                                        HasDropShadow="False"
-                                        PopupAnimation="None">
-                                        <TextBlock
-                                            Margin="8"
-                                            FontSize="12"
-                                            Text="HasDropShadow=False" />
-                                    </cy:PopupBox>
-                                </StackPanel>
-                            </UniformGrid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <!--  ⑥ 常见使用场景  -->
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="常见使用场景">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="6" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <UniformGrid Columns="2" Rows="2">
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M12,2 A10,10 0 1,1 2,12 A10,10 0 0,1 12,2 M12,8 L12,12 L16,14"
-                                        Stroke="{DynamicResource Foreground.Link}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="时间选择器" />
-                                    <cy:PopupBox
-                                        MinWidth="140"
-                                        Margin="0,4,0,4"
-                                        HorizontalAlignment="Left"
-                                        Content="14:30">
-                                        <Grid Width="200" Margin="4">
-                                            <TextBlock
-                                                FontSize="12"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="此处可放小时分钟选择器..." />
-                                        </Grid>
-                                    </cy:PopupBox>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="日历、时间选择器的内核"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M12,2 A4,4 0 1,1 12,10 A4,4 0 0,1 12,2 M4,21 L4,18 A4,4 0 0,1 8,14 L16,14 A4,4 0 0,1 20,18 L20,21"
-                                        Stroke="{DynamicResource Foreground.Success}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="用户菜单" />
-                                    <cy:PopupBox
-                                        MinWidth="140"
-                                        Margin="0,4,0,4"
-                                        HorizontalAlignment="Left"
-                                        Content="@yangf85">
-                                        <StackPanel Width="180" Margin="4">
-                                            <Button Margin="0,0,0,4" Content="个人主页" />
-                                            <Button Margin="0,0,0,4" Content="设置" />
-                                            <Separator />
-                                            <Button Margin="0,4,0,0" Content="退出登录" />
-                                        </StackPanel>
-                                    </cy:PopupBox>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="导航栏右上角的下拉菜单"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M12,3 A6,6 0 0,1 18,9 V13 L20,17 H4 L6,13 V9 A6,6 0 0,1 12,3 Z M9,17 A3,3 0 0,0 15,17"
-                                        Stroke="{DynamicResource Foreground.Warning}"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="通知中心" />
-                                    <cy:PopupBox
-                                        MinWidth="140"
-                                        Margin="0,4,0,4"
-                                        HorizontalAlignment="Left"
-                                        Content="3 条新通知">
-                                        <StackPanel Width="240" Margin="4">
-                                            <TextBlock
-                                                FontWeight="Medium"
-                                                Text="最新通知"
-                                                TextWrapping="Wrap" />
-                                            <TextBlock
-                                                Margin="0,6,0,0"
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="• 张三 评论了你的帖子"
-                                                TextWrapping="Wrap" />
-                                            <TextBlock
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="• 系统升级完成"
-                                                TextWrapping="Wrap" />
-                                            <TextBlock
-                                                FontSize="11"
-                                                Foreground="{DynamicResource Foreground.Caption}"
-                                                Text="• 备份任务已完成"
-                                                TextWrapping="Wrap" />
-                                        </StackPanel>
-                                    </cy:PopupBox>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="工具栏铃铛图标的下拉"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-
-                            <cy:Card Margin="6,6">
-                                <StackPanel>
-                                    <Path
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Left"
-                                        Data="M12,2 A10,10 0 1,1 2,12 A10,10 0 0,1 12,2 M9,9 A3,3 0 1,1 12,12 V14 M12,17 L12,17.01"
-                                        Stroke="#8B5CF6"
-                                        StrokeLineJoin="Round"
-                                        StrokeThickness="1.5" />
-                                    <TextBlock
-                                        Margin="0,8,0,4"
-                                        FontSize="13"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource Foreground.Default}"
-                                        Text="帮助提示" />
-                                    <cy:PopupBox
-                                        MinWidth="140"
-                                        Margin="0,4,0,4"
-                                        HorizontalAlignment="Left"
-                                        Content="鼠标悬停看说明"
-                                        TriggerMode="Hover">
-                                        <TextBlock
-                                            Width="240"
-                                            Margin="4"
-                                            FontSize="12"
-                                            Text="Hover 模式 + 较长内容 —— 比 ToolTip 更灵活,可以放任意 UI 元素和交互按钮。"
-                                            TextWrapping="Wrap" />
-                                    </cy:PopupBox>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="比 ToolTip 更复杂的悬浮内容"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </cy:Card>
-                        </UniformGrid>
-                    </cy:Card>
-                </StackPanel>
-
-                <!--  ===== 右列 =====  -->
-                <StackPanel Grid.Column="2">
-
-                    <cy:Card Margin="0,0,0,20">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="事件回显" Subtitle="LastEvent / OpenCount / CloseCount" />
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <Border
-                                Padding="14,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="最近一次事件:" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="{Binding LastEvent}"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                            <UniformGrid
-                                Margin="0,12,0,0"
-                                Columns="2"
-                                Rows="1">
-                                <Border
-                                    Margin="0,0,4,0"
-                                    Padding="12,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="OpenCount" />
-                                        <TextBlock
-                                            FontFamily="Consolas"
-                                            FontSize="22"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding OpenCount}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border
-                                    Margin="4,0,0,0"
-                                    Padding="12,10"
-                                    Background="{DynamicResource Background.Header}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{DynamicResource Foreground.Caption}"
-                                            Text="CloseCount" />
-                                        <TextBlock
-                                            FontFamily="Consolas"
-                                            FontSize="22"
-                                            FontWeight="Bold"
-                                            Foreground="{DynamicResource Foreground.Link}"
-                                            Text="{Binding CloseCount}" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-                        </StackPanel>
-                    </cy:Card>
-
-                    <cy:Card>
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="PopupBox vs 其他选择" />
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <Border
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="ToolTip" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="纯展示信息,不能交互。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Margin="0,8,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="ContextMenu" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="只能放 MenuItem 列表,内容受限。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Margin="0,8,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Header}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="{DynamicResource Foreground.Link}"
-                                        Text="SplitButton / DropDownButton" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{DynamicResource Foreground.Caption}"
-                                        Text="专门用于&quot;按钮 + 菜单项列表&quot;场景。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Margin="0,8,0,0"
-                                Padding="12,10"
-                                Background="{DynamicResource Background.Highlighted}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="13"
-                                        FontWeight="Medium"
-                                        Foreground="White"
-                                        Text="PopupBox ← 当前" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="White"
-                                        Text="放任意 UIElement,支持四种触发,完整 MVVM。最通用。"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </cy:Card>
-                </StackPanel>
-            </Grid>
-
-            <!--  ============ 底部 ============  -->
-            <Grid Grid.Row="2" Margin="0,20,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--  ⑦ 主要属性  -->
-                <cy:Card Grid.Row="0" Margin="0,0,0,20">
-                    <cy:Card.Header>
-                        <cy:CardHeader Title="PopupBox 主要属性 / 命令 / 事件">
-                            <cy:CardHeader.Icon>
-                                <Border Style="{StaticResource SectionNumberStyle}">
-                                    <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="7" />
-                                </Border>
-                            </cy:CardHeader.Icon>
-                        </cy:CardHeader>
-                    </cy:Card.Header>
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,4,8"
+                    Style="{StaticResource ScenarioCardStyle}">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,2 A10,10 0 1,1 2,12 A10,10 0 0,1 12,2 M12,8 L12,12 L16,14"
+                            Stroke="{DynamicResource Foreground.Link}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="时间选择器" />
+                        <cy:PopupBox
+                            MinWidth="140"
+                            Margin="0,4,0,4"
+                            HorizontalAlignment="Left"
+                            Content="14:30">
+                            <Grid Width="200" Margin="4">
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="此处可放小时分钟选择器..." />
+                            </Grid>
+                        </cy:PopupBox>
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="日历、时间选择器的内核"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
-                    <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="4,0,0,8"
+                    Style="{StaticResource ScenarioCardStyle}">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,2 A4,4 0 1,1 12,10 A4,4 0 0,1 12,2 M4,21 L4,18 A4,4 0 0,1 8,14 L16,14 A4,4 0 0,1 20,18 L20,21"
+                            Stroke="{DynamicResource Foreground.Success}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="用户菜单" />
+                        <cy:PopupBox
+                            MinWidth="140"
+                            Margin="0,4,0,4"
+                            HorizontalAlignment="Left"
+                            Content="@yangf85">
+                            <StackPanel Width="180" Margin="4">
+                                <Button Margin="0,0,0,4" Content="个人主页" />
+                                <Button Margin="0,0,0,4" Content="设置" />
+                                <Separator />
+                                <Button Margin="0,4,0,0" Content="退出登录" />
+                            </StackPanel>
+                        </cy:PopupBox>
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="导航栏右上角的下拉菜单"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Background="{DynamicResource Background.Header}" />
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,4,0"
+                    Style="{StaticResource ScenarioCardStyle}">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,3 A6,6 0 0,1 18,9 V13 L20,17 H4 L6,13 V9 A6,6 0 0,1 12,3 Z M9,17 A3,3 0 0,0 15,17"
+                            Stroke="{DynamicResource Foreground.Warning}"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="通知中心" />
+                        <cy:PopupBox
+                            MinWidth="140"
+                            Margin="0,4,0,4"
+                            HorizontalAlignment="Left"
+                            Content="3 条新通知">
+                            <StackPanel Width="240" Margin="4">
+                                <TextBlock
+                                    FontWeight="Medium"
+                                    Text="最新通知"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="• 张三 评论了你的帖子"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="• 系统升级完成"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{DynamicResource Foreground.Caption}"
+                                    Text="• 备份任务已完成"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </cy:PopupBox>
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="工具栏铃铛图标的下拉"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
 
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="4,0,0,0"
+                    Style="{StaticResource ScenarioCardStyle}">
+                    <StackPanel>
+                        <Path
+                            Width="22"
+                            Height="22"
+                            HorizontalAlignment="Left"
+                            Data="M12,2 A10,10 0 1,1 2,12 A10,10 0 0,1 12,2 M9,9 A3,3 0 1,1 12,12 V14 M12,17 L12,17.01"
+                            Stroke="#8B5CF6"
+                            StrokeLineJoin="Round"
+                            StrokeThickness="1.5" />
+                        <TextBlock
+                            Margin="0,10,0,4"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource Foreground.Default}"
+                            Text="帮助提示" />
+                        <cy:PopupBox
+                            MinWidth="140"
+                            Margin="0,4,0,4"
+                            HorizontalAlignment="Left"
+                            Content="鼠标悬停看说明"
+                            TriggerMode="Hover">
                             <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="属性 / 事件" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="类型" />
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PropTableHeaderStyle}"
-                                Text="说明" />
-                            <Border
-                                Grid.Row="0"
-                                Grid.ColumnSpan="3"
-                                Height="1"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource Border.Default}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Content / ContentTemplate" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / DataTemplate" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="触发按钮上显示的内容。" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupContent / PopupContentTemplate" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / DataTemplate" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 内的主体内容。XAML 默认 ContentProperty,可以直接写在 &lt;cy:PopupBox&gt; 标签内。" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsOpen" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (TwoWay)" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 是否展开。可双向绑定。Popup 自关时同步回此值。" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TriggerMode" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="PopupTriggerMode" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="触发方式: Click / Hover。默认 Click。" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HoverDelay" />
-                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="TimeSpan" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Hover 模式下的展开延迟。默认 200ms。" />
-
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Command / CommandParameter" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand / object" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="按钮 Click 的附带命令(独立于 popup 开关)。可绑定 VM 命令。" />
-
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseCommand (只读)" />
-                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand" />
-                            <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 内按钮可绑定来关闭 popup,无需 ViewModel 中转。用 RelativeSource AncestorType=cy:PopupBox 拿到。" />
-
-                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="OpenedCommand / ClosedCommand" />
-                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand" />
-                            <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 状态变化时执行的 VM 命令。无需 codebehind 监听 Opened/Closed。" />
-
-                            <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Placement / HorizontalOffset / VerticalOffset" />
-                            <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="(从 Popup 继承)" />
-                            <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 弹出位置。默认 Bottom。" />
-
-                            <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupAnimation" />
-                            <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="PopupAnimation" />
-                            <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="None / Fade / Slide / Scroll。默认 Fade。" />
-
-                            <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="StaysOpen" />
-                            <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="点击外部是否关闭。默认 false(点外部即关)。表单场景设 true。" />
-
-                            <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaxDropDownWidth / MaxDropDownHeight" />
-                            <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
-                            <TextBlock Grid.Row="12" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 最大尺寸约束。" />
-
-                            <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupBackground / Border / Padding" />
-                            <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush / Brush / Thickness / Thickness" />
-                            <TextBlock Grid.Row="13" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 容器外观。背景、边框、内边距,与 ContentPresenter 一体化。" />
-
-                            <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HasDropShadow" />
-                            <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                            <TextBlock Grid.Row="14" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否带阴影。默认 true。Win10 风格扁平设计可关闭。" />
-
-                            <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Click / Opened / Closed" />
-                            <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEventHandler" />
-                            <TextBlock Grid.Row="15" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="路由事件 (Bubble)。可用 EventTrigger 在 Style 里响应。" />
-                        </Grid>
-                    </Border>
-                </cy:Card>
-
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="280" />
-                    </Grid.ColumnDefinitions>
-
-                    <cy:Card Grid.Column="0">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="XAML 示例">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="8" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-                        <TextBox AcceptsReturn="True" Style="{StaticResource CodeBlockStyle}">
-                            <![CDATA[<!-- 基础:Content + 默认内容属性 PopupContent -->
-<cy:PopupBox Content="点我">
-    <StackPanel>
-        <TextBlock Text="任意内容" />
-    </StackPanel>
-</cy:PopupBox>
-
-<!-- TriggerMode 切换 -->
-<cy:PopupBox Content="悬停" TriggerMode="Hover" HoverDelay="0:0:0.3">
-    <TextBlock Text="鼠标悬停 300ms 后展开" />
-</cy:PopupBox>
-
-<!-- MVVM 命令三件套 -->
-<cy:PopupBox Content="保存"
-             Command="{Binding SaveCommand}"
-             OpenedCommand="{Binding RefreshDataCommand}"
-             ClosedCommand="{Binding PersistCommand}">
-    <local:DataPanel />
-</cy:PopupBox>
-
-<!-- popup 内表单 + CloseCommand -->
-<cy:PopupBox Content="编辑" StaysOpen="True">
-    <StackPanel DataContext="{Binding Form}">
-        <TextBox Text="{Binding Name}" />
-        <Button Content="取消"
-                Command="{Binding CloseCommand,
-                    RelativeSource={RelativeSource AncestorType=cy:PopupBox}}" />
-        <Button Content="提交" Command="{Binding SubmitCommand}" />
-    </StackPanel>
-</cy:PopupBox>
-
-<!-- 位置 / 动画 / 阴影 -->
-<cy:PopupBox Content="向上"
-             Placement="Top"
-             PopupAnimation="Slide"
-             HasDropShadow="False">
-    <TextBlock Text="扁平风格,向上弹出" />
-</cy:PopupBox>
-
-<!-- popup 内 DataContext 自动继承 PopupBox 的 DataContext,
-     可以直接绑外层 VM 属性,无需手工 RelativeSource -->]]>
-                        </TextBox>
-                    </cy:Card>
-
-                    <cy:Card Grid.Column="2">
-                        <cy:Card.Header>
-                            <cy:CardHeader Title="设计要点">
-                                <cy:CardHeader.Icon>
-                                    <Border Style="{StaticResource SectionNumberStyle}">
-                                        <TextBlock Style="{StaticResource SectionNumberTextStyle}" Text="9" />
-                                    </Border>
-                                </cy:CardHeader.Icon>
-                            </cy:CardHeader>
-                        </cy:Card.Header>
-
-                        <StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="DataContext 双重桥接" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Popup 的 Content 不在 PopupBox 的视觉/逻辑树里,DataContext 不自动继承。控件代码里同步两次:Popup.DataContext + PopupContent.DataContext(后者是因为 UIElement 类型的 Content 有独立 DataContext,不会被 ContentPresenter 覆盖)。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="CloseCommand 只读 DP" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="popup 内按钮直接绑控件自带的关闭命令,不需要 VM 写一个 CloseCommand 转发。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="IsOpen 双向同步" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="Popup.IsOpen ↔ ToggleButton.IsChecked ↔ PopupBox.IsOpen,任一处变化全闭环。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="位置跟随窗口" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="IsPositionUpdate 附加属性订阅 Window.LocationChanged,通过临时切 HorizontalOffset 触发重布局,不用反射调私有方法。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    FontSize="13"
-                                    FontWeight="Medium"
-                                    Foreground="{DynamicResource Foreground.Link}"
-                                    Text="事件具名解订阅" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource Foreground.Caption}"
-                                    Text="OnApplyTemplate 严格 -=/+= 配对,Hook 类持有句柄并 IDisposable 清理。"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </cy:Card>
-                </Grid>
+                                Width="240"
+                                Margin="4"
+                                FontSize="12"
+                                Text="Hover 模式 + 较长内容 — 比 ToolTip 更灵活, 可以放任意 UI 元素和交互按钮。"
+                                TextWrapping="Wrap" />
+                        </cy:PopupBox>
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="比 ToolTip 更复杂的悬浮内容"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
             </Grid>
-        </Grid>
+
+            <!--  ========== ⑦ PopupBox vs 其他选择 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑦ PopupBox vs 其他选择"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="什么时候用哪一个" />
+
+            <StackPanel>
+                <Border Margin="0,0,0,8" Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="ToolTip" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="纯展示信息, 不能交互"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="0,0,0,8" Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="ContextMenu" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="只能放 MenuItem 列表, 内容受限"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="0,0,0,8" Style="{StaticResource MetricBoxStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Foreground.Link}"
+                            Text="SplitButton / DropDownButton" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="专门用于 按钮 + 菜单项列表 场景"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Padding="12,10"
+                    Background="{DynamicResource Background.Highlighted}"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource Text.Invert}"
+                            Text="PopupBox ← 当前" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource Text.Invert}"
+                            Text="放任意 UIElement, 支持四种触发, 完整 MVVM。最通用"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!--  ========== ⑧ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑧ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="PopupBox 配置属性 / 命令 / 事件" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性 / 命令 / 事件" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Content / ContentTemplate" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / DataTemplate" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="触发按钮上显示的内容。" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupContent / PopupContentTemplate" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / DataTemplate" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 内的主体内容。XAML 默认 ContentProperty, 可以直接写在 &lt;cy:PopupBox&gt; 标签内。" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="IsOpen" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (TwoWay)" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 是否展开。可双向绑定。Popup 自关时同步回此值。" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TriggerMode" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (Click)" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="触发方式: Click / Hover。" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HoverDelay" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="TimeSpan (200ms)" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Hover 模式下的展开延迟。" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Command / CommandParameter" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand / object" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="按钮 Click 的附带命令(独立于 popup 开关)。可绑定 VM 命令。" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="CloseCommand (只读)" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 内按钮可绑定来关闭 popup, 无需 ViewModel 中转。用 RelativeSource AncestorType=cy:PopupBox 拿到。" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="OpenedCommand / ClosedCommand" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="ICommand" />
+                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 状态变化时执行的 VM 命令。无需 codebehind 监听 Opened / Closed。" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Placement / HorizontalOffset / VerticalOffset" />
+                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="(从 Popup 继承)" />
+                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 弹出位置。默认 Bottom。" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupAnimation" />
+                    <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="enum (Fade)" />
+                    <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="None / Fade / Slide / Scroll。" />
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="StaysOpen" />
+                    <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (false)" />
+                    <TextBlock Grid.Row="11" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="点击外部是否关闭。表单场景设 true。" />
+
+                    <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="MaxDropDownWidth / Height" />
+                    <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="double" />
+                    <TextBlock Grid.Row="12" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 最大尺寸约束。" />
+
+                    <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="PopupBackground / Border / Padding" />
+                    <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Brush / Brush / Thickness" />
+                    <TextBlock Grid.Row="13" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="popup 容器外观。背景、边框、内边距, 与 ContentPresenter 一体化。" />
+
+                    <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="HasDropShadow" />
+                    <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool (true)" />
+                    <TextBlock Grid.Row="14" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="是否带阴影。Win10 风格扁平设计可关闭。" />
+
+                    <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="Click / Opened / Closed" />
+                    <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="RoutedEventHandler" />
+                    <TextBlock Grid.Row="15" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="路由事件 (Bubble)。可用 EventTrigger 在 Style 里响应。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑨ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑨ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="PopupBox 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="DataContext 双重桥接" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Popup 的 Content 不在 PopupBox 的视觉 / 逻辑树里, DataContext 不自动继承。控件代码里同步两次: Popup.DataContext + PopupContent.DataContext"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="CloseCommand 只读 DP" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="popup 内按钮直接绑控件自带的关闭命令, 不需要 VM 写一个 CloseCommand 转发"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="IsOpen 双向同步" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Popup.IsOpen ↔ ToggleButton.IsChecked ↔ PopupBox.IsOpen, 任一处变化全闭环"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="位置跟随窗口" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="IsPositionUpdate 附加属性订阅 Window.LocationChanged, 通过临时切 HorizontalOffset 触发重布局, 不用反射调私有方法"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="事件具名解订阅" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="OnApplyTemplate 严格 -=/+= 配对, Hook 类持有句柄并 IDisposable 清理"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
     </ScrollViewer>
 </UserControl>
