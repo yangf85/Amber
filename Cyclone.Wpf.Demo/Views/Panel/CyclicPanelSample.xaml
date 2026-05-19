@@ -1,88 +1,533 @@
-﻿<UserControl x:Class="Cyclone.Wpf.Demo.Views.CyclicPanelSample"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:cy="https://www.cyclone/wpf"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance Type=local:CyclicPanelViewModel}"
-             d:DesignHeight="450"
-             d:DesignWidth="800"
-             mc:Ignorable="d">
-    <UserControl.Resources />
-    <Grid>
-        <StackPanel Margin="10">
-            <ScrollViewer x:Name="scrollViewer"
-                          CanContentScroll="True"
-                          HorizontalScrollBarVisibility="Hidden"
-                          VerticalScrollBarVisibility="Hidden">
-                <cy:CyclicPanel x:Name="cycle"
-                                IsAnimationEnabled="False"
-                                Orientation="Horizontal"
-                                VisibleItemCount="5">
-                    <Button Height="Auto"
-                            Content="Item 0" />
-                    <Button Height="Auto"
-                            Content="Item 1" />
-                    <Button Height="Auto"
-                            Content="Item 2" />
-                    <Button Height="Auto"
-                            Content="Item 3" />
-                    <Button Height="Auto"
-                            Content="Item 4" />
-                    <Button Height="Auto"
-                            Content="Item 5" />
-                    <Button Height="Auto"
-                            Content="Item 6" />
-                    <Button Height="Auto"
-                            Content="Item 7" />
-                    <Button Height="Auto"
-                            Content="Item 8" />
-                    <Button Height="Auto"
-                            Content="Item 9" />
-                    <Button Height="Auto"
-                            Content="Item 10" />
-                </cy:CyclicPanel>
-            </ScrollViewer>
-            <Button Click="Button_Click" />
+<UserControl
+    x:Class="Cyclone.Wpf.Demo.Views.CyclicPanelSample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cy="https://www.cyclone/wpf"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type local:CyclicPanelViewModel}}"
+    d:DesignHeight="2400"
+    d:DesignWidth="1100"
+    mc:Ignorable="d">
 
-            <ItemsControl x:Name="items"
-                          Height="320"
-                          ItemsSource="{Binding Data}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Background="{Binding Background}">
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Foreground="White"
-                                       Text="{Binding FirstName}" />
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+    <UserControl.Resources>
+        <!--  ========== 与 ButtonSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
+        </Style>
 
-                <ItemsControl.Template>
-                    <ControlTemplate TargetType="ItemsControl">
-                        <Border Background="{TemplateBinding Background}"
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!--  Demo 容器  -->
+        <Style x:Key="DemoBorderStyle" TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!--  Demo Item 模板(用于 cyclic 中可见的 Item 视觉)  -->
+        <Style x:Key="CyclicItemStyle" TargetType="{x:Type Border}">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="{DynamicResource Background.Header}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!--  API 表样式  -->
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
+
+            <!--  ========== Page Header ==========  -->
+            <Border>
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M4,12 A8,8 0 1,1 12,20 M4,12 L4,7 M4,12 L9,12"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeEndLineCap="Round"
+                            StrokeThickness="2.5" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="CyclicPanel" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="无限循环" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="循环面板 — 仅显示固定数量的项, 通过 VisibleItemCount 控制视口大小, 支持横向/纵向方向和可选切换动画。常用于轮播、时间轴、虚拟滚动场景。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ① 水平循环 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 水平循环"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Orientation=Horizontal · VisibleItemCount=5" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="水平方向只渲染 VisibleItemCount 个 Item, 超出视口的项会被复用。点击下方 “查看可见项索引” 按钮可观察当前显示的 Item 索引。" />
+
+            <Border Style="{StaticResource DemoBorderStyle}">
+                <StackPanel>
+                    <ScrollViewer
+                        CanContentScroll="True"
+                        HorizontalScrollBarVisibility="Hidden"
+                        VerticalScrollBarVisibility="Hidden">
+                        <cy:CyclicPanel
+                            x:Name="cycle"
+                            IsAnimationEnabled="False"
+                            Orientation="Horizontal"
+                            VisibleItemCount="5">
+                            <Button Height="Auto" Content="Item 0" />
+                            <Button Height="Auto" Content="Item 1" />
+                            <Button Height="Auto" Content="Item 2" />
+                            <Button Height="Auto" Content="Item 3" />
+                            <Button Height="Auto" Content="Item 4" />
+                            <Button Height="Auto" Content="Item 5" />
+                            <Button Height="Auto" Content="Item 6" />
+                            <Button Height="Auto" Content="Item 7" />
+                            <Button Height="Auto" Content="Item 8" />
+                            <Button Height="Auto" Content="Item 9" />
+                            <Button Height="Auto" Content="Item 10" />
+                        </cy:CyclicPanel>
+                    </ScrollViewer>
+                    <Button
+                        Margin="0,14,0,0"
+                        HorizontalAlignment="Left"
+                        Padding="14,8"
+                        Click="Button_Click"
+                        Content="查看可见项索引"
+                        Style="{DynamicResource Button.Style.Subtle}" />
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ② 垂直循环 + 动画 + 数据绑定 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 垂直循环 + 动画"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Orientation=Vertical · IsAnimationEnabled=True · ItemsSource 绑定" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="把 CyclicPanel 设为 ItemsControl 的 ItemsPanel 即可绑定数据源, 启用动画后 Item 切换有平滑过渡效果。下方使用 ObservableCollection&lt;FakerData&gt; 作为数据源, VisibleItemCount=8 表示固定显示 8 个槽位。" />
+
+            <Border Style="{StaticResource DemoBorderStyle}">
+                <ItemsControl
+                    Height="360"
+                    ItemsSource="{Binding Data}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CyclicItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border
+                                        Grid.Column="0"
+                                        Width="6"
+                                        Height="28"
+                                        VerticalAlignment="Center"
+                                        Background="{Binding Background}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="{DynamicResource Foreground.Default}"
+                                        Text="{Binding FirstName}" />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource Foreground.Caption}"
+                                        Text="{Binding City}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                    <ItemsControl.Template>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <Border
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                            <ScrollViewer x:Name="scrollViewer"
-                                          CanContentScroll="True"
-                                          HorizontalScrollBarVisibility="Hidden"
-                                          VerticalScrollBarVisibility="Hidden">
-                                <ItemsPresenter />
-                            </ScrollViewer>
-                        </Border>
-                    </ControlTemplate>
-                </ItemsControl.Template>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <cy:CyclicPanel x:Name="cycle"
-                                        IsAnimationEnabled="True"
-                                        Orientation="Vertical"
-                                        VisibleItemCount="8" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+                                <ScrollViewer
+                                    CanContentScroll="True"
+                                    HorizontalScrollBarVisibility="Hidden"
+                                    VerticalScrollBarVisibility="Hidden">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <cy:CyclicPanel
+                                IsAnimationEnabled="True"
+                                Orientation="Vertical"
+                                VisibleItemCount="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Border>
+
+            <TextBlock
+                Margin="0,12,0,0"
+                FontSize="11"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="提示: 在面板上滚动鼠标滚轮可看到 Item 循环切换的动画效果。"
+                TextWrapping="Wrap" />
+
+            <!--  ========== ③ VisibleItemCount 对比 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ VisibleItemCount 对比"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="可见项数决定视口大小, 与数据总量无关" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="同样的 11 项数据, 设置不同的 VisibleItemCount 可得到不同密度的视图。每次只渲染 VisibleItemCount 个 UIElement, 性能与数据量解耦。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel
+                    Grid.Column="0"
+                    Margin="0,0,8,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="VisibleItemCount = 3" />
+                    <Border Style="{StaticResource DemoBorderStyle}">
+                        <ScrollViewer
+                            CanContentScroll="True"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden">
+                            <cy:CyclicPanel
+                                IsAnimationEnabled="True"
+                                Orientation="Vertical"
+                                VisibleItemCount="3">
+                                <Button Content="Alpha" />
+                                <Button Content="Beta" />
+                                <Button Content="Gamma" />
+                                <Button Content="Delta" />
+                                <Button Content="Epsilon" />
+                                <Button Content="Zeta" />
+                            </cy:CyclicPanel>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="1"
+                    Margin="4,0,4,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="VisibleItemCount = 5" />
+                    <Border Style="{StaticResource DemoBorderStyle}">
+                        <ScrollViewer
+                            CanContentScroll="True"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden">
+                            <cy:CyclicPanel
+                                IsAnimationEnabled="True"
+                                Orientation="Vertical"
+                                VisibleItemCount="5">
+                                <Button Content="Alpha" />
+                                <Button Content="Beta" />
+                                <Button Content="Gamma" />
+                                <Button Content="Delta" />
+                                <Button Content="Epsilon" />
+                                <Button Content="Zeta" />
+                            </cy:CyclicPanel>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="2"
+                    Margin="8,0,0,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="VisibleItemCount = 7" />
+                    <Border Style="{StaticResource DemoBorderStyle}">
+                        <ScrollViewer
+                            CanContentScroll="True"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden">
+                            <cy:CyclicPanel
+                                IsAnimationEnabled="True"
+                                Orientation="Vertical"
+                                VisibleItemCount="7">
+                                <Button Content="Alpha" />
+                                <Button Content="Beta" />
+                                <Button Content="Gamma" />
+                                <Button Content="Delta" />
+                                <Button Content="Epsilon" />
+                                <Button Content="Zeta" />
+                            </cy:CyclicPanel>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!--  ========== ④ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="核心属性一览表" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Orientation" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="Orientation (Vertical)" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="布局方向。Horizontal 时 Item 横向排列, Vertical 时纵向排列。" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="VisibleItemCount" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="int (5)" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="同时可见的 Item 个数。决定每个 Item 的尺寸与视口大小, 与数据总量无关。" />
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="IsAnimationEnabled" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool (false)" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="True 时 Item 切换有平滑过渡动画, False 时直接跳变。" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="VisibleItemIndices" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="IReadOnlyList&lt;int&gt;" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="只读 — 当前视口中可见 Item 的原始索引集合, 滚动时实时更新。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑤ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="CyclicPanel 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="视口与数据解耦" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="只渲染 VisibleItemCount 个 UIElement, 数据量再大也只占固定开销, 适合长列表/无限滚动场景"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="无限循环" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="滚动到末尾会自动循环回开头, 适合走马灯、广告轮播、时间轴等首尾相接的展示"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="动画可选" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="IsAnimationEnabled 控制切换动效, 高频更新场景关闭可节省 GPU 开销"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

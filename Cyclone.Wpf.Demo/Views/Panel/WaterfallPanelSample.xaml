@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Cyclone.Wpf.Demo.Views.WaterfallPanelSample"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,56 +6,573 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cyclone.Wpf.Demo.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DataContext="{d:DesignInstance Type=local:WaterfallPanelViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type={x:Type local:WaterfallPanelViewModel}}"
+    d:DesignHeight="2800"
+    d:DesignWidth="1100"
     mc:Ignorable="d">
-    <Grid>
-        <ItemsControl x:Name="items" ItemsSource="{Binding Data}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Background="{Binding Background}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Foreground="White"
-                                Text="{Binding FirstName}" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Foreground="White"
-                                Text="{Binding City}" />
-                        </StackPanel>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
 
-            <ItemsControl.Template>
-                <ControlTemplate TargetType="ItemsControl">
+    <UserControl.Resources>
+        <!--  ========== 与 ButtonSample 对齐的版式样式 ==========  -->
+        <Style x:Key="ChapterHeaderStyle" TargetType="{x:Type cy:SectionHeader}">
+            <Setter Property="Margin" Value="0,36,0,0" />
+            <Setter Property="MainTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="MainTitleFontSize" Value="20" />
+            <Setter Property="MainTitleFontWeight" Value="SemiBold" />
+            <Setter Property="MainTitleForeground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="SubTitleHorizontalAlignment" Value="Left" />
+            <Setter Property="SubTitleVisibility" Value="Visible" />
+            <Setter Property="SubTitleFontSize" Value="13" />
+            <Setter Property="SubTitleForeground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="SubTitleMargin" Value="0,4,0,0" />
+            <Setter Property="SeparatorVisibility" Value="Visible" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="SeparatorMargin" Value="0,14,0,18" />
+        </Style>
+
+        <Style x:Key="DemoItemTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="DemoBorderStyle" TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Background" Value="{DynamicResource Background.Container}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!--  瀑布流卡片模板  -->
+        <DataTemplate x:Key="WaterfallCardTemplate">
+            <Border Background="{Binding Background}" CornerRadius="4">
+                <StackPanel
+                    Margin="8"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Text="{Binding FirstName}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="11"
+                        Foreground="White"
+                        Opacity="0.85"
+                        Text="{Binding City}" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!--  API 表样式  -->
+        <Style x:Key="PropTableHeaderStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style x:Key="PropTableCellStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style
+            x:Key="PropTableNameStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        </Style>
+        <Style
+            x:Key="PropTableTypeStyle"
+            BasedOn="{StaticResource PropTableCellStyle}"
+            TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Background="{DynamicResource Background.Global}" VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            MaxWidth="920"
+            Margin="40,32"
+            HorizontalAlignment="Stretch">
+
+            <!--  ========== Page Header ==========  -->
+            <Border>
+                <StackPanel Orientation="Horizontal">
                     <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <ScrollViewer
-                            x:Name="scrollViewer"
-                            CanContentScroll="True"
-                            HorizontalScrollBarVisibility="Visible"
-                            VerticalScrollBarVisibility="Visible">
-                            <ItemsPresenter />
-                        </ScrollViewer>
+                        Width="56"
+                        Height="56"
+                        Background="{DynamicResource Background.Info}">
+                        <Path
+                            Width="32"
+                            Height="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M4,4 L8,4 L8,14 L4,14 Z M10,4 L14,4 L14,20 L10,20 Z M16,4 L20,4 L20,10 L16,10 Z M16,12 L20,12 L20,20 L16,20 Z"
+                            Stretch="None"
+                            Stroke="{DynamicResource Text.Invert}"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeEndLineCap="Round"
+                            StrokeThickness="2.5" />
                     </Border>
-                </ControlTemplate>
-            </ItemsControl.Template>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <cy:WaterfallPanel
-                        Columns="5"
-                        FillLastItem="True"
-                        MaxItemSize="200"
-                        MinItemSize="100"
-                        Orientation="Vertical"
-                        Spacing="5" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
-    </Grid>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="32"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource Foreground.Default}"
+                                Text="WaterfallPanel" />
+                            <Border
+                                Margin="12,4,0,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Background.Info}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource Text.Invert}"
+                                    Text="Pinterest 风格" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="{DynamicResource Foreground.Caption}"
+                            Text="瀑布流面板 — 固定列数, 每个 Item 高度自适应内容, 自动放入最短的一列。MinItemSize / MaxItemSize 约束尺寸范围, FillLastItem 让末尾项铺满最后一行。" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  ========== ① 基础瀑布流 ==========  -->
+            <cy:SectionHeader
+                MainTitle="① 基础瀑布流"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Columns=5 · MinItemSize=100 · MaxItemSize=200" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="56 个数据项分布在 5 列中, 每个 Item 高度随内容自适应, 放入当前最短的列。MinItemSize / MaxItemSize 把每个 Item 的尺寸夹在 100~200 之间, 避免极端值。" />
+
+            <Border Style="{StaticResource DemoBorderStyle}">
+                <Border
+                    Height="500"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <ItemsControl
+                        ItemTemplate="{StaticResource WaterfallCardTemplate}"
+                        ItemsSource="{Binding Data}">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <Border
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                    <ScrollViewer
+                                        CanContentScroll="True"
+                                        HorizontalScrollBarVisibility="Disabled"
+                                        VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <cy:WaterfallPanel
+                                    Columns="5"
+                                    FillLastItem="True"
+                                    MaxItemSize="200"
+                                    MinItemSize="100"
+                                    Orientation="Vertical"
+                                    Spacing="5" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Border>
+            </Border>
+
+            <TextBlock
+                Margin="0,12,0,0"
+                FontSize="11"
+                Foreground="{DynamicResource Foreground.Caption}"
+                Text="滚动观察: 每个 Item 自动放入当前最短的列, 整体高度差最小化。"
+                TextWrapping="Wrap" />
+
+            <!--  ========== ② 列数对比 ==========  -->
+            <cy:SectionHeader
+                MainTitle="② 列数对比"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="Columns 决定密度 · 同一数据集不同呈现" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="同样的数据, 不同 Columns 决定卡片密度。窄屏(手机)用 2 列, 标准桌面用 3-4 列, 宽屏可到 5-6 列。" />
+
+            <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="Columns = 2 (移动端)" />
+            <Border Style="{StaticResource DemoBorderStyle}">
+                <Border
+                    Height="280"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <ItemsControl
+                        ItemTemplate="{StaticResource WaterfallCardTemplate}"
+                        ItemsSource="{Binding Data}">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer
+                                    CanContentScroll="True"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <cy:WaterfallPanel
+                                    Columns="2"
+                                    MaxItemSize="160"
+                                    MinItemSize="80"
+                                    Orientation="Vertical"
+                                    Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Border>
+            </Border>
+
+            <TextBlock
+                Margin="0,16,0,0"
+                Style="{StaticResource DemoItemTitleStyle}"
+                Text="Columns = 4 (桌面端)" />
+            <Border Style="{StaticResource DemoBorderStyle}">
+                <Border
+                    Height="280"
+                    BorderBrush="{DynamicResource Border.Default}"
+                    BorderThickness="1">
+                    <ItemsControl
+                        ItemTemplate="{StaticResource WaterfallCardTemplate}"
+                        ItemsSource="{Binding Data}">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer
+                                    CanContentScroll="True"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <cy:WaterfallPanel
+                                    Columns="4"
+                                    MaxItemSize="160"
+                                    MinItemSize="80"
+                                    Orientation="Vertical"
+                                    Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Border>
+            </Border>
+
+            <!--  ========== ③ FillLastItem 末项填充 ==========  -->
+            <cy:SectionHeader
+                MainTitle="③ FillLastItem 末项填充"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="True 时最后一项扩展铺满末尾不齐处" />
+
+            <TextBlock
+                Style="{StaticResource CaptionStyle}"
+                Text="瀑布流末尾通常各列高度不齐, FillLastItem=True 会拉伸最后一项填充空缺, 视觉上更整齐。False 时保留自然参差感。" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel
+                    Grid.Column="0"
+                    Margin="0,0,8,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="FillLastItem = False" />
+                    <Border Style="{StaticResource DemoBorderStyle}">
+                        <Border
+                            Height="320"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <ItemsControl
+                                ItemTemplate="{StaticResource WaterfallCardTemplate}"
+                                ItemsSource="{Binding Data}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <cy:WaterfallPanel
+                                            Columns="3"
+                                            FillLastItem="False"
+                                            MaxItemSize="150"
+                                            MinItemSize="80"
+                                            Orientation="Vertical"
+                                            Spacing="5" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Border>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="FillLastItem = True" />
+                    <Border Style="{StaticResource DemoBorderStyle}">
+                        <Border
+                            Height="320"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1">
+                            <ItemsControl
+                                ItemTemplate="{StaticResource WaterfallCardTemplate}"
+                                ItemsSource="{Binding Data}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <cy:WaterfallPanel
+                                            Columns="3"
+                                            FillLastItem="True"
+                                            MaxItemSize="150"
+                                            MinItemSize="80"
+                                            Orientation="Vertical"
+                                            Spacing="5" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Border>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!--  ========== ④ 主要 API ==========  -->
+            <cy:SectionHeader
+                MainTitle="④ 主要 API"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="核心属性一览表" />
+
+            <Border BorderBrush="{DynamicResource Border.Default}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Background="{DynamicResource Background.Header}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="属性" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="类型" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableHeaderStyle}"
+                        Text="说明" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.ColumnSpan="3"
+                        Height="1"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource Border.Default}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Orientation" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="Orientation (Vertical)" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="瀑布流方向。Vertical 时分列纵向堆, Horizontal 时分行横向堆。" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Columns" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="int" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="列数(Vertical) 或行数(Horizontal), 决定密度。" />
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="Spacing" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="double (0)" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="相邻 Item 之间的间距, 水平和垂直一致。" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="MinItemSize" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="double" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="每个 Item 在主轴方向(高度/宽度)的下限, 防止过小。" />
+
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="MaxItemSize" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="double" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="每个 Item 在主轴方向的上限, 防止过大。" />
+
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="FillLastItem" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool (false)" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="True 时最后一项扩展铺满末尾不齐处, False 时保留自然参差。" />
+                </Grid>
+            </Border>
+
+            <!--  ========== ⑤ 设计要点 ==========  -->
+            <cy:SectionHeader
+                MainTitle="⑤ 设计要点"
+                Style="{StaticResource ChapterHeaderStyle}"
+                SubTitle="WaterfallPanel 的关键决策" />
+
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="最短列优先" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="不是简单按顺序填列, 而是把新 Item 放进当前最短的列, 整体高度差最小化"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="尺寸约束" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="MinItemSize / MaxItemSize 把每项尺寸夹在合理范围, 避免长文本撑爆或空内容塌陷"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="自然 vs 整齐" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="FillLastItem 在视觉整齐(末项铺满) 和自然参差(典型 Pinterest 风格) 之间切换, 按场景选"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource Foreground.Link}"
+                        Text="可旋转" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource Foreground.Caption}"
+                        Text="Orientation=Horizontal 时变成 “行瀑布” — 各行宽度不同的卡片横向堆, 适合移动端横滑场景"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
