@@ -151,9 +151,7 @@
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="直接嵌套 CascadePickerItem" />
 
-            <TextBlock
-                Style="{StaticResource CaptionStyle}"
-                Text="鼠标悬停展开下一级; 点叶子节点确认选择。也可以用键盘: ↓ 打开 / 上下方向键移动 / → 进入子级 / ← 折叠或回到上级 / Enter 选中 / Esc 关闭。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="鼠标悬停展开下一级; 点叶子节点确认选择。也可以用键盘: ↓ 打开 / 上下方向键移动 / → 进入子级 / ← 折叠或回到上级 / Enter 选中 / Esc 关闭。" />
 
             <cy:CascadePicker
                 Width="320"
@@ -183,9 +181,7 @@
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="ItemsSource / NodeMemberPath / ChildrenMemberPath" />
 
-            <TextBlock
-                Style="{StaticResource CaptionStyle}"
-                Text="用对象集合驱动。NodeMemberPath 告诉控件每级显示哪个字段, ChildrenMemberPath 告诉控件子集合在哪里。SelectedItem 双向绑定到当前选中的 Region 对象。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="用对象集合驱动。NodeMemberPath 告诉控件每级显示哪个字段, ChildrenMemberPath 告诉控件子集合在哪里。SelectedItem 双向绑定到当前选中的 Region 对象。" />
 
             <cy:CascadePicker
                 Width="320"
@@ -226,9 +222,7 @@
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="SelectedValue + SelectedValuePath" />
 
-            <TextBlock
-                Style="{StaticResource CaptionStyle}"
-                Text="VM 持有 ID 字符串而不是对象引用 — 更利于 MVVM、序列化与配置存档。控件内部 O(1) 索引 ID → item, 无歧义。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="VM 持有 ID 字符串而不是对象引用 — 更利于 MVVM、序列化与配置存档。控件内部 O(1) 索引 ID → item, 无歧义。" />
 
             <cy:CascadePicker
                 Width="320"
@@ -289,9 +283,7 @@
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="IsShowFullPath / Separator / SelectedPath" />
 
-            <TextBlock
-                Style="{StaticResource CaptionStyle}"
-                Text="IsShowFullPath=true 显示完整路径(含分隔符); SelectedPath 暴露/接收当前路径字符串, 路径在树中唯一时支持双向。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="IsShowFullPath=true 显示完整路径(含分隔符); SelectedPath 暴露/接收当前路径字符串, 路径在树中唯一时支持双向。" />
 
             <TextBlock Style="{StaticResource DemoItemTitleStyle}" Text="完整路径 + 自定义分隔符 ' › '" />
             <cy:CascadePicker
@@ -326,9 +318,7 @@
                 Style="{StaticResource ChapterHeaderStyle}"
                 SubTitle="Watermark / IsReadOnly / ClearCommand" />
 
-            <TextBlock
-                Style="{StaticResource CaptionStyle}"
-                Text="Watermark 在无值时显示。文本框右侧的清除按钮 / Delete 键 触发 ClearCommand。切换 IsReadOnly 体验只读状态。" />
+            <TextBlock Style="{StaticResource CaptionStyle}" Text="Watermark 在无值时显示。文本框右侧的清除按钮 / Delete 键 触发 ClearCommand。切换 IsReadOnly 体验只读状态。" />
 
             <Grid Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
