@@ -167,10 +167,9 @@
                     <DataGridCheckBoxColumn
                         Width="60"
                         Binding="{Binding IsActive}"
-                        EditingElementStyle="{StaticResource DataGrid.CheckBoxColumn.EditingElementStyle}"
                         ElementStyle="{StaticResource DataGrid.CheckBoxColumn.ElementStyle}"
-                        Header="在职"
-                        IsReadOnly="False" />
+                        Header="在职" />
+                    <DataGridComboBoxColumn ElementStyle="{StaticResource DataGrid.ComboBoxColumn.ElementStyle}" Header="测试" />
                 </DataGrid.Columns>
             </DataGrid>
 
