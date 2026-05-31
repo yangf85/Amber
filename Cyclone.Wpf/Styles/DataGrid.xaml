@@ -655,6 +655,7 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="IsEnabled" Value="{Binding Path=IsReadOnly, Converter={x:Static conv:BooleanConverter.Inverse}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridCell}}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">

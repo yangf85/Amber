@@ -1,27 +1,25 @@
 <!--
     ============================================================================
     Expander 样式 (WinUI 3 风格 · 无圆角 · LayoutTransform 真实布局动画)
-    
+
     设计要点:
     - Header 用 ToggleButton 模板——完整 hover / pressed / focused / disabled 视觉
     - 箭头用 RotateTransform 平滑旋转 180° (替代多组 Path Data 切换)
     - 内容展开/折叠用 LayoutTransform.ScaleY
-      · 与 RenderTransform 不同——ScaleY 真实参与布局测量,
-        内容 layout slot 高度从 0 平滑增长到全高,
-        外部布局的其他控件会被平滑推开/收回,不会瞬间跳位
-      · 无需手动测量目标高度——WPF 自己算,
-        内容可以动态变化高度,无需缓存 / 锁死
+    · 与 RenderTransform 不同——ScaleY 真实参与布局测量,
+    内容 layout slot 高度从 0 平滑增长到全高,
+    外部布局的其他控件会被平滑推开/收回,不会瞬间跳位
+    · 无需手动测量目标高度——WPF 自己算,
+    内容可以动态变化高度,无需缓存 / 锁死
     - 无圆角 (与项目规约对齐)
     - Down 方向:Content 在 Header 下方,边框分隔线在 Content 顶部
-      Up 方向:Header 在 Content 下方,边框分隔线移到 Content 底部
-    
+    Up 方向:Header 在 Content 下方,边框分隔线移到 Content 底部
+
     注:伴随这份样式,Cyclone.Wpf.Helpers.ExpanderHelper 可以删除——
-       样式已包含完整的动画,无需附加属性介入。
+    样式已包含完整的动画,无需附加属性介入。
     ============================================================================
 -->
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Cyclone.Wpf;component/Styles/Control.xaml" />
@@ -191,7 +189,7 @@
                                 内容区——LayoutTransform.ScaleY 让缩放真实参与布局测量。
                                 ScaleY=0 时 layout slot 高度真为 0,
                                 ScaleY 渐变到 1 时 slot 高度平滑增长——外部布局的其他控件被平滑推开。
-                                
+
                                 初始状态:Visibility=Collapsed (彻底从布局退出) + ScaleY=0,
                                 双重保险,避免首次渲染闪一下。
                             -->
@@ -206,7 +204,6 @@
                                 </Border.LayoutTransform>
                                 <ContentPresenter
                                     x:Name="ContentContainer"
-                                    Margin="{TemplateBinding Padding}"
                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                     Content="{TemplateBinding Content}"
