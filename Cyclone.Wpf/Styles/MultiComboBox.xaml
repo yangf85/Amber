@@ -87,27 +87,58 @@
     -->
 
     <Style x:Key="MultiComboBox.ChipDeleteButton.Style.Basic" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Focusable" Value="False" />
-        <Setter Property="Width" Value="16" />
-        <Setter Property="Height" Value="16" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="Bg" Background="{TemplateBinding Background}">
+                    <Border
+                        x:Name="RootBorder"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="9"
+                        SnapsToDevicePixels="True">
+
                         <Path
                             x:Name="Cross"
                             Width="8"
                             Height="8"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
                             Data="M558.933333 529.066667l285.866667 285.866666-29.866667 29.866667-285.866666-285.866667-285.866667 285.866667-29.866667-29.866667 285.866667-285.866666L213.333333 243.2l29.866667-29.866667 285.866667 285.866667L814.933333 213.333333l29.866667 29.866667-285.866667 285.866667z"
                             Fill="{DynamicResource Icon.Foreground.Default}"
+                            Opacity="0.75"
                             Stretch="Uniform" />
                     </Border>
+
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Background.Hover}" />
-                            <Setter TargetName="Cross" Property="Fill" Value="{DynamicResource Foreground.Default}" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                            <Setter TargetName="Cross" Property="Fill" Value="{DynamicResource Icon.Foreground.Hover}" />
+                            <Setter TargetName="Cross" Property="Opacity" Value="1" />
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            <Setter TargetName="Cross" Property="Fill" Value="{DynamicResource Icon.Foreground.Pressed}" />
+                            <Setter TargetName="Cross" Property="Opacity" Value="1" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                            <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                            <Setter TargetName="Cross" Property="Fill" Value="{DynamicResource Icon.Foreground.Disabled}" />
+                            <Setter TargetName="Cross" Property="Opacity" Value="0.45" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -136,17 +167,21 @@
             SnapsToDevicePixels="True">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="6" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <CheckBox
+                <!--  左侧选中指示条  -->
+                <Border
+                    x:Name="SelectionBar"
                     Grid.Column="0"
-                    Margin="6,0,2,0"
+                    Width="3"
+                    Height="0"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Focusable="False"
-                    IsChecked="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                    IsHitTestVisible="False" />
+                    Background="{DynamicResource Background.Selected}"
+                    CornerRadius="1.5"
+                    Opacity="0" />
 
                 <ContentPresenter
                     Grid.Column="1"
@@ -159,18 +194,41 @@
                     ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
             </Grid>
         </Border>
+
         <ControlTemplate.Triggers>
+            <!--  Hover：显示浅背景  -->
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
             </Trigger>
+
+            <!--  键盘焦点：显示浅背景  -->
             <Trigger Property="IsKeyboardFocused" Value="True">
                 <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
             </Trigger>
+
+            <!--  选中：只显示竖条，不显示整行选中背景  -->
             <Trigger Property="IsSelected" Value="True">
-                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                <Setter TargetName="SelectionBar" Property="Opacity" Value="1" />
+                <Setter TargetName="SelectionBar" Property="Height" Value="16" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
             </Trigger>
+
+            <!--  选中 + Hover：允许临时显示 Hover 背景  -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected" Value="True" />
+                    <Condition Property="IsMouseOver" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                <Setter TargetName="SelectionBar" Property="Opacity" Value="1" />
+                <Setter TargetName="SelectionBar" Property="Height" Value="16" />
+            </MultiTrigger>
+
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                <Setter Property="Opacity" Value="0.5" />
+                <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Cyclone.Wpf.Demo.Helper;
 using Cyclone.Wpf.Helpers;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Controls;
 
 namespace Cyclone.Wpf.Demo.Views;
@@ -114,6 +115,30 @@ public partial class EditableEmployee : ObservableObject
 
     [ObservableProperty]
     public partial decimal Salary { get; set; }
+
+    [ObservableProperty]
+    public partial EmployeeStatus Status { get; set; }
+}
+
+public enum EmployeeStatus
+{
+    [Description("无")]
+    None,
+
+    [Description("激活")]
+    Active,
+
+    [Description("未激活")]
+    Inactive,
+
+    [Description("待激活")]
+    Pending,
+
+    [Description("封禁")]
+    Blocked,
+
+    [Description("删除")]
+    Deleted,
 }
 
 /// <summary>

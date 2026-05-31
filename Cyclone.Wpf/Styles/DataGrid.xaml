@@ -526,86 +526,78 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ComboBox">
+                <ControlTemplate TargetType="{x:Type ComboBox}">
                     <Border
                         x:Name="RootBorder"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         SnapsToDevicePixels="True">
+
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                            <!--  整块透明点击层：无箭头，但点击任意区域展开 Popup  -->
+                            <ToggleButton
+                                x:Name="OpenButton"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                ClickMode="Press"
+                                Focusable="False"
+                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="0"
+                                            SnapsToDevicePixels="True" />
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <!--  当前选中内容  -->
                             <ContentPresenter
-                                Name="ContentSite"
-                                Grid.Column="0"
+                                x:Name="ContentSite"
+                                Margin="4,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Content="{TemplateBinding SelectionBoxItem}"
                                 ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                 ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                                 IsHitTestVisible="False" />
-                            <ToggleButton
-                                x:Name="OpenButton"
-                                Grid.Column="1"
-                                Margin="4,0,0,0"
-                                Background="Transparent"
-                                ClickMode="Press"
-                                Focusable="False"
-                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                                <ToggleButton.Template>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
-                                            <Path
-                                                x:Name="Indicator"
-                                                Width="12"
-                                                Height="12"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Data="M533.333333 631.466667L866.133333 298.666667l29.866667 29.866666-362.666667 362.666667L170.666667 328.533333l29.866666-29.866666 332.8 332.8z"
-                                                Fill="{DynamicResource Icon.Foreground.Default}"
-                                                Stretch="Uniform" />
-                                        </Grid>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Indicator" Property="Fill" Value="{DynamicResource Icon.Foreground.Hover}" />
-                                            </Trigger>
-                                            <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="Indicator" Property="Data" Value="M533.333333 358.4l-332.8 332.8-29.866666-29.866667L533.333333 298.666667l362.666667 362.666666-29.866667 29.866667-332.8-332.8z" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </ToggleButton.Template>
-                            </ToggleButton>
+
                             <Popup
-                                x:Name="Popup"
+                                x:Name="PART_Popup"
                                 AllowsTransparency="True"
                                 Focusable="False"
                                 IsOpen="{TemplateBinding IsDropDownOpen}"
                                 Placement="Bottom"
                                 PlacementTarget="{Binding ElementName=RootBorder}"
                                 PopupAnimation="Slide">
+
                                 <Grid
                                     x:Name="DropDown"
-                                    MinWidth="{Binding Path=ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}"
+                                    MinWidth="{Binding ActualWidth, ElementName=RootBorder}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}"
                                     SnapsToDevicePixels="True">
+
                                     <Border
                                         x:Name="DropDownBorder"
                                         Background="{DynamicResource Background.Container}"
                                         BorderBrush="{DynamicResource Border.Default}"
                                         BorderThickness="1">
+
                                         <ScrollViewer
                                             x:Name="DropDownScrollViewer"
                                             Focusable="False"
                                             HorizontalScrollBarVisibility="Auto"
                                             VerticalScrollBarVisibility="Auto">
+
                                             <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
                                         </ScrollViewer>
                                     </Border>
@@ -613,30 +605,162 @@
                             </Popup>
                         </Grid>
                     </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+
+        <!--  下拉项：仿 WinUI 3 / 你的 ListBox 左侧竖条选中样式  -->
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type ComboBoxItem}">
-                    <Setter Property="VerticalContentAlignment" Value="Center" />
                     <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Control}" />
-                    <Setter Property="Background" Value="{DynamicResource Background.Global}" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="Background" Value="Transparent" />
                     <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
                     <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Padding" Value="0" />
+
                     <Setter Property="Template">
                         <Setter.Value>
-                            <ControlTemplate TargetType="ComboBoxItem">
+                            <ControlTemplate TargetType="{x:Type ComboBoxItem}">
                                 <Border
-                                    Name="RootBorder"
-                                    Padding="4,0"
+                                    x:Name="RootBorder"
+                                    Height="{TemplateBinding Height}"
+                                    HorizontalAlignment="Stretch"
                                     Background="{TemplateBinding Background}"
-                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                    <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    SnapsToDevicePixels="True"
+                                    UseLayoutRounding="True">
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <!--  左侧选中竖条区域  -->
+                                            <ColumnDefinition Width="6" />
+                                            <!--  内容区域  -->
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--  WinUI 3 风格选中竖条  -->
+                                        <Border
+                                            x:Name="SelectionBar"
+                                            Grid.Column="0"
+                                            Width="3"
+                                            Height="16"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Background="{DynamicResource Background.Selected}"
+                                            Opacity="0">
+
+                                            <Border.RenderTransform>
+                                                <ScaleTransform x:Name="SelectionBarScale" ScaleY="0.4" />
+                                            </Border.RenderTransform>
+
+                                            <Border.RenderTransformOrigin>
+                                                <Point X="0.5" Y="0.5" />
+                                            </Border.RenderTransformOrigin>
+                                        </Border>
+
+                                        <ContentPresenter
+                                            Grid.Column="1"
+                                            Margin="4,0,8,0"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                            Content="{TemplateBinding Content}"
+                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+                                    </Grid>
                                 </Border>
+
                                 <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
+                                    <!--  Hover：整行浅底  -->
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsMouseOver" Value="True" />
+                                            <Condition Property="IsSelected" Value="False" />
+                                        </MultiTrigger.Conditions>
                                         <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                                    </MultiTrigger>
+
+                                    <!--  键盘/鼠标高亮项：ComboBox 下拉里建议加 IsHighlighted  -->
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsHighlighted" Value="True" />
+                                            <Condition Property="IsSelected" Value="False" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                                    </MultiTrigger>
+
+                                    <!--  选中态：整行浅底 + 左竖条  -->
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetName="SelectionBar"
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="1"
+                                                        Duration="0:0:0.15">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <CubicEase EasingMode="EaseOut" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetName="SelectionBarScale"
+                                                        Storyboard.TargetProperty="ScaleY"
+                                                        To="1"
+                                                        Duration="0:0:0.18">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <BackEase Amplitude="0.3" EasingMode="EaseOut" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+
+                                        <Trigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetName="SelectionBar"
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="0"
+                                                        Duration="0:0:0.10" />
+
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetName="SelectionBarScale"
+                                                        Storyboard.TargetProperty="ScaleY"
+                                                        To="0.4"
+                                                        Duration="0:0:0.10" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.ExitActions>
+
+                                        <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+                                    </Trigger>
+
+                                    <!--  选中但失焦：竖条弱化，行底透明，和你的 ListBox 保持一致  -->
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsSelected" Value="True" />
+                                            <Condition Property="Selector.IsSelectionActive" Value="False" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="SelectionBar" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                                        <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                                    </MultiTrigger>
+
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource Foreground.Disabled}" />
+                                        <Setter TargetName="RootBorder" Property="Background" Value="Transparent" />
+                                        <Setter Property="Opacity" Value="0.5" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

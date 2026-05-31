@@ -169,7 +169,11 @@
                         Binding="{Binding IsActive}"
                         ElementStyle="{StaticResource DataGrid.CheckBoxColumn.ElementStyle}"
                         Header="在职" />
-                    <DataGridComboBoxColumn ElementStyle="{StaticResource DataGrid.ComboBoxColumn.ElementStyle}" Header="测试" />
+                    <DataGridComboBoxColumn
+                        ElementStyle="{StaticResource DataGrid.ComboBoxColumn.ElementStyle}"
+                        Header="测试"
+                        ItemsSource="{cy:EnumToItemsSource EnumType={x:Type local:EmployeeStatus}}"
+                        SelectedItemBinding="{Binding Status}" />
                 </DataGrid.Columns>
             </DataGrid>
 

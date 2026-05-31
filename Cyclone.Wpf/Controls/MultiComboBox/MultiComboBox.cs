@@ -30,13 +30,19 @@ namespace Cyclone.Wpf.Controls;
 public class MultiComboBox : ListBox
 {
     private const string PART_ToggleButton = nameof(PART_ToggleButton);
+
     private const string PART_ClearButton = nameof(PART_ClearButton);
+
     private const string PART_Popup = nameof(PART_Popup);
+
     private const string PART_SelectAllCheckBox = nameof(PART_SelectAllCheckBox);
+
     private const string PART_ChipPanel = nameof(PART_ChipPanel);
 
     private CheckBox _selectAllCheckBox;
+
     private ItemsControl _chipPanel;
+
     private bool _suppressSync;
 
     // 缓存委托保证 AddHandler / RemoveHandler 用同一个引用
@@ -58,10 +64,20 @@ public class MultiComboBox : ListBox
             typeof(MultiComboBox),
             new FrameworkPropertyMetadata(typeof(MultiComboBox)));
 
+        //避免构造顺序错误
+        HasSelectedItemsPropertyKey =
+                        DependencyProperty.RegisterReadOnly(
+                nameof(HasSelectedItems),
+                typeof(bool),
+                typeof(MultiComboBox),
+                new FrameworkPropertyMetadata(false));
+
+        HasSelectedItemsProperty = HasSelectedItemsPropertyKey.DependencyProperty;
+
         // 默认 SelectionMode = Multiple（ListBox 默认是 Single——本控件存在的意义就是多选）
         SelectionModeProperty.OverrideMetadata(
-            typeof(MultiComboBox),
-            new FrameworkPropertyMetadata(SelectionMode.Multiple));
+                typeof(MultiComboBox),
+                new FrameworkPropertyMetadata(SelectionMode.Multiple));
 
         // DisplayMemberPath 变化时重新生成默认 chip 模板
         DisplayMemberPathProperty.OverrideMetadata(
@@ -95,6 +111,7 @@ public class MultiComboBox : ListBox
             typeof(MultiComboBox),
             new FrameworkPropertyMetadata(
                 default(IList),
+
                 // 注意：不是 BindsTwoWayByDefault——集合本身的引用不应该被反向写回 ViewModel。
                 // 集合的"内容"双向同步靠 INotifyCollectionChanged，调用方提供 ObservableCollection 即可。
                 // 这样 ViewModel 里可以用 `public ObservableCollection<T> SelectedXxx { get; } = new()` 这种只读属性。
@@ -301,14 +318,9 @@ public class MultiComboBox : ListBox
 
     #region HasSelectedItems
 
-    private static readonly DependencyPropertyKey HasSelectedItemsPropertyKey =
-        DependencyProperty.RegisterReadOnly(
-            nameof(HasSelectedItems),
-            typeof(bool),
-            typeof(MultiComboBox),
-            new FrameworkPropertyMetadata(false));
+    public static readonly DependencyProperty HasSelectedItemsProperty;
 
-    public static readonly DependencyProperty HasSelectedItemsProperty = HasSelectedItemsPropertyKey.DependencyProperty;
+    private static readonly DependencyPropertyKey HasSelectedItemsPropertyKey;
 
     /// <summary>只读。是否有任何选中项。给模板 Trigger 用（控制清除按钮、水印的可见性）。</summary>
     public bool HasSelectedItems
@@ -397,6 +409,7 @@ public class MultiComboBox : ListBox
         {
             // 从基类 SelectedItems 移除——会触发 OnSelectionChanged 自动镜像同步到 SelectedItemsBindable
             box.SelectedItems.Remove(item);
+
             // 标 Handled 阻止冒泡，避免点击 × 同时触发外层"打开下拉"行为
             e.Handled = true;
         }
@@ -447,6 +460,7 @@ public class MultiComboBox : ListBox
                     bindable.RemoveAt(i);
                 }
             }
+
             // 添加：新选中但还不在 bindable 里的
             foreach (var item in base.SelectedItems)
             {
@@ -467,34 +481,6 @@ public class MultiComboBox : ListBox
     #endregion Override (Selector)
 
     #region Override (FrameworkElement)
-
-    /// <summary>
-    /// 键盘：Esc 关闭下拉、Alt+下打开下拉、Tab 关下拉。
-    /// 其余（Space / 方向键 / Ctrl+A）由 ListBox 基类处理。
-    /// </summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        switch (e.Key)
-        {
-            case Key.Escape when IsOpen:
-                IsOpen = false;
-                e.Handled = true;
-                return;
-
-            case Key.System when e.SystemKey == Key.Down:
-                // Alt+Down：标准 ComboBox 行为——打开下拉
-                IsOpen = !IsOpen;
-                e.Handled = true;
-                return;
-
-            case Key.Tab when IsOpen:
-                IsOpen = false;
-                // 不 Handle——让焦点正常 Tab 走
-                break;
-        }
-
-        base.OnKeyDown(e);
-    }
 
     public override void OnApplyTemplate()
     {
@@ -518,6 +504,36 @@ public class MultiComboBox : ListBox
         RefreshDefaultChipTemplate();
 
         UpdateSelectionState();
+    }
+
+    /// <summary>
+    /// 键盘：Esc 关闭下拉、Alt+下打开下拉、Tab 关下拉。
+    /// 其余（Space / 方向键 / Ctrl+A）由 ListBox 基类处理。
+    /// </summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Escape when IsOpen:
+                IsOpen = false;
+                e.Handled = true;
+                return;
+
+            case Key.System when e.SystemKey == Key.Down:
+
+                // Alt+Down：标准 ComboBox 行为——打开下拉
+                IsOpen = !IsOpen;
+                e.Handled = true;
+                return;
+
+            case Key.Tab when IsOpen:
+                IsOpen = false;
+
+                // 不 Handle——让焦点正常 Tab 走
+                break;
+        }
+
+        base.OnKeyDown(e);
     }
 
     #endregion Override (FrameworkElement)
@@ -634,17 +650,15 @@ public class MultiComboBox : ListBox
     xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
     xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
     xmlns:cy='clr-namespace:Cyclone.Wpf.Controls;assembly=Cyclone.Wpf'>
-    <Border Margin='2' Padding='6,2,2,2'
-            Background='{{DynamicResource Background.Header}}'
-            BorderBrush='{{DynamicResource Border.Default}}'
-            BorderThickness='1'>
+    <Border Margin='2' Padding='4,2'
+            Background='{{DynamicResource Background.Pressed}}'
+            BorderThickness='0'>
         <StackPanel Orientation='Horizontal'>
             <TextBlock VerticalAlignment='Center' Text='{textBinding}' />
-            <Button Margin='6,0,0,0' VerticalAlignment='Center'
+            <Button Margin='4,0,0,0' VerticalAlignment='Center'
                     Command='{{x:Static cy:MultiComboBox.RemoveItemCommand}}'
                     CommandParameter='{{Binding}}'
-                    Style='{{DynamicResource MultiComboBox.ChipDeleteButton.Style.Basic}}'
-                    ToolTip='Remove' />
+                    Style='{{DynamicResource MultiComboBox.ChipDeleteButton.Style.Basic}}'/>
         </StackPanel>
     </Border>
 </DataTemplate>";
@@ -686,6 +700,7 @@ public class MultiComboBox : ListBox
         {
             int total = Items.Count;
             int selected = base.SelectedItems.Count;
+
             // 三态：全选 / 部分选 / 全未选
             _selectAllCheckBox.IsChecked = total > 0 && selected == total
                 ? true
