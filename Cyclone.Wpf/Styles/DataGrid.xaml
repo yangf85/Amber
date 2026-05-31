@@ -1,7 +1,7 @@
 ﻿<!--
     ============================================================================
     WinUI 3 风格 DataGrid 样式 (v2 — 整行高亮 + 左竖条指示器 + 无圆角)
-    
+
     破坏性变更说明（vs 旧版本）：
     - 视觉风格全面改版，与 ListBox / ListView / TreeView 视觉对齐：
     · DataGridRow 左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
@@ -14,7 +14,7 @@
     - 修复 SelectAll 按钮 Background=Red 的明显错误（应该是默认主题色）
     - 隔行底色（AlternationIndex）保留——表格视觉的传统
     - DataGridColumnHeader 风格统一（hover/按下交互 + 排序箭头位置改右侧）
-    
+
     保留行为：
     - HorizontalGridLinesBrush / VerticalGridLinesBrush 网格线（表格特性）
     - AlternationCount=2 隔行底色
@@ -474,6 +474,296 @@
                 <Setter Property="Margin" Value="{Binding NewItemMargin, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  DataGridComboBoxColumn 默认样式资源  -->
+    <!--  ============================================================  -->
+    <Style x:Key="DataGrid.ComboBoxColumn.ItemContainerStyle" TargetType="{x:Type ComboBoxItem}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                    <Border
+                        x:Name="ItemBorder"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DataGrid.ComboBoxColumn.ElementStyle" TargetType="{x:Type ComboBox}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBox}">
+                    <Border
+                        x:Name="RootBorder"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DataGrid.ComboBoxColumn.EditingElementStyle" TargetType="{x:Type ComboBox}">
+        <Setter Property="Background" Value="{DynamicResource Background.Default}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
+        <Setter Property="Padding" Value="4,0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="MaxDropDownHeight" Value="260" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource DataGrid.ComboBoxColumn.ItemContainerStyle}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBox}">
+                    <Grid x:Name="RootGrid" SnapsToDevicePixels="True">
+                        <ToggleButton
+                            x:Name="DropDownToggle"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            ClickMode="Press"
+                            Focusable="False"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border
+                                        x:Name="ToggleBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        SnapsToDevicePixels="True">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="24" />
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter
+                                                Grid.Column="0"
+                                                Margin="{Binding Padding, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                ContentStringFormat="{Binding SelectionBoxItemStringFormat, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                ContentTemplate="{Binding SelectionBoxItemTemplate, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                ContentTemplateSelector="{Binding ItemTemplateSelector, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}" />
+                                            <Path
+                                                x:Name="Arrow"
+                                                Grid.Column="1"
+                                                Width="8"
+                                                Height="5"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Data="M0,0 L8,0 L4,5 Z"
+                                                Fill="{DynamicResource Foreground.Caption}"
+                                                Stretch="Uniform" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ToggleBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Foreground.Default}" />
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="ToggleBorder" Property="Background" Value="{DynamicResource Background.Default}" />
+                                            <Setter TargetName="ToggleBorder" Property="BorderBrush" Value="{DynamicResource Background.Highlighted}" />
+                                            <Setter TargetName="ToggleBorder" Property="BorderThickness" Value="1" />
+                                            <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource Background.Highlighted}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.45" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Popup
+                            x:Name="PART_Popup"
+                            AllowsTransparency="True"
+                            Focusable="False"
+                            IsOpen="{TemplateBinding IsDropDownOpen}"
+                            Placement="Bottom"
+                            PopupAnimation="Fade">
+                            <Grid
+                                x:Name="DropDown"
+                                MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                SnapsToDevicePixels="True">
+                                <Border
+                                    x:Name="DropDownBorder"
+                                    Background="{DynamicResource Background.Default}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1">
+                                    <ScrollViewer CanContentScroll="True" SnapsToDevicePixels="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Grid>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter TargetName="DropDownBorder" Property="MinHeight" Value="32" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter Property="BorderBrush" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  DataGridCheckBoxColumn 默认样式资源  -->
+    <!--  ============================================================  -->
+    <Style x:Key="DataGrid.CheckBoxColumn.ElementStyle" TargetType="{x:Type CheckBox}">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid
+                        Width="16"
+                        Height="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        SnapsToDevicePixels="True">
+                        <Border
+                            x:Name="CheckBoxBorder"
+                            Background="{DynamicResource Background.Default}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1" />
+                        <Path
+                            x:Name="CheckMark"
+                            Margin="3"
+                            Data="M 3 7 L 6 10 L 11 4"
+                            Stroke="White"
+                            StrokeEndLineCap="Round"
+                            StrokeLineJoin="Round"
+                            StrokeStartLineCap="Round"
+                            StrokeThickness="2"
+                            Visibility="Collapsed" />
+                        <Rectangle
+                            x:Name="IndeterminateMark"
+                            Width="8"
+                            Height="2"
+                            Fill="White"
+                            Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter TargetName="CheckBoxBorder" Property="Background" Value="{DynamicResource Background.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="Background" Value="{DynamicResource Background.Selected}" />
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{DynamicResource Background.Selected}" />
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="CheckBoxBorder" Property="Background" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{DynamicResource Background.Highlighted}" />
+                            <Setter TargetName="IndeterminateMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style
+        x:Key="DataGrid.CheckBoxColumn.EditingElementStyle"
+        BasedOn="{StaticResource DataGrid.CheckBoxColumn.ElementStyle}"
+        TargetType="{x:Type CheckBox}">
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsHitTestVisible" Value="True" />
+    </Style>
+
+    <!--  ============================================================  -->
+    <!--  DataGridHyperlinkColumn 默认样式资源  -->
+    <!--  ============================================================  -->
+    <Style x:Key="DataGrid.HyperlinkColumn.ElementStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextDecorations" Value="{x:Null}" />
+    </Style>
+
+    <Style
+        x:Key="DataGrid.HyperlinkColumn.EditingElementStyle"
+        BasedOn="{StaticResource DataGrid.EditingTextBox.Style}"
+        TargetType="{x:Type TextBox}">
+        <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
+        <Setter Property="Padding" Value="6,0" />
     </Style>
 
     <!--  ============================================================  -->

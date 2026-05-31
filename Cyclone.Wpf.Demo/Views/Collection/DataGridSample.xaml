@@ -167,7 +167,10 @@
                     <DataGridCheckBoxColumn
                         Width="60"
                         Binding="{Binding IsActive}"
-                        Header="在职" />
+                        EditingElementStyle="{StaticResource DataGrid.CheckBoxColumn.EditingElementStyle}"
+                        ElementStyle="{StaticResource DataGrid.CheckBoxColumn.ElementStyle}"
+                        Header="在职"
+                        IsReadOnly="False" />
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -317,11 +320,11 @@
 
             <DataGrid
                 Height="280"
+                hp:DataGridHelper.SelectedItems="{Binding SelectedRows}"
                 AutoGenerateColumns="False"
                 IsReadOnly="True"
                 ItemsSource="{Binding MultiSelectData}"
-                SelectionMode="Extended"
-                hp:DataGridHelper.SelectedItems="{Binding SelectedRows}">
+                SelectionMode="Extended">
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="120"
@@ -380,9 +383,9 @@
 
             <DataGrid
                 Height="260"
+                hp:DataGridHelper.IsAutoGenerate="True"
                 IsReadOnly="True"
-                ItemsSource="{Binding Products}"
-                hp:DataGridHelper.IsAutoGenerate="True" />
+                ItemsSource="{Binding Products}" />
 
             <Border
                 Margin="0,12,0,0"
@@ -965,7 +968,6 @@
                         TextWrapping="Wrap" />
                 </StackPanel>
             </StackPanel>
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>
