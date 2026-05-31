@@ -663,7 +663,6 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-
                         <Border
                             x:Name="BoxBorder"
                             Grid.Column="0"
