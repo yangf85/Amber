@@ -231,7 +231,7 @@ public partial class FilterBoxViewModel : ObservableObject
         {
             TextOperator.Equal => s => string.Equals(s ?? "", pattern, cmp),
             TextOperator.NotEqual => s => !string.Equals(s ?? "", pattern, cmp),
-            TextOperator.Contains => s => (s ?? "").IndexOf(pattern, cmp) >= 0,
+            TextOperator.Contains => s => (s ?? "").Contains(pattern, cmp),
             TextOperator.NotContains => s => (s ?? "").IndexOf(pattern, cmp) < 0,
             TextOperator.StartsWith => s => (s ?? "").StartsWith(pattern, cmp),
             TextOperator.EndsWith => s => (s ?? "").EndsWith(pattern, cmp),
@@ -325,7 +325,7 @@ public partial class FilterBoxViewModel : ObservableObject
 
         // ⑥ 联合过滤:必须先建数据 + ICollectionView,再赋值过滤参数,
         // 否则 OnXxxChanged partial 钩子里 ProductsView 仍为 null,导致 NRE。
-        Products = new ObservableCollection<FilterProduct>(new[]
+        Products = [with(new[]
         {
             new FilterProduct("Wireless Headphones Pro", "音频", 199, 42, 4.5),
             new FilterProduct("Mechanical Keyboard", "外设", 599, 18, 4.7),
@@ -339,7 +339,7 @@ public partial class FilterBoxViewModel : ObservableObject
             new FilterProduct("Studio Microphone", "音频", 899, 14, 4.5),
             new FilterProduct("Standing Desk", "家具", 1299, 12, 4.4),
             new FilterProduct("Cable Organizer", "配件", 29, 350, 3.8),
-        });
+        })];
 
         ProductsView = CollectionViewSource.GetDefaultView(Products);
         ProductsView.Filter = FilterProductPredicate;

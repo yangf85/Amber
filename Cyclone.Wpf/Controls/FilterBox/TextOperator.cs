@@ -24,6 +24,6 @@ public enum TextOperator
     [Description("$")]
     EndsWith,
 
-    [Description(".*")]
+    [Description("*")]
     Regex
 }
