@@ -204,7 +204,7 @@
     <!--  水平模板  -->
     <!--  ============================================================  -->
     <ControlTemplate x:Key="RangeSlider.ControlTemplate.Horizontal" TargetType="{x:Type ctl:RangeSlider}">
-        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+        <Grid ClipToBounds="False" SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -228,6 +228,7 @@
 
             <ctl:RangeTrack
                 Grid.Row="1"
+                ClipToBounds="False"
                 VerticalAlignment="Center"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 LowerValue="{TemplateBinding LowerValue}"
@@ -308,7 +309,7 @@
     <!--  垂直模板  -->
     <!--  ============================================================  -->
     <ControlTemplate x:Key="RangeSlider.ControlTemplate.Vertical" TargetType="{x:Type ctl:RangeSlider}">
-        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+        <Grid ClipToBounds="False" SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -332,6 +333,7 @@
 
             <ctl:RangeTrack
                 Grid.Column="1"
+                ClipToBounds="False"
                 HorizontalAlignment="Center"
                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
                 LowerValue="{TemplateBinding LowerValue}"
@@ -416,11 +418,16 @@
         BasedOn="{StaticResource Control.Style.Basic}"
         TargetType="{x:Type ctl:RangeSlider}">
         <Setter Property="Background" Value="Transparent" />
+        <!--  关闭裁切：thumb 的 28px 光环/20px hover 体在轨道末端会越界，被裁成直角  -->
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="InactiveTrackBrush" Value="{DynamicResource Background.Inactive}" />
         <Setter Property="ActiveTrackBrush" Value="{DynamicResource Background.Selected}" />
         <Setter Property="TrackThickness" Value="4" />
-        <Setter Property="ThumbSize" Value="18" />
+        <!--  ThumbSize = thumb 的布局占位/命中区，须 ≥ 最大视觉尺寸(28px 光环)。
+              可见 Body 仍是 18px(写死在 Thumb 模板)；这里设 28 让 RangeTrack 每端
+              预留 14px，光环在轨道末端不再越界，TickBar.ReservedSpace 同步对齐  -->
+        <Setter Property="ThumbSize" Value="28" />
         <Setter Property="TickFrequency" Value="1" />
         <Setter Property="AutoToolTipPrecision" Value="2" />
         <Setter Property="AutoToolTipPlacement" Value="TopLeft" />

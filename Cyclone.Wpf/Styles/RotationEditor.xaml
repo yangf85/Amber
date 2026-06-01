@@ -1,14 +1,14 @@
 <!--
     ============================================================================
     RotationEditor 样式 (XYZ 三轴角度编辑器)
-    
+
     设计要点:
     - XYZ 三轴用 红/绿/蓝 经典色彩约定(Blender/Unity/3ds Max 通用),不用主题 token
     - 每条 Slider 视觉跟项目 Slider 一致 — 圆形 Thumb,4px Track,左段彩色填充
     - 轴标签 22×22 彩色方块 + 白字
     - IsSnapToTickEnabled=True + TickFrequency=Step,让 Step 控制鼠标拖动也按步长跳
     - Reset 命令通过类级 CommandBinding 处理 — 模板不需要写命令绑定
-    
+
     修复 (vs 旧版):
     - Thumb 12×18 方形 → 14px 圆形,跟项目其他 Slider 一致
     - Background.Control / BorderThickness.Thin → Background.Container / BorderThickness=1
@@ -62,16 +62,40 @@
     <Style x:Key="RotationEditor.Slider.Thumb.Style.Basic" TargetType="Thumb">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Focusable" Value="False" />
-        <Setter Property="Width" Value="14" />
-        <Setter Property="Height" Value="14" />
+        <!--
+            布局占位 = thumb 命中区/Track 预留尺寸。设 22 容纳 22px 光圈
+            (也正好等于 Slider 行高，竖直方向不溢出)；可见圆仍由 ThumbBody 固定 14px
+        -->
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Ellipse
-                        x:Name="ThumbBody"
-                        Fill="{DynamicResource Background.Container}"
-                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
-                        StrokeThickness="2" />
+                    <Grid>
+                        <!--  外圈光圈 — IsDragging 时弹入，颜色跟随轴色  -->
+                        <Ellipse
+                            x:Name="FocusRing"
+                            Width="22"
+                            Height="22"
+                            Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
+                            Opacity="0"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="FocusRingScale" ScaleX="0.7" ScaleY="0.7" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!--  Thumb 主体 — 固定 14px 圆，白底轴色边  -->
+                        <Ellipse
+                            x:Name="ThumbBody"
+                            Width="14"
+                            Height="14"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Fill="{DynamicResource Background.Container}"
+                            Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}"
+                            StrokeThickness="2" />
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ThumbBody" Property="Width" Value="16" />
@@ -79,6 +103,56 @@
                         </Trigger>
                         <Trigger Property="IsDragging" Value="True">
                             <Setter TargetName="ThumbBody" Property="Fill" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Slider}}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.3"
+                                            Duration="0:0:0.15" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="1"
+                                            Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRing"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="FocusRingScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="0.7"
+                                            Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -93,7 +167,8 @@
         <Grid
             Height="22"
             VerticalAlignment="Center"
-            Background="Transparent">
+            Background="Transparent"
+            ClipToBounds="False">
             <!--  轨道底色  -->
             <Border
                 Height="4"
@@ -101,7 +176,7 @@
                 Background="{DynamicResource Background.Inactive}"
                 SnapsToDevicePixels="True" />
             <!--  实际 Track  -->
-            <Track x:Name="PART_Track">
+            <Track x:Name="PART_Track" ClipToBounds="False">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton
                         Background="{TemplateBinding Foreground}"
@@ -131,6 +206,8 @@
     <!--  ============================================================  -->
     <Style x:Key="RotationEditor.Slider.Style.Basic" TargetType="Slider">
         <Setter Property="OverridesDefaultStyle" Value="True" />
+        <!--  关闭裁切：thumb 实际尺寸大于 Track 预留时，端点的越界部分不会被切成直角  -->
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Minimum" Value="0" />
         <Setter Property="Maximum" Value="359.99" />

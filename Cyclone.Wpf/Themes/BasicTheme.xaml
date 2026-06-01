@@ -21,7 +21,7 @@
     <SolidColorBrush x:Key="Background.Editing" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="Background.Loading" Color="{StaticResource GrayLighten2}" />
     <SolidColorBrush x:Key="Background.Dragging" Color="{StaticResource BlueDarken3}" />
-    <SolidColorBrush x:Key="Background.Selected" Color="{StaticResource BlueDefault}" />
+    <SolidColorBrush x:Key="Background.Selected" Color="{StaticResource BlueDarken2}" />
     <SolidColorBrush x:Key="Background.InputError" Color="{StaticResource RedLighten5}" />
     <SolidColorBrush x:Key="Background.Warning" Color="{StaticResource OrangeDarken3}" />
     <SolidColorBrush x:Key="Background.Error" Color="{StaticResource RedDarken3}" />
@@ -122,7 +122,7 @@
     <SolidColorBrush x:Key="Icon.Foreground.Dragging" Color="{StaticResource BlueDarken4}" />
     <SolidColorBrush x:Key="Icon.Foreground.Success" Color="{StaticResource GreenDarken3}" />
     <SolidColorBrush x:Key="Icon.Foreground.Error" Color="{StaticResource RedDarken3}" />
-    <SolidColorBrush x:Key="Icon.Foreground.Warning" Color="{StaticResource OrangeLighten1}" />
+    <SolidColorBrush x:Key="Icon.Foreground.Warning" Color="{StaticResource OrangeDarken3}" />
     <SolidColorBrush x:Key="Icon.Foreground.Info" Color="{StaticResource BlueDarken3}" />
     <SolidColorBrush x:Key="Icon.Foreground.Disabled" Color="{StaticResource GrayLighten1}" />
     <SolidColorBrush x:Key="Icon.Foreground.Link" Color="{StaticResource BlueDarken3}" />
@@ -144,15 +144,13 @@
     <SolidColorBrush x:Key="Highlight.Invert" Color="{StaticResource Black}" />
 
     <!--  ==================== 品牌主色族 ====================  -->
-    <!--  控件库主操作色——通过修改这组 token 即可整体换肤（蓝→绿/紫等）  -->
-    <SolidColorBrush x:Key="Brand.Primary" Color="{StaticResource BlueDefault}" />
-    <SolidColorBrush x:Key="Brand.PrimaryHover" Color="{StaticResource BlueDarken1}" />
-    <SolidColorBrush x:Key="Brand.PrimaryPressed" Color="{StaticResource BlueDarken2}" />
+    <SolidColorBrush x:Key="Brand.Primary" Color="{StaticResource BlueDarken2}" />
+    <SolidColorBrush x:Key="Brand.PrimaryHover" Color="{StaticResource BlueDarken3}" />
+    <SolidColorBrush x:Key="Brand.PrimaryPressed" Color="{StaticResource BlueDarken4}" />
     <SolidColorBrush x:Key="Brand.PrimaryDisabled" Color="{StaticResource BlueLighten3}" />
     <SolidColorBrush x:Key="Brand.PrimarySubtle" Color="{StaticResource BlueLighten5}" />
 
     <!--  ==================== 文字选区 ====================  -->
-    <!--  TextBox / RichTextBox 选中文字的背景色与前景色（区别于 ListBoxItem 的 Background.Selected）  -->
     <SolidColorBrush x:Key="Selection.Background" Color="{StaticResource BlueLighten4}" />
     <SolidColorBrush x:Key="Selection.Foreground" Color="{StaticResource GrayDarken4}" />
 
@@ -204,7 +202,7 @@
     <Thickness x:Key="Padding.Top">4,8,4,4</Thickness>
     <Thickness x:Key="Padding.Bottom">4,4,4,8</Thickness>
     <Thickness x:Key="Padding.Horizontal">8,4</Thickness>
-    <Thickness x:Key="Padding.Vertical">4,8</Thickness>
+    <Thickness x:Key="Padding.Vertical">4,6</Thickness>
     <Thickness x:Key="Padding.All">8</Thickness>
 
     <!--  BorderThickness - 保持不变  -->
