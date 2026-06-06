@@ -82,7 +82,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="Validation.ErrorTemplate" Value="{DynamicResource ValidationError.ControlTemplate}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
@@ -115,7 +115,7 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Padding" Value="2,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
@@ -171,8 +171,7 @@
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Caption}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="0,0,1,1" />
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Padding" Value="4,2" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
@@ -484,7 +483,7 @@
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -926,7 +925,7 @@
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border.Default}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="ColumnHeaderHeight" Value="{DynamicResource Height.Horizontal.Header}" />
+        <Setter Property="ColumnHeaderHeight" Value="{DynamicResource Height.Horizontal.Control}" />
         <Setter Property="RowHeight" Value="{DynamicResource Height.Horizontal.Item}" />
         <Setter Property="RowHeaderWidth" Value="0" />
         <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected" />
