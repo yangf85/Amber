@@ -114,6 +114,20 @@ public class CascadePicker : ItemsControl
         public string NodeText;      // 自身节点文本
     }
 
+    #region IsEditable
+
+    public static readonly DependencyProperty IsEditableProperty =
+    DependencyProperty.Register(nameof(IsEditable), typeof(bool),
+        typeof(CascadePicker), new PropertyMetadata(true));
+
+    public bool IsEditable
+    {
+        get => (bool)GetValue(IsEditableProperty);
+        set => SetValue(IsEditableProperty, value);
+    }
+
+    #endregion IsEditable
+
     #region IsOpened
 
     public static readonly DependencyProperty IsOpenedProperty =
@@ -433,6 +447,8 @@ public class CascadePicker : ItemsControl
             typeof(CascadePicker),
             new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnTextChanged));
 
+    private bool _isSyncingFromText;
+
     /// <summary>
     /// 获取或设置文本框中显示的文本（受 <see cref="IsShowFullPath"/> 影响）。
     /// </summary>
@@ -444,7 +460,31 @@ public class CascadePicker : ItemsControl
 
     private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
+        var p = (CascadePicker)d;
         CommandManager.InvalidateRequerySuggested();
+
+        if (p._isSyncing || !p.IsEditable)
+        {
+            return; // 来自选中项同步、或非编辑模式，不反查
+        }
+
+        p._isSyncingFromText = true;
+        try
+        {
+            var text = e.NewValue as string;
+            if (!string.IsNullOrEmpty(text) && p._byPath.TryGetValue(text, out var item))
+            {
+                p.SetCurrentValue(SelectedItemProperty, item); // 输入恰好匹配某个完整路径
+            }
+            else
+            {
+                p.SetCurrentValue(SelectedItemProperty, null); // 列表外的自定义文本
+            }
+        }
+        finally
+        {
+            p._isSyncingFromText = false;
+        }
     }
 
     #endregion Text
@@ -559,10 +599,7 @@ public class CascadePicker : ItemsControl
     {
         base.OnApplyTemplate();
 
-        if (_clearButton != null)
-        {
-            _clearButton.Click -= OnClearButtonClick;
-        }
+        _clearButton?.Click -= OnClearButtonClick;
 
         _textBox = GetTemplateChild(PART_DisplayedTextBox) as TextBox;
         _popup = GetTemplateChild(PART_ItemsPopup) as Popup;
@@ -744,31 +781,6 @@ public class CascadePicker : ItemsControl
 
     #region Private Methods - Index
 
-    private void RebuildIndex()
-    {
-        _byItem.Clear();
-        _byValue.Clear();
-        _byPath.Clear();
-        _pathConflicts?.Clear();
-
-        if (Items == null || Items.Count == 0)
-        {
-            return;
-        }
-
-        var ancestors = new List<object>();
-        foreach (var item in Items)
-        {
-            IndexNode(item, ancestors);
-        }
-
-        if (_pathConflicts != null && _pathConflicts.Count > 0)
-        {
-            System.Diagnostics.Trace.TraceWarning(
-                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
-        }
-    }
-
     /// <summary>
     /// 数据结构变化或关键属性（NodeMemberPath / ChildrenMemberPath / SelectedValuePath / Separator）变化时重建索引。
     /// </summary>
@@ -802,6 +814,31 @@ public class CascadePicker : ItemsControl
         }
 
         return prop?.GetValue(item);
+    }
+
+    private void RebuildIndex()
+    {
+        _byItem.Clear();
+        _byValue.Clear();
+        _byPath.Clear();
+        _pathConflicts?.Clear();
+
+        if (Items == null || Items.Count == 0)
+        {
+            return;
+        }
+
+        var ancestors = new List<object>();
+        foreach (var item in Items)
+        {
+            IndexNode(item, ancestors);
+        }
+
+        if (_pathConflicts != null && _pathConflicts.Count > 0)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
+        }
     }
 
     private void IndexNode(object item, List<object> ancestors)
@@ -922,7 +959,11 @@ public class CascadePicker : ItemsControl
             {
                 SetCurrentValue(SelectedValueProperty, null);
                 SetCurrentValue(SelectedPathProperty, null);
-                SetCurrentValue(TextProperty, string.Empty);
+                if (!_isSyncingFromText)                       // ← 新增判断
+                {
+                    SetCurrentValue(TextProperty, string.Empty);
+                }
+
                 _pendingValue = null;
                 _pendingPath = null;
                 return;

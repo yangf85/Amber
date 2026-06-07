@@ -222,7 +222,7 @@
                                 BorderThickness="0"
                                 IsReadOnly="{TemplateBinding IsReadOnly}"
                                 Style="{StaticResource CascadePicker.DisplayedTextBoxStyle}"
-                                Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                                Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 x:Name="PART_ClearButton"
                                 Grid.Column="1"
@@ -260,6 +260,9 @@
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="False">
+                            <Setter TargetName="PART_DisplayedTextBox" Property="IsReadOnly" Value="True" />
+                        </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="Text" Value="" />

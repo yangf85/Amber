@@ -183,14 +183,22 @@
 
             <TextBlock Style="{StaticResource CaptionStyle}" Text="用对象集合驱动。NodeMemberPath 告诉控件每级显示哪个字段, ChildrenMemberPath 告诉控件子集合在哪里。SelectedItem 双向绑定到当前选中的 Region 对象。" />
 
-            <cy:CascadePicker
-                Width="320"
-                HorizontalAlignment="Left"
-                ChildrenMemberPath="Children"
-                ItemsSource="{Binding Regions}"
-                NodeMemberPath="Name"
-                SelectedItem="{Binding SelectedRegion, Mode=TwoWay}"
-                Watermark="选择行政区" />
+            <cy:SpacingStackPanel Orientation="Horizontal">
+                <cy:CascadePicker
+                    Width="320"
+                    HorizontalAlignment="Left"
+                    ChildrenMemberPath="Children"
+                    ItemsSource="{Binding Regions}"
+                    NodeMemberPath="Name"
+                    SelectedItem="{Binding SelectedRegion, Mode=TwoWay}"
+                    Text="{Binding Text}"
+                    Watermark="选择行政区" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="DarkGreen"
+                    Text="{Binding Text}" />
+                <Button Command="{Binding ModifyTextCommand}" Content="修改文本" />
+            </cy:SpacingStackPanel>
 
             <Border
                 Margin="0,12,0,0"

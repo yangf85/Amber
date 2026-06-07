@@ -30,6 +30,9 @@ public partial class CascadePickerViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsReadOnlyEnabled { get; set; }
 
+    [ObservableProperty]
+    public partial string Text { get; set; } = "用户输入的文本.";
+
     private static ObservableCollection<Region> BuildRegionData()
     {
         return new ObservableCollection<Region>
@@ -125,6 +128,12 @@ public partial class CascadePickerViewModel : ObservableObject
                 },
             },
         };
+    }
+
+    [RelayCommand]
+    private void ModifyText()
+    {
+        Text = "后台修改文本";
     }
 
     [RelayCommand]
