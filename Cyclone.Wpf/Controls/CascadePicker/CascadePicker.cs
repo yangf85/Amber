@@ -568,9 +568,17 @@ public class CascadePicker : ItemsControl
     public void Clear()
     {
         SetCurrentValue(SelectedItemProperty, null);
+        SetCurrentValue(SelectedValueProperty, null);
+        SetCurrentValue(SelectedPathProperty, null);
+        SetCurrentValue(TextProperty, string.Empty);
 
-        // SelectedItem 变化会自动同步 SelectedValue / SelectedPath / Text
+        _pendingValue = null;
+        _pendingPath = null;
+
+        SetCurrentValue(IsOpenedProperty, false);
         _textBox?.Focus();
+
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private static void OnClearCommandExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -781,6 +789,31 @@ public class CascadePicker : ItemsControl
 
     #region Private Methods - Index
 
+    private void RebuildIndex()
+    {
+        _byItem.Clear();
+        _byValue.Clear();
+        _byPath.Clear();
+        _pathConflicts?.Clear();
+
+        if (Items == null || Items.Count == 0)
+        {
+            return;
+        }
+
+        var ancestors = new List<object>();
+        foreach (var item in Items)
+        {
+            IndexNode(item, ancestors);
+        }
+
+        if (_pathConflicts != null && _pathConflicts.Count > 0)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
+        }
+    }
+
     /// <summary>
     /// 数据结构变化或关键属性（NodeMemberPath / ChildrenMemberPath / SelectedValuePath / Separator）变化时重建索引。
     /// </summary>
@@ -814,31 +847,6 @@ public class CascadePicker : ItemsControl
         }
 
         return prop?.GetValue(item);
-    }
-
-    private void RebuildIndex()
-    {
-        _byItem.Clear();
-        _byValue.Clear();
-        _byPath.Clear();
-        _pathConflicts?.Clear();
-
-        if (Items == null || Items.Count == 0)
-        {
-            return;
-        }
-
-        var ancestors = new List<object>();
-        foreach (var item in Items)
-        {
-            IndexNode(item, ancestors);
-        }
-
-        if (_pathConflicts != null && _pathConflicts.Count > 0)
-        {
-            System.Diagnostics.Trace.TraceWarning(
-                $"[CascadePicker] 检测到 {_pathConflicts.Count} 条重复路径，SelectedPath 反查仅命中首个：{string.Join(", ", _pathConflicts)}");
-        }
     }
 
     private void IndexNode(object item, List<object> ancestors)
