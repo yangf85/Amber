@@ -1,33 +1,4 @@
-﻿<!--
-    ============================================================================
-    WinUI 3 风格 TabControl 样式 (v2 — pill 指示器 + 融入内容区 + 无圆角)
-
-    破坏性变更说明（vs 旧版本）：
-    - 视觉风格全面改版，与 ListBox / ListView / TreeView / DataGrid 视觉对齐：
-    · 选中指示器从 2px 矩形 → 3px pill 圆头（横向是 4px 长条 / 纵向是 3px 竖条），
-    带 ScaleX/ScaleY 弹性扩展动画
-    · 默认 TabItem 背景透明（不再默认浅灰），Hover 才显 Background.Hover
-    · 选中 TabItem 背景 = Background.Container（和内容区底色一致——视觉融合）
-    · 选中态字重加粗 (Medium → SemiBold) + 颜色加深 (Foreground.Default → Link)
-    · 失焦弱化：Selector.IsSelectionActive=False 时指示器变 Highlighted
-    · 禁用态 + 自定义 FocusVisual（无障碍键盘聚焦提示）
-    · 无圆角
-
-    - 修复横向指示器的负 Margin hack：
-    · 旧版 Indicator Margin=-15,0 用负值突破 Padding 边界——能 work 但脆弱
-    · 新版指示器放 RootBorder 外层 Grid，自然贯穿整个 tab 宽度
-
-    - 修复未选中和 hover 视觉同色问题：
-    · 旧版默认背景 Background.Header (#F5F5F5)
-    · 新版默认透明，hover 才显浅灰，反馈清晰
-
-    保留行为：
-    - TabStripPlacement 4 方向触发器切模板和 ItemContainerStyle
-    - 内容区背景 Background.Container（白）
-    - 选中态切换的视觉过渡走动画（150-180ms）
-    ============================================================================
--->
-<ResourceDictionary
+﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:conv="clr-namespace:Cyclone.Wpf.Converters"
@@ -101,7 +72,7 @@
                             x:Name="Indicator"
                             Grid.Row="1"
                             Height="3"
-                            Margin="20,0"
+                            Margin="0"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Bottom"
                             Background="{DynamicResource Background.Selected}"
