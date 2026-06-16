@@ -165,7 +165,7 @@
                 <TabItem Header="通知偏好">
                     <TextBlock Style="{StaticResource TabContentTextStyle}" Text="邮件订阅、桌面通知、声音提示 — 选择哪些事件触发哪种通知方式。" />
                 </TabItem>
-                <TabItem Header="高级">
+                <TabItem Header="  高级  ">
                     <TextBlock Style="{StaticResource TabContentTextStyle}" Text="开发者选项、实验功能开关、缓存清理。一般用户不会进来。" />
                 </TabItem>
             </TabControl>
@@ -705,41 +705,149 @@
                         VerticalAlignment="Bottom"
                         Background="{DynamicResource Border.Default}" />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TabStripPlacement" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Dock (Top)" />
-                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Tab 头条位置 — Top / Bottom / Left / Right。本主题样式自动响应 4 方向。" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="TabStripPlacement" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="Dock (Top)" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="Tab 头条位置 — Top / Bottom / Left / Right。本主题样式自动响应 4 方向。" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemsSource" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="IEnumerable" />
-                    <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="数据源(继承自 ItemsControl)。绑定后 tab 数量随集合变化, 配合 ObservableCollection 实现动态增删。" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ItemsSource" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="IEnumerable" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="数据源(继承自 ItemsControl)。绑定后 tab 数量随集合变化, 配合 ObservableCollection 实现动态增删。" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemTemplate" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate" />
-                    <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="渲染 tab 头(即 TabItem.Header 的内容)。DataContext 是单个数据对象。" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ItemTemplate" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="DataTemplate" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="渲染 tab 头(即 TabItem.Header 的内容)。DataContext 是单个数据对象。" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ContentTemplate" />
-                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="DataTemplate" />
-                    <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="渲染当前选中 tab 的内容区。DataContext 是当前 SelectedItem。和 ItemTemplate 配对使用。" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ContentTemplate" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="DataTemplate" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="渲染当前选中 tab 的内容区。DataContext 是当前 SelectedItem。和 ItemTemplate 配对使用。" />
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="SelectedItem / SelectedIndex" />
-                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object / int (TwoWay)" />
-                    <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="当前选中 tab。继承自 Selector, 可写 — 直接 TwoWay 绑回 ViewModel。" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="SelectedItem / SelectedIndex" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="object / int (TwoWay)" />
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="当前选中 tab。继承自 Selector, 可写 — 直接 TwoWay 绑回 ViewModel。" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="ItemContainerStyle" />
-                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="Style" />
-                    <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="TabItem 容器样式。本主题已根据 TabStripPlacement 自动切换 Horizontal / Vertical 两套样式, 一般无需手动配置。" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="ItemContainerStyle" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="Style" />
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="TabItem 容器样式。本主题已根据 TabStripPlacement 自动切换 Horizontal / Vertical 两套样式, 一般无需手动配置。" />
 
-                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TabItem.Header" />
-                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                    <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Tab 头内容 — 可以是字符串, 也可以是任意 UIElement (StackPanel / 图标 + 文字 + 徽章等)。" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="TabItem.Header" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="object" />
+                    <TextBlock
+                        Grid.Row="7"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="Tab 头内容 — 可以是字符串, 也可以是任意 UIElement (StackPanel / 图标 + 文字 + 徽章等)。" />
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TabItem.Content" />
-                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="object" />
-                    <TextBlock Grid.Row="8" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="Tab 内容 — 默认是 TabItem 的子元素。仅当前选中的 tab 实例化(懒加载)。" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="TabItem.Content" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="object" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="Tab 内容 — 默认是 TabItem 的子元素。仅当前选中的 tab 实例化(懒加载)。" />
 
-                    <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource PropTableNameStyle}" Text="TabItem.IsEnabled" />
-                    <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource PropTableTypeStyle}" Text="bool" />
-                    <TextBlock Grid.Row="9" Grid.Column="2" Style="{StaticResource PropTableCellStyle}" Text="禁用单个 tab — Cursor 变 Arrow, 文字变 Disabled 灰, 点击不切换。" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="0"
+                        Style="{StaticResource PropTableNameStyle}"
+                        Text="TabItem.IsEnabled" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="1"
+                        Style="{StaticResource PropTableTypeStyle}"
+                        Text="bool" />
+                    <TextBlock
+                        Grid.Row="9"
+                        Grid.Column="2"
+                        Style="{StaticResource PropTableCellStyle}"
+                        Text="禁用单个 tab — Cursor 变 Arrow, 文字变 Disabled 灰, 点击不切换。" />
                 </Grid>
             </Border>
 
@@ -821,7 +929,6 @@
                         TextWrapping="Wrap" />
                 </StackPanel>
             </StackPanel>
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>
