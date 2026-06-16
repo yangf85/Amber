@@ -1,7 +1,7 @@
 ﻿<!--
     ============================================================================
     WinUI 3 风格 TabControl 样式 (v2 — pill 指示器 + 融入内容区 + 无圆角)
-    
+
     破坏性变更说明（vs 旧版本）：
     - 视觉风格全面改版，与 ListBox / ListView / TreeView / DataGrid 视觉对齐：
     · 选中指示器从 2px 矩形 → 3px pill 圆头（横向是 4px 长条 / 纵向是 3px 竖条），
@@ -12,15 +12,15 @@
     · 失焦弱化：Selector.IsSelectionActive=False 时指示器变 Highlighted
     · 禁用态 + 自定义 FocusVisual（无障碍键盘聚焦提示）
     · 无圆角
-    
+
     - 修复横向指示器的负 Margin hack：
     · 旧版 Indicator Margin=-15,0 用负值突破 Padding 边界——能 work 但脆弱
     · 新版指示器放 RootBorder 外层 Grid，自然贯穿整个 tab 宽度
-    
+
     - 修复未选中和 hover 视觉同色问题：
     · 旧版默认背景 Background.Header (#F5F5F5)
     · 新版默认透明，hover 才显浅灰，反馈清晰
-    
+
     保留行为：
     - TabStripPlacement 4 方向触发器切模板和 ItemContainerStyle
     - 内容区背景 Background.Container（白）
@@ -61,7 +61,7 @@
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Header}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="20,0" />
+        <Setter Property="Padding" Value="4,0" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Header}" />
         <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource TabItem.FocusVisualStyle}" />
@@ -105,7 +105,7 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Bottom"
                             Background="{DynamicResource Background.Selected}"
-                            CornerRadius="1.5"
+                            CornerRadius="2"
                             Opacity="0">
                             <Border.RenderTransform>
                                 <ScaleTransform x:Name="IndicatorScale" ScaleX="0.4" />
@@ -208,7 +208,7 @@
         <Setter Property="Height" Value="{DynamicResource Height.Horizontal.Header}" />
         <Setter Property="MinWidth" Value="120" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="Padding" Value="4,0" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Header}" />
         <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -232,7 +232,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Background="{DynamicResource Background.Selected}"
-                            CornerRadius="1.5"
+                            CornerRadius="2"
                             Opacity="0">
                             <Border.RenderTransform>
                                 <ScaleTransform x:Name="IndicatorScale" ScaleY="0.4" />
@@ -361,10 +361,16 @@
 
                 <!--  Tab 头条 + 底部分隔线  -->
                 <Grid Grid.Row="0">
-                    <TabPanel
-                        x:Name="HeaderPanel"
-                        IsItemsHost="True"
-                        KeyboardNavigation.TabIndex="1" />
+                    <ScrollViewer
+                        CanContentScroll="False"
+                        Focusable="False"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Disabled">
+                        <TabPanel
+                            x:Name="HeaderPanel"
+                            IsItemsHost="True"
+                            KeyboardNavigation.TabIndex="1" />
+                    </ScrollViewer>
                     <Border
                         Height="1"
                         VerticalAlignment="Bottom"
@@ -398,10 +404,16 @@
                 </Border>
 
                 <Grid Grid.Row="1">
-                    <TabPanel
-                        x:Name="HeaderPanel"
-                        IsItemsHost="True"
-                        KeyboardNavigation.TabIndex="1" />
+                    <ScrollViewer
+                        CanContentScroll="False"
+                        Focusable="False"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Disabled">
+                        <TabPanel
+                            x:Name="HeaderPanel"
+                            IsItemsHost="True"
+                            KeyboardNavigation.TabIndex="1" />
+                    </ScrollViewer>
                     <Border
                         Height="1"
                         VerticalAlignment="Top"

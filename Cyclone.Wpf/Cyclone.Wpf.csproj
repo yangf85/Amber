@@ -17,7 +17,7 @@
 
 	  <!-- ==================== 版本号配置 ==================== -->
 	  <!-- 每次发布新版本时，只需修改这一个地方 -->
-	  <Version>0.0.0.27</Version>
+	  <Version>0.0.0.28</Version>
 
 	  <!-- 以下都自动使用上面的 Version -->
 	  <AssemblyVersion>$(Version)</AssemblyVersion>
