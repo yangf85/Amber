@@ -34,22 +34,16 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="4,0" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Header}" />
-        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource TabItem.FocusVisualStyle}" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
-                    <!--
-                        外层 Grid 包含 RootBorder + 指示器
-                        指示器放 Grid 顶/底层，绕过 RootBorder 的 Padding 自然贯穿整宽
-                    -->
                     <Grid x:Name="OuterGrid" SnapsToDevicePixels="True">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
                         <Border
                             x:Name="RootBorder"
                             Grid.Row="0"
@@ -146,7 +140,6 @@
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Container}" />
-                            <Setter Property="FontWeight" Value="SemiBold" />
                             <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
                         </Trigger>
 
@@ -291,7 +284,6 @@
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
                             <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource Background.Container}" />
-                            <Setter Property="FontWeight" Value="SemiBold" />
                             <Setter Property="Foreground" Value="{DynamicResource Foreground.Link}" />
                         </Trigger>
 
