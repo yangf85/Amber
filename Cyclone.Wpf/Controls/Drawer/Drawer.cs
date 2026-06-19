@@ -63,6 +63,52 @@ public class Drawer : ContentControl
 
     #endregion DrawerContent
 
+    #region DrawerContentTemplate
+
+    /// <summary>
+    /// 定义抽屉内容模板的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty DrawerContentTemplateProperty =
+        DependencyProperty.Register(
+            nameof(DrawerContentTemplate),
+            typeof(DataTemplate),
+            typeof(Drawer),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置抽屉内容模板。
+    /// </summary>
+    public DataTemplate DrawerContentTemplate
+    {
+        get => (DataTemplate)GetValue(DrawerContentTemplateProperty);
+        set => SetValue(DrawerContentTemplateProperty, value);
+    }
+
+    #endregion DrawerContentTemplate
+
+    #region DrawerContentTemplateSelector
+
+    /// <summary>
+    /// 定义抽屉内容模板选择器的依赖属性。
+    /// </summary>
+    public static readonly DependencyProperty DrawerContentTemplateSelectorProperty =
+        DependencyProperty.Register(
+            nameof(DrawerContentTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(Drawer),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// 获取或设置抽屉内容模板选择器。
+    /// </summary>
+    public DataTemplateSelector DrawerContentTemplateSelector
+    {
+        get => (DataTemplateSelector)GetValue(DrawerContentTemplateSelectorProperty);
+        set => SetValue(DrawerContentTemplateSelectorProperty, value);
+    }
+
+    #endregion DrawerContentTemplateSelector
+
     #region IsOpen
 
     /// <summary>
