@@ -15,6 +15,7 @@ namespace Cyclone.Wpf.Controls;
 public class Drawer : ContentControl
 {
     private const string PART_DrawerPanel = "PART_DrawerPanel";
+
     private const string PART_Overlay = "PART_Overlay";
 
     /// <summary>
@@ -23,7 +24,9 @@ public class Drawer : ContentControl
     private const double DefaultDrawerHeight = 300d;
 
     private FrameworkElement _drawerPanel;
+
     private FrameworkElement _overlay;
+
     private TranslateTransform _translateTransform;
 
     static Drawer()
@@ -467,18 +470,6 @@ public class Drawer : ContentControl
     #region Override Methods
 
     /// <inheritdoc />
-    protected override void OnPreviewKeyDown(KeyEventArgs e)
-    {
-        base.OnPreviewKeyDown(e);
-
-        if (!e.Handled && IsOpen && CloseOnEscape && e.Key == Key.Escape)
-        {
-            Close();
-            e.Handled = true;
-        }
-    }
-
-    /// <inheritdoc />
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -522,6 +513,18 @@ public class Drawer : ContentControl
 
         // 初始化遮罩状态（不动画，避免首次渲染闪烁）
         UpdateOverlayVisibility(animate: false);
+    }
+
+    /// <inheritdoc />
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+
+        if (!e.Handled && IsOpen && CloseOnEscape && e.Key == Key.Escape)
+        {
+            Close();
+            e.Handled = true;
+        }
     }
 
     #endregion Override Methods
