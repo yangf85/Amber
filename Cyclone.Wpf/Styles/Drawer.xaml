@@ -56,7 +56,12 @@
                 FocusManager.IsFocusScope="True"
                 KeyboardNavigation.DirectionalNavigation="Cycle"
                 KeyboardNavigation.TabNavigation="Cycle">
-                <ContentPresenter Margin="{TemplateBinding Padding}" Content="{TemplateBinding DrawerContent}" />
+                <ContentPresenter
+                    Margin="{TemplateBinding Padding}"
+                    Content="{Binding DrawerContent, RelativeSource={RelativeSource TemplatedParent}}"
+                    ContentTemplate="{TemplateBinding DrawerContentTemplate}"
+                    ContentTemplateSelector="{TemplateBinding DrawerContentTemplateSelector}"
+                    DataContext="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}}" />
             </Border>
         </Grid>
 
