@@ -76,13 +76,13 @@ public sealed class DataGridPropertyAttribute : Attribute
 /// DataGrid 辅助附加属性。
 ///
 /// 提供四个附加属性：
-///   1. SelectedItems            (IList)   — 双向绑定多选项到 ViewModel
+///   1. SelectedItems            (IList)   — 单向镜像 DataGrid 多选项到 ViewModel
 ///   2. IsAutoGenerate           (bool)    — 启用基于 [DataGridProperty] 特性的自动列生成
 ///   3. TextColumnEditingStyle   (Style)   — 给所有 DataGridTextColumn 统一应用编辑样式
 ///   4. DataGridPropertyAttribute          — 标在 ViewModel 属性上配合 IsAutoGenerate 用
 ///
 /// 设计要点：
-///   · SelectedItems 用 OneWay 语义（VM 端 getter-only 属性即可），靠 INPC 实现真双向
+///   · SelectedItems 只把 DataGrid.SelectedItems 镜像到 VM 集合，不反向驱动 UI 选区
 ///   · 重入抑制 + 增量更新（用 e.AddedItems/RemovedItems 而非全量 Clear/Add）
 ///   · IsAutoGenerate 监听 ItemsSource 变化用 DependencyPropertyDescriptor，
 ///     必须在控件 Unloaded 时解绑——否则内存泄漏
@@ -90,7 +90,7 @@ public sealed class DataGridPropertyAttribute : Attribute
 /// </summary>
 public static class DataGridHelper
 {
-    #region SelectedItems — 双向同步多选项
+    #region SelectedItems — 单向镜像多选项
 
     public static readonly DependencyProperty SelectedItemsProperty;
 
@@ -100,7 +100,7 @@ public static class DataGridHelper
     public static void SetSelectedItems(DependencyObject obj, IList value) =>
         obj.SetValue(SelectedItemsProperty, value);
 
-    #endregion SelectedItems — 双向同步多选项
+    #endregion SelectedItems — 单向镜像多选项
 
     #region IsAutoGenerate — 基于特性自动生成列
 
@@ -134,16 +134,6 @@ public static class DataGridHelper
             typeof(bool),
             typeof(DataGridHelper),
             new PropertyMetadata(false));
-
-    /// <summary>
-    /// 当前订阅在 SelectedItems IList 上的 NotifyCollectionChanged 委托——闭包 capture 了 DataGrid 引用。
-    /// </summary>
-    private static readonly DependencyProperty CollectionChangedHandlerProperty =
-        DependencyProperty.RegisterAttached(
-            "CollectionChangedHandler",
-            typeof(NotifyCollectionChangedEventHandler),
-            typeof(DataGridHelper),
-            new PropertyMetadata(null));
 
     /// <summary>
     /// TextColumnEditingStyle 模式下监听 Columns 变化的具名 handler——存附加属性供解绑。
@@ -198,7 +188,7 @@ public static class DataGridHelper
 
     #endregion 静态构造 — 集中注册 DP
 
-    #region SelectedItems 双向同步
+    #region SelectedItems 单向镜像
 
     private static void OnSelectedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -207,44 +197,16 @@ public static class DataGridHelper
             return;
         }
 
-        // 1) 解绑旧 INPC
-        var oldHandler = dataGrid.GetValue(CollectionChangedHandlerProperty) as NotifyCollectionChangedEventHandler;
-        if (oldHandler != null && e.OldValue is INotifyCollectionChanged oldInpc)
-        {
-            oldInpc.CollectionChanged -= oldHandler;
-        }
-        dataGrid.SetValue(CollectionChangedHandlerProperty, null);
+        dataGrid.SelectionChanged -= OnDataGridSelectionChanged;
 
-        // 2) 确保 DataGrid.SelectionChanged 已订阅
-        if (e.NewValue != null)
+        if (e.NewValue is not IList newList)
         {
-            dataGrid.SelectionChanged -= OnDataGridSelectionChanged;
-            dataGrid.SelectionChanged += OnDataGridSelectionChanged;
-        }
-        else
-        {
-            dataGrid.SelectionChanged -= OnDataGridSelectionChanged;
             return;
         }
 
-        // 3) 绑定新 IList 的 INPC（如果实现了）——闭包 capture DataGrid
-        if (e.NewValue is INotifyCollectionChanged newInpc)
-        {
-            NotifyCollectionChangedEventHandler handler = (sender, args) =>
-                OnExternalCollectionChanged(dataGrid, args);
-            newInpc.CollectionChanged += handler;
-            dataGrid.SetValue(CollectionChangedHandlerProperty, handler);
-        }
-
-        // 4) 初始同步
-        if (e.NewValue is IList newList && newList.Count > 0)
-        {
-            SyncDataGridFromExternalList(dataGrid, newList);
-        }
-        else if (e.NewValue is IList emptyList)
-        {
-            SyncExternalListFromDataGrid(dataGrid, emptyList);
-        }
+        // DataGrid.SelectedItems 是 UI 选区的唯一状态源，VM 集合只作为结果镜像。
+        SyncExternalListFromDataGrid(dataGrid, newList);
+        dataGrid.SelectionChanged += OnDataGridSelectionChanged;
     }
 
     private static void OnDataGridSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -268,7 +230,6 @@ public static class DataGridHelper
         SetIsUpdating(dataGrid, true);
         try
         {
-            // 增量更新——比 Clear + AddAll 高效，且不会发出 Reset 通知
             foreach (var item in e.RemovedItems)
             {
                 externalList.Remove(item);
@@ -279,94 +240,6 @@ public static class DataGridHelper
                 {
                     externalList.Add(item);
                 }
-            }
-        }
-        finally
-        {
-            SetIsUpdating(dataGrid, false);
-        }
-    }
-
-    private static void OnExternalCollectionChanged(DataGrid dataGrid, NotifyCollectionChangedEventArgs e)
-    {
-        if (GetIsUpdating(dataGrid))
-        {
-            return;
-        }
-
-        SetIsUpdating(dataGrid, true);
-        try
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (var item in e.NewItems)
-                        {
-                            if (!dataGrid.SelectedItems.Contains(item))
-                            {
-                                dataGrid.SelectedItems.Add(item);
-                            }
-                        }
-                    }
-                    break;
-
-                case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null)
-                    {
-                        foreach (var item in e.OldItems)
-                        {
-                            dataGrid.SelectedItems.Remove(item);
-                        }
-                    }
-                    break;
-
-                case NotifyCollectionChangedAction.Reset:
-                    dataGrid.SelectedItems.Clear();
-                    break;
-
-                case NotifyCollectionChangedAction.Replace:
-                    if (e.OldItems != null)
-                    {
-                        foreach (var item in e.OldItems)
-                        {
-                            dataGrid.SelectedItems.Remove(item);
-                        }
-                    }
-                    if (e.NewItems != null)
-                    {
-                        foreach (var item in e.NewItems)
-                        {
-                            if (!dataGrid.SelectedItems.Contains(item))
-                            {
-                                dataGrid.SelectedItems.Add(item);
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        finally
-        {
-            SetIsUpdating(dataGrid, false);
-        }
-    }
-
-    private static void SyncDataGridFromExternalList(DataGrid dataGrid, IList externalList)
-    {
-        if (GetIsUpdating(dataGrid))
-        {
-            return;
-        }
-
-        SetIsUpdating(dataGrid, true);
-        try
-        {
-            dataGrid.SelectedItems.Clear();
-            foreach (var item in externalList)
-            {
-                dataGrid.SelectedItems.Add(item);
             }
         }
         finally
@@ -397,7 +270,7 @@ public static class DataGridHelper
         }
     }
 
-    #endregion SelectedItems 双向同步
+    #endregion SelectedItems 单向镜像
 
     #region IsAutoGenerate
 
@@ -531,6 +404,27 @@ public static class DataGridHelper
 
     private static class DataGridColumnManager
     {
+        public static void GenerateColumns(DataGrid dataGrid)
+        {
+            dataGrid.Columns.Clear();
+
+            var itemType = GetItemSourceType(dataGrid);
+            if (itemType == null)
+            {
+                return;
+            }
+
+            var properties = GetPropertiesWithAttribute(itemType);
+            foreach (var (propertyInfo, attribute) in properties.OrderBy(p => p.Attribute.Index))
+            {
+                var column = CreateColumn(propertyInfo, attribute);
+                if (column != null)
+                {
+                    dataGrid.Columns.Add(column);
+                }
+            }
+        }
+
         private static Type GetItemSourceType(DataGrid dataGrid)
         {
             if (dataGrid.ItemsSource is not IEnumerable enumerable)
@@ -653,27 +547,6 @@ public static class DataGridHelper
 
             templateColumn.CellTemplate = template;
             return templateColumn;
-        }
-
-        public static void GenerateColumns(DataGrid dataGrid)
-        {
-            dataGrid.Columns.Clear();
-
-            var itemType = GetItemSourceType(dataGrid);
-            if (itemType == null)
-            {
-                return;
-            }
-
-            var properties = GetPropertiesWithAttribute(itemType);
-            foreach (var (propertyInfo, attribute) in properties.OrderBy(p => p.Attribute.Index))
-            {
-                var column = CreateColumn(propertyInfo, attribute);
-                if (column != null)
-                {
-                    dataGrid.Columns.Add(column);
-                }
-            }
         }
     }
 
