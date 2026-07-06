@@ -38,11 +38,9 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Hover}" />
                             <Setter TargetName="IconPath" Property="Stroke" Value="{DynamicResource Icon.Foreground.Hover}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Background.Pressed}" />
                             <Setter TargetName="IconPath" Property="Stroke" Value="{DynamicResource Icon.Foreground.Pressed}" />
                         </Trigger>
                     </ControlTemplate.Triggers>

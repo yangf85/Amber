@@ -8,6 +8,7 @@
 
     <SolidColorBrush x:Key="Background.Global" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="Background.Default" Color="{StaticResource GrayLighten5}" />
+    <SolidColorBrush x:Key="Background.AlternateRow" Color="{StaticResource GrayLighten3}" />
     <SolidColorBrush x:Key="Background.Invert" Color="{StaticResource GrayDarken3}" />
     <SolidColorBrush x:Key="Background.Active" Color="{StaticResource BlueDarken3}" />
     <SolidColorBrush x:Key="Background.Inactive" Color="{StaticResource GrayLighten4}" />

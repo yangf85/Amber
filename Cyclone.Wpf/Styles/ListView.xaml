@@ -1,7 +1,7 @@
 ﻿<!--
     ============================================================================
     WinUI 3 风格 ListView 样式 (v4 — 修复 GridView 列绑定失效)
-    
+
     破坏性变更说明（vs v3）：
     - 修复 ListViewItem 模板使 GridView.Columns 真正生效：
     · v3 错误地认为 ContentPresenter 在 View=GridView 时会被 WPF
@@ -13,7 +13,7 @@
     模板——既支持 GridView 列模式，也支持脱了 View 的 ItemTemplate 模式
     - 修复 GridViewHeaderRowPresenter 的 ColumnHeaderContainerStyle 链路
     （v3 已修复 Visibility 联动 View，本次未变）
-    
+
     破坏性变更说明（vs 原始 Win10 版本）：
     - WinUI 3 视觉风格：左侧 3px 竖条选中指示器（pill, 仅选中态淡入）
     - 整行 hover/选中浅底，文字色保持不变（不再反色）
@@ -345,6 +345,11 @@
         <!--  默认走 GridView 模板（绝大多数 ListView 用法）  -->
         <Setter Property="Template" Value="{StaticResource ListViewItem.Template.GridView}" />
         <Style.Triggers>
+            <!--  隔行换色：AlternationCount 必须 >= 2，奇数行使用替代背景  -->
+            <DataTrigger Binding="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource Self}}" Value="1">
+                <Setter Property="Background" Value="{DynamicResource Background.AlternateRow}" />
+            </DataTrigger>
+
             <!--
                 ListView.View=null 时切普通模板——通过 RelativeSource 找父 ListView.View 判定
                 关键：DataTrigger 比 Setter 优先级高,在父级 View 为 null 时覆盖默认 Template
@@ -369,6 +374,7 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource Foreground.Default}" />
         <Setter Property="Padding" Value="0" />
+        <Setter Property="AlternationCount" Value="2" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
@@ -396,22 +402,35 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
-                                <GridViewHeaderRowPresenter
-                                    x:Name="HeaderRow"
-                                    Grid.Row="0"
-                                    Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
-                                    <GridViewHeaderRowPresenter.Style>
-                                        <Style TargetType="{x:Type GridViewHeaderRowPresenter}">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding View, RelativeSource={RelativeSource AncestorType=ListView}}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </GridViewHeaderRowPresenter.Style>
-                                </GridViewHeaderRowPresenter>
+                                <!--
+                                    与 ListViewItem.Template.GridView 中的行内容区保持同样结构：
+                                    左侧 6px 选中条占位 + 内容区 Margin=4,0,8,0。
+                                    否则表头从 x=0 开始，行内容从 x=10 开始，列会错位。
+                                -->
+                                <Grid x:Name="HeaderHost" Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <GridViewHeaderRowPresenter
+                                        x:Name="HeaderRow"
+                                        Grid.Column="1"
+                                        Margin="4,0,8,0"
+                                        Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                                        <GridViewHeaderRowPresenter.Style>
+                                            <Style TargetType="{x:Type GridViewHeaderRowPresenter}">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding View, RelativeSource={RelativeSource AncestorType=ListView}}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </GridViewHeaderRowPresenter.Style>
+                                    </GridViewHeaderRowPresenter>
+                                </Grid>
 
                                 <ItemsPresenter Grid.Row="1" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                             </Grid>
